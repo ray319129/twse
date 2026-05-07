@@ -12,6 +12,10 @@
         "n_day_high"
       ],
       "combos": [],
+      "chips": {
+        "inst_total_today": 3191924,
+        "inst_buy_streak": 2
+      },
       "note": "台達電",
       "news": [
         {
@@ -53,40 +57,45 @@
       "change_pct": 0.6,
       "hits": [
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
       "combos": [],
+      "chips": {
+        "inst_total_today": 23796093,
+        "inst_buy_streak": 8
+      },
       "note": "鴻海",
       "news": [
         {
-          "title": "三大法人買賣超 – 外資買超(2330)台積電、(2317)鴻海，投信買超(2330)台積電、(2408)南亞科，法人合計買超583.31億元 - sinotrade.com.tw",
-          "link": "https://news.google.com/rss/articles/CBMi2gRBVV95cUxOV1A0UEhkbExQWUwzRGtvQWlRODlxSDdINkgySUZ0a3pYemNsZTc1SVhxd1JoTnRkbmN2aDhFVG5HSHRzcUppN0lkeU5jX3NHem8tZm5CTVhneVJ1eEI5Y1hKLV9VQlZkc25PVkRXT0ZlTFVONGVQZEFVNHF4NzdsdDQ3ZmdGdmNEOFg0ZGJ6UFFaU3BPMDI1ZUM0LWtTY1VLSHdpdEE0dGl4M3N6bDVQanhlTjZQaUxSM1RxRGRCY3cxYnNnckF4dGhOT25TYm9heUtPS3VDVEg4eDNIZ2dESjAtcnBuTjQ2QW5vQ19pTmVrVl9sd2JNT0dibkFNZUpkMm13c01ZdzBTeENkN21QelVodTdnSm5QM3BMY0ttTURZQWJEUC1ldXJWSFJOZi15S2gyY3NnNjU3dmpTQzlkVzJleW1Oc2hNZXBGdG94emRxclhUaGRvZzJoZTVYWmp5SEFUY0ppYUFJOFN6Ul9FS2ZIR0tNV2dWQTdZRjQwVDhXQzhCV3c1Zml0ZGlYN3dyaE1qX2N1Z3hwTlV1Z3NoQURoa1RWQ3U4cXRWMXlGQjhFbThfMUdkdTNRb3VVM0RJNnZZb3BqYjhzb2dyeFpRVU9taUNQMVA5M2JjTkh4QWtQSG13OGt4YnROem13NlZPTHptak9NVE4xSWc3TlZ4QUF2VEZaY1YzamhqQVNZSmVuZDNFUzRDR1FiN1RENzBpeTBoQlE1UDZqSVlTWDQwaDRGakFmYzVpYjUyN3gzcVUtcnpPWXdiWFVqeGxOX25hTi1rVnBDRjRoZw?oc=5",
-          "published": "Thu, 07 May 2026 08:38:03 GMT",
-          "source": "sinotrade.com.tw"
-        },
-        {
-          "title": "台股4萬1還能進場？「1警訊」快下車！杜金龍曝台積電(2330)、台達電(2308)買點：鴻海(2317)1壞處「已賣一半」 - 今周刊",
-          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNeERIOFIxeXhjcHpMbG4tSTZCWHpBRmtpNnJvc0FoUTAxVXM3WW9rTG1oTzRIRXN0a2dBUW1JeDhodTRNckZNOE9uWGJ2VnBpNTFQSDc0WENJQnZNWGliLWRISjVfUDhSS0ZRUEFKc0hfLUpGOExlV0lkOGJFUjBzYw?oc=5",
-          "published": "Thu, 07 May 2026 20:08:21 GMT",
-          "source": "今周刊"
-        },
-        {
-          "title": "鴻海(2317)攜手波蘭打造電動車基地擬成立合資公司切入歐洲在地製造供應鏈 - news.cnyes.com",
-          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE42eFNiVk9uOFE0V2tBTEpTTWdDV1RvRUNjVDE3UzNXTWk4WEZwaURiX1JvV3NuVUdXNldxZVRDMlNTVDBhYkVEMmFFWlpTVTg?oc=5",
-          "published": "Thu, 07 May 2026 10:00:08 GMT",
-          "source": "news.cnyes.com"
-        },
-        {
-          "title": "鴻海營收行情待發酵？今漲半根衝刺240元大關 分析師這樣看 - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMijANBVV95cUxQLWQ0dnNUUkRLa05FNkM4RXBUWVlmY2JQZFpaeTFIMEFsRXI2amRRbDg0LV81X2NidlVRVkhuNzdvTlM1NTl1LW9PMTFHM1Z1SmlDOHVHLTUyRXZmLWlaSW9uLWMzMEd6aFJsWEhYUDByQXBweURjTzMxcTBrYVU5TlQxY3BEeHVENGF3UFFDbDNxazBOelhRN3lPcWVUNF96TGgybDZLT25RVDkySk9EUHYxeXRsOXQ1S3JtTWpfeTc0NEpWTkw0X3daMGhGdkFxcWY2Z2psWnZFVHJZbjMxYmZvNUhlZFRyYlR2YVBxeEViVGtEMWFJQ0FEU3ZiVlQxQ1luS0NmRWxBMW9LYjhnTkdWV1RUSWRnVlVpOVJmTnpab2V5ejFzcFJNNFZnWi1Zdk1LbEkxbWJSUmJUSHcxRENyMVdUSkNxWTUxcjYtNlNHUUZRNGRBR1lVZ3RCY0pUTjFubEQ5RnYxSjA0ZEhrVU9STkVubXZhbXA1SXFMTHI4MEY1M21tdGtZU1U?oc=5",
-          "published": "Tue, 05 May 2026 05:01:18 GMT",
+          "title": "鴻海營收行情待發酵？今小漲2%攻回230元大關 分析師這樣看 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiggNBVV95cUxOYkhGRFV1YkNVblNOckJzSERlcXYyUVRyV3hhMTRrRjdNSEZIby1MYVdRSVVVMTJvd1BfWlRJdFZmLU9seG1WUG4za1dOOWhSWk13WkJmRV9hcERXTnpYSUdnakFmUzEtZXRIOWtpRTczRUtCNXZULUpsU2pkVU5jc0VIWUFBTkpRSWRLUlUtbU0zOW42MHAwbHcwZmxvR1dnR3d0UDIzcnVtWVRCTTlYckQ0TTBERmlvY0pVOUEyeXJlZGhGTTRWZGx0QXhMRmNQS1hqWTBpdk15dlpLNzVPUUFQT1lDcmU5YTk5elNmWFk5N1dFN2twb3RwU3lHMkkwY3FoRkdfVHlyc1U4SlVsLWpqclJISDhGN1NIYXNDQ1paREdlR3JoSlowNGJUZ1RSTW5SbFBVSW9KQUpoN2Q2ZFp2TnQ4LTNkWklCQjJkUzRad0Q4dzhUaFFBeThSVmNnTjJQNHMtZkp0ZmJYbm1INjVrNzBTdGoxLXg0Nkd4WmV4UQ?oc=5",
+          "published": "Tue, 05 May 2026 02:39:14 GMT",
           "source": "Yahoo股市"
         },
         {
-          "title": "【即時新聞】鴻海(2317)營收創高獲外資狂掃！這「3檔概念股」買氣升溫接棒上攻？ - CMoney投資網誌",
-          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOa3NBc3A5eVd5UHU2Y3UzdkR4TFcwbzhSMVZSSnFHZlplcm14OE1rdFJwNENBd3h5cUNXSkh3S2FzOTd6dE8wUHZQWTZreVVhd2FxenRxMmZfMXFFTXYxeklTNDA2Q3d2TWNlU3U1Smp0S1VwUV9yX1ZEYV9ocGppR3NuQ2dkMnVjemE1cUxqZkg?oc=5",
-          "published": "Thu, 07 May 2026 03:47:15 GMT",
-          "source": "CMoney投資網誌"
+          "title": "2317 鴻海 - 鴻海直接炸鍋，前所未見行情下的3種布局優缺點-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5FT0FvQUV1NXpyU0pwWDlWVHpDZXhmeHJMWFBvQi1GVTRtR3duRVRSZkZfQWtvVHZaRkVKUXZDUW43dFpnc0NWRFlITmhUZjhJdTVEQ3BYcFQ?oc=5",
+          "published": "Wed, 06 May 2026 15:09:17 GMT",
+          "source": "CMoney"
+        },
+        {
+          "title": "4月營收速報》鴻海創同期新高 Q2淡季不淡 - 自由時報",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9jLWVtTkJtZDJQdEFIb29LWEVYaERHSEJ1QVpvSmtUd0wweExEclJGNUJET1ZnaFc1VXVzcV80OXNZWVdoYXRSaGltY3d0eUo5Q203N3Q1bHE?oc=5",
+          "published": "Tue, 05 May 2026 22:34:16 GMT",
+          "source": "自由時報"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海起風了！大家要抓牢不要被甩出局！-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBkMk1Hdm1mUmZUNUZBcnpxR19mYkgwbGlnTEJBUXhWM01wOENwNnM2MVFtb0RNUzVTZU1lNjFDM3hGNFRVNlV6Q3VRMEU2ZXpkT2FoSDBlTDk?oc=5",
+          "published": "Tue, 05 May 2026 18:23:03 GMT",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海2026年4月營收快報-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9FVklKeHJaU1JJR1E2ZVJiME1qWGhGVS1LQjQ0OEp2S3RoYndtcmQxNzh3a3RmcWVZRGRSR3hZYmxmZkhHTGtabTZtNnZJSUQya0dlMnEwYUs?oc=5",
+          "published": "Tue, 05 May 2026 09:20:47 GMT",
+          "source": "CMoney"
         }
       ]
     },
@@ -101,6 +110,10 @@
         "n_day_high"
       ],
       "combos": [],
+      "chips": {
+        "inst_total_today": 5466427,
+        "inst_buy_streak": 1
+      },
       "note": "台積電",
       "news": [
         {
@@ -145,6 +158,10 @@
         "above_240ma"
       ],
       "combos": [],
+      "chips": {
+        "inst_total_today": -849952,
+        "inst_buy_streak": 0
+      },
       "note": "聯發科",
       "news": [
         {
@@ -188,6 +205,10 @@
         "above_240ma"
       ],
       "combos": [],
+      "chips": {
+        "inst_total_today": 248191,
+        "inst_buy_streak": 2
+      },
       "note": "大立光",
       "news": [
         {
@@ -333,7 +354,11 @@
         "macd_turn_red",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 98590,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6506",
@@ -906,7 +931,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 34961,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6803",
@@ -1077,17 +1106,6 @@
       "combos": []
     },
     {
-      "stock_id": "9136",
-      "name": "巨騰-DR",
-      "close": 12.149999618530273,
-      "change_pct": 0.0,
-      "hits": [
-        "above_240ma",
-        "n_day_high"
-      ],
-      "combos": []
-    },
-    {
       "stock_id": "6969",
       "name": "成信實業*-創",
       "close": 28.799999237060547,
@@ -1138,7 +1156,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 60924,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6854",
@@ -1242,7 +1264,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 0,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6208",
@@ -1345,7 +1371,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 88153,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "5243",
@@ -1596,7 +1626,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 425012,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "5291",
@@ -1629,7 +1663,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 3000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6417",
@@ -1643,7 +1681,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -193956,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "4933",
@@ -1833,7 +1875,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 801427,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "6525",
@@ -1846,7 +1892,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -245620,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "4960",
@@ -1919,7 +1969,11 @@
         "bullish_ma_alignment",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -10999,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6515",
@@ -1973,7 +2027,11 @@
         "bullish_ma_alignment",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 50621,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "4967",
@@ -2137,7 +2195,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 391698,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "4953",
@@ -2159,7 +2221,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 226490,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6470",
@@ -2329,9 +2395,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 4150072,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "6552",
@@ -2402,9 +2473,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 2549480,
+        "inst_buy_streak": 13
+      }
     },
     {
       "stock_id": "5609",
@@ -2428,7 +2506,11 @@
         "macd_turn_red",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 31033,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6180",
@@ -2448,9 +2530,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 4759726,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "6021",
@@ -2487,7 +2574,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 2653000,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "6015",
@@ -2498,9 +2589,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 1134000,
+        "inst_buy_streak": 13
+      }
     },
     {
       "stock_id": "6005",
@@ -2691,7 +2789,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -27536,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6024",
@@ -2701,9 +2803,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 173328,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "6174",
@@ -2812,7 +2919,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 7918010,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "6150",
@@ -2844,7 +2955,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 581301,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6124",
@@ -3003,7 +3118,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1166776,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "6167",
@@ -3054,9 +3173,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 2273000,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "6173",
@@ -3068,7 +3194,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -519111,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6108",
@@ -3080,7 +3210,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 371000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6164",
@@ -3128,7 +3262,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 97044,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6154",
@@ -3207,7 +3345,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -117000,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6271",
@@ -3239,7 +3381,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -69000,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6269",
@@ -3261,7 +3407,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 301784,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "5356",
@@ -3326,7 +3476,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -932566,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6259",
@@ -3348,7 +3502,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -115910,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "5425",
@@ -3358,9 +3516,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 491194,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "6265",
@@ -3383,7 +3546,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -55000,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "5351",
@@ -3453,7 +3620,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 93902,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "5309",
@@ -3540,7 +3711,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -535494,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6278",
@@ -3552,7 +3727,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -372355,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6279",
@@ -3648,7 +3827,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -214036,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6214",
@@ -3669,9 +3852,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 429961,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "6217",
@@ -3785,9 +3973,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 602040,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "5488",
@@ -3809,7 +4004,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -1305795,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6222",
@@ -3874,7 +4073,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 285000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "5460",
@@ -3974,7 +4177,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 147346,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "5475",
@@ -4026,9 +4233,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 137084,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "6229",
@@ -4041,7 +4255,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -153854,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6230",
@@ -4206,9 +4424,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 276309,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "8021",
@@ -4231,7 +4456,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 721069,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "8028",
@@ -4306,7 +4535,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -102366,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "8043",
@@ -4461,7 +4694,11 @@
         "bullish_ma_alignment",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 446516,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "7792",
@@ -4688,7 +4925,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 144015,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "8996",
@@ -4810,9 +5051,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 392452,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "8112",
@@ -4835,7 +5083,11 @@
         "macd_turn_red",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 70017,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "8183",
@@ -4963,9 +5215,16 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "volume_price_surge"
+        "volume_price_surge",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 371838,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "8358",
@@ -4976,9 +5235,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 688268,
+        "inst_buy_streak": 6
+      }
     },
     {
       "stock_id": "8349",
@@ -5128,7 +5394,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -1102438,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "8271",
@@ -5138,9 +5408,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 168358,
+        "inst_buy_streak": 8
+      }
     },
     {
       "stock_id": "8284",
@@ -5163,7 +5438,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 135030,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "8291",
@@ -5368,7 +5647,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 94578,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6788",
@@ -5380,7 +5663,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -194223,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "6789",
@@ -5477,7 +5764,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 63180,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6643",
@@ -5498,9 +5789,16 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "volume_price_surge"
+        "volume_price_surge",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 28065,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "6654",
@@ -5533,7 +5831,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 11000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6592",
@@ -5804,9 +6106,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 674254,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "6679",
@@ -5818,7 +6125,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 258269,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "6683",
@@ -5870,9 +6181,16 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "volume_price_surge"
+        "volume_price_surge",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 78580,
+        "inst_buy_streak": 4
+      }
     },
     {
       "stock_id": "6962",
@@ -5975,9 +6293,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 133023,
+        "inst_buy_streak": 4
+      }
     },
     {
       "stock_id": "7711",
@@ -6140,7 +6465,11 @@
         "macd_turn_red",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 122653,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6937",
@@ -6182,7 +6511,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 140,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6890",
@@ -6214,7 +6547,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 38000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "6862",
@@ -6356,7 +6693,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -495626,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "1789",
@@ -6408,9 +6749,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1007154,
+        "inst_buy_streak": 4
+      }
     },
     {
       "stock_id": "1815",
@@ -6442,7 +6788,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 3000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "1727",
@@ -6504,7 +6854,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -2000,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "1773",
@@ -6583,7 +6937,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -376772,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2049",
@@ -6648,7 +7006,11 @@
         "macd_turn_red",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 192965,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "2108",
@@ -6855,7 +7217,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 25991,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "1563",
@@ -7081,9 +7447,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1231099,
+        "inst_buy_streak": 9
+      }
     },
     {
       "stock_id": "1713",
@@ -7137,7 +7508,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 39000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "2115",
@@ -7160,7 +7535,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 180072,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "1591",
@@ -7182,7 +7561,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -22766,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "1597",
@@ -7192,9 +7575,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 72000,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "1603",
@@ -7317,9 +7705,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1579640,
+        "inst_buy_streak": 18
+      }
     },
     {
       "stock_id": "2397",
@@ -7444,9 +7837,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 2113997,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "2377",
@@ -7498,9 +7896,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 47569,
+        "inst_buy_streak": 6
+      }
     },
     {
       "stock_id": "2385",
@@ -7511,7 +7914,11 @@
         "bullish_ma_alignment",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 261957,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "2387",
@@ -7554,7 +7961,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -184000,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2436",
@@ -7725,9 +8136,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 843077,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "2368",
@@ -7760,7 +8178,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -4875775,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2305",
@@ -7783,39 +8205,10 @@
         "n_day_high"
       ],
       "combos": [],
-      "note": "台達電",
-      "news": [
-        {
-          "title": "台股4萬1還能進場？「1警訊」快下車！杜金龍曝台積電(2330)、台達電(2308)買點：鴻海(2317)1壞處「已賣一半」 - 今周刊",
-          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNeERIOFIxeXhjcHpMbG4tSTZCWHpBRmtpNnJvc0FoUTAxVXM3WW9rTG1oTzRIRXN0a2dBUW1JeDhodTRNckZNOE9uWGJ2VnBpNTFQSDc0WENJQnZNWGliLWRISjVfUDhSS0ZRUEFKc0hfLUpGOExlV0lkOGJFUjBzYw?oc=5",
-          "published": "Thu, 07 May 2026 20:08:21 GMT",
-          "source": "今周刊"
-        },
-        {
-          "title": "台達電（2308）做什麼、法說會重點有哪些？Q1 EPS 7.91元改寫單季紀錄，±400V今年出貨、800V蓄勢2027年放量｜股市話題｜豐雲學堂2026 年 05 月 - sinotrade.com.tw",
-          "link": "https://news.google.com/rss/articles/CBMi4ANBVV95cUxQNnVabk9BYTQ5Y0picVRXTE5TZkRtZlBjWlBKcVFoaTVhRFIteFdOZlFYZmd1dWlabnFtZng1akZHdWZIdnAzZWp4dnQ4MXZnUXMzOXNMdkF5UDZSUFV0NDJGTWNlR0Jxb0l4V1JxU0U2RDlXSlhNNjZucWxqV0JNaW82VzRHMlplV1FYSnQzajlvRVl6QXhMTk9IVlNjZk5hX1BhUEkwNlpwa3B4bDZiVzE3X2lvTndzYld0RlVsZ0dzN0p3Z0huLUlmWDNJaGdGVUdhVjV1enA1WjQ5aUJZOXkwZlNtMnVIZ2Y0T0JyU0RNUHFPNU5IQTJLeFlCYmFYcGdhZG9SZ1ltS1RCQm9iOWRla2pGWWRQMXByNEc0a0p5aUtpbldkSW9tLTBSSWd1bWRQRDFaZXF2bkU4X2JkelB2ZHc5emdwamhmQ004YW94NmxlUTh1N1dsbWZoS2dJTE9MNzFvcG1BN2djZTYxM0pTOGlEd1BrUXhOd1BJbUdvRGpwelhLalIwM1lkckVUT09wUU4wSUY1cjZMQUJxTmxlSE8yYVpWWDJoTkJBbHhicjl3eXE3aGd3UDhhdHRSZkszM0E4QmlGd0h1U3RtV0Vma3JXNW82NnktUzdIY2o?oc=5",
-          "published": "Tue, 05 May 2026 07:00:00 GMT",
-          "source": "sinotrade.com.tw"
-        },
-        {
-          "title": "不只台積電！台達電市值躋身全球百大榜超越迪士尼 - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMi7wJBVV95cUxOVnJtbV9wV1F2Q3pMN2NESWJOcW44bk9kODdtNEx4WlBHRUg2YU1tV0hnRS1KNTB5TGFZU29TdnJOY0tRVzZrN1J3Z1FhUDJjczlFVzZHWjRKTGdOcWVFNzdteVFHZGNSN3NibkRtMkJ0VDZ0TkRGMTJwd3pqYVZVQWRuOUttVktiVTc4TVBzaUFOaTd1TmJrQ2YtSVhZNFBjdmFYcXV5Rjg5T1Jva0dSUmEzR2hZTElWbHlnaWhkQVRDZC1sbEtNa2hYQ1FBNDVFQ1c3SlpTcDRfNDFSb1FhU3lkMnAzTEJSb2Y3VmdGTlNjeTN6d0t1Wk5TTm1qQzZuODJibTVCT3NZb2hHdVNzQ2dmUXFlY09rWnhQWEpJV0R5dnRTRGtsWm9mVWtlZ0YwNnR0eWxkb0dpUy1wRVkydjNxdEdfQW51cHdSZ3dTMjJaalFrNkZHREtiODV1RGRJRjQxTzM1NGE2WU5OX3Bv?oc=5",
-          "published": "Tue, 05 May 2026 01:53:18 GMT",
-          "source": "Yahoo股市"
-        },
-        {
-          "title": "外資點名 調高奇鋐、台達電、技嘉及研華目標價 - 經濟日報",
-          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFBfLTgyQnB6RUdMck10OGs5clkyc3AxWjJmN241eWlES3ZFNmlQcmprUXRQNGlHcHhScEJFVGhZdzRtVmgzQTgwb18zTEdlWnBPUjZBQ0VZOFRaUdIBX0FVX3lxTE5uS1Vsd1pONVBUaHU1QURuRV9uM2lrOGVVYUZ2YUplcUpqV0ZoeWJmRGFXZXBqa2FqNDhqenFlWEZBQkVOaks5M3ZxN1hfTTRnY1FrN0I3UXZRbTVfN0FR?oc=5",
-          "published": "Wed, 06 May 2026 09:00:00 GMT",
-          "source": "經濟日報"
-        },
-        {
-          "title": "【即時新聞】台達電受法人點名電子通膨延續AI需求帶動4月營收月增可期 - CMoney投資網誌",
-          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNaE9vSDhiZDVFMUVFLV91WFlocFQwZTZNLVI4elAzSS1YUkp4Q25KZl9LME85Z1dTa1JuNVplMkwtanJCTmtGVmJYNk5GTldZUzB3dTZuZG01eUpoZGVCUmVHeTVzVEN6dUNTOHprSFg1V1E5dEtsTHJRTFg4MHFJQ2E1cTVBTW1Kd2NXdTYtc24?oc=5",
-          "published": "Thu, 07 May 2026 11:03:27 GMT",
-          "source": "CMoney投資網誌"
-        }
-      ]
+      "chips": {
+        "inst_total_today": 3191924,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "2312",
@@ -7849,7 +8242,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 17108330,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "2316",
@@ -7869,42 +8266,14 @@
       "change_pct": 0.6,
       "hits": [
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
       "combos": [],
-      "note": "鴻海",
-      "news": [
-        {
-          "title": "三大法人買賣超 – 外資買超(2330)台積電、(2317)鴻海，投信買超(2330)台積電、(2408)南亞科，法人合計買超583.31億元 - sinotrade.com.tw",
-          "link": "https://news.google.com/rss/articles/CBMi2gRBVV95cUxOV1A0UEhkbExQWUwzRGtvQWlRODlxSDdINkgySUZ0a3pYemNsZTc1SVhxd1JoTnRkbmN2aDhFVG5HSHRzcUppN0lkeU5jX3NHem8tZm5CTVhneVJ1eEI5Y1hKLV9VQlZkc25PVkRXT0ZlTFVONGVQZEFVNHF4NzdsdDQ3ZmdGdmNEOFg0ZGJ6UFFaU3BPMDI1ZUM0LWtTY1VLSHdpdEE0dGl4M3N6bDVQanhlTjZQaUxSM1RxRGRCY3cxYnNnckF4dGhOT25TYm9heUtPS3VDVEg4eDNIZ2dESjAtcnBuTjQ2QW5vQ19pTmVrVl9sd2JNT0dibkFNZUpkMm13c01ZdzBTeENkN21QelVodTdnSm5QM3BMY0ttTURZQWJEUC1ldXJWSFJOZi15S2gyY3NnNjU3dmpTQzlkVzJleW1Oc2hNZXBGdG94emRxclhUaGRvZzJoZTVYWmp5SEFUY0ppYUFJOFN6Ul9FS2ZIR0tNV2dWQTdZRjQwVDhXQzhCV3c1Zml0ZGlYN3dyaE1qX2N1Z3hwTlV1Z3NoQURoa1RWQ3U4cXRWMXlGQjhFbThfMUdkdTNRb3VVM0RJNnZZb3BqYjhzb2dyeFpRVU9taUNQMVA5M2JjTkh4QWtQSG13OGt4YnROem13NlZPTHptak9NVE4xSWc3TlZ4QUF2VEZaY1YzamhqQVNZSmVuZDNFUzRDR1FiN1RENzBpeTBoQlE1UDZqSVlTWDQwaDRGakFmYzVpYjUyN3gzcVUtcnpPWXdiWFVqeGxOX25hTi1rVnBDRjRoZw?oc=5",
-          "published": "Thu, 07 May 2026 08:38:03 GMT",
-          "source": "sinotrade.com.tw"
-        },
-        {
-          "title": "台股4萬1還能進場？「1警訊」快下車！杜金龍曝台積電(2330)、台達電(2308)買點：鴻海(2317)1壞處「已賣一半」 - 今周刊",
-          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNeERIOFIxeXhjcHpMbG4tSTZCWHpBRmtpNnJvc0FoUTAxVXM3WW9rTG1oTzRIRXN0a2dBUW1JeDhodTRNckZNOE9uWGJ2VnBpNTFQSDc0WENJQnZNWGliLWRISjVfUDhSS0ZRUEFKc0hfLUpGOExlV0lkOGJFUjBzYw?oc=5",
-          "published": "Thu, 07 May 2026 20:08:21 GMT",
-          "source": "今周刊"
-        },
-        {
-          "title": "鴻海(2317)攜手波蘭打造電動車基地擬成立合資公司切入歐洲在地製造供應鏈 - news.cnyes.com",
-          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE42eFNiVk9uOFE0V2tBTEpTTWdDV1RvRUNjVDE3UzNXTWk4WEZwaURiX1JvV3NuVUdXNldxZVRDMlNTVDBhYkVEMmFFWlpTVTg?oc=5",
-          "published": "Thu, 07 May 2026 10:00:08 GMT",
-          "source": "news.cnyes.com"
-        },
-        {
-          "title": "鴻海營收行情待發酵？今漲半根衝刺240元大關 分析師這樣看 - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMijANBVV95cUxQLWQ0dnNUUkRLa05FNkM4RXBUWVlmY2JQZFpaeTFIMEFsRXI2amRRbDg0LV81X2NidlVRVkhuNzdvTlM1NTl1LW9PMTFHM1Z1SmlDOHVHLTUyRXZmLWlaSW9uLWMzMEd6aFJsWEhYUDByQXBweURjTzMxcTBrYVU5TlQxY3BEeHVENGF3UFFDbDNxazBOelhRN3lPcWVUNF96TGgybDZLT25RVDkySk9EUHYxeXRsOXQ1S3JtTWpfeTc0NEpWTkw0X3daMGhGdkFxcWY2Z2psWnZFVHJZbjMxYmZvNUhlZFRyYlR2YVBxeEViVGtEMWFJQ0FEU3ZiVlQxQ1luS0NmRWxBMW9LYjhnTkdWV1RUSWRnVlVpOVJmTnpab2V5ejFzcFJNNFZnWi1Zdk1LbEkxbWJSUmJUSHcxRENyMVdUSkNxWTUxcjYtNlNHUUZRNGRBR1lVZ3RCY0pUTjFubEQ5RnYxSjA0ZEhrVU9STkVubXZhbXA1SXFMTHI4MEY1M21tdGtZU1U?oc=5",
-          "published": "Tue, 05 May 2026 05:01:18 GMT",
-          "source": "Yahoo股市"
-        },
-        {
-          "title": "【即時新聞】鴻海(2317)營收創高獲外資狂掃！這「3檔概念股」買氣升溫接棒上攻？ - CMoney投資網誌",
-          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOa3NBc3A5eVd5UHU2Y3UzdkR4TFcwbzhSMVZSSnFHZlplcm14OE1rdFJwNENBd3h5cUNXSkh3S2FzOTd6dE8wUHZQWTZreVVhd2FxenRxMmZfMXFFTXYxeklTNDA2Q3d2TWNlU3U1Smp0S1VwUV9yX1ZEYV9ocGppR3NuQ2dkMnVjemE1cUxqZkg?oc=5",
-          "published": "Thu, 07 May 2026 03:47:15 GMT",
-          "source": "CMoney投資網誌"
-        }
-      ]
+      "chips": {
+        "inst_total_today": 23796093,
+        "inst_buy_streak": 8
+      }
     },
     {
       "stock_id": "2323",
@@ -8039,7 +8408,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 10092319,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "2328",
@@ -8090,9 +8463,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 15155303,
+        "inst_buy_streak": 7
+      }
     },
     {
       "stock_id": "2357",
@@ -8144,9 +8522,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1027785,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "2349",
@@ -8181,39 +8564,10 @@
         "n_day_high"
       ],
       "combos": [],
-      "note": "台積電",
-      "news": [
-        {
-          "title": "三大法人買賣超 – 外資買超(2330)台積電、(2317)鴻海，投信買超(2330)台積電、(2408)南亞科，法人合計買超583.31億元 - sinotrade.com.tw",
-          "link": "https://news.google.com/rss/articles/CBMi2gRBVV95cUxOV1A0UEhkbExQWUwzRGtvQWlRODlxSDdINkgySUZ0a3pYemNsZTc1SVhxd1JoTnRkbmN2aDhFVG5HSHRzcUppN0lkeU5jX3NHem8tZm5CTVhneVJ1eEI5Y1hKLV9VQlZkc25PVkRXT0ZlTFVONGVQZEFVNHF4NzdsdDQ3ZmdGdmNEOFg0ZGJ6UFFaU3BPMDI1ZUM0LWtTY1VLSHdpdEE0dGl4M3N6bDVQanhlTjZQaUxSM1RxRGRCY3cxYnNnckF4dGhOT25TYm9heUtPS3VDVEg4eDNIZ2dESjAtcnBuTjQ2QW5vQ19pTmVrVl9sd2JNT0dibkFNZUpkMm13c01ZdzBTeENkN21QelVodTdnSm5QM3BMY0ttTURZQWJEUC1ldXJWSFJOZi15S2gyY3NnNjU3dmpTQzlkVzJleW1Oc2hNZXBGdG94emRxclhUaGRvZzJoZTVYWmp5SEFUY0ppYUFJOFN6Ul9FS2ZIR0tNV2dWQTdZRjQwVDhXQzhCV3c1Zml0ZGlYN3dyaE1qX2N1Z3hwTlV1Z3NoQURoa1RWQ3U4cXRWMXlGQjhFbThfMUdkdTNRb3VVM0RJNnZZb3BqYjhzb2dyeFpRVU9taUNQMVA5M2JjTkh4QWtQSG13OGt4YnROem13NlZPTHptak9NVE4xSWc3TlZ4QUF2VEZaY1YzamhqQVNZSmVuZDNFUzRDR1FiN1RENzBpeTBoQlE1UDZqSVlTWDQwaDRGakFmYzVpYjUyN3gzcVUtcnpPWXdiWFVqeGxOX25hTi1rVnBDRjRoZw?oc=5",
-          "published": "Thu, 07 May 2026 08:38:03 GMT",
-          "source": "sinotrade.com.tw"
-        },
-        {
-          "title": "台股4萬1還能進場？「1警訊」快下車！杜金龍曝台積電(2330)、台達電(2308)買點：鴻海(2317)1壞處「已賣一半」 - 今周刊",
-          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNeERIOFIxeXhjcHpMbG4tSTZCWHpBRmtpNnJvc0FoUTAxVXM3WW9rTG1oTzRIRXN0a2dBUW1JeDhodTRNckZNOE9uWGJ2VnBpNTFQSDc0WENJQnZNWGliLWRISjVfUDhSS0ZRUEFKc0hfLUpGOExlV0lkOGJFUjBzYw?oc=5",
-          "published": "Thu, 07 May 2026 20:08:21 GMT",
-          "source": "今周刊"
-        },
-        {
-          "title": "2330 台積電 - 台股破四萬二創新高，台積電收2310元-股市爆料同學會 - CMoney",
-          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE43Nnk4OTE4Mkt1VnlnVFlOVXBkRFl3NVNOTFNtZXlpUTFLeHdTdmozQ1VJb0dfdGExUkRQQUpYXy1nQnJISU9NT2JxbVFuaGp5M3ZnT0hLLVY?oc=5",
-          "published": "Thu, 07 May 2026 16:36:20 GMT",
-          "source": "CMoney"
-        },
-        {
-          "title": "斷言台股「還沒漲完」台積電該上車？專家給答案了 - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMizwJBVV95cUxNbVBjaHZXWDZVbDQ0bjJjckxDMml4NzFOcmNNdmFfajlDeGJGUFZ6RTVfR185cGVtZzNGZjRXd3FISFdtazFzWHdCTk5hRFBnTGdVekNNSi1ic25ZMnNUNnQ3Sk9VbUROQzFYa0dMME9WQk5oQlRXdl9zcXo5NVBLV2JxZERiUzFmT0swLXR5cjh5aWxuUnBSaEV1VDZOT3UtUExGQlZ4eEcxSUtVWDFjc0Nqd3hVRXdfOEVyTS02dnU1d0VKTDdmemZBbHBMTDhxamdIQktyT0pkb25DRnlPTl9GOHVSQlpWR0s2SUdnYkZmUU5TYTYwLVlSVGRtSUtYbjVGMVRHSGVvYndQYWIxNWxaM3dFTWV4U3E0ZHlkU3ZZNEEtUmExRmdoc3JiQjZScjBFbEd0YmUwVG03bHlzSjVpR255RGZjX0h5ZFpwNA?oc=5",
-          "published": "Thu, 07 May 2026 07:15:37 GMT",
-          "source": "Yahoo股市"
-        },
-        {
-          "title": "【即時新聞】台積電(2330)今日續任台指期領漲核心，夜盤震盪中資金聚焦AI供應鏈受惠油價回落 - CMoney投資網誌",
-          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOQ05kYjJ6NjEzM05jV1BPU2h2ZXFURDROOXlraS1OXy11MmNlQVF1dkcyOUluUVg3UElxTUw1anZndUQySFNOUU9Yd3djWkZQNkYtdDc2UGxnM3J0SjdidzRPaGRjMTlPUHBoV0RSRjBrQ29TZWVxY0RDMDkzTUlnSWZPa1dxbUpmbEpWN25DbGc?oc=5",
-          "published": "Thu, 07 May 2026 16:59:10 GMT",
-          "source": "CMoney投資網誌"
-        }
-      ]
+      "chips": {
+        "inst_total_today": 5466427,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "2337",
@@ -8236,7 +8590,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 5096536,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "2342",
@@ -8246,9 +8604,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 805925,
+        "inst_buy_streak": 7
+      }
     },
     {
       "stock_id": "2344",
@@ -8269,9 +8632,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 629878,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "2347",
@@ -8679,39 +9047,10 @@
         "above_240ma"
       ],
       "combos": [],
-      "note": "聯發科",
-      "news": [
-        {
-          "title": "史上最大尾！聯發科今起抓去關禁閉 股價震盪下跌近4% - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMi8gJBVV95cUxQWm9JTlBKTkpOS1dWQnhEazh4ekVkZ1ZTc0NzMGVfcDFqZEtJRnZQekRTU21sNFpsWHhneTVxTHNweEI4SDFwekFqTkdUalJCT2JIOTBVS083ckhMQTJoQzZGN05WVFdqMUxXT0FFNS01NDRpTk92Y3dSVUNKUVJpWlZadm1SYURhel91dEJMWGR3SENMNExOV2l3eG42NWZYRG5wQ1pYT0JxUEJjWVVjRElBdUYyUzROd0ZMUE9xV3lBd2NtYTY0WE1iUlAxcEE0UWNxeG42anJONXM1RnFvMlFhUDRtNnQyQllBQTF0NWtaeFNhUFpYVGpqakd0bF9DX1RIRDJ2SlNGa1psTzRzc1hZTFo3QVFWbEVQWjJKSE9PTzRSLU5wc1p0dUJCb2ZZRnk2NXdMajdUSDFERlpUeXdRc1lUX1RtVHJEcUxuRnc3Rm9ic0k3SVpLNGtqNlBOaERpMHU5cW4wOTB0eVhiMFBn?oc=5",
-          "published": "Thu, 07 May 2026 01:18:45 GMT",
-          "source": "Yahoo股市"
-        },
-        {
-          "title": "全台首座！聯發科這1地研發資料中心曝 祭出「它」加速AI佈局 - 三立娛樂星聞",
-          "link": "https://news.google.com/rss/articles/CBMiSkFVX3lxTFBVTWhfVjdYb2VLdWJnc0tueWc1djNVTEduY0RHVk5reTZncW5YdnEtX1FkVV9Ba19hbGRpRjFQTlIzQi1VUFpPcDNB?oc=5",
-          "published": "Thu, 07 May 2026 05:20:03 GMT",
-          "source": "三立娛樂星聞"
-        },
-        {
-          "title": "聯發科被關禁閉大跌！立委批「這身價怎麼炒股？」 金管會：1個月內提檢討報告 - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMiygNBVV95cUxNQVQwZzdOYUVsSDU5WUU5X1NOODJaY0Y1WVJmWGJGSnRRQUJFdFFZRERwR2ZWLVAtOHhrRWtPQ0hfTHVDODVLNnF4WnAtVm0xb3plMFNyaWJMMTVEZVhkQXZqakpROFJnZ29wX3A3TnF0VWd2a01TX3lzZXc3aVBkS19jcjcwMENEZzhSSDAySGJraWFPTkxzVHNDYUdXdk5iNk9hci1BYm5OelNUeDdzRXoyZER1N1lKMnJOakFicFMwRHNvamVWVVRvZ21ZRDZTalZmbFRMek1WcTlvWDJzVm1BckhDOVptcFFlcDRVXzdsbFg5d1VHMGl4OGxqcEpKNFZIWlA3d192ZlhVbzZ0OEJGUm1FVmFYNG5pT2pabkJTdG1Tdkp2RngweFo5QlJVbVNHTGtybXhEd3hGcjJjWWEzSGoyeXc4c3lHcDVNNXZTblNuSWJ4YXRqVWMtaUFUc1huejBNUGFTY0RlSllodXFPMnpwZUNlS0Mya3FfcHJaZHRzY3V3bEZ0TWczQWRLZVo2YzQxNk9EbGFQVWROYkZod0dXLVZzT2lPUmxIX3VCdlZTUHdnUGIyekdJd2I5d2pnMkdiXzMxZw?oc=5",
-          "published": "Thu, 07 May 2026 03:50:13 GMT",
-          "source": "Yahoo股市"
-        },
-        {
-          "title": "三大法人買賣超 – 外資買超(2317)鴻海、(2454)聯發科，投信買超(2330)台積電、(3443)創意，法人合計買超672.75億元 - sinotrade.com.tw",
-          "link": "https://news.google.com/rss/articles/CBMizgRBVV95cUxPOGtrLUFrUG42MHlqZTlFaXdsQmNvbDJYOWNZSEh0WXhlamFab1dfelpGaFNHejJLbWJlaTlwbDJIWGFhMHA2TlpLTVdFcjB2Y29heGtNRTFDTG8xblo1SmdTMzM4VUt1TzdwWDRqZnNZYnl2OThKZkk3YXZ4RDBiSnBDSHA3a0t4Yk90aVFuMHdHbkNNRkdrVjJwT3dHYmRjNlIxYmlmRC04OU5UZE9WX1NPVks2ZzFLUmpEMzZGSHFoSVUyZVdzYVVzYWtzN2M3RVFKeC1lUzNSc19ObTExT2l4QTNZemJlM0sxTTllTGxnYjQzMktMOEw5Zmo1amlDcTI2Q19qMlU5b3ZTUGsxOS1vdFNDVGJNOTNvbEVaZnhtWk45VG9yNm05c3ZRdFplMFQ4VVZwblVUWGZRMFlaOEFjZjQxMEJHbWNBb080TTMtQzhSWVVxeHMxSEJCSWVCTWx4cE51RWFsTVRzbm1GRk1JUzZST1Z5T2NhMHdoX0JQQWJIUC1fcjF2TVFhY1BWam1GRHBFajNmSVR4cHlMQ1FRcVdDcHhXX0Q3b0ZQSWY4SzB2SEJzeEdsTFBETlZPS2lJYmxXOWFyUmhIZ2lPclpYeWl5bHUyY25jTDJKQnl4d2dVeVlHb1ZsOU1VNVc1TkVhbXZwbGVNRE1IcWdwNzNpQXVaLXlMYThXbXdQa25TRC02Qnl6a29kdFhQenRJNzg5LVUyc1ctanprcUZKMmV1a0NBZDMtNWVyWi1EV2lfZjFSeWc0dEgyMEExUQ?oc=5",
-          "published": "Wed, 06 May 2026 08:36:05 GMT",
-          "source": "sinotrade.com.tw"
-        },
-        {
-          "title": "2454.聯發科.外資最新目標價? - CMoney",
-          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5Sa0ExVTUyWjV0bzRlSVhZWDBxOEY1LWVQeVpfdHdXQjJFdkhnVTA5Q3RJVWZSekl2R25UdDZ5eXFEaXdBdU02S3ItV19lQzFOSDhXbzZBcVE?oc=5",
-          "published": "Fri, 01 May 2026 11:09:07 GMT",
-          "source": "CMoney"
-        }
-      ]
+      "chips": {
+        "inst_total_today": -849952,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3622",
@@ -8819,7 +9158,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -153935,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3663",
@@ -9034,7 +9377,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1082788,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3711",
@@ -9046,7 +9393,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 2737345,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3712",
@@ -9102,7 +9453,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 318000,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3704",
@@ -9135,7 +9490,11 @@
         "macd_turn_red",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 507083,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3680",
@@ -9147,7 +9506,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -600193,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3684",
@@ -9336,7 +9699,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 285010,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3444",
@@ -9359,7 +9726,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -1,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3447",
@@ -9394,7 +9765,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 106798,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3479",
@@ -9415,9 +9790,16 @@
         "bullish_ma_alignment",
         "golden_cross",
         "above_240ma",
-        "volume_price_surge"
+        "volume_price_surge",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 208920212,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "3419",
@@ -9440,7 +9822,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 234245,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "3346",
@@ -9473,7 +9859,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 138111,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "3356",
@@ -9497,7 +9887,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 223695,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3360",
@@ -9636,9 +10030,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 485632,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "3491",
@@ -9661,7 +10062,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -2104919,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3533",
@@ -9671,9 +10076,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 256793,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "3535",
@@ -9810,7 +10220,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 23945,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3492",
@@ -9915,7 +10329,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 748423,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "3528",
@@ -9926,9 +10344,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 104000,
+        "inst_buy_streak": 12
+      }
     },
     {
       "stock_id": "4583",
@@ -10008,7 +10433,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 553260,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "4707",
@@ -10020,7 +10449,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -182221,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "4581",
@@ -10063,7 +10496,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -2665,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "4560",
@@ -10138,7 +10575,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -142119,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "4577",
@@ -10286,7 +10727,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -5572070,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "4923",
@@ -10669,7 +11114,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 946719,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "4541",
@@ -10825,7 +11274,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -1000,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2751",
@@ -10916,9 +11369,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1316626,
+        "inst_buy_streak": 8
+      }
     },
     {
       "stock_id": "2641",
@@ -11120,7 +11578,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -109324,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2867",
@@ -11173,9 +11635,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 24661407,
+        "inst_buy_streak": 8
+      }
     },
     {
       "stock_id": "2885",
@@ -11259,7 +11726,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -507492,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2481",
@@ -11292,7 +11763,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -54321,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2485",
@@ -11348,7 +11823,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -48308,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "2471",
@@ -11390,9 +11869,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 521233,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "2460",
@@ -11478,9 +11962,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 7093026,
+        "inst_buy_streak": 4
+      }
     },
     {
       "stock_id": "2542",
@@ -11804,9 +12295,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 747397,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "3163",
@@ -11912,7 +12410,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 4720561,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3092",
@@ -11946,7 +12448,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -212201,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3095",
@@ -11957,9 +12463,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 3011,
+        "inst_buy_streak": 7
+      }
     },
     {
       "stock_id": "3105",
@@ -12004,9 +12517,16 @@
         "bullish_ma_alignment",
         "above_240ma",
         "volume_price_surge",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [
+        "主升段啟動"
+      ],
+      "chips": {
+        "inst_total_today": 119171,
+        "inst_buy_streak": 3
+      }
     },
     {
       "stock_id": "3131",
@@ -12058,9 +12578,14 @@
       "change_pct": 3.15,
       "hits": [
         "bullish_ma_alignment",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 186388,
+        "inst_buy_streak": 5
+      }
     },
     {
       "stock_id": "3217",
@@ -12159,7 +12684,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 715340,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3321",
@@ -12203,7 +12732,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -97630,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3285",
@@ -12225,7 +12758,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -366202,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3224",
@@ -12247,7 +12784,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -17078,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3229",
@@ -12324,7 +12865,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -330117,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3265",
@@ -12387,9 +12932,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 400491,
+        "inst_buy_streak": 7
+      }
     },
     {
       "stock_id": "3024",
@@ -12402,7 +12952,11 @@
         "volume_price_surge",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 226022,
+        "inst_buy_streak": 1
+      }
     },
     {
       "stock_id": "3025",
@@ -12423,9 +12977,14 @@
         "bullish_ma_alignment",
         "above_240ma",
         "macd_turn_red",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1382264,
+        "inst_buy_streak": 4
+      }
     },
     {
       "stock_id": "3028",
@@ -12448,7 +13007,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -315213,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3031",
@@ -12521,39 +13084,10 @@
         "above_240ma"
       ],
       "combos": [],
-      "note": "大立光",
-      "news": [
-        {
-          "title": "大立光4月營收53億元月減1% 「老實樹」林恩平：5月又比4月低 - Yahoo股市",
-          "link": "https://news.google.com/rss/articles/CBMihANBVV95cUxQRms1N2lENGV2NlhCdWlja0dXOFdVZXlOSldMbERKYkxhc2ljQnlBSlVBdHhtRGg5OEZUS2c0T0Z0SHJWRzhpYnQyblUtYWdpYkhBVGtMUE5xekd6MThvZU01MmdSczV0T0lhUjQwLW1WM0dBQnNBTkhrTUo4cnhvX1JJVEV0R3lySF9jR1ppQlg0SHpDalFFTExZNFFJbWI0WXBYWi1Bd2wzQlB6cUdWclZHX1ExNEsySFJXNGlFWVVpOUdtNWV3RXMzWHltWElEclJDQUtXU2JaMnBmZHhVYnNoM1E4NldZU1IyMzdOSW1kVWgyYm90YmtHNEtnRWQtWkZhUjJOZ0d2NTVWNzlqeHRMX2RkdGpGOTJwTlVwMjNtU2NBNkZjM3J1TnF4R3FsZzFYdndYUnB3ckFHMlM3THl6eVg1MFl4cHpQVWNQZzdock53bE5iOXpmWDRpUk50b2s1UTF1SUFrMlY2UnZxTGFkYzJPOGotOF9tVk1hdTJNc2Jh?oc=5",
-          "published": "Tue, 05 May 2026 08:12:35 GMT",
-          "source": "Yahoo股市"
-        },
-        {
-          "title": "黃仁勳點火機器人 大立光、亞光扮感測要角 | 產業熱點 | 產業 - 經濟日報",
-          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1KekZkYkZBcnZwZ2VEc2k5TUxwcVlwYXpvMnBJaUVyOVBqMDNKVUJXUmc0VTlKRkZwcUtsdGFGbmRCYWZDaHBycWhoRGlnSFdIWlJvLXRha3liZw?oc=5",
-          "published": "Wed, 06 May 2026 09:00:00 GMT",
-          "source": "經濟日報"
-        },
-        {
-          "title": "3008 大立光- 在6251張借劵賣出張數壓制下的真相-股市爆料同學會 - CMoney",
-          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1SQTFfNU9XN1VNTFA1amw2WDduN2drbzcydWlsNVhfQm5sTmlJNXdpQUJJVU1ZQVl4Z05oNmRnT2dxWjRVX3Z0ZU1DS1M1V0llb1E2a1FIUV8?oc=5",
-          "published": "Wed, 06 May 2026 10:52:05 GMT",
-          "source": "CMoney"
-        },
-        {
-          "title": "大立光法說／營收年增7%，毛利率49.4％，說明CPO進度｜股市話題｜豐雲學堂 2026 年 05 月 - sinotrade.com.tw",
-          "link": "https://news.google.com/rss/articles/CBMi_wJBVV95cUxNbXQwN20tSkdyeGZSN0h2T19rNGJsZVl6Q2FiUVg1clByQUttenBLMFFaeUM3c0xDU2xXMVlrd1RVMDRjNlpmZ3o3bFJlbDNmb2pxbkpwSC1HNURucFFWSzlzZllRcEktNElzTkg0RV9HNmsyRVRqVkdwbVcxV3JUNEw5ZVpBMkhRMHdzdmt3elRhWWQtTzhhVzNBWldtQVI0V1ZXVEljdkRPcTBNajZ3WFd1amtnX0tyLWZ1eTI5NVdQaW01dkVaYjRxaEFEVHRUTU4yX2o4c2RUeFhPLVNLMVg2aE1KZG1pZWNzd01DVTFTc2gxRk1QSWdCSEpqVmV1SzUtb21rdjBqSjhQWFQ2dDNxZlc0SlhGeW9zSjBYbk82Z2lXNVNfTE9jUXJXeENieDRObmJmTi1Yd29fdW90M3p1bDRJZ2kxWENOOVlsZ1NXTHFmSnJOOGt3ejBCa0VabS1QMVJxODAxLW1GVVphZ1FzbG5VMFFiS0l4czBkOA?oc=5",
-          "published": "Thu, 16 Apr 2026 07:00:00 GMT",
-          "source": "sinotrade.com.tw"
-        },
-        {
-          "title": "4月營收速報》大立光月減1%、年增24% - 自由時報",
-          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBQd29rSWJFMUxUcWJNQWplSGZQZURGY08yZGJxdzN3cEZIR2YweEdmOXltSGt3eXFYVmM2TmZNd0I0UXRHMnl6VXlaenZaYzdmYkEybHFxazA?oc=5",
-          "published": "Tue, 05 May 2026 21:34:09 GMT",
-          "source": "自由時報"
-        }
-      ]
+      "chips": {
+        "inst_total_today": 248191,
+        "inst_buy_streak": 2
+      }
     },
     {
       "stock_id": "3010",
@@ -12593,9 +13127,14 @@
       "hits": [
         "bullish_ma_alignment",
         "above_240ma",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 333089,
+        "inst_buy_streak": 7
+      }
     },
     {
       "stock_id": "3033",
@@ -12607,7 +13146,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -4283401,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3034",
@@ -12616,9 +13159,14 @@
       "change_pct": 2.6,
       "hits": [
         "bullish_ma_alignment",
-        "n_day_high"
+        "n_day_high",
+        "inst_consecutive_buy"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 352862,
+        "inst_buy_streak": 4
+      }
     },
     {
       "stock_id": "3050",
@@ -12672,7 +13220,11 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -292990,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3060",
@@ -12799,7 +13351,11 @@
         "above_240ma",
         "volume_price_surge"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": -357289,
+        "inst_buy_streak": 0
+      }
     },
     {
       "stock_id": "3047",
@@ -12841,8 +13397,13 @@
         "above_240ma",
         "n_day_high"
       ],
-      "combos": []
+      "combos": [],
+      "chips": {
+        "inst_total_today": 1031738,
+        "inst_buy_streak": 1
+      }
     }
   ],
-  "no_data_count": 163
+  "no_data_count": 156,
+  "chips_fetched": 157
 }
