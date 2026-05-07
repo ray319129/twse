@@ -58,30 +58,30 @@ volume_price:
 
 # D. 籌碼類
 chips:
-  inst_consecutive_buy:            # D1 法人連買
+  inst_consecutive_buy:            # D1 法人連買 ✅ 已實作
     enabled: true
     days: 3
 
-  foreign_holding_increase:        # D2 外資加碼
-    enabled: true
+  foreign_holding_increase:        # D2 外資加碼 ⏳ TODO 下個 commit
+    enabled: false
     period: 30
-    threshold: 0.02                # 上升 2 個百分點
+    threshold: 0.02
 
-  short_cover_with_buy:            # D3 融券回補 + 主力買超
-    enabled: true
-    cover_threshold: 0.05          # 融券減少 5%
+  short_cover_with_buy:            # D3 融券回補 + 主力買超 ⏳ TODO
+    enabled: false
+    cover_threshold: 0.05
 
-# E. 基本面快篩
+# E. 基本面快篩 ⏳ TODO 全部下個 commit
 fundamental:
   monthly_revenue_growth:          # E1 月營收連續成長
-    enabled: true
+    enabled: false
     consecutive_months: 3
-    latest_yoy_min: 0.10           # 最新月 YoY ≥ 10%
+    latest_yoy_min: 0.10
 
   eps_positive_high_yield:         # E2 EPS 正成長 + 高殖利率
-    enabled: true
+    enabled: false
     eps_quarters: 4
-    yield_min: 0.04                # 殖利率 ≥ 4%
+    yield_min: 0.04
 
 # 多訊號交集組合
 combos:

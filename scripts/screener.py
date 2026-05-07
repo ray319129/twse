@@ -17,9 +17,13 @@ def _prev(df: pd.DataFrame, col: str, default=np.nan):
     return val if pd.notna(val) else default
 
 
-def evaluate_stock(df: pd.DataFrame, cfg: dict) -> dict:
-    """Evaluate all enabled price-based strategies for one stock's history.
-    Returns a dict {strategy_name: bool}. Missing data → False.
+def evaluate_stock(df: pd.DataFrame, cfg: dict, chips_df: pd.DataFrame | None = None) -> dict:
+    """Evaluate all enabled strategies for one stock.
+
+    df:       price+indicator DataFrame (date index)
+    chips_df: institutional buy/sell DataFrame (date index, optional)
+
+    Returns dict {strategy_name: bool}. Missing data → False.
     """
     hits: dict[str, bool] = {}
     if df.empty or len(df) < 5:
@@ -127,7 +131,25 @@ def evaluate_stock(df: pd.DataFrame, cfg: dict) -> dict:
         else:
             hits["n_day_high"] = False
 
+    # D. 籌碼類 (需要 chips_df)
+    chips_cfg = cfg.get("chips", {})
+
+    # D1 法人連買 N 日
+    d1_cfg = chips_cfg.get("inst_consecutive_buy", {})
+    if d1_cfg.get("enabled"):
+        n = int(d1_cfg.get("days", 3))
+        hits["inst_consecutive_buy"] = _inst_buy_streak_ok(chips_df, n)
+
     return hits
+
+
+def _inst_buy_streak_ok(chips_df: pd.DataFrame | None, n: int) -> bool:
+    if chips_df is None or chips_df.empty or "inst_total" not in chips_df.columns:
+        return False
+    tail = chips_df["inst_total"].tail(n)
+    if len(tail) < n:
+        return False
+    return bool((tail > 0).all())
 
 
 def evaluate_combos(hits: dict, combos_cfg: list[dict]) -> list[str]:
@@ -141,8 +163,8 @@ def evaluate_combos(hits: dict, combos_cfg: list[dict]) -> list[str]:
     return triggered
 
 
-def screen_stock(df: pd.DataFrame, cfg: dict) -> dict:
-    hits = evaluate_stock(df, cfg)
+def screen_stock(df: pd.DataFrame, cfg: dict, chips_df: pd.DataFrame | None = None) -> dict:
+    hits = evaluate_stock(df, cfg, chips_df=chips_df)
     combos = evaluate_combos(hits, cfg.get("combos", []))
     return {"hits": hits, "combos": combos}
 

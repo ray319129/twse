@@ -52,10 +52,15 @@ def fetch_stock_info(force: bool = False) -> pd.DataFrame:
 
 
 def filter_tradable_stocks(df: pd.DataFrame) -> pd.DataFrame:
-    """Keep 4-digit numeric codes only (excludes ETFs starting with 00, warrants, etc.)."""
+    """Keep 4-digit numeric codes only.
+    Excludes:
+    - 00xx: ETFs / 槓反 ETF
+    - 91xx: TDR (Taiwan Depository Receipts), yfinance 沒收錄
+    """
     out = df.copy()
     out = out[out["stock_id"].str.match(r"^\d{4}$")]
     out = out[~out["stock_id"].str.startswith("00")]
+    out = out[~out["stock_id"].str.startswith("91")]
     if "type" in out.columns:
         out = out[out["type"].isin(["twse", "tpex"])]
     out = out.drop_duplicates(subset=["stock_id"]).reset_index(drop=True)
@@ -111,6 +116,57 @@ def bulk_fetch_history(stocks: list[tuple[str, str]], days: int = 400, sleep: fl
             log.info(f"history fetched {i+1}/{len(stocks)}")
         time.sleep(sleep)
     return out
+
+
+# ---------- FinMind chips (institutional buy/sell) ----------
+
+def fetch_institutional_history(stock_id: str, start: date, end: date) -> pd.DataFrame:
+    """Per-stock institutional buy/sell history from FinMind.
+    Returns DataFrame indexed by date with columns:
+      inst_foreign, inst_invest, inst_dealer, inst_total (each = buy - sell, in shares)
+    Empty DataFrame on failure / no data.
+    """
+    rows = fetch_finmind(
+        "TaiwanStockInstitutionalInvestorsBuySell",
+        data_id=stock_id,
+        start_date=start.isoformat(),
+        end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    if "buy" not in df.columns or "sell" not in df.columns or "name" not in df.columns:
+        return pd.DataFrame()
+    df["net"] = df["buy"].fillna(0) - df["sell"].fillna(0)
+
+    # FinMind 'name' field uses English keys, varies slightly across periods.
+    # Map to our 3 categories. Anything else → ignore.
+    def bucket(n: str) -> str:
+        if not isinstance(n, str):
+            return ""
+        s = n.lower()
+        if "foreign" in s:
+            return "foreign"
+        if "investment" in s or "trust" in s:
+            return "invest"
+        if "dealer" in s:
+            return "dealer"
+        return ""
+
+    df["bucket"] = df["name"].apply(bucket)
+    df = df[df["bucket"] != ""]
+    if df.empty:
+        return pd.DataFrame()
+
+    pivot = df.pivot_table(index="date", columns="bucket", values="net", aggfunc="sum", fill_value=0)
+    pivot = pivot.rename(columns={c: f"inst_{c}" for c in pivot.columns})
+    for col in ("inst_foreign", "inst_invest", "inst_dealer"):
+        if col not in pivot.columns:
+            pivot[col] = 0
+    pivot["inst_total"] = pivot[["inst_foreign", "inst_invest", "inst_dealer"]].sum(axis=1)
+    pivot.index = pd.to_datetime(pivot.index).tz_localize(None).normalize()
+    pivot = pivot.sort_index()
+    return pivot[["inst_foreign", "inst_invest", "inst_dealer", "inst_total"]]
 
 
 # ---------- Google News RSS ----------

@@ -44,6 +44,13 @@
         {% for h in s.hits %}<span style="background: #e8f4fd; color: #2c3e50; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}
       </div>
     {% endif %}
+    {% if s.chips %}
+      <div style="margin-top: 6px; font-size: 13px;">
+        <strong>籌碼:</strong>
+        三大法人今日合計 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張
+        {% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}
+      </div>
+    {% endif %}
     {% if not s.combos and not s.hits %}
       <div style="margin-top: 6px; font-size: 13px; color: #999;">今日無策略觸發</div>
     {% endif %}
@@ -65,8 +72,8 @@
   <div style="color: #999; padding: 8px 0;">自選池目前是空的,請編輯 <code>config/watchlist.json</code></div>
 {% endif %}
 
-<!-- 二、全市場符合條件 -->
-<h3 style="color: #2c3e50; margin-top: 24px;">【二】全市場符合條件 ({{ market_total }} 檔)</h3>
+<!-- 二、全市場多訊號交集 -->
+<h3 style="color: #2c3e50; margin-top: 24px;">【二】全市場多訊號交集 ({{ combo_hit_count }} 檔)</h3>
 {% if by_combo %}
   {% for combo_name, stocks in by_combo.items() %}
   <h4 style="color: #34495e; margin: 16px 0 8px 0;">▎{{ combo_name }} ({{ stocks|length }} 檔)</h4>
@@ -77,7 +84,7 @@
         <th style="padding: 6px;">名稱</th>
         <th style="padding: 6px; text-align: right;">收盤</th>
         <th style="padding: 6px; text-align: right;">漲跌%</th>
-        <th style="padding: 6px;">其他觸發指標</th>
+        <th style="padding: 6px;">觸發指標</th>
       </tr>
     </thead>
     <tbody>
@@ -101,7 +108,12 @@
   </table>
   {% endfor %}
 {% else %}
-  <div style="color: #999;">今日全市場無多訊號交集觸發。</div>
+  <div style="color: #999; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">
+    今日全市場無多訊號交集觸發。
+    {% if single_hit_count > 0 %}
+      <br><span style="color: #777;">(另有 {{ single_hit_count }} 檔僅觸發單一訊號,單一訊號歷史勝率有限,故不列出)</span>
+    {% endif %}
+  </div>
 {% endif %}
 
 <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;">
