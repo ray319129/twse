@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>台股技術選股 - {{ date_str }}</title>
+</head>
+<body style="font-family: -apple-system, 'Segoe UI', 'Microsoft JhengHei', sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; color: #222; background: #fafafa;">
+
+<div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;">
+  <strong>⚠️ 風險提醒</strong><br>
+  本報告為「條件篩選結果」,<strong>不是投資建議</strong>。下單前請看 (1) 公司基本面 (2) 近期新聞 (3) 你的停損紀律。<br>
+  系統建議使用者前 3~6 個月當「學習工具」:訊號 → 觀察 → 不下單 → 累積對訊號品質的直覺。
+</div>
+
+<h2 style="border-bottom: 2px solid #2c3e50; padding-bottom: 6px;">
+  台股技術選股 — {{ date_str }}
+  {% if test_mode %}<span style="color: #c0392b;">[測試]</span>{% endif %}
+</h2>
+
+<!-- 一、自選池 -->
+<h3 style="color: #2c3e50;">【一】自選池訊號 ({{ watchlist|length }} 檔)</h3>
+{% if watchlist %}
+  {% for s in watchlist %}
+  <div style="background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px;">
+    <div style="font-size: 16px; font-weight: bold;">
+      🔔 {{ s.stock_id }} {{ s.name }}
+      {% if s.close %}<span style="color: #555; font-weight: normal;">收 {{ '%.2f'|format(s.close) }}</span>{% endif %}
+      {% if s.change_pct is not none %}
+        <span style="color: {% if s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %}; font-weight: normal;">
+          ({{ '%+.2f'|format(s.change_pct) }}%)
+        </span>
+      {% endif %}
+    </div>
+    {% if s.note %}<div style="color: #666; font-size: 13px;">備註:{{ s.note }}</div>{% endif %}
+    {% if s.combos %}
+      <div style="margin-top: 6px;">
+        <strong>觸發組合:</strong>
+        {% for c in s.combos %}<span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">{{ c }}</span>{% endfor %}
+      </div>
+    {% endif %}
+    {% if s.hits %}
+      <div style="margin-top: 6px; font-size: 13px;">
+        <strong>觸發指標:</strong>
+        {% for h in s.hits %}<span style="background: #e8f4fd; color: #2c3e50; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}
+      </div>
+    {% endif %}
+    {% if not s.combos and not s.hits %}
+      <div style="margin-top: 6px; font-size: 13px; color: #999;">今日無策略觸發</div>
+    {% endif %}
+    {% if s.news %}
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd;">
+        <strong style="font-size: 13px;">近期新聞:</strong>
+        <ul style="margin: 4px 0 0 0; padding-left: 20px; font-size: 13px;">
+          {% for n in s.news[:3] %}
+          <li><a href="{{ n.link }}" style="color: #2980b9; text-decoration: none;">{{ n.title }}</a>
+            {% if n.source %}<span style="color: #999; font-size: 12px;">— {{ n.source }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div style="color: #999; padding: 8px 0;">自選池目前是空的,請編輯 <code>config/watchlist.json</code></div>
+{% endif %}
+
+<!-- 二、全市場符合條件 -->
+<h3 style="color: #2c3e50; margin-top: 24px;">【二】全市場符合條件 ({{ market_total }} 檔)</h3>
+{% if by_combo %}
+  {% for combo_name, stocks in by_combo.items() %}
+  <h4 style="color: #34495e; margin: 16px 0 8px 0;">▎{{ combo_name }} ({{ stocks|length }} 檔)</h4>
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+    <thead>
+      <tr style="background: #ecf0f1; text-align: left;">
+        <th style="padding: 6px;">代號</th>
+        <th style="padding: 6px;">名稱</th>
+        <th style="padding: 6px; text-align: right;">收盤</th>
+        <th style="padding: 6px; text-align: right;">漲跌%</th>
+        <th style="padding: 6px;">其他觸發指標</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in stocks[:30] %}
+      <tr style="border-bottom: 1px solid #ecf0f1;">
+        <td style="padding: 6px;"><strong>{{ s.stock_id }}</strong></td>
+        <td style="padding: 6px;">{{ s.name }}</td>
+        <td style="padding: 6px; text-align: right;">{{ '%.2f'|format(s.close) if s.close else '-' }}</td>
+        <td style="padding: 6px; text-align: right; color: {% if s.change_pct and s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %};">
+          {{ '%+.2f'|format(s.change_pct) if s.change_pct is not none else '-' }}
+        </td>
+        <td style="padding: 6px; color: #666;">
+          {% for h in s.hits %}{{ label.get(h, h) }}{% if not loop.last %} · {% endif %}{% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if stocks|length > 30 %}
+      <tr><td colspan="5" style="padding: 6px; color: #999; font-size: 12px;">…還有 {{ stocks|length - 30 }} 檔,完整清單見 data/signals/{{ date_str.split(' ')[0] }}.json</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+  {% endfor %}
+{% else %}
+  <div style="color: #999;">今日全市場無多訊號交集觸發。</div>
+{% endif %}
+
+<hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;">
+
+<div style="font-size: 12px; color: #999;">
+  完整網頁(階段二上線):<br>
+  https://ray319129.github.io/twse<br><br>
+  資料缺漏: {{ no_data_count }} 檔(yfinance 無資料,常見於剛上市/暫停交易/下市)<br>
+  此信由 GitHub Actions 自動寄出。
+</div>
+
+</body>
+</html>

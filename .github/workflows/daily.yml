@@ -1,0 +1,61 @@
+name: Daily Screener
+
+on:
+  schedule:
+    # 16:30 Asia/Taipei = 08:30 UTC, weekdays only
+    - cron: "30 8 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Send email with [測試] prefix"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-screener
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run daily screener
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: |
+          if [ "${{ github.event.inputs.test }}" = "true" ]; then
+            python -m scripts.main --test
+          else
+            python -m scripts.main
+          fi
+
+      - name: Commit data updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then
+            git commit -m "data: $(date -u +'%Y-%m-%d') daily update"
+            git push
+          else
+            echo "No data changes to commit."
+          fi
