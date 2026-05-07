@@ -4,7 +4,11 @@ from pathlib import Path
 from .config import PRICES_DIR, DATA_DIR
 
 CHIPS_DIR = DATA_DIR / "chips"
-CHIPS_DIR.mkdir(parents=True, exist_ok=True)
+REVENUE_DIR = DATA_DIR / "revenue"
+EPS_DIR = DATA_DIR / "eps"
+PER_DIR = DATA_DIR / "per"
+for _d in (CHIPS_DIR, REVENUE_DIR, EPS_DIR, PER_DIR):
+    _d.mkdir(parents=True, exist_ok=True)
 
 
 def _normalize_index(df: pd.DataFrame) -> pd.DataFrame:
@@ -56,7 +60,7 @@ def upsert_prices(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
     return _upsert(price_path(stock_id), new_df, _load_parquet)
 
 
-# Chips (institutional buy/sell history per stock)
+# Chips (institutional + margin + foreign holding history per stock)
 
 def chips_path(stock_id: str) -> Path:
     return CHIPS_DIR / f"{stock_id}.parquet"
@@ -68,3 +72,61 @@ def load_chips(stock_id: str) -> pd.DataFrame:
 
 def upsert_chips(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
     return _upsert(chips_path(stock_id), new_df, _load_parquet)
+
+
+# Monthly revenue (index = "YYYY-MM" string)
+
+def revenue_path(stock_id: str) -> Path:
+    return REVENUE_DIR / f"{stock_id}.parquet"
+
+
+def load_revenue(stock_id: str) -> pd.DataFrame:
+    p = revenue_path(stock_id)
+    if not p.exists():
+        return pd.DataFrame()
+    df = pd.read_parquet(p)
+    if df.index.name != "ym" and "ym" in df.columns:
+        df = df.set_index("ym")
+    return df.sort_index()
+
+
+def upsert_revenue(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
+    if new_df.empty:
+        return load_revenue(stock_id)
+    cur = load_revenue(stock_id)
+    new_df = new_df.copy()
+    if cur.empty:
+        new_df.to_parquet(revenue_path(stock_id))
+        return new_df
+    combined = pd.concat([cur, new_df])
+    combined = combined[~combined.index.duplicated(keep="last")].sort_index()
+    combined.to_parquet(revenue_path(stock_id))
+    return combined
+
+
+# Quarterly EPS
+
+def eps_path(stock_id: str) -> Path:
+    return EPS_DIR / f"{stock_id}.parquet"
+
+
+def load_eps(stock_id: str) -> pd.DataFrame:
+    return _load_parquet(eps_path(stock_id))
+
+
+def upsert_eps(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
+    return _upsert(eps_path(stock_id), new_df, _load_parquet)
+
+
+# PER / dividend yield / PB
+
+def per_path(stock_id: str) -> Path:
+    return PER_DIR / f"{stock_id}.parquet"
+
+
+def load_per(stock_id: str) -> pd.DataFrame:
+    return _load_parquet(per_path(stock_id))
+
+
+def upsert_per(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
+    return _upsert(per_path(stock_id), new_df, _load_parquet)

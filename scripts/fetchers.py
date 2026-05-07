@@ -118,46 +118,33 @@ def bulk_fetch_history(stocks: list[tuple[str, str]], days: int = 400, sleep: fl
     return out
 
 
-# ---------- FinMind chips (institutional buy/sell) ----------
+# ---------- FinMind chips (daily institutional + margin + foreign holding) ----------
 
-def fetch_institutional_history(stock_id: str, start: date, end: date) -> pd.DataFrame:
-    """Per-stock institutional buy/sell history from FinMind.
-    Returns DataFrame indexed by date with columns:
-      inst_foreign, inst_invest, inst_dealer, inst_total (each = buy - sell, in shares)
-    Empty DataFrame on failure / no data.
-    """
+def _fetch_institutional(stock_id: str, start: date, end: date) -> pd.DataFrame:
     rows = fetch_finmind(
         "TaiwanStockInstitutionalInvestorsBuySell",
-        data_id=stock_id,
-        start_date=start.isoformat(),
-        end_date=end.isoformat(),
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
     )
     if not rows:
         return pd.DataFrame()
     df = pd.DataFrame(rows)
-    if "buy" not in df.columns or "sell" not in df.columns or "name" not in df.columns:
+    if not {"buy", "sell", "name"}.issubset(df.columns):
         return pd.DataFrame()
     df["net"] = df["buy"].fillna(0) - df["sell"].fillna(0)
 
-    # FinMind 'name' field uses English keys, varies slightly across periods.
-    # Map to our 3 categories. Anything else → ignore.
     def bucket(n: str) -> str:
         if not isinstance(n, str):
             return ""
         s = n.lower()
-        if "foreign" in s:
-            return "foreign"
-        if "investment" in s or "trust" in s:
-            return "invest"
-        if "dealer" in s:
-            return "dealer"
+        if "foreign" in s: return "foreign"
+        if "investment" in s or "trust" in s: return "invest"
+        if "dealer" in s: return "dealer"
         return ""
 
     df["bucket"] = df["name"].apply(bucket)
     df = df[df["bucket"] != ""]
     if df.empty:
         return pd.DataFrame()
-
     pivot = df.pivot_table(index="date", columns="bucket", values="net", aggfunc="sum", fill_value=0)
     pivot = pivot.rename(columns={c: f"inst_{c}" for c in pivot.columns})
     for col in ("inst_foreign", "inst_invest", "inst_dealer"):
@@ -165,8 +152,148 @@ def fetch_institutional_history(stock_id: str, start: date, end: date) -> pd.Dat
             pivot[col] = 0
     pivot["inst_total"] = pivot[["inst_foreign", "inst_invest", "inst_dealer"]].sum(axis=1)
     pivot.index = pd.to_datetime(pivot.index).tz_localize(None).normalize()
-    pivot = pivot.sort_index()
-    return pivot[["inst_foreign", "inst_invest", "inst_dealer", "inst_total"]]
+    return pivot[["inst_foreign", "inst_invest", "inst_dealer", "inst_total"]].sort_index()
+
+
+def _fetch_margin(stock_id: str, start: date, end: date) -> pd.DataFrame:
+    rows = fetch_finmind(
+        "TaiwanStockMarginPurchaseShortSale",
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    margin_col = next((c for c in ("MarginPurchaseTodayBalance", "MarginBalance") if c in df.columns), None)
+    short_col = next((c for c in ("ShortSaleTodayBalance", "ShortBalance") if c in df.columns), None)
+    if not margin_col and not short_col:
+        return pd.DataFrame()
+    out = pd.DataFrame()
+    out["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+    if margin_col:
+        out["margin_balance"] = df[margin_col].astype(float)
+    if short_col:
+        out["short_balance"] = df[short_col].astype(float)
+    out = out.set_index("date").sort_index()
+    return out
+
+
+def _fetch_holding(stock_id: str, start: date, end: date) -> pd.DataFrame:
+    rows = fetch_finmind(
+        "TaiwanStockHoldingSharesPer",
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    candidates = (
+        "ForeignInvestmentSharesRatio", "HoldingSharesPer", "PercentageHeld",
+        "ForeignInvestmentSharesPer",
+    )
+    col = next((c for c in candidates if c in df.columns), None)
+    if not col:
+        return pd.DataFrame()
+    out = pd.DataFrame()
+    out["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+    out["foreign_holding_pct"] = pd.to_numeric(df[col], errors="coerce")
+    return out.dropna().set_index("date").sort_index()
+
+
+def fetch_chips_history(stock_id: str, start: date, end: date) -> pd.DataFrame:
+    """Daily chips: institutional + margin + foreign holding. Empty if all sources fail."""
+    parts = []
+    for fn in (_fetch_institutional, _fetch_margin, _fetch_holding):
+        try:
+            df = fn(stock_id, start, end)
+        except Exception as e:
+            log.warning(f"chips fetch {fn.__name__} {stock_id} failed: {e}")
+            df = pd.DataFrame()
+        if not df.empty:
+            parts.append(df)
+    if not parts:
+        return pd.DataFrame()
+    out = parts[0]
+    for p in parts[1:]:
+        out = out.join(p, how="outer")
+    return out.sort_index()
+
+
+# Back-compat alias used by older main.py / storage paths
+fetch_institutional_history = fetch_chips_history
+
+
+# ---------- FinMind fundamentals (monthly revenue, EPS, PER/yield) ----------
+
+def fetch_monthly_revenue(stock_id: str, months: int = 18) -> pd.DataFrame:
+    """Monthly revenue history with YoY computed.
+    Returns DataFrame indexed by year_month (string YYYY-MM), columns: revenue, revenue_yoy.
+    """
+    end = date.today()
+    start = (end.replace(day=1) - timedelta(days=months * 32))
+    rows = fetch_finmind(
+        "TaiwanStockMonthRevenue",
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    if "revenue" not in df.columns:
+        return pd.DataFrame()
+    if "revenue_year" in df.columns and "revenue_month" in df.columns:
+        df["ym"] = df["revenue_year"].astype(int).astype(str).str.zfill(4) + "-" + \
+                   df["revenue_month"].astype(int).astype(str).str.zfill(2)
+    else:
+        df["ym"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m")
+    df = df.drop_duplicates(subset=["ym"]).sort_values("ym")
+    df["revenue"] = pd.to_numeric(df["revenue"], errors="coerce")
+    df = df.dropna(subset=["revenue"])
+    df = df.set_index("ym")[["revenue"]]
+    df["revenue_yoy"] = df["revenue"].pct_change(periods=12)
+    return df
+
+
+def fetch_eps_quarterly(stock_id: str, quarters: int = 6) -> pd.DataFrame:
+    """Quarterly EPS history. Returns DataFrame indexed by quarter_end date, column: eps."""
+    end = date.today()
+    start = end - timedelta(days=quarters * 100)
+    rows = fetch_finmind(
+        "TaiwanStockFinancialStatements",
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    if not {"type", "value", "date"}.issubset(df.columns):
+        return pd.DataFrame()
+    eps_keys = {"EPS", "EarningsPerShare", "EPS_Quarter", "BasicEPS", "EarningsPerShareBasic"}
+    eps = df[df["type"].isin(eps_keys)].copy()
+    if eps.empty:
+        return pd.DataFrame()
+    eps["value"] = pd.to_numeric(eps["value"], errors="coerce")
+    eps = eps.dropna(subset=["value"])
+    eps = eps.drop_duplicates(subset=["date"], keep="last").sort_values("date")
+    out = pd.DataFrame()
+    out["date"] = pd.to_datetime(eps["date"]).dt.tz_localize(None).dt.normalize()
+    out["eps"] = eps["value"].values
+    return out.set_index("date").sort_index()
+
+
+def fetch_per_yield(stock_id: str, days: int = 10) -> pd.DataFrame:
+    """Recent days of PER / dividend yield / PBR. Returns DataFrame indexed by date."""
+    end = date.today()
+    start = end - timedelta(days=days * 2)
+    rows = fetch_finmind(
+        "TaiwanStockPER",
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    out = pd.DataFrame()
+    out["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+    for src, dst in (("PER", "pe"), ("PBR", "pb"), ("dividend_yield", "yield_pct")):
+        if src in df.columns:
+            out[dst] = pd.to_numeric(df[src], errors="coerce")
+    return out.set_index("date").sort_index().dropna(how="all")
 
 
 # ---------- Google News RSS ----------

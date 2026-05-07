@@ -44,11 +44,59 @@
         {% for h in s.hits %}<span style="background: #e8f4fd; color: #2c3e50; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}
       </div>
     {% endif %}
+    {% if s.industry %}<div style="margin-top: 4px; font-size: 12px; color: #777;">產業:{{ s.industry }}</div>{% endif %}
     {% if s.chips %}
       <div style="margin-top: 6px; font-size: 13px;">
         <strong>籌碼:</strong>
-        三大法人今日合計 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張
-        {% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}
+        {% if s.chips.inst_total_today is defined %}
+          三大法人 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張
+          {% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}
+        {% endif %}
+        {% if s.chips.foreign_holding_pct is defined %}
+          · 外資持股 {{ s.chips.foreign_holding_pct }}%
+          {% if s.chips.foreign_holding_change_30d is defined %}
+            (30 日 {{ '%+.2f'|format(s.chips.foreign_holding_change_30d) }}pp)
+          {% endif %}
+        {% endif %}
+        {% if s.chips.short_change_pct is defined %}
+          · 融券 {{ '%+.1f'|format(s.chips.short_change_pct) }}%
+        {% endif %}
+      </div>
+    {% endif %}
+    {% if s.fundamentals %}
+      <div style="margin-top: 4px; font-size: 13px;">
+        <strong>基本面:</strong>
+        {% if s.fundamentals.eps_latest is defined %}最新季 EPS {{ s.fundamentals.eps_latest }} ·{% endif %}
+        {% if s.fundamentals.revenue_yoy is defined %}{{ s.fundamentals.revenue_latest_ym }} 月營收 YoY {{ '%+.1f'|format(s.fundamentals.revenue_yoy) }}% ·{% endif %}
+        {% if s.fundamentals.pe is defined %}PE {{ s.fundamentals.pe }} ·{% endif %}
+        {% if s.fundamentals.yield_pct is defined %}殖利率 {{ s.fundamentals.yield_pct }}%{% endif %}
+      </div>
+    {% endif %}
+    {% if s.levels %}
+      <div style="margin-top: 6px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 12px;">
+        <strong style="font-size: 13px;">📍 技術參考座標</strong>
+        <span style="color: #999; font-size: 11px;">(座標,不是買點)</span>
+        <table style="width: 100%; margin-top: 4px; font-size: 12px; border-collapse: collapse;">
+          <tr>
+            {% if s.levels.ma5 %}<td style="padding: 2px 4px;">5MA <strong>{{ '%.2f'|format(s.levels.ma5) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma5_diff_pct) }}%)</span></td>{% endif %}
+            {% if s.levels.ma20 %}<td style="padding: 2px 4px;">20MA <strong>{{ '%.2f'|format(s.levels.ma20) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma20_diff_pct) }}%)</span></td>{% endif %}
+            {% if s.levels.ma60 %}<td style="padding: 2px 4px;">60MA <strong>{{ '%.2f'|format(s.levels.ma60) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma60_diff_pct) }}%)</span></td>{% endif %}
+          </tr>
+          <tr>
+            {% if s.levels.ma240 %}<td style="padding: 2px 4px;">年線 <strong>{{ '%.2f'|format(s.levels.ma240) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma240_diff_pct) }}%)</span></td>{% endif %}
+            {% if s.levels.high_60 %}<td style="padding: 2px 4px;">60 日高 <strong>{{ '%.2f'|format(s.levels.high_60) }}</strong></td>{% endif %}
+            {% if s.levels.low_60 %}<td style="padding: 2px 4px;">60 日低 <strong>{{ '%.2f'|format(s.levels.low_60) }}</strong></td>{% endif %}
+          </tr>
+          {% if s.levels.atr14 %}
+          <tr>
+            <td colspan="3" style="padding: 4px 4px 0; color: #555;">
+              ATR(14) = {{ '%.2f'|format(s.levels.atr14) }} ·
+              <strong>2×ATR 停損參考</strong>: {{ '%.2f'|format(s.levels.stop_2atr) }} ({{ '%.1f'|format(s.levels.stop_2atr_pct) }}%)
+              <span style="color:#999;">— 進場後若跌破此價,代表波動超出常態,屬於停損訊號</span>
+            </td>
+          </tr>
+          {% endif %}
+        </table>
       </div>
     {% endif %}
     {% if not s.combos and not s.hits %}

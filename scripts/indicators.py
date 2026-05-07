@@ -48,12 +48,16 @@ def atr(high: pd.Series, low: pd.Series, close: pd.Series, n: int = 14) -> pd.Se
     return tr.rolling(n, min_periods=n).mean()
 
 
+def bbands(close: pd.Series, n: int = 20, k: float = 2.0):
+    mid = sma(close, n)
+    std = close.rolling(n, min_periods=n).std()
+    return mid - k * std, mid, mid + k * std
+
+
 def compute_all(df: pd.DataFrame) -> pd.DataFrame:
     """Append indicators to a price DataFrame.
 
     Input must have columns: open, high, low, close, volume; index = date.
-    Output adds: ma5/10/20/60/120/240, k, d, dif, dea, macd_hist, rsi14,
-    atr14, vol_ma5, vol_ma20, vol_ratio, discount60.
     """
     if df.empty:
         return df
@@ -67,6 +71,8 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
     out["rsi14"] = rsi(out["close"], 14)
     out["atr14"] = atr(out["high"], out["low"], out["close"], 14)
 
+    out["bb_lower"], out["bb_mid"], out["bb_upper"] = bbands(out["close"], 20, 2.0)
+
     out["vol_ma5"] = sma(out["volume"], 5)
     out["vol_ma20"] = sma(out["volume"], 20)
     out["vol_ratio"] = out["volume"] / out["vol_ma5"]
@@ -74,3 +80,48 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
     out["discount60"] = out["close"].shift(60)
 
     return out
+
+
+def reference_levels(df: pd.DataFrame, atr_mult: float = 2.0) -> dict:
+    """Snapshot of technical reference levels for the latest bar.
+    Returns a dict of value-or-None for each level. Distances ('% from close')
+    are returned as float (None if undefined). NOT a buy/sell signal — just
+    coordinates: where the price sits relative to common reference points.
+    """
+    if df.empty:
+        return {}
+    last = df.iloc[-1]
+    close = float(last["close"]) if pd.notna(last["close"]) else None
+    if close is None:
+        return {}
+
+    def pct_from(level):
+        if level is None or pd.isna(level) or close == 0:
+            return None
+        return round((close - float(level)) / close * 100, 2)
+
+    levels: dict = {"close": close}
+
+    for k in ("ma5", "ma20", "ma60", "ma120", "ma240"):
+        v = last.get(k)
+        levels[k] = float(v) if pd.notna(v) else None
+        levels[f"{k}_diff_pct"] = pct_from(levels[k])
+
+    if len(df) >= 60:
+        levels["high_60"] = float(df["close"].tail(60).max())
+        levels["low_60"] = float(df["close"].tail(60).min())
+    if len(df) >= 20:
+        levels["high_20"] = float(df["close"].tail(20).max())
+        levels["low_20"] = float(df["close"].tail(20).min())
+
+    bbl = last.get("bb_lower"); bbu = last.get("bb_upper")
+    levels["bb_lower"] = float(bbl) if pd.notna(bbl) else None
+    levels["bb_upper"] = float(bbu) if pd.notna(bbu) else None
+
+    a = last.get("atr14")
+    if pd.notna(a):
+        atr_v = float(a)
+        levels["atr14"] = atr_v
+        levels["stop_2atr"] = round(close - atr_mult * atr_v, 2)
+        levels["stop_2atr_pct"] = round(-atr_mult * atr_v / close * 100, 2)
+    return levels

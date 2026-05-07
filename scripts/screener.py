@@ -17,14 +17,16 @@ def _prev(df: pd.DataFrame, col: str, default=np.nan):
     return val if pd.notna(val) else default
 
 
-def evaluate_stock(df: pd.DataFrame, cfg: dict, chips_df: pd.DataFrame | None = None) -> dict:
-    """Evaluate all enabled strategies for one stock.
-
-    df:       price+indicator DataFrame (date index)
-    chips_df: institutional buy/sell DataFrame (date index, optional)
-
-    Returns dict {strategy_name: bool}. Missing data → False.
-    """
+def evaluate_stock(
+    df: pd.DataFrame,
+    cfg: dict,
+    *,
+    chips_df: pd.DataFrame | None = None,
+    revenue_df: pd.DataFrame | None = None,
+    eps_df: pd.DataFrame | None = None,
+    per_df: pd.DataFrame | None = None,
+) -> dict:
+    """Evaluate all enabled strategies for one stock. Missing data → strategy False."""
     hits: dict[str, bool] = {}
     if df.empty or len(df) < 5:
         return hits
@@ -131,25 +133,103 @@ def evaluate_stock(df: pd.DataFrame, cfg: dict, chips_df: pd.DataFrame | None = 
         else:
             hits["n_day_high"] = False
 
-    # D. 籌碼類 (需要 chips_df)
+    # D. 籌碼類
     chips_cfg = cfg.get("chips", {})
 
-    # D1 法人連買 N 日
     d1_cfg = chips_cfg.get("inst_consecutive_buy", {})
     if d1_cfg.get("enabled"):
         n = int(d1_cfg.get("days", 3))
         hits["inst_consecutive_buy"] = _inst_buy_streak_ok(chips_df, n)
 
+    d2_cfg = chips_cfg.get("foreign_holding_increase", {})
+    if d2_cfg.get("enabled"):
+        period = int(d2_cfg.get("period", 30))
+        thr = float(d2_cfg.get("threshold", 0.02)) * 100
+        hits["foreign_holding_increase"] = _foreign_holding_up(chips_df, period, thr)
+
+    d3_cfg = chips_cfg.get("short_cover_with_buy", {})
+    if d3_cfg.get("enabled"):
+        cover_thr = float(d3_cfg.get("cover_threshold", 0.05))
+        hits["short_cover_with_buy"] = _short_cover_with_buy(chips_df, cover_thr)
+
+    # E. 基本面快篩
+    fund_cfg = cfg.get("fundamental", {})
+
+    e1_cfg = fund_cfg.get("monthly_revenue_growth", {})
+    if e1_cfg.get("enabled"):
+        m = int(e1_cfg.get("consecutive_months", 3))
+        yoy_min = float(e1_cfg.get("latest_yoy_min", 0.10))
+        hits["monthly_revenue_growth"] = _monthly_revenue_growth(revenue_df, m, yoy_min)
+
+    e2_cfg = fund_cfg.get("eps_positive_high_yield", {})
+    if e2_cfg.get("enabled"):
+        q = int(e2_cfg.get("eps_quarters", 4))
+        ymin = float(e2_cfg.get("yield_min", 0.04)) * 100
+        hits["eps_positive_high_yield"] = _eps_positive_high_yield(eps_df, per_df, q, ymin)
+
     return hits
 
 
-def _inst_buy_streak_ok(chips_df: pd.DataFrame | None, n: int) -> bool:
+def _inst_buy_streak_ok(chips_df, n: int) -> bool:
     if chips_df is None or chips_df.empty or "inst_total" not in chips_df.columns:
         return False
-    tail = chips_df["inst_total"].tail(n)
+    tail = chips_df["inst_total"].dropna().tail(n)
     if len(tail) < n:
         return False
     return bool((tail > 0).all())
+
+
+def _foreign_holding_up(chips_df, period: int, threshold_pct_points: float) -> bool:
+    if chips_df is None or chips_df.empty or "foreign_holding_pct" not in chips_df.columns:
+        return False
+    s = chips_df["foreign_holding_pct"].dropna()
+    if len(s) < period:
+        return False
+    delta = float(s.iloc[-1]) - float(s.iloc[-period])
+    return delta >= threshold_pct_points
+
+
+def _short_cover_with_buy(chips_df, cover_threshold: float) -> bool:
+    if chips_df is None or chips_df.empty:
+        return False
+    if "short_balance" not in chips_df.columns or "inst_total" not in chips_df.columns:
+        return False
+    sb = chips_df["short_balance"].dropna()
+    it = chips_df["inst_total"].dropna()
+    if len(sb) < 2 or it.empty:
+        return False
+    last = float(sb.iloc[-1]); prev = float(sb.iloc[-2])
+    if prev <= 0:
+        return False
+    short_change = (last - prev) / prev
+    inst_today = float(it.iloc[-1])
+    return short_change <= -cover_threshold and inst_today > 0
+
+
+def _monthly_revenue_growth(rev_df, consecutive: int, latest_yoy_min: float) -> bool:
+    if rev_df is None or rev_df.empty or "revenue_yoy" not in rev_df.columns:
+        return False
+    yoy = rev_df["revenue_yoy"].dropna()
+    if len(yoy) < consecutive:
+        return False
+    tail = yoy.tail(consecutive)
+    if not (tail > 0).all():
+        return False
+    return float(tail.iloc[-1]) >= latest_yoy_min
+
+
+def _eps_positive_high_yield(eps_df, per_df, quarters: int, yield_min_pct: float) -> bool:
+    if eps_df is None or eps_df.empty or "eps" not in eps_df.columns:
+        return False
+    last_eps = eps_df["eps"].dropna().tail(quarters)
+    if len(last_eps) < quarters or not (last_eps > 0).all():
+        return False
+    if per_df is None or per_df.empty or "yield_pct" not in per_df.columns:
+        return False
+    y = per_df["yield_pct"].dropna()
+    if y.empty:
+        return False
+    return float(y.iloc[-1]) >= yield_min_pct
 
 
 def evaluate_combos(hits: dict, combos_cfg: list[dict]) -> list[str]:
@@ -163,8 +243,19 @@ def evaluate_combos(hits: dict, combos_cfg: list[dict]) -> list[str]:
     return triggered
 
 
-def screen_stock(df: pd.DataFrame, cfg: dict, chips_df: pd.DataFrame | None = None) -> dict:
-    hits = evaluate_stock(df, cfg, chips_df=chips_df)
+def screen_stock(
+    df: pd.DataFrame,
+    cfg: dict,
+    *,
+    chips_df: pd.DataFrame | None = None,
+    revenue_df: pd.DataFrame | None = None,
+    eps_df: pd.DataFrame | None = None,
+    per_df: pd.DataFrame | None = None,
+) -> dict:
+    hits = evaluate_stock(
+        df, cfg,
+        chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=per_df,
+    )
     combos = evaluate_combos(hits, cfg.get("combos", []))
     return {"hits": hits, "combos": combos}
 
