@@ -108,8 +108,11 @@ def daily_run(test_mode: bool = False) -> None:
     watchlist = load_watchlist()
     today = now_tpe().date()
 
-    if not _is_trading_day(today):
-        log.info(f"{today} appears to be non-trading day; skipping email")
+    if not test_mode and not _is_trading_day(today):
+        log.info(
+            f"{today} 沒有當日資料(可能是台股假日,或台北盤前/盤中觸發);跳過寄信。"
+            f" 加 --test 旗標可強制寄信。"
+        )
         return
 
     log.info("Loading stock universe...")
