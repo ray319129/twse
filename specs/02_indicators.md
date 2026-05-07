@@ -2,14 +2,14 @@
 
 ## 實作框架
 
-**主 library**: [`pandas-ta`](https://github.com/twopirllc/pandas-ta)
-- 純 Python,`pip install pandas-ta` 即可
-- 不需要 build TA-Lib C library,**GitHub Actions 部署無痛**
-- 主流指標都有
+**指標純手刻**(`scripts/indicators.py`),只用 `numpy` + `pandas`。
 
-**輔助**: `pandas`, `numpy`
+**為什麼不用第三方套件**:
+- `TA-Lib` 是 C library,GitHub Actions 部署要 apt-get build,麻煩
+- `pandas-ta` 已暫停維護,PyPI 上 `0.3.14b0` 在 Python 3.11+ 環境裝不上(實測 Actions 報 `No matching distribution found`)
+- 我們只用 7~8 個常見指標(MA / KD / MACD / RSI / ATR / 量能 / 季線扣抵),手刻不到 100 行,反而比依賴套件穩定
 
-**為什麼不用 TA-Lib**:TA-Lib 是 C library,Actions 上設定麻煩。`pandas-ta` 純 Python 雖然慢一點,但全市場每日跑 < 1 分鐘,可接受。
+**輔助**:`pandas` / `numpy`
 
 ---
 

@@ -22,7 +22,7 @@
 GitHub Actions (cron)
     ↓ Python
     ├─ 抓資料 (TWSE / TPEX / FinMind / Google News RSS)
-    ├─ 算指標 (pandas-ta)
+    ├─ 算指標 (numpy / pandas 手刻,避免第三方套件不穩)
     ├─ 跑選股策略 (12 條 + 4 個交集組合)
     ├─ 對自選池檢查觸發 → 寄 Email
     └─ 寫 JSON 回 repo
