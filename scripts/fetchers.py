@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging as _logging
 import time
 import urllib.parse
 from datetime import date, datetime, timedelta
@@ -9,17 +10,37 @@ import yfinance as yf
 from .config import FINMIND_TOKEN, META_DIR
 from .utils import http_get_json, log, chunked
 
+# yfinance prints its own ERROR-level "possibly delisted" lines for every miss.
+# We already retry + log via our own helpers, so suppress yfinance's noise.
+_logging.getLogger("yfinance").setLevel(_logging.CRITICAL)
+
 FINMIND_API = "https://api.finmindtrade.com/api/v4/data"
+
+# Datasets that returned 4xx during this run; future calls short-circuit.
+_DEAD_DATASETS: set[str] = set()
 
 
 # ---------- FinMind ----------
 
 def fetch_finmind(dataset: str, **params) -> list[dict]:
+    """Resilient FinMind GET. Returns [] on any failure (never raises).
+    402/404/400 short-circuits future calls to the same dataset for this run.
+    """
+    if dataset in _DEAD_DATASETS:
+        return []
     payload = {"dataset": dataset, "token": FINMIND_TOKEN, **params}
-    j = http_get_json(FINMIND_API, params=payload, retries=2, delay=2.0)
+    try:
+        j = http_get_json(FINMIND_API, params=payload, retries=2, delay=2.0)
+    except Exception as e:
+        msg = str(e)
+        if any(code in msg for code in ("400", "402", "404")):
+            _DEAD_DATASETS.add(dataset)
+            log.warning(f"FinMind {dataset} 不可用(免費版受限或名稱失效);本 run 後續跳過。")
+        else:
+            log.warning(f"FinMind {dataset} fetch error: {e}")
+        return []
     if isinstance(j, dict) and "data" in j:
         return j["data"]
-    log.warning(f"FinMind {dataset} unexpected response keys: {list(j.keys()) if isinstance(j, dict) else type(j)}")
     return []
 
 
@@ -178,24 +199,32 @@ def _fetch_margin(stock_id: str, start: date, end: date) -> pd.DataFrame:
 
 
 def _fetch_holding(stock_id: str, start: date, end: date) -> pd.DataFrame:
-    rows = fetch_finmind(
-        "TaiwanStockHoldingSharesPer",
-        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    """Foreign holding ratio. FinMind has renamed/restructured this several
+    times; we try a few dataset+column combos, return empty if none works.
+    """
+    candidate_columns = (
+        "ForeignInvestmentSharesRatio", "ForeignInvestmentRemainRatio",
+        "ForeignInvestmentRatio", "HoldingSharesPer", "PercentageHeld",
+        "ForeignInvestmentSharesPer", "Foreign_Investment_Ratio",
     )
-    if not rows:
-        return pd.DataFrame()
-    df = pd.DataFrame(rows)
-    candidates = (
-        "ForeignInvestmentSharesRatio", "HoldingSharesPer", "PercentageHeld",
-        "ForeignInvestmentSharesPer",
-    )
-    col = next((c for c in candidates if c in df.columns), None)
-    if not col:
-        return pd.DataFrame()
-    out = pd.DataFrame()
-    out["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
-    out["foreign_holding_pct"] = pd.to_numeric(df[col], errors="coerce")
-    return out.dropna().set_index("date").sort_index()
+    for ds in ("TaiwanStockShareholding", "TaiwanStockHoldingSharesPer"):
+        rows = fetch_finmind(
+            ds, data_id=stock_id,
+            start_date=start.isoformat(), end_date=end.isoformat(),
+        )
+        if not rows:
+            continue
+        df = pd.DataFrame(rows)
+        col = next((c for c in candidate_columns if c in df.columns), None)
+        if not col:
+            continue
+        out = pd.DataFrame()
+        out["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+        out["foreign_holding_pct"] = pd.to_numeric(df[col], errors="coerce")
+        out = out.dropna().set_index("date").sort_index()
+        if not out.empty:
+            return out
+    return pd.DataFrame()
 
 
 def fetch_chips_history(stock_id: str, start: date, end: date) -> pd.DataFrame:
