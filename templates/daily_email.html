@@ -44,7 +44,7 @@
         {% for h in s.hits %}<span style="background: #e8f4fd; color: #2c3e50; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}
       </div>
     {% endif %}
-    {% if s.industry %}<div style="margin-top: 4px; font-size: 12px; color: #777;">產業:{{ s.industry }}</div>{% endif %}
+    {% if s.industry %}<div style="margin-top: 4px; font-size: 12px; color: #777;">產業:{{ s.industry }}{% if s.hot_industry %} <span style="color: #e67e22;">🔥 熱門產業</span>{% endif %}</div>{% endif %}
     {% if s.chips %}
       <div style="margin-top: 6px; font-size: 13px;">
         <strong>籌碼:</strong>
@@ -120,8 +120,48 @@
   <div style="color: #999; padding: 8px 0;">自選池目前是空的,請編輯 <code>config/watchlist.json</code></div>
 {% endif %}
 
-<!-- 二、全市場多訊號交集 -->
-<h3 style="color: #2c3e50; margin-top: 24px;">【二】全市場多訊號交集 ({{ combo_hit_count }} 檔)</h3>
+<!-- 二、產業熱度排行 -->
+<h3 style="color: #2c3e50; margin-top: 24px;">【二】產業熱度排行</h3>
+<div style="font-size: 12px; color: #888; margin-bottom: 6px;">
+  依各產業成分股的「站上季線比例 + 多頭排列比例 + 近 20 日動能」算熱度分數。
+  <strong>前 {{ hot_industries|length }} 名標為熱門產業 🔥</strong>,下方選股清單中屬於這些產業的會排前面。
+  資金通常在熱門產業輪動,從熱門產業挑股勝率較高。
+</div>
+{% if industry_trends %}
+<table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+  <thead>
+    <tr style="background: #ecf0f1; text-align: left;">
+      <th style="padding: 6px;">產業</th>
+      <th style="padding: 6px; text-align: right;">成分股</th>
+      <th style="padding: 6px; text-align: right;">今日均漲</th>
+      <th style="padding: 6px; text-align: right;">近20日</th>
+      <th style="padding: 6px; text-align: right;">站季線</th>
+      <th style="padding: 6px; text-align: right;">多頭排列</th>
+      <th style="padding: 6px; text-align: right;">命中</th>
+      <th style="padding: 6px; text-align: right;">熱度</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in industry_trends %}
+    <tr style="border-bottom: 1px solid #ecf0f1; {% if t.industry in hot_industries %}background: #fff8e1;{% endif %}">
+      <td style="padding: 6px;">{% if t.industry in hot_industries %}🔥 {% endif %}<strong>{{ t.industry }}</strong></td>
+      <td style="padding: 6px; text-align: right;">{{ t.count }}</td>
+      <td style="padding: 6px; text-align: right; color: {% if t.avg_change >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(t.avg_change) }}%</td>
+      <td style="padding: 6px; text-align: right; color: {% if t.avg_ret20 >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.1f'|format(t.avg_ret20) }}%</td>
+      <td style="padding: 6px; text-align: right;">{{ t.breadth_ma60|int }}%</td>
+      <td style="padding: 6px; text-align: right;">{{ t.bullish_ratio|int }}%</td>
+      <td style="padding: 6px; text-align: right;">{{ t.combo_hits }}</td>
+      <td style="padding: 6px; text-align: right;"><strong>{{ t.score }}</strong></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div style="color: #999;">產業資料不足,無法排行。</div>
+{% endif %}
+
+<!-- 三、全市場多訊號交集 -->
+<h3 style="color: #2c3e50; margin-top: 24px;">【三】全市場多訊號交集 ({{ combo_hit_count }} 檔)</h3>
 {% if by_combo %}
   {% for combo_name, stocks in by_combo.items() %}
   <h4 style="color: #34495e; margin: 16px 0 8px 0;">▎{{ combo_name }} ({{ stocks|length }} 檔)</h4>
@@ -130,6 +170,7 @@
       <tr style="background: #ecf0f1; text-align: left;">
         <th style="padding: 6px;">代號</th>
         <th style="padding: 6px;">名稱</th>
+        <th style="padding: 6px;">產業</th>
         <th style="padding: 6px; text-align: right;">收盤</th>
         <th style="padding: 6px; text-align: right;">漲跌%</th>
         <th style="padding: 6px;">觸發指標</th>
@@ -137,9 +178,10 @@
     </thead>
     <tbody>
       {% for s in stocks[:30] %}
-      <tr style="border-bottom: 1px solid #ecf0f1;">
-        <td style="padding: 6px;"><strong>{{ s.stock_id }}</strong></td>
+      <tr style="border-bottom: 1px solid #ecf0f1; {% if s.hot_industry %}background: #fff8e1;{% endif %}">
+        <td style="padding: 6px;">{% if s.hot_industry %}🔥{% endif %}<strong>{{ s.stock_id }}</strong></td>
         <td style="padding: 6px;">{{ s.name }}</td>
+        <td style="padding: 6px; color: #777; font-size: 12px;">{{ s.industry }}</td>
         <td style="padding: 6px; text-align: right;">{{ '%.2f'|format(s.close) if s.close else '-' }}</td>
         <td style="padding: 6px; text-align: right; color: {% if s.change_pct and s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %};">
           {{ '%+.2f'|format(s.change_pct) if s.change_pct is not none else '-' }}
@@ -150,7 +192,7 @@
       </tr>
       {% endfor %}
       {% if stocks|length > 30 %}
-      <tr><td colspan="5" style="padding: 6px; color: #999; font-size: 12px;">…還有 {{ stocks|length - 30 }} 檔,完整清單見 data/signals/{{ date_str.split(' ')[0] }}.json</td></tr>
+      <tr><td colspan="6" style="padding: 6px; color: #999; font-size: 12px;">…還有 {{ stocks|length - 30 }} 檔(🔥 熱門產業已排前),完整清單見 data/signals/{{ date_str.split(' ')[0] }}.json</td></tr>
       {% endif %}
     </tbody>
   </table>

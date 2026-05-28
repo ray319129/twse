@@ -23,8 +23,11 @@ from .storage import (
 )
 from .indicators import compute_all, reference_levels
 from .screener import screen_stock, stock_summary
+from .industry import compute_industry_trends
 from .notify import render_email, send_email
 from .utils import log
+
+HOT_INDUSTRY_TOP_N = 5
 
 
 STRATEGY_LABEL = {
@@ -202,6 +205,7 @@ def daily_run(test_mode: bool = False) -> None:
     market_results: list[dict] = []
     watchlist_results: list[dict] = []
     no_data: list[str] = []
+    industry_rows: list[dict] = []
     chips_fetched = 0
     fund_fetched = 0
     combos_cfg = cfg.get("combos", [])
@@ -247,7 +251,28 @@ def daily_run(test_mode: bool = False) -> None:
             chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=per_df,
         )
         summary = stock_summary(sid, sname, df_ind, full_screen)
-        summary["industry"] = industry_map.get(sid, "")
+        industry = industry_map.get(sid, "") or ""
+        summary["industry"] = industry
+
+        last = df_ind.iloc[-1]
+        close_v = last.get("close")
+        ma20_v = last.get("ma20")
+        ma60_v = last.get("ma60")
+        ret20 = 0.0
+        if len(df_ind) >= 21:
+            c0, c20 = df_ind["close"].iloc[-1], df_ind["close"].iloc[-21]
+            if pd.notna(c0) and pd.notna(c20) and c20:
+                ret20 = float(c0 / c20 - 1)
+        industry_rows.append({
+            "stock_id": sid,
+            "industry": industry,
+            "change_pct": summary.get("change_pct") or 0.0,
+            "above_ma20": bool(pd.notna(close_v) and pd.notna(ma20_v) and close_v > ma20_v),
+            "above_ma60": bool(pd.notna(close_v) and pd.notna(ma60_v) and close_v > ma60_v),
+            "bullish": bool(price_screen["hits"].get("bullish_ma_alignment", False)),
+            "ret20": ret20,
+            "combo_hit": bool(full_screen["combos"]),
+        })
 
         if chips_df is not None:
             summary["chips"] = _chip_summary(chips_df)
@@ -266,9 +291,19 @@ def daily_run(test_mode: bool = False) -> None:
             summary["news"] = fetch_news(sid, sname, limit=5)
             watchlist_results.append(summary)
 
+    industry_trends = compute_industry_trends(industry_rows)
+    hot_industries = [t["industry"] for t in industry_trends[:HOT_INDUSTRY_TOP_N]]
+    hot_set = set(hot_industries)
+
+    for r in market_results:
+        r["hot_industry"] = r.get("industry", "") in hot_set
+    for r in watchlist_results:
+        r["hot_industry"] = r.get("industry", "") in hot_set
+
     log.info(
         f"Watchlist hits: {len(watchlist_results)}, market hits: {len(market_results)}, "
-        f"chips fetched: {chips_fetched}, fundamentals fetched: {fund_fetched}"
+        f"chips fetched: {chips_fetched}, fundamentals fetched: {fund_fetched}, "
+        f"hot industries: {hot_industries}"
     )
 
     SIGNALS_DIR.mkdir(parents=True, exist_ok=True)
@@ -277,6 +312,7 @@ def daily_run(test_mode: bool = False) -> None:
             "date": today.isoformat(),
             "watchlist": watchlist_results,
             "market": market_results,
+            "industry_trends": industry_trends,
             "no_data_count": len(no_data),
             "chips_fetched": chips_fetched,
             "fund_fetched": fund_fetched,
@@ -286,6 +322,9 @@ def daily_run(test_mode: bool = False) -> None:
     for r in market_results:
         for c in r["combos"]:
             by_combo.setdefault(c, []).append(r)
+    # 熱門產業的股票排前面
+    for c in by_combo:
+        by_combo[c].sort(key=lambda x: (not x.get("hot_industry", False), -(x.get("change_pct") or 0)))
 
     single_hit_count = sum(1 for r in market_results if not r["combos"])
 
@@ -295,6 +334,8 @@ def daily_run(test_mode: bool = False) -> None:
         "by_combo": by_combo,
         "combo_hit_count": sum(len(v) for v in by_combo.values()),
         "single_hit_count": single_hit_count,
+        "industry_trends": industry_trends[:10],
+        "hot_industries": hot_industries,
         "no_data_count": len(no_data),
         "label": STRATEGY_LABEL,
         "test_mode": test_mode,
