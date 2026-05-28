@@ -13,6 +13,7 @@ from .fetchers import (
     fetch_stock_info, filter_tradable_stocks, fetch_news,
     fetch_price_history, fetch_chips_history,
     fetch_monthly_revenue, fetch_eps_quarterly, fetch_per_yield,
+    fetch_valuation_snapshot,
 )
 from .storage import (
     load_prices, upsert_prices,
@@ -198,6 +199,8 @@ def daily_run(test_mode: bool = False) -> None:
     universe = filter_tradable_stocks(info)
     log.info(f"Universe: {len(universe)} tradable stocks")
 
+    valuation_snapshot = fetch_valuation_snapshot(today)
+
     market_map = dict(zip(universe["stock_id"], universe.get("type", pd.Series(["twse"] * len(universe)))))
     name_map = dict(zip(universe["stock_id"], universe["stock_name"]))
     industry_map = dict(zip(universe["stock_id"], universe.get("industry_category", pd.Series([""] * len(universe)))))
@@ -236,23 +239,23 @@ def daily_run(test_mode: bool = False) -> None:
         is_watch = sid in watchlist
         need_chips_combo, need_fund_combo = _need_extra_data(price_screen["hits"], combos_cfg)
 
-        chips_df = revenue_df = eps_df = per_df = None
+        chips_df = revenue_df = eps_df = None
         if is_watch or need_chips_combo:
             chips_df = _update_chips(sid, today)
             chips_fetched += 1
         if is_watch or need_fund_combo:
             revenue_df = _update_revenue(sid)
             eps_df = _update_eps(sid)
-            per_df = _update_per(sid)
             fund_fetched += 1
 
         full_screen = screen_stock(
             df_ind, cfg,
-            chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=per_df,
+            chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=None,
         )
         summary = stock_summary(sid, sname, df_ind, full_screen)
         industry = industry_map.get(sid, "") or ""
         summary["industry"] = industry
+        summary["valuation"] = valuation_snapshot.get(sid, {})
 
         last = df_ind.iloc[-1]
         close_v = last.get("close")
@@ -276,8 +279,8 @@ def daily_run(test_mode: bool = False) -> None:
 
         if chips_df is not None:
             summary["chips"] = _chip_summary(chips_df)
-        if revenue_df is not None or eps_df is not None or per_df is not None:
-            summary["fundamentals"] = _fund_summary(revenue_df, eps_df, per_df)
+        if revenue_df is not None or eps_df is not None:
+            summary["fundamentals"] = _fund_summary(revenue_df, eps_df, None)
 
         if is_watch or summary["combos"]:
             summary["levels"] = reference_levels(df_ind)

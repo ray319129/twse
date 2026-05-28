@@ -63,13 +63,20 @@
         {% endif %}
       </div>
     {% endif %}
-    {% if s.fundamentals %}
+    {% if s.fundamentals and (s.fundamentals.eps_latest is defined or s.fundamentals.revenue_yoy is defined) %}
       <div style="margin-top: 4px; font-size: 13px;">
-        <strong>基本面:</strong>
+        <strong>成長面:</strong>
         {% if s.fundamentals.eps_latest is defined %}最新季 EPS {{ s.fundamentals.eps_latest }} ·{% endif %}
-        {% if s.fundamentals.revenue_yoy is defined %}{{ s.fundamentals.revenue_latest_ym }} 月營收 YoY {{ '%+.1f'|format(s.fundamentals.revenue_yoy) }}% ·{% endif %}
-        {% if s.fundamentals.pe is defined %}PE {{ s.fundamentals.pe }} ·{% endif %}
-        {% if s.fundamentals.yield_pct is defined %}殖利率 {{ s.fundamentals.yield_pct }}%{% endif %}
+        {% if s.fundamentals.revenue_yoy is defined %}{{ s.fundamentals.revenue_latest_ym }} 月營收 YoY {{ '%+.1f'|format(s.fundamentals.revenue_yoy) }}%{% endif %}
+      </div>
+    {% endif %}
+    {% if s.valuation and (s.valuation.pe or s.valuation.yield_pct or s.valuation.pb) %}
+      <div style="margin-top: 4px; font-size: 13px;">
+        <strong>估值面:</strong>
+        {% if s.valuation.pe %}本益比 {{ '%.1f'|format(s.valuation.pe) }} ·{% endif %}
+        {% if s.valuation.yield_pct %}殖利率 {{ '%.2f'|format(s.valuation.yield_pct) }}% ·{% endif %}
+        {% if s.valuation.pb %}股價淨值比 {{ '%.2f'|format(s.valuation.pb) }}{% endif %}
+        {% if s.valuation.pe and s.valuation.pe > 30 %}<span style="color:#e67e22;"> ⚠ 本益比偏高</span>{% endif %}
       </div>
     {% endif %}
     {% if s.levels %}

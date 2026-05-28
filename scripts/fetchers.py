@@ -325,6 +325,80 @@ def fetch_per_yield(stock_id: str, days: int = 10) -> pd.DataFrame:
     return out.set_index("date").sort_index().dropna(how="all")
 
 
+# ---------- TWSE valuation snapshot (PE / yield / PB, free, official, bulk) ----------
+
+_TWSE_BWIBBU_URLS = (
+    "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d",
+    "https://www.twse.com.tw/exchangeReport/BWIBBU_d",
+)
+
+
+def _to_float(x):
+    try:
+        s = str(x).replace(",", "").strip()
+        if s in ("", "-", "N/A", "--"):
+            return None
+        return float(s)
+    except Exception:
+        return None
+
+
+def fetch_valuation_snapshot(d: date | None = None) -> dict[str, dict]:
+    """All listed (TWSE) stocks' PE / yield / PB for one day, in ONE official
+    free call. Returns {stock_id: {pe, yield_pct, pb}}. Walks back a few days
+    to skip holidays. Empty dict on failure (caller degrades gracefully).
+    """
+    d = d or date.today()
+    for back in range(4):
+        ymd = (d - timedelta(days=back)).strftime("%Y%m%d")
+        for url in _TWSE_BWIBBU_URLS:
+            try:
+                j = http_get_json(url, params={"date": ymd, "selectType": "ALL", "response": "json"},
+                                  retries=1, delay=2.0)
+            except Exception:
+                continue
+            if not isinstance(j, dict):
+                continue
+            fields = j.get("fields") or []
+            data = j.get("data") or []
+            if not fields or not data:
+                continue
+
+            def find_idx(*names):
+                for i, f in enumerate(fields):
+                    if any(n in str(f) for n in names):
+                        return i
+                return None
+
+            i_id = find_idx("證券代號", "代號")
+            i_pe = find_idx("本益比")
+            i_yield = find_idx("殖利率")
+            i_pb = find_idx("股價淨值比", "淨值比")
+            if i_id is None:
+                continue
+            out: dict[str, dict] = {}
+            for row in data:
+                try:
+                    sid = str(row[i_id]).strip()
+                except Exception:
+                    continue
+                if not sid:
+                    continue
+                rec = {}
+                if i_pe is not None:
+                    rec["pe"] = _to_float(row[i_pe])
+                if i_yield is not None:
+                    rec["yield_pct"] = _to_float(row[i_yield])
+                if i_pb is not None:
+                    rec["pb"] = _to_float(row[i_pb])
+                out[sid] = rec
+            if out:
+                log.info(f"Valuation snapshot: {len(out)} stocks ({ymd})")
+                return out
+    log.warning("Valuation snapshot empty (TWSE BWIBBU unavailable)")
+    return {}
+
+
 # ---------- Google News RSS ----------
 
 def fetch_news(stock_id: str, name: str, limit: int = 10) -> list[dict]:
