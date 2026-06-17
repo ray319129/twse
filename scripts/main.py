@@ -13,7 +13,11 @@ from .fetchers import (
     fetch_stock_info, filter_tradable_stocks, fetch_news,
     fetch_price_history, fetch_chips_history,
     fetch_monthly_revenue, fetch_eps_quarterly, fetch_per_yield,
+<<<<<<< HEAD
     fetch_valuation_snapshot, fetch_index_history,
+=======
+    fetch_valuation_snapshot,
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 )
 from .storage import (
     load_prices, upsert_prices,
@@ -22,7 +26,11 @@ from .storage import (
     load_eps, upsert_eps,
     load_per, upsert_per,
 )
+<<<<<<< HEAD
 from .indicators import compute_all, reference_levels, compute_relative_strength
+=======
+from .indicators import compute_all, reference_levels
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 from .screener import screen_stock, stock_summary
 from .industry import compute_industry_trends
 from .notify import render_email, send_email
@@ -46,11 +54,14 @@ STRATEGY_LABEL = {
     "short_cover_with_buy": "融券回補+主力買超",
     "monthly_revenue_growth": "月營收連續成長",
     "eps_positive_high_yield": "EPS+高殖利率",
+<<<<<<< HEAD
     # 領先 / 醞釀型
     "coiling_squeeze": "盤底蓄勢",
     "pullback_to_support": "回測支撐",
     "relative_strength_leader": "相對強勢",
     "chip_accumulation": "籌碼吸籌",
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 }
 
 CHIP_STRATEGIES = {
@@ -62,6 +73,7 @@ FUND_STRATEGIES = {
     "monthly_revenue_growth",
     "eps_positive_high_yield",
 }
+<<<<<<< HEAD
 # 「發動之前」的領先訊號;在 email 獨立成「醞釀區」,與已觸發的追勢訊號分開呈現。
 LEADING_STRATEGIES = {
     "coiling_squeeze",
@@ -69,6 +81,8 @@ LEADING_STRATEGIES = {
     "relative_strength_leader",
     "chip_accumulation",
 }
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
 
 def _is_trading_day(today: date) -> bool:
@@ -193,6 +207,7 @@ def _fund_summary(revenue_df, eps_df, per_df) -> dict:
     return out
 
 
+<<<<<<< HEAD
 def _is_quiet_base(df_ind: pd.DataFrame) -> bool:
     """純價格判斷:布林帶寬度落在近 120 日最低 25% 分位、且近 20 日股價持平。
     用來決定要不要為這檔「安靜的股票」額外抓籌碼來偵測法人吸籌(籌碼吸籌訊號)。
@@ -212,6 +227,8 @@ def _is_quiet_base(df_ind: pd.DataFrame) -> bool:
     return True
 
 
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 def daily_run(test_mode: bool = False) -> None:
     assert_env()
     cfg = load_screeners()
@@ -232,6 +249,7 @@ def daily_run(test_mode: bool = False) -> None:
 
     valuation_snapshot = fetch_valuation_snapshot(today)
 
+<<<<<<< HEAD
     # 大盤指數(相對強度用),整個 run 只抓一次
     index_df = fetch_index_history(days=400)
     index_close = index_df["close"] if not index_df.empty else None
@@ -241,25 +259,33 @@ def daily_run(test_mode: bool = False) -> None:
         index_below_ma20 = bool(index_close.iloc[-1] < idx_ma20.iloc[-1])
     log.info(f"Index loaded: {0 if index_close is None else len(index_close)} bars, 大盤站上月線={not index_below_ma20}")
 
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     market_map = dict(zip(universe["stock_id"], universe.get("type", pd.Series(["twse"] * len(universe)))))
     name_map = dict(zip(universe["stock_id"], universe["stock_name"]))
     industry_map = dict(zip(universe["stock_id"], universe.get("industry_category", pd.Series([""] * len(universe)))))
 
     market_results: list[dict] = []
     watchlist_results: list[dict] = []
+<<<<<<< HEAD
     anticipation_results: list[dict] = []
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     no_data: list[str] = []
     industry_rows: list[dict] = []
     chips_fetched = 0
     fund_fetched = 0
     combos_cfg = cfg.get("combos", [])
 
+<<<<<<< HEAD
     # 籌碼吸籌:為「安靜的股票」額外抓籌碼,但用 max_scan 控制每日 API 用量
     ca_cfg = cfg.get("leading", {}).get("chip_accumulation", {})
     chip_scan_enabled = bool(ca_cfg.get("enabled"))
     chip_scan_cap = int(ca_cfg.get("max_scan", 120))
     chip_scan_used = 0
 
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     for sid, sname in name_map.items():
         existing = load_prices(sid)
         market = market_map.get(sid, "twse")
@@ -281,13 +307,17 @@ def daily_run(test_mode: bool = False) -> None:
             continue
 
         df_ind = compute_all(df)
+<<<<<<< HEAD
         if index_close is not None:
             df_ind = compute_relative_strength(df_ind, index_close, n=60)
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
         price_screen = screen_stock(df_ind, cfg)
         is_watch = sid in watchlist
         need_chips_combo, need_fund_combo = _need_extra_data(price_screen["hits"], combos_cfg)
 
+<<<<<<< HEAD
         # 安靜的股票 → 為偵測「法人吸籌」額外抓籌碼(受 max_scan 上限保護)
         want_chip_scan = (
             chip_scan_enabled and not is_watch and not need_chips_combo
@@ -300,6 +330,12 @@ def daily_run(test_mode: bool = False) -> None:
             chips_fetched += 1
             if want_chip_scan:
                 chip_scan_used += 1
+=======
+        chips_df = revenue_df = eps_df = None
+        if is_watch or need_chips_combo:
+            chips_df = _update_chips(sid, today)
+            chips_fetched += 1
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
         if is_watch or need_fund_combo:
             revenue_df = _update_revenue(sid)
             eps_df = _update_eps(sid)
@@ -308,17 +344,23 @@ def daily_run(test_mode: bool = False) -> None:
         full_screen = screen_stock(
             df_ind, cfg,
             chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=None,
+<<<<<<< HEAD
             valuation=valuation_snapshot.get(sid, {}),
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
         )
         summary = stock_summary(sid, sname, df_ind, full_screen)
         industry = industry_map.get(sid, "") or ""
         summary["industry"] = industry
         summary["valuation"] = valuation_snapshot.get(sid, {})
+<<<<<<< HEAD
         # 把領先訊號從一般觸發指標切出來,獨立成「醞釀區」呈現
         summary["leading"] = [h for h in summary["hits"] if h in LEADING_STRATEGIES]
         summary["hits"] = [h for h in summary["hits"] if h not in LEADING_STRATEGIES]
         if "relative_strength_leader" in summary["leading"] and index_below_ma20:
             summary["rs_weak_market"] = True  # 大盤回檔仍相對強勢 = 更值得留意
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
         last = df_ind.iloc[-1]
         close_v = last.get("close")
@@ -345,15 +387,22 @@ def daily_run(test_mode: bool = False) -> None:
         if revenue_df is not None or eps_df is not None:
             summary["fundamentals"] = _fund_summary(revenue_df, eps_df, None)
 
+<<<<<<< HEAD
         if is_watch or summary["combos"] or summary["leading"]:
+=======
+        if is_watch or summary["combos"]:
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
             summary["levels"] = reference_levels(df_ind)
 
         if summary["combos"] or summary["hits"]:
             market_results.append(summary)
 
+<<<<<<< HEAD
         if summary["leading"]:
             anticipation_results.append(summary)
 
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
         if is_watch:
             summary = dict(summary)
             summary["note"] = watchlist[sid]
@@ -368,6 +417,7 @@ def daily_run(test_mode: bool = False) -> None:
         r["hot_industry"] = r.get("industry", "") in hot_set
     for r in watchlist_results:
         r["hot_industry"] = r.get("industry", "") in hot_set
+<<<<<<< HEAD
     for r in anticipation_results:
         r["hot_industry"] = r.get("industry", "") in hot_set
 
@@ -376,6 +426,13 @@ def daily_run(test_mode: bool = False) -> None:
         f"anticipation hits: {len(anticipation_results)}, "
         f"chips fetched: {chips_fetched} (吸籌掃描 {chip_scan_used}/{chip_scan_cap}), "
         f"fundamentals fetched: {fund_fetched}, hot industries: {hot_industries}"
+=======
+
+    log.info(
+        f"Watchlist hits: {len(watchlist_results)}, market hits: {len(market_results)}, "
+        f"chips fetched: {chips_fetched}, fundamentals fetched: {fund_fetched}, "
+        f"hot industries: {hot_industries}"
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     )
 
     SIGNALS_DIR.mkdir(parents=True, exist_ok=True)
@@ -384,7 +441,10 @@ def daily_run(test_mode: bool = False) -> None:
             "date": today.isoformat(),
             "watchlist": watchlist_results,
             "market": market_results,
+<<<<<<< HEAD
             "anticipation": anticipation_results,
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
             "industry_trends": industry_trends,
             "no_data_count": len(no_data),
             "chips_fetched": chips_fetched,
@@ -399,6 +459,7 @@ def daily_run(test_mode: bool = False) -> None:
     for c in by_combo:
         by_combo[c].sort(key=lambda x: (not x.get("hot_industry", False), -(x.get("change_pct") or 0)))
 
+<<<<<<< HEAD
     # 醞釀區:依領先訊號分組(一檔可同時出現在多個訊號下)
     by_leading: dict[str, list[dict]] = {}
     for r in anticipation_results:
@@ -407,6 +468,8 @@ def daily_run(test_mode: bool = False) -> None:
     for h in by_leading:
         by_leading[h].sort(key=lambda x: (not x.get("hot_industry", False), -(x.get("change_pct") or 0)))
 
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     single_hit_count = sum(1 for r in market_results if not r["combos"])
 
     ctx = {
@@ -415,9 +478,12 @@ def daily_run(test_mode: bool = False) -> None:
         "by_combo": by_combo,
         "combo_hit_count": sum(len(v) for v in by_combo.values()),
         "single_hit_count": single_hit_count,
+<<<<<<< HEAD
         "by_leading": by_leading,
         "leading_hit_count": len(anticipation_results),
         "index_below_ma20": index_below_ma20,
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
         "industry_trends": industry_trends[:10],
         "hot_industries": hot_industries,
         "no_data_count": len(no_data),
@@ -429,7 +495,11 @@ def daily_run(test_mode: bool = False) -> None:
     subject_prefix = "[測試] " if test_mode else ""
     subject = (
         f"{subject_prefix}[台股選股] {today.strftime('%Y/%m/%d')} "
+<<<<<<< HEAD
         f"自選池 {len(watchlist_results)} / 交集 {ctx['combo_hit_count']} / 醞釀 {len(anticipation_results)} 檔"
+=======
+        f"自選池 {len(watchlist_results)} 檔 / 多訊號交集 {ctx['combo_hit_count']} 檔"
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     )
 
     send_email(subject, html)

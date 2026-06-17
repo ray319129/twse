@@ -126,6 +126,7 @@ def fetch_price_history(stock_id: str, market: str, days: int = 400) -> pd.DataF
     return df
 
 
+<<<<<<< HEAD
 def fetch_index_history(days: int = 400, ticker: str = "^TWII") -> pd.DataFrame:
     """大盤加權指數 (TAIEX) OHLCV,用來算個股相對強度。空 DataFrame on failure."""
     try:
@@ -151,6 +152,8 @@ def fetch_index_history(days: int = 400, ticker: str = "^TWII") -> pd.DataFrame:
     return df
 
 
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 def bulk_fetch_history(stocks: list[tuple[str, str]], days: int = 400, sleep: float = 0.3) -> dict[str, pd.DataFrame]:
     """Fetch history for many (stock_id, market) pairs. Returns {stock_id: df}."""
     out: dict[str, pd.DataFrame] = {}

@@ -11,9 +11,14 @@
   1. 抓全市場(上市 + 上櫃約 1800 檔)當日資料
   2. 計算所有技術指標
   3. 跑 12 條長線策略 + 4 個多訊號交集組合
+<<<<<<< HEAD
   4. 跑 4 條「領先 / 醞釀型」訊號(在發動**之前**就撈候選)→ email 的「醞釀區」
   5. 對你的自選池檢查觸發條件
   6. 寄 Email 給你看選股結果 + 醞釀區 + 自選池訊號
+=======
+  4. 對你的自選池檢查觸發條件
+  5. 寄 Email 給你看選股結果 + 自選池訊號
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
 - GitHub Pages 顯示:選股清單、個股 K 線、公司資訊、近期新聞、自選池管理
 
@@ -48,7 +53,10 @@ GitHub Pages 前端 (階段二)
 - [02_indicators.md](specs/02_indicators.md) — 技術指標公式與計算方式
 - [03_data_sources.md](specs/03_data_sources.md) — 各資料源 API 與排程
 - [04_email_template.md](specs/04_email_template.md) — Email 內容範本
+<<<<<<< HEAD
 - [05_leading_signals.md](specs/05_leading_signals.md) — 領先 / 醞釀型訊號(在發動前撈候選)
+=======
+>>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
 ## 環境設定(初次啟用)
 
