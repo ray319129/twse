@@ -1,0 +1,781 @@
+{
+  "date": "2026-06-18",
+  "core": [],
+  "watch": [],
+  "watchlist": [
+    {
+      "stock_id": "2330",
+      "name": "台積電",
+      "close": null,
+      "change_pct": null,
+      "valuation": {
+        "pe": 32.07,
+        "yield_pct": 0.92,
+        "pb": 10.5
+      },
+      "note": "台積電",
+      "hot_industry": false,
+      "levels": {},
+      "hits": [],
+      "combos": [],
+      "chips": {
+        "inst_total_today": -6298981,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 69.95,
+        "short_change_pct": -8.2
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 30.09,
+        "revenue_consecutive_growth_months": 3,
+        "eps_latest": 22.08,
+        "eps_quarters_loaded": 8
+      },
+      "news": [
+        {
+          "title": "2330 台積電 - 鉬=ASML、台積電與imec三方合作推進2D材料電晶體開發- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9XaDQ0NFBzUVBjVjQ1LWthbEJJUUVqdjR2bzZ6bGlVdmVYbHAxOUJnOHR2WTJQNVYzQktRaTV0OTAtWWdHblFQeUYtcS15Z2FGYVZQdzZuUlY?oc=5",
+          "published": "Wed, 17 Jun 2026 12:19:32 GMT",
+          "source": "CMoney"
+        },
+        {
+          "title": "台積電（2330）10年前「買在170高點」！但過程…融資慘賠500萬連泡麵都比價| 台股雜談| 股市 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBkU05GV2ktYUxaSXdnZW1IT0M0X1RxZ1lMWG8wVG1fN2ZlLVFBU2VrVlIwaDU2REF1am4yajdxSk9UOEhrSHZqMzB2dVRMWjd4VHc?oc=5",
+          "published": "Mon, 15 Jun 2026 02:30:44 GMT",
+          "source": "UDN"
+        },
+        {
+          "title": "毛利率衝69％震撼市場！外資喊出台積電3500元天價目標 EPS上看108元再刷新天花板 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiywNBVV95cUxNSGJKcGJBajlSWEdDbHdOUTJRWTlTeV9vOEw1NENZSUE5VmZFcXJwZXNZR0paRFdZS1Fjb3NOcVhmQjNDb3RNU3FUbTJQdTRzUmlUTEQ3T21kRjZ4RHlMaDRJNVZaLWtqRFFoT3B5WU93NmRPU3YySDRDZHNrSGtWNUZ2LUFuX1Q4WnpNdnFER19rUVZuNUl6aHc1RDRQaDNpRkcyTGpqS25XeUFJYXFad0xXNzc0VXk3eWo3dzlpNlRyaUZDTVFsVGNKX2pzMVFXZWNtSkxGSHdwaldwdXFQRFlzdzBSTGpzVDRkZTY3cTlLMTRWeDdGLVU3RElnb21jd0xkUkJXcHhyR08zdmNQX0x6T1plQXA4UWJWaVlGRjZXSnB0cU84QldkTXV5Z3NkRW15TVpaWmlRTmx0WG5OeV9QUUJjT19wVEtiajMwR1FuQnN6OG1CQ0VWZmRHdFJkeFRpemQ4MmRPM2ZlQWtDb3BYOGtvbnJHQWFGWDJucnNkUXdhc3RCYWJuUzdyNHBFeTFZUmcxUHNyVVZXdFZSMlYtX0g0TjRWZlY1MzhOR1hSRnVuRnNDWTJwaHQ4dm9YQlM5UEwydk1LbVk?oc=5",
+          "published": "Tue, 16 Jun 2026 23:20:00 GMT",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "台積電（2330）｜CoWoS再上修，2027獲利跳升的前奏【豐學PRIME盤後精選】｜豐雲學堂2026 年 06 月 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMigANBVV95cUxQN200dXdKQ3VRQnRVVXd3bm9JSFVINDVXanItRURHQkU2TEh1MFFnb2hnQnlTcVlPdFJRa3FPT3BRVE1XYXNqWnBSUmpLR3JPWHVRcFEzYm1oVk5oUXhVNVR6QW01TXF5a192bHJMVzg0UHB0OHNBcUNPNHhQbFdIbUpYbGtpYjhYTjlVNUJwMHE0YlVjQ2t6dkk2WDNVeEZ5N2hsQ1ZDVm5ZRW52SzRyODE5d3hpLUotOGxNX1hldkw0cE9ZdHBiVmo4ak9RNUhWUlg2dlJmQkF4RnFOU1Atc3dKcU5VOGxibnBUZng5cGdYbzJfbTZxTVJRNjBvX19GN1F2d2dHcGNKY1AtaUp5RVhCbzA1eVE3RHF1Z3hQYkZtaS1RNzJUWmNBc2RYVEVaSzRqUTF3d29PcUhuanpGMjBDTEdPNlU5bGNJMlVKVzlQU0V6UlB5LV9lVUR5MjV0dXVfbER3R2hpZ2llUGdEdjA0eHZnbjdYOFhfU0JUNVc?oc=5",
+          "published": "Tue, 16 Jun 2026 01:20:20 GMT",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "2330 台積電 - 不知道利率公布會不會有人哭出來還是笑出來 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1WSTNoNFZ5cGtyenkydTF1SXo1NTlYb3ZBak1aRmNrZ0cwOEdGa0g5R28yUmFMcmFWdUhrWnpFYkN0bVhrT3VDeFUyU2wwby1kNTA1Q003Ung?oc=5",
+          "published": "Wed, 17 Jun 2026 11:53:08 GMT",
+          "source": "CMoney"
+        }
+      ]
+    },
+    {
+      "stock_id": "2454",
+      "name": "聯發科",
+      "close": null,
+      "change_pct": null,
+      "valuation": {
+        "pe": 71.08,
+        "yield_pct": 1.2,
+        "pb": 18.24
+      },
+      "note": "聯發科",
+      "hot_industry": false,
+      "levels": {},
+      "hits": [
+        "relative_strength_leader"
+      ],
+      "combos": [],
+      "chips": {
+        "inst_total_today": -1437132,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 55.84,
+        "short_change_pct": -12.86
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 4.99,
+        "revenue_consecutive_growth_months": 2,
+        "eps_latest": 15.17,
+        "eps_quarters_loaded": 8
+      },
+      "news": [
+        {
+          "title": "台積電(2330)從170元抱到2300元！他身價翻14倍「1天獲利比工作1年還多」：聯發科(2454)慘賠500萬後，我學會這件事 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOUGxTaFhNOHNTZmxNRWVTaDBWM2hTcHV2bXl3SHg2cXZPOGFkeVNYbmdRSk9HN1dmUThINS1kYUpSNUFmbWZZTnlsMXQ4d2Z6RGQ1WGVycHhyZ0JtU1BjR0ZXV0tTTTczNnAyTnhuUGRPcGZFY2NWU1lKOEJaaWIydA?oc=5",
+          "published": "Wed, 17 Jun 2026 08:52:49 GMT",
+          "source": "今周刊"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2330)台積電、(2327)國巨*，投信買超(2454)聯發科、(2303)聯電，法人合計買超639.51億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMizwRBVV95cUxNRDJTMkN2eGFiaVhfWFg2M0pHSmI2UHpIckRxM1JDTlpwcmlxX3RNdjJTS253cGlJOGdrTFVvRnJuR1JfcHlHdDBGY2hxYnBFUnloYW03UE1keFRIcjFiNlM3SVk5Q3ZXR2RnRmFzLTJZNGI4dXdmVFJYdmI2bUYtaHh0Y19sN1RkV0U3SUoyTjdUUEJqS2I5T3ZKcFhYZmZRdEJTT0FuWW5VWTZXSTV3bHd5alhLWU1vQWtELW5FMDV1ODdvTnM0TzdtM2hkWGNYRThCaVFSUERxY1EyV0llbEF1dkZaRzBzMXZXMUdYbjQyeGk4YTNGbXlyQklfZ1h2SmlORWhWbUNqbmJwOTdBOXZqN2E1WmVCV3I3aVVnalBGeU5lLXhvREdqMU1MRlNwNU40UmRpU3RaeExDS3BaZS1TdXAtTXR0RkZSNTJUN0EyMzRBOThFS0o4aVNVVjgzSzNGUDBBRy1fYXJvblVWQkM0eGVhd01ZbmhpUnpBdFMzR08wSHMxbVdoaEdKNzYwbzFjSDBfWDlBSWNEbHRrR2g4RklEYTlDMVVTWUZ1ajZIcVN2by1YUUFhQTJPYTktcnJ4N3Q3eTV3R3R3eTVyaXctS0RVUGRIVS1FMUJ4elFJcW81UXBnNG1kT2JrbF96TVBYSDBhSFhVQkg5SjFHM2VzZkpuaTBjYWJURE9CdkpuWkJIc3JzSllSR1I4MUxrdmJRNVJCMUtjc2NCSkN2NzBxRm5oUjZ0M0ZRUVBxSVJYQ2tHWXVVdThjam1vaUE?oc=5",
+          "published": "Mon, 15 Jun 2026 08:31:49 GMT",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "AI PC換機潮來了？技嘉(2376)、華碩(2357)、聯發科(2454)...一表看14檔受惠股：這2檔悄出現「大戶增散戶減」跡象 - Yahoo新聞",
+          "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPQVFlczBMa0tYUGpud2FCS1p0akRPU1ZpeWRWMUpkLTdZQVIyQWszUWsyN0pSZjZYQXJuUEd5UEdTajFtNHZjQXdOc25QYWR5dzFkMHJCZzhZNjZmRmpsOWpfU1R1SWt5R1dsUTJpYUpXTGt2cmdTTmx0b1BySU9UWFg0UEd2d2YtZGZ2THhQck9ObjdybGJ5UjA4RlMxR1NSVlFQNG9fb2g0NC01OE1FR09iV3dYaU1ObDJfSmFKV2tzb3kyNkdQa0Q4NTNYUlU?oc=5",
+          "published": "Wed, 17 Jun 2026 03:35:12 GMT",
+          "source": "Yahoo新聞"
+        },
+        {
+          "title": "聯發科(2454)攜手老黃再出招！「NVIDIA RTX Spark」晶片挑戰1 Petaflops算力，全面進駐國際大廠筆電 - 優分析UAnalyze",
+          "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9GS0pxWjg0Z19UMDVLX0pkS1I5aTVxbW9Rdl9uM2RvVnZPaEJISnlxUGI4YlE4SWZxMXJ2NTFGOUNhSGVvaldFYlpBbzdrcmRPbUlpdjFB?oc=5",
+          "published": "Tue, 16 Jun 2026 07:00:00 GMT",
+          "source": "優分析UAnalyze"
+        },
+        {
+          "title": "2454 聯發科 - 有AMD、聯發科加持，這家台灣矽光子獨角獸是什麼來頭？ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBhMzBnS3QxUTFHQTJucml5bi1WM3o1bmZIZ3lRWU11elpzM2Frd3J1aW1XVkNIR2xUeTFLRE1NNGJzYXZCYWRIUUtKTjBSM01RZ0Rjck1WYmI?oc=5",
+          "published": "Thu, 11 Jun 2026 20:32:04 GMT",
+          "source": "CMoney"
+        }
+      ]
+    },
+    {
+      "stock_id": "2317",
+      "name": "鴻海",
+      "close": null,
+      "change_pct": null,
+      "valuation": {
+        "pe": 19.32,
+        "yield_pct": 2.65,
+        "pb": 2.14
+      },
+      "note": "鴻海",
+      "hot_industry": false,
+      "levels": {},
+      "hits": [],
+      "combos": [],
+      "chips": {
+        "inst_total_today": -8410760,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 41.31,
+        "short_change_pct": -19.95
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 39.57,
+        "revenue_consecutive_growth_months": 3,
+        "eps_latest": 3.56,
+        "eps_quarters_loaded": 8
+      },
+      "news": [
+        {
+          "title": "2317 鴻海 - 幾張圖片看鴻海最近的發展 不要被鴻海股價下跌打趴了 (附上最... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE01Ql94cVpoMjdSV1BldUxMOTE5TEpmWjFkcy1WS3QxNE1TbkkxZWdQVGR2TzR2N0VIVVRxRy02eF9ySFA4dW1aLVVxVGNEZUhfT3J3WF9wYVM?oc=5",
+          "published": "Mon, 15 Jun 2026 13:09:06 GMT",
+          "source": "CMoney"
+        },
+        {
+          "title": "鴻海(2317)、廣達(2382)、緯創(3231)...抱股過節買誰？台股挑戰前高卻暗藏2大隱憂...9檔避風好股出列 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPRTRmMWZjbDNnTG1rTUFQdmNNVUFrX01GdFZyVzJtVFFUanFVS2ZvalF1X0Y4U2lNN3lWTnY3cDExUW56dE5mbW9ELW1FbmJXUF9VSGZKY09lSkp4T2JzalBsYTRLTzk1TmZjMFl3MHlTMC1HUk9WMnVFRDVsckRfcg?oc=5",
+          "published": "Wed, 17 Jun 2026 09:17:00 GMT",
+          "source": "今周刊"
+        },
+        {
+          "title": "鴻海攜手能源管理大廠施耐德電機 下半年啟動合作生產 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi_AJBVV95cUxOUkgzcFNfVEZXc1BqY1oyeWY3OUpUNVQxWVE5amtwelJVRVFmbjF4Q21FQ2tWVElrWU80SWlPQ1J3aGJhOVZHcXB0c2xrVVNFaURNbllLV1pLTGJ2ZHI3Q00zSElBZ1NtOV9Uako1Tml0T2VOeGFMdFRPYkhEdjNxUWJMbmtqaTE1bkotaGxseGlJNE8xamUzTDYtVWlKZTNFcFZWSVhOYm5MNHF3Tmo1RTB4UklQOEFxSmhrRDV6Um1qREhWMWNNMDJrU2x0VjZucmhjSTY0S1c5YTdHbmQwYW5RRGl3Rjh2NnI0ZUJYSjVCQXZYel83VlFhTEFSZFlQTUF2b05OTWFyVHFUQ05CVk42ZHk3UEZBTTg2QkZoZ3NmUHlEbGJ5SGNZSlZqOEFUYXZwVFRHbV8wUFdqU0RONE9FRG1MNUlhTDlpYlFRLVNoUGVrdk05MHJoWW9UQk5mQnRqSWZWa3l3bHBZcmh0RmkzekpZZE9PVmJNZw?oc=5",
+          "published": "Mon, 15 Jun 2026 05:51:46 GMT",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海參展法國VivaTech，深化歐洲AI生態系布局- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1BOUJpdWJjRlVDTEs4S0RfRnM4NzlDYlNsb0Q3eTEzYUJySjFFUVdZWHZwTG1oUk9hMHNYMW42WUVHNTVkVFdqUEszM1VINlUzVmdpQ29jb3o?oc=5",
+          "published": "Wed, 17 Jun 2026 06:14:27 GMT",
+          "source": "CMoney"
+        },
+        {
+          "title": "個股：鴻海(2317)首次參展法國VivaTech 2026，深化歐洲AI生態系布局 - 富聯網",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNTUlzNXNlQmR4OTdhVjhXb1JGVjBnM3hSZk1oMVJiNVJkWm4wZ09WX2kzXzUtakJDZU91SnFkN1drRml0cmdqVE1EY05nSEptNXh4aDBDSGZnYzVGblRMMVFLRWxlSkNSLUEzajNiRkJwYVJaVndmWEt5aDV5RFdvaW5oQ1Q4Nmdp?oc=5",
+          "published": "Wed, 17 Jun 2026 04:43:00 GMT",
+          "source": "富聯網"
+        }
+      ]
+    },
+    {
+      "stock_id": "2308",
+      "name": "台達電",
+      "close": null,
+      "change_pct": null,
+      "valuation": {
+        "pe": 79.46,
+        "yield_pct": 0.54,
+        "pb": 18.69
+      },
+      "note": "台達電",
+      "hot_industry": false,
+      "levels": {},
+      "hits": [],
+      "combos": [],
+      "chips": {
+        "inst_total_today": -3356399,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 63.95
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 43.65,
+        "revenue_consecutive_growth_months": 3,
+        "eps_latest": 7.91,
+        "eps_quarters_loaded": 8
+      },
+      "news": [
+        {
+          "title": "43萬股民怨嘆！台達電「開平走低崩2.7%」慘陷貼息窘境 11.6元現金股利這天入帳 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiygJBVV95cUxQQ1AyOEFUUUZKUEMwZkFYcVFib0FkRlVVUGF2SHBGbnU3ZHdQc1lwaHVWQl83SEhDLThQTk1mU24zYTgwVmJYV3FITVV3aW1tZThTblJBRUtxaFBQX1BQN3h4RHAxdktuVDZQTTVrZWpOZTZJN1FYMU9say1pUy13bkpXbEl3SWZ6b3pBcTNvaWllVjcwallkSkFXbUN1U3NCbUFXYmhXNG5YNkd5QWM0WnMteGxkdXdmVEVobnFUa3pIb2xDOEtpWDNsOFBKbEtRRjlTQndXejdLdl80TUxFQjlBdDkxRmZiU19ORkpUdXlJTlJaQmVzbkVyeFI0S1R4dlJ3RXVjMEVCYk9wbFBnLWNKVVg1ZG1DdG03TXR1U0JTRWVTYjh2TmxXQlg1ckJvVUVwZ0NXOXBBXzVUVEJaYjFVN3lOTTlUb1E?oc=5",
+          "published": "Wed, 17 Jun 2026 02:53:20 GMT",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "台達電獲調升目標價！00896狂押8%直接吃補…今為最後買進日明除息| 存股族愛ETF | 股市 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5Qbktldm9DYW1DZjhlN1NZRVBrcldjcDlFTHBKODY0NTRYeDRmV0x4SW9hVXVyczNXdXR3WjdiV2FDYzhPTnpJcnZvYUVNTy1ndklz?oc=5",
+          "published": "Mon, 15 Jun 2026 04:51:27 GMT",
+          "source": "UDN"
+        },
+        {
+          "title": "台達電(2308)太貴買不下手？華新(1605)、光寶科(2301)、華城(1519)...13檔電力黑馬買誰最賺？這檔訂單排到2028年 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNNjlsbHoyOFFEdGtRSmljWXJoR2J6NTZ4cWJiYWYzTzBzSU9LYWtnRUs3ZDEtUnUtN3ItdWJTX0QwVS14NVplNm5RdVpKdEhMMWRUdWtzQ1B2Q3lsNGFhOXotaU83VXl2M0hHakI2UmE1YTJkNWNZejlPTkJkU2hmdg?oc=5",
+          "published": "Tue, 16 Jun 2026 00:51:00 GMT",
+          "source": "今周刊"
+        },
+        {
+          "title": "1表看》台達電、光寶科、高力、華城、AES...儲能6雄最新目標價來了龍頭法人評非紅供應鏈：「這4家」有肥單- 上市櫃 - 旺得富理財網",
+          "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5aSnVLeEQ4TFZzY1N1cGlJSDZzazlvSHM5R0dMc3VqZ2ZNdllSbEYwakVIeFpwd2FOUmdGcTNqeUlqWnNsS2E4ZTV4Vlc3bkFLNlppTllST3d1aDREaVFPd2dKRERyS2pnYUE?oc=5",
+          "published": "Tue, 16 Jun 2026 03:35:23 GMT",
+          "source": "旺得富理財網"
+        },
+        {
+          "title": "焦點股》台達電：5月營收備受期待 帶量急拉翻紅 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTFB5NDB4T1ZHaW45TVltMUZDeEFVRjlOQk9fUWlic0hLZVdPLVBNT2ZrbDE5MzdpRWdnT1lNREhhUFpfTVBhaEJzSWYyRnpXTmZ1bVk0dlJpcmlkRl81YjRj0gFkQVVfeXFMTWg0dVlFUEtLdXdPNzRNeTE1clhlU2JveHl5cXZEdXdNWnJWTktuRHBYV0RFM1Jfeld2T2J3Z2o5YVpCNjlqTlZDTGFHcW9XV3NDVWFlYnFzcHYzMEt6QllfUENCTA?oc=5",
+          "published": "Tue, 09 Jun 2026 07:00:00 GMT",
+          "source": "自由財經"
+        }
+      ]
+    },
+    {
+      "stock_id": "3008",
+      "name": "大立光",
+      "close": null,
+      "change_pct": null,
+      "valuation": {
+        "pe": 32.11,
+        "yield_pct": 1.55,
+        "pb": 3.65
+      },
+      "note": "大立光",
+      "hot_industry": false,
+      "levels": {},
+      "hits": [
+        "relative_strength_leader"
+      ],
+      "combos": [],
+      "chips": {
+        "inst_total_today": 770946,
+        "inst_buy_streak": 3,
+        "foreign_holding_pct": 33.79,
+        "short_change_pct": 17.78
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 41.83,
+        "revenue_consecutive_growth_months": 3,
+        "eps_latest": 46.63,
+        "eps_quarters_loaded": 8
+      },
+      "news": [
+        {
+          "title": "大立光爭取 CPO 訂單 將首度參加半導體展 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE82QnJab1h2bmhUaEI0ZVJKeUlZS0dIZ1VQWW5Ob2JSeEFTVGxzZVBWZDlGVVBpMlgtSFBGd2l0VU5ablVJTzZBUG9iaVB1OWhVSXVXR3VlLVNYd9IBX0FVX3lxTE5VWGh2ODZtUm5leEtnX0s1RVNSaDY3YWkyUnAtSGJJbGNWaDFERllnVXNpQWVrVm4wOWhLdHFzZFdTMXg1blpLNVV2ZW9qZG9jZHhtVHV4WllHUTBnVmpJ?oc=5",
+          "published": "Tue, 16 Jun 2026 16:34:59 GMT",
+          "source": "經濟日報"
+        },
+        {
+          "title": "大立光股價2020➝5145元還有肉？台積電、聯發科怎麼選？友達、訊芯-KY可以買？老手曝3檔黑馬股「完成打底等噴出」 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNRDNqdnV0ZEt5Zm85aHU5bHNleDlORFdRNUd4OHJKWFJhd0xRTGxfMWd2TzRYODl1WjV3TzZMSk10TEE3Q0txZFZKX2ZOYW9lZTVtM2wwQkktakZNZzY1WVRwNXowd1Vyd2FzTkxIbkI1OUxFUElDRkZGd254a0VKZQ?oc=5",
+          "published": "Wed, 17 Jun 2026 09:15:00 GMT",
+          "source": "今周刊"
+        },
+        {
+          "title": "大立光股東會後嗨漲1325元　連漲2根股民敲碗「要6千元」 - ETtoday財經雲",
+          "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBETEJaaE5EOElDNG5FX0l5a0dGZDN3bW5XSkNWd1B6MEVxQzlxSVpuRW93Ri1zLVhVR051ZkRwaWEtM3phc28xTlh2SFRvNTlwOUHSAW5BVV95cUxQbGRUam95Uld2TV9EVW4yNmYycUVZY0hnSE9NQkU1cHVnZXlQNTJDNWF1MnFIUTB3OUJBUDVYZGxWNnh6TkhSMFlNbkRnWXNLLWdTOGlRb1hxbXhYbXMzakUxZ3FOQUNRUkxMaURTUQ?oc=5",
+          "published": "Tue, 16 Jun 2026 02:09:00 GMT",
+          "source": "ETtoday財經雲"
+        },
+        {
+          "title": "【09:43 即時新聞】大立光(3008)亮燈漲停4860，CPO量產預期＋均線多頭排列吸引主力續搶 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxNWE1BeUFSdGxUTVVuTlp1YUVwVkdxbURqOGxMY0VfYjVjMGQtLUg3NzZ6aW9WaXZWNzRjdlM0cGp1OGhLREdESVcxWWlJWGRVN2lWMzd1MmQtVnlvWjVNYTNaNXY0cWl5Rl9CY2FtYkVvQ1FlYUxvck0tUHRtVTFpc251TFQ4NS00LTFWdlpB?oc=5",
+          "published": "Tue, 16 Jun 2026 01:44:04 GMT",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "大立光4月EPS暴漲91.88%衝上13.95元！首現身COMPUTEX強攻CPO - Yahoo新聞",
+          "link": "https://news.google.com/rss/articles/CBMinwJBVV95cUxPV2UyRF9aaXdseFEwSUVNRDhoUzJpd1pjbnZIT3U4eDFjNEg3cnROeGxsaG0tWHgwc1FBNHI1Wk1waU5mM3F6OGJlREVYMmQwYmp1RXVwaExEVlFONUY0OFFBMklJQllJVW1tc01pZWg4anJGMVpMcG5XbU1Ra0ZyYURWSEd4WEVzUDJITTdTdXIwRkFoaWFJMmI4dFBsSGpfRHMtOWlUT3g0TktCQ2xraGItU3hQbjRxd1N6ei0xdHBDWkpqclh6WXptb2FBZFBoakVVVS0yMFhKQ2MzT2FjbG5CRm9JZ1FCMDdBV3JDdXBOU0YxZmhkVVRtSi1wQWpOUW9jT096VHhFSGI5YkROTmN1Y3FKWHNJT1J2dXZEMA?oc=5",
+          "published": "Wed, 17 Jun 2026 14:56:00 GMT",
+          "source": "Yahoo新聞"
+        }
+      ]
+    }
+  ],
+  "industry_trends": [
+    {
+      "industry": "居家生活類",
+      "count": 5,
+      "avg_change": 0.26,
+      "avg_ret20": 1.9,
+      "breadth_ma20": 20.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 4.6
+    },
+    {
+      "industry": "貿易百貨",
+      "count": 38,
+      "avg_change": -0.02,
+      "avg_ret20": 0.4,
+      "breadth_ma20": 5.0,
+      "breadth_ma60": 3.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 2.0
+    },
+    {
+      "industry": "汽車工業",
+      "count": 39,
+      "avg_change": 0.0,
+      "avg_ret20": 0.1,
+      "breadth_ma20": 3.0,
+      "breadth_ma60": 3.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 1.3
+    },
+    {
+      "industry": "資訊服務業",
+      "count": 43,
+      "avg_change": 0.08,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 2.0,
+      "breadth_ma60": 2.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 1.2
+    },
+    {
+      "industry": "其他電子類",
+      "count": 53,
+      "avg_change": 0.0,
+      "avg_ret20": 0.2,
+      "breadth_ma20": 2.0,
+      "breadth_ma60": 2.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 1.1
+    },
+    {
+      "industry": "電機機械",
+      "count": 101,
+      "avg_change": 0.01,
+      "avg_ret20": -0.2,
+      "breadth_ma20": 2.0,
+      "breadth_ma60": 2.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 1.0
+    },
+    {
+      "industry": "紡織纖維",
+      "count": 57,
+      "avg_change": 0.04,
+      "avg_ret20": -0.0,
+      "breadth_ma20": 2.0,
+      "breadth_ma60": 2.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.9
+    },
+    {
+      "industry": "鋼鐵工業",
+      "count": 48,
+      "avg_change": -0.02,
+      "avg_ret20": 0.1,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 2.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.8
+    },
+    {
+      "industry": "電腦及週邊設備業",
+      "count": 64,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 2.0,
+      "breadth_ma60": 2.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.8
+    },
+    {
+      "industry": "其他",
+      "count": 130,
+      "avg_change": -0.0,
+      "avg_ret20": -0.1,
+      "breadth_ma20": 2.0,
+      "breadth_ma60": 1.0,
+      "bullish_ratio": 1.0,
+      "combo_hits": 0,
+      "score": 0.7
+    },
+    {
+      "industry": "通信網路業",
+      "count": 82,
+      "avg_change": -0.0,
+      "avg_ret20": 0.1,
+      "breadth_ma20": 1.0,
+      "breadth_ma60": 1.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.7
+    },
+    {
+      "industry": "電子工業",
+      "count": 207,
+      "avg_change": 0.02,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 1.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.6
+    },
+    {
+      "industry": "生技醫療業",
+      "count": 105,
+      "avg_change": 0.0,
+      "avg_ret20": -0.0,
+      "breadth_ma20": 1.0,
+      "breadth_ma60": 1.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.5
+    },
+    {
+      "industry": "光電業",
+      "count": 108,
+      "avg_change": -0.01,
+      "avg_ret20": -0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 1.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.3
+    },
+    {
+      "industry": "電子零組件業",
+      "count": 137,
+      "avg_change": 0.01,
+      "avg_ret20": -0.0,
+      "breadth_ma20": 1.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.1
+    },
+    {
+      "industry": "其他電子業",
+      "count": 39,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "化學工業",
+      "count": 43,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "化學生技醫療",
+      "count": 49,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "半導體業",
+      "count": 175,
+      "avg_change": -0.04,
+      "avg_ret20": -0.1,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "塑膠工業",
+      "count": 26,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "建材營造",
+      "count": 77,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "數位雲端",
+      "count": 5,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "數位雲端類",
+      "count": 10,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "文化創意業",
+      "count": 27,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "橡膠工業",
+      "count": 11,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "水泥工業",
+      "count": 7,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "油電燃氣業",
+      "count": 12,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "玻璃陶瓷",
+      "count": 5,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "綠能環保",
+      "count": 9,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "綠能環保類",
+      "count": 6,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "航運業",
+      "count": 33,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "觀光事業",
+      "count": 44,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "觀光餐旅",
+      "count": 7,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "農業科技業",
+      "count": 4,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "造紙工業",
+      "count": 7,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "運動休閒",
+      "count": 3,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "金融保險",
+      "count": 32,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "金融業",
+      "count": 9,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "電器電纜",
+      "count": 18,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "電子商務業",
+      "count": 8,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "電子通路業",
+      "count": 22,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    },
+    {
+      "industry": "食品工業",
+      "count": 32,
+      "avg_change": 0.0,
+      "avg_ret20": 0.0,
+      "breadth_ma20": 0.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 0.0
+    }
+  ],
+  "scored_count": 2,
+  "no_data_count": 155
+}
