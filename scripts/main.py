@@ -7,7 +7,7 @@ import pandas as pd
 
 from .config import (
     assert_env, load_screeners, load_watchlist,
-    SIGNALS_DIR, now_tpe,
+    SIGNALS_DIR, DATA_DIR, now_tpe,
 )
 from .fetchers import (
     fetch_stock_info, filter_tradable_stocks, fetch_news,
@@ -26,6 +26,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
+from .track import build_report as build_perf_report
 from .notify import render_email, send_email
 from .utils import log
 
@@ -349,11 +350,21 @@ def daily_run(test_mode: bool = False) -> None:
             "no_data_count": len(no_data),
         }, f, ensure_ascii=False, indent=2, default=str)
 
+    # 前進式績效:回看過去核心精選後續走勢(讀剛寫入的 + 歷史 signals)
+    try:
+        performance = build_perf_report(index_close)
+    except Exception as e:
+        log.warning(f"performance report failed: {e}")
+        performance = {"summary": {}, "by_profile": {}, "recent": [], "total_picks_tracked": 0, "horizons": []}
+    with open(DATA_DIR / "performance.json", "w", encoding="utf-8") as f:
+        json.dump(performance, f, ensure_ascii=False, indent=2, default=str)
+
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),
         "core": core,
         "watch": watch,
         "watchlist": watchlist_results,
+        "performance": performance,
         "core_count": len(core),
         "watch_count": len(watch),
         "scored_count": len(scored),

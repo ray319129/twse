@@ -110,7 +110,7 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
             ret5 = close / c5 - 1
     ext_ma20 = (close / ma20 - 1) if (pd.notna(ma20) and ma20 > 0) else 0.0
     chg = (close / prev_close - 1) if (pd.notna(prev_close) and prev_close > 0) else 0.0
-    limit_up_today = chg >= 0.095
+    limit_up_today = bool(chg >= 0.095)
     exhausted = bool(
         (pd.notna(ret5) and ret5 > 0.22)        # 5 日漲 > 22%
         or ext_ma20 > 0.18                       # 乖離 20MA > 18%

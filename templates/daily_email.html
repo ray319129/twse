@@ -206,6 +206,67 @@
 <div style="color: #999;">產業資料不足,無法排行。</div>
 {% endif %}
 
+<!-- 五、核心績效回顧 -->
+<h3 style="color: #16a085; margin-top: 24px;">【五】核心績效回顧 — 過去的「核心精選」後來漲了沒?</h3>
+<div style="font-size: 12px; color: #888; margin-bottom: 6px;">
+  回看過去每一批核心精選,用每日收盤算進場後 N 個交易日的實際報酬,並比對同期大盤(贏大盤 = alpha)。
+  <strong>這才是檢驗評分有沒有用的客觀證據</strong>。樣本要累積幾週才有參考性。
+</div>
+{% if performance and performance.summary %}
+<table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+  <thead>
+    <tr style="background: #e8f6f3; text-align: left;">
+      <th style="padding: 6px;">進場後</th>
+      <th style="padding: 6px; text-align: right;">樣本數</th>
+      <th style="padding: 6px; text-align: right;">勝率</th>
+      <th style="padding: 6px; text-align: right;">平均報酬</th>
+      <th style="padding: 6px; text-align: right;">平均贏大盤</th>
+      <th style="padding: 6px; text-align: right;">贏大盤比例</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for h in performance.horizons %}
+    {% set s = performance.summary.get(h) %}
+    {% if s %}
+    <tr style="border-bottom: 1px solid #ecf0f1;">
+      <td style="padding: 6px;"><strong>{{ h }} 個交易日</strong></td>
+      <td style="padding: 6px; text-align: right;">{{ s.n }}</td>
+      <td style="padding: 6px; text-align: right;">{{ s.win_rate }}%</td>
+      <td style="padding: 6px; text-align: right; color: {% if s.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(s.avg_ret) }}%</td>
+      <td style="padding: 6px; text-align: right; color: {% if s.avg_alpha is not none and s.avg_alpha >= 0 %}#27ae60{% elif s.avg_alpha is not none %}#c0392b{% else %}#999{% endif %};">{{ ('%+.2f'|format(s.avg_alpha) + '%') if s.avg_alpha is not none else '-' }}</td>
+      <td style="padding: 6px; text-align: right;">{{ (s.beat_rate ~ '%') if s.beat_rate is not none else '-' }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+{% if performance.by_profile %}
+<div style="font-size: 12px; color: #666; margin-top: 6px;">
+  5 日依型態:
+  {% for prof, s in performance.by_profile.items() %}{{ prof }}(n={{ s.n }} 勝率{{ s.win_rate }}% 均{{ '%+.2f'|format(s.avg_ret) }}%){% if not loop.last %} · {% endif %}{% endfor %}
+</div>
+{% endif %}
+{% if performance.recent %}
+<div style="font-size: 12px; color: #666; margin-top: 8px;"><strong>最近一批({{ performance.recent_date }})核心 5 日實際走勢:</strong></div>
+<table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px;">
+  <tbody>
+    {% for r in performance.recent %}
+    <tr style="border-bottom: 1px solid #f0f0f0;">
+      <td style="padding: 4px 6px;">{{ r.stock_id }} {{ r.name }}</td>
+      <td style="padding: 4px 6px; color:#888;">{{ r.profile }} · {{ r.trigger }} · 分{{ r.score }}</td>
+      <td style="padding: 4px 6px; text-align: right; color: {% if r.ret5 >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(r.ret5) }}%</td>
+      <td style="padding: 4px 6px; text-align: right; color:#888;">{{ ('贏大盤 ' + '%+.2f'|format(r.alpha5) + '%') if r.alpha5 is not none else '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% else %}
+<div style="color: #999; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">
+  績效資料累積中 — 核心精選需經過至少 1 個交易日才有前進報酬,跑幾天後這裡就會出現勝率/報酬/贏大盤統計。
+</div>
+{% endif %}
+
 <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;">
 
 <div style="font-size: 12px; color: #999;">
