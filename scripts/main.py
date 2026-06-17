@@ -350,9 +350,9 @@ def daily_run(test_mode: bool = False) -> None:
             "no_data_count": len(no_data),
         }, f, ensure_ascii=False, indent=2, default=str)
 
-    # 前進式績效:回看過去核心精選後續走勢(讀剛寫入的 + 歷史 signals)
+    # 歷史追蹤與績效:回看過去所有核心選股的後續走勢(讀剛寫入的 + 歷史 signals)
     try:
-        performance = build_perf_report(index_close)
+        performance = build_perf_report(as_of=today)
     except Exception as e:
         log.warning(f"performance report failed: {e}")
         performance = {"summary": {}, "by_profile": {}, "recent": [], "total_picks_tracked": 0, "horizons": []}
