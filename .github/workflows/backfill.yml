@@ -1,0 +1,60 @@
+name: Backfill History
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Days of history to fetch per stock"
+        required: false
+        default: "400"
+      all:
+        description: "Refetch everything (otherwise skip stocks already filled)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backfill
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Backfill
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+        run: |
+          DAYS="${{ github.event.inputs.days }}"
+          ALL_FLAG=""
+          if [ "${{ github.event.inputs.all }}" = "true" ]; then
+            ALL_FLAG="--all"
+          fi
+          python -m scripts.backfill --days "$DAYS" $ALL_FLAG
+
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then
+            git commit -m "data: backfill $(date -u +'%Y-%m-%d')"
+            git push
+          else
+            echo "No data changes."
+          fi

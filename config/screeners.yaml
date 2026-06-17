@@ -1,0 +1,124 @@
+# 選股策略設定檔
+# 規格詳見 specs/01_strategies.md
+
+# 全域設定
+global:
+  min_market_cap: 1_000_000_000   # 最小市值 (元),濾掉雞蛋水餃股
+  exclude_etf: true                # 不選 ETF
+  exclude_warrant: true            # 不選權證
+  exclude_full_cash: true          # 不選全額交割股
+
+# A. 趨勢類
+trend:
+  bullish_ma_alignment:            # A1 多頭排列
+    enabled: true
+    periods: [5, 20, 60, 120]
+
+  golden_cross:                    # A2 黃金交叉
+    enabled: true
+    fast: 5
+    slow: 20
+
+  break_60ma:                      # A3 突破季線
+    enabled: true
+
+  above_240ma:                     # A4 站上年線
+    enabled: true
+    consecutive_days: 5
+
+# B. 動能類
+momentum:
+  kd_golden_cross_low:             # B1 KD 低檔黃金交叉
+    enabled: true
+    k_period: 9
+    d_period: 3
+    smooth_k: 3
+    low_threshold: 30
+
+  macd_turn_red:                   # B2 MACD 翻紅
+    enabled: true
+    fast: 12
+    slow: 26
+    signal: 9
+
+  rsi_break_50:                    # B3 RSI 突破 50
+    enabled: true
+    period: 14
+
+# C. 量價類
+volume_price:
+  volume_price_surge:              # C1 量價齊揚
+    enabled: true
+    volume_multiplier: 1.5
+    price_change_min: 0.02         # 漲幅 ≥ 2%
+
+  n_day_high:                      # C2 N 日新高
+    enabled: true
+    period: 60
+
+# D. 籌碼類
+chips:
+  inst_consecutive_buy:            # D1 法人連買 ✅
+    enabled: true
+    days: 3
+
+  foreign_holding_increase:        # D2 外資加碼 ✅
+    enabled: true
+    period: 30
+    threshold: 0.02                # 30 日內外資持股比上升 ≥ 2 個百分點
+
+  short_cover_with_buy:            # D3 融券回補 + 主力買超 ✅
+    enabled: true
+    cover_threshold: 0.05          # 融券餘額減少 ≥ 5%
+
+# E. 基本面快篩
+fundamental:
+  monthly_revenue_growth:          # E1 月營收連續成長 ✅
+    enabled: true
+    consecutive_months: 3
+    latest_yoy_min: 0.10           # 最新月 YoY ≥ 10%
+
+  eps_positive_high_yield:         # E2 EPS 正成長 + 高殖利率 ✅
+    enabled: true
+    eps_quarters: 4                # 近 4 季 EPS 都需為正
+    yield_min: 0.04                # 殖利率 ≥ 4%
+
+# F. 領先 / 醞釀型(目標:在發動「之前」就抓到。代價:假訊號較多,當觀察名單用)
+leading:
+  coiling_squeeze:                 # F1 盤底蓄勢(波動壓縮)
+    enabled: true
+    lookback: 120                  # 回看天數
+    width_pct: 0.15                # 布林帶寬度落在近 120 日最低 15% 分位 → 收斂(相對)
+    abs_width_max: 0.06            # 或帶寬已 < 6%(±3%)→ 持續盤整也抓得到(絕對)
+    require_volume_contraction: true  # 同時量縮(vol_ma5 < vol_ma20)
+    near_ma60_tol: 0.10            # 收盤不可低於季線 10% 以上(避免接刀)
+
+  pullback_to_support:             # F2 回測支撐(多頭回檔)
+    enabled: true
+    near_pct: 0.03                 # 收盤距 20MA/60MA 在 ±3% 內算「回到支撐」
+    min_drawdown: 0.05             # 自近期高點至少回檔 5%
+    lookback_high: 20             # 近期高點取近 20 日
+    require_turn_up: true          # 需開始轉強(收紅 或 KD 交叉向上)
+
+  relative_strength_leader:        # F3 相對強勢領頭羊
+    enabled: true
+    rs_min: 1.0                    # 近 60 日報酬須贏大盤(rs_ratio >= 1)
+    rising_days: 10                # 且 rs_ratio 較 10 日前上升
+
+  chip_accumulation:               # F4 籌碼吸籌(法人默默布局,價格還沒動)
+    enabled: true
+    lookback: 10                   # 近 10 個交易日
+    min_buy_days: 6                # 至少 6 天法人淨買超
+    flat_ret20_max: 0.08           # 但近 20 日股價漲跌幅在 ±8% 內(還沒發動)
+    max_scan: 120                  # 每日最多為幾檔「安靜股」額外抓籌碼(控制 API 用量)
+
+# 多訊號交集組合
+combos:
+  - name: 主升段啟動
+    requires: [bullish_ma_alignment, volume_price_surge, inst_consecutive_buy]
+  - name: 底部反轉
+    requires: [break_60ma, macd_turn_red, monthly_revenue_growth]
+  - name: 強勢續攻
+    requires: [bullish_ma_alignment, n_day_high, foreign_holding_increase]
+  - name: 保守存股
+    requires: [above_240ma, eps_positive_high_yield]

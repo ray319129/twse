@@ -1,0 +1,21 @@
+# 資料處理
+pandas>=2.0,<3.0
+numpy>=1.24,<2.0
+pyarrow>=14.0
+
+# HTTP / 解析
+requests>=2.31
+feedparser>=6.0
+beautifulsoup4>=4.12
+lxml>=4.9
+
+# 股價資料來源
+yfinance>=0.2.40
+
+# 設定 / Email 範本
+PyYAML>=6.0
+Jinja2>=3.1
+
+# 時間處理
+python-dateutil>=2.8
+pytz>=2024.1

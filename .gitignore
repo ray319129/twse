@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Local secrets
+.env
+.env.local
+secrets.local.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp / scratch
+scratch/
+tmp/
+
+# Frontend (階段二之後)
+docs/node_modules/
+docs/dist/
