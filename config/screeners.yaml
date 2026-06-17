@@ -83,7 +83,16 @@ fundamental:
     eps_quarters: 4                # 近 4 季 EPS 都需為正
     yield_min: 0.04                # 殖利率 ≥ 4%
 
-# F. 領先 / 醞釀型(目標:在發動「之前」就抓到。代價:假訊號較多,當觀察名單用)
+# ★ 短線信心排序(取代「符合條件就全列出」)— 詳見 scripts/scoring.py
+# 全市場用免費資料(價格 + 估值快照)算 0~100 信心分,只取最高分的核心+觀察。
+ranking:
+  core_count: 10              # 核心(今天有新鮮觸發、可考慮進場)最多幾檔
+  watch_count: 20            # 觀察(醞釀中、放口袋盯)最多幾檔
+  min_score: 45              # 低於此分不入榜(避免名單不夠時硬湊垃圾)
+  min_dollar_volume: 30000000  # 日均成交金額門檻(3000 萬),太低直接淘汰
+  enrich_top_n: 30           # 只對排名前 N 名補抓 FinMind 籌碼/財報(控制 API 額度)
+
+# F. 領先 / 醞釀型(舊版,已被上面的 ranking 取代,保留供 screen_stock 標籤用)
 leading:
   coiling_squeeze:                 # F1 盤底蓄勢(波動壓縮)
     enabled: true

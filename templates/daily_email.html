@@ -2,129 +2,89 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>台股技術選股 - {{ date_str }}</title>
+<title>台股短線選股 - {{ date_str }}</title>
 </head>
-<body style="font-family: -apple-system, 'Segoe UI', 'Microsoft JhengHei', sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; color: #222; background: #fafafa;">
+<body style="font-family: -apple-system, 'Segoe UI', 'Microsoft JhengHei', sans-serif; max-width: 760px; margin: 0 auto; padding: 16px; color: #222; background: #fafafa;">
 
 <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;">
   <strong>⚠️ 風險提醒</strong><br>
-  本報告為「條件篩選結果」,<strong>不是投資建議</strong>。下單前請看 (1) 公司基本面 (2) 近期新聞 (3) 你的停損紀律。<br>
-  系統建議使用者前 3~6 個月當「學習工具」:訊號 → 觀察 → 不下單 → 累積對訊號品質的直覺。
+  本報告為「條件排序結果」,<strong>不是投資建議</strong>。短線進場前請確認 (1) 量能是否續強 (2) 大盤位階 (3) 你的停損紀律。<br>
+  信心分越高 ≠ 一定漲;它只是「同時符合趨勢 / 強度 / 時機 / 品質 / 流動性」的程度。
 </div>
 
 <h2 style="border-bottom: 2px solid #2c3e50; padding-bottom: 6px;">
-  台股技術選股 — {{ date_str }}
+  台股短線選股 — {{ date_str }}
   {% if test_mode %}<span style="color: #c0392b;">[測試]</span>{% endif %}
 </h2>
+<div style="font-size: 12px; color: #888; margin: 4px 0 16px;">
+  全市場 {{ scored_count }} 檔通過流動性後評分排序。
+  大盤目前{% if index_below_ma20 %}<span style="color:#c0392b;">在月線之下(偏弱,進場宜更保守)</span>{% else %}<span style="color:#27ae60;">站上月線(偏多)</span>{% endif %}。
+</div>
+
+{% macro profile_badge(p) -%}
+{% if p == '動能' %}<span style="background:#fdecea;color:#c0392b;padding:1px 7px;border-radius:10px;font-size:11px;">動能</span>
+{%- elif p == '品質' %}<span style="background:#e8f1fb;color:#2471a3;padding:1px 7px;border-radius:10px;font-size:11px;">品質</span>
+{%- else %}<span style="background:#eee;color:#666;padding:1px 7px;border-radius:10px;font-size:11px;">均衡</span>{% endif %}
+{%- endmacro %}
+
+{% macro score_bar(s) -%}
+<span style="font-size:11px;color:#888;">趨勢{{ (s.trend*100)|int }} · 強度{{ (s.rs*100)|int }} · 時機{{ (s.setup*100)|int }} · 品質{{ (s.quality*100)|int }} · 量能{{ (s.liquidity*100)|int }}</span>
+{%- endmacro %}
 
 <!-- 一、自選池 -->
-<h3 style="color: #2c3e50;">【一】自選池訊號 ({{ watchlist|length }} 檔)</h3>
+<h3 style="color: #2c3e50;">【一】自選池 ({{ watchlist|length }} 檔)</h3>
 {% if watchlist %}
   {% for s in watchlist %}
   <div style="background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px;">
     <div style="font-size: 16px; font-weight: bold;">
       🔔 {{ s.stock_id }} {{ s.name }}
       {% if s.close %}<span style="color: #555; font-weight: normal;">收 {{ '%.2f'|format(s.close) }}</span>{% endif %}
-      {% if s.change_pct is not none %}
-        <span style="color: {% if s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %}; font-weight: normal;">
-          ({{ '%+.2f'|format(s.change_pct) }}%)
-        </span>
-      {% endif %}
+      {% if s.change_pct is not none %}<span style="color: {% if s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %}; font-weight: normal;">({{ '%+.2f'|format(s.change_pct) }}%)</span>{% endif %}
+      {% if s.score is defined %}<span style="float:right;font-size:14px;">信心 <strong style="color:#5e35b1;">{{ s.score }}</strong> {{ profile_badge(s.profile) }}</span>{% endif %}
     </div>
     {% if s.note %}<div style="color: #666; font-size: 13px;">備註:{{ s.note }}</div>{% endif %}
-    {% if s.combos %}
-      <div style="margin-top: 6px;">
-        <strong>觸發組合:</strong>
-        {% for c in s.combos %}<span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">{{ c }}</span>{% endfor %}
+    {% if s.score is defined %}
+      <div style="margin-top:4px;">{{ score_bar(s) }}
+        {% if s.trigger %}<span style="color:#27ae60;font-size:11px;"> · ✅ 今日觸發{% if s.breakout %}帶量突破{% elif s.pullback_turn %}回測轉強{% endif %}</span>
+        {% elif s.exhausted %}<span style="color:#e67e22;font-size:11px;"> · ⚠ 短線過熱</span>
+        {% elif s.brewing %}<span style="color:#8e44ad;font-size:11px;"> · 🌱 醞釀中</span>{% endif %}
       </div>
     {% endif %}
-    {% if s.hits %}
-      <div style="margin-top: 6px; font-size: 13px;">
-        <strong>觸發指標:</strong>
-        {% for h in s.hits %}<span style="background: #e8f4fd; color: #2c3e50; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}
-      </div>
-    {% endif %}
-    {% if s.leading %}
-      <div style="margin-top: 6px; font-size: 13px;">
-        <strong>🌱 醞釀訊號:</strong>
-        {% for h in s.leading %}<span style="background: #ede7f6; color: #5e35b1; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}
-        <span style="color: #999; font-size: 11px;">(發動前的領先訊號,假訊號較多)</span>
-      </div>
-    {% endif %}
+    {% if s.combos %}<div style="margin-top: 6px;"><strong>觸發組合:</strong>{% for c in s.combos %}<span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">{{ c }}</span>{% endfor %}</div>{% endif %}
+    {% if s.hits %}<div style="margin-top: 6px; font-size: 13px;"><strong>觸發指標:</strong>{% for h in s.hits %}<span style="background: #e8f4fd; color: #2c3e50; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">{{ label.get(h, h) }}</span>{% endfor %}</div>{% endif %}
     {% if s.industry %}<div style="margin-top: 4px; font-size: 12px; color: #777;">產業:{{ s.industry }}{% if s.hot_industry %} <span style="color: #e67e22;">🔥 熱門產業</span>{% endif %}</div>{% endif %}
     {% if s.chips %}
-      <div style="margin-top: 6px; font-size: 13px;">
-        <strong>籌碼:</strong>
-        {% if s.chips.inst_total_today is defined %}
-          三大法人 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張
-          {% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}
-        {% endif %}
-        {% if s.chips.foreign_holding_pct is defined %}
-          · 外資持股 {{ s.chips.foreign_holding_pct }}%
-          {% if s.chips.foreign_holding_change_30d is defined %}
-            (30 日 {{ '%+.2f'|format(s.chips.foreign_holding_change_30d) }}pp)
-          {% endif %}
-        {% endif %}
-        {% if s.chips.short_change_pct is defined %}
-          · 融券 {{ '%+.1f'|format(s.chips.short_change_pct) }}%
-        {% endif %}
+      <div style="margin-top: 6px; font-size: 13px;"><strong>籌碼:</strong>
+        {% if s.chips.inst_total_today is defined %}三大法人 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張{% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}{% endif %}
+        {% if s.chips.foreign_holding_pct is defined %} · 外資持股 {{ s.chips.foreign_holding_pct }}%{% endif %}
+        {% if s.chips.short_change_pct is defined %} · 融券 {{ '%+.1f'|format(s.chips.short_change_pct) }}%{% endif %}
       </div>
     {% endif %}
     {% if s.fundamentals and (s.fundamentals.eps_latest is defined or s.fundamentals.revenue_yoy is defined) %}
-      <div style="margin-top: 4px; font-size: 13px;">
-        <strong>成長面:</strong>
+      <div style="margin-top: 4px; font-size: 13px;"><strong>成長面:</strong>
         {% if s.fundamentals.eps_latest is defined %}最新季 EPS {{ s.fundamentals.eps_latest }} ·{% endif %}
         {% if s.fundamentals.revenue_yoy is defined %}{{ s.fundamentals.revenue_latest_ym }} 月營收 YoY {{ '%+.1f'|format(s.fundamentals.revenue_yoy) }}%{% endif %}
       </div>
     {% endif %}
     {% if s.valuation and (s.valuation.pe or s.valuation.yield_pct or s.valuation.pb) %}
-      <div style="margin-top: 4px; font-size: 13px;">
-        <strong>估值面:</strong>
+      <div style="margin-top: 4px; font-size: 13px;"><strong>估值面:</strong>
         {% if s.valuation.pe %}本益比 {{ '%.1f'|format(s.valuation.pe) }} ·{% endif %}
         {% if s.valuation.yield_pct %}殖利率 {{ '%.2f'|format(s.valuation.yield_pct) }}% ·{% endif %}
         {% if s.valuation.pb %}股價淨值比 {{ '%.2f'|format(s.valuation.pb) }}{% endif %}
         {% if s.valuation.pe and s.valuation.pe > 30 %}<span style="color:#e67e22;"> ⚠ 本益比偏高</span>{% endif %}
       </div>
     {% endif %}
-    {% if s.levels %}
-      <div style="margin-top: 6px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 12px;">
-        <strong style="font-size: 13px;">📍 技術參考座標</strong>
-        <span style="color: #999; font-size: 11px;">(座標,不是買點)</span>
-        <table style="width: 100%; margin-top: 4px; font-size: 12px; border-collapse: collapse;">
-          <tr>
-            {% if s.levels.ma5 %}<td style="padding: 2px 4px;">5MA <strong>{{ '%.2f'|format(s.levels.ma5) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma5_diff_pct) }}%)</span></td>{% endif %}
-            {% if s.levels.ma20 %}<td style="padding: 2px 4px;">20MA <strong>{{ '%.2f'|format(s.levels.ma20) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma20_diff_pct) }}%)</span></td>{% endif %}
-            {% if s.levels.ma60 %}<td style="padding: 2px 4px;">60MA <strong>{{ '%.2f'|format(s.levels.ma60) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma60_diff_pct) }}%)</span></td>{% endif %}
-          </tr>
-          <tr>
-            {% if s.levels.ma240 %}<td style="padding: 2px 4px;">年線 <strong>{{ '%.2f'|format(s.levels.ma240) }}</strong> <span style="color:#888">({{ '%+.1f'|format(s.levels.ma240_diff_pct) }}%)</span></td>{% endif %}
-            {% if s.levels.high_60 %}<td style="padding: 2px 4px;">60 日高 <strong>{{ '%.2f'|format(s.levels.high_60) }}</strong></td>{% endif %}
-            {% if s.levels.low_60 %}<td style="padding: 2px 4px;">60 日低 <strong>{{ '%.2f'|format(s.levels.low_60) }}</strong></td>{% endif %}
-          </tr>
-          {% if s.levels.atr14 %}
-          <tr>
-            <td colspan="3" style="padding: 4px 4px 0; color: #555;">
-              ATR(14) = {{ '%.2f'|format(s.levels.atr14) }} ·
-              <strong>2×ATR 停損參考</strong>: {{ '%.2f'|format(s.levels.stop_2atr) }} ({{ '%.1f'|format(s.levels.stop_2atr_pct) }}%)
-              <span style="color:#999;">— 進場後若跌破此價,代表波動超出常態,屬於停損訊號</span>
-            </td>
-          </tr>
-          {% endif %}
-        </table>
+    {% if s.levels and s.levels.atr14 %}
+      <div style="margin-top: 6px; padding: 6px 8px; background: #f8f9fa; border-radius: 4px; font-size: 12px; color:#555;">
+        📍 20MA {{ '%.2f'|format(s.levels.ma20) }} · 60MA {{ '%.2f'|format(s.levels.ma60) }} · 60日高 {{ '%.2f'|format(s.levels.high_60) }}
+        · <strong>2×ATR 停損參考 {{ '%.2f'|format(s.levels.stop_2atr) }}</strong> ({{ '%.1f'|format(s.levels.stop_2atr_pct) }}%)
       </div>
-    {% endif %}
-    {% if not s.combos and not s.hits and not s.leading %}
-      <div style="margin-top: 6px; font-size: 13px; color: #999;">今日無策略觸發</div>
     {% endif %}
     {% if s.news %}
       <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd;">
         <strong style="font-size: 13px;">近期新聞:</strong>
         <ul style="margin: 4px 0 0 0; padding-left: 20px; font-size: 13px;">
-          {% for n in s.news[:3] %}
-          <li><a href="{{ n.link }}" style="color: #2980b9; text-decoration: none;">{{ n.title }}</a>
-            {% if n.source %}<span style="color: #999; font-size: 12px;">— {{ n.source }}</span>{% endif %}
-          </li>
-          {% endfor %}
+          {% for n in s.news[:3] %}<li><a href="{{ n.link }}" style="color: #2980b9; text-decoration: none;">{{ n.title }}</a>{% if n.source %}<span style="color: #999; font-size: 12px;"> — {{ n.source }}</span>{% endif %}</li>{% endfor %}
         </ul>
       </div>
     {% endif %}
@@ -134,13 +94,87 @@
   <div style="color: #999; padding: 8px 0;">自選池目前是空的,請編輯 <code>config/watchlist.json</code></div>
 {% endif %}
 
-<!-- 二、產業熱度排行 -->
-<h3 style="color: #2c3e50; margin-top: 24px;">【二】產業熱度排行</h3>
-<div style="font-size: 12px; color: #888; margin-bottom: 6px;">
-  依各產業成分股的「站上季線比例 + 多頭排列比例 + 近 20 日動能」算熱度分數。
-  <strong>前 {{ hot_industries|length }} 名標為熱門產業 🔥</strong>,下方選股清單中屬於這些產業的會排前面。
-  資金通常在熱門產業輪動,從熱門產業挑股勝率較高。
+<!-- 二、核心精選 -->
+<h3 style="color: #c0392b; margin-top: 24px;">【二】核心精選 — 今日可考慮進場 ({{ core_count }} 檔)</h3>
+<div style="font-size: 12px; color: #888; margin-bottom: 8px;">
+  信心分最高、<strong>且今天出現新鮮觸發</strong>(帶量突破 或 回測支撐轉強)、且未過熱的標的。依信心分排序。短線(隔日沖/隔週)優先看這層。
 </div>
+{% if core %}
+  {% for s in core %}
+  <div style="background:#fff; border:1px solid #e0b4b0; border-left:4px solid #c0392b; border-radius:6px; padding:10px 14px; margin-bottom:10px;">
+    <div style="font-size:15px;font-weight:bold;">
+      #{{ loop.index }} {% if s.hot_industry %}🔥{% endif %}{{ s.stock_id }} {{ s.name }} {{ profile_badge(s.profile) }}
+      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong></span>
+    </div>
+    <div style="font-size:13px;color:#444;margin-top:3px;">
+      收 {{ '%.2f'|format(s.close) }}
+      <span style="color: {% if s.change_pct and s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %};">({{ '%+.2f'|format(s.change_pct) if s.change_pct is not none else '-' }}%)</span>
+      · {{ s.industry }}
+      · <strong style="color:#27ae60;">{% if s.breakout %}帶量突破{% elif s.pullback_turn %}回測轉強{% else %}觸發{% endif %}</strong>
+      {% if s.ret5_pct is not none %} · 5日 {{ '%+.1f'|format(s.ret5_pct) }}%{% endif %}
+      {% if s.ret20_pct is not none %} · 20日 {{ '%+.1f'|format(s.ret20_pct) }}%{% endif %}
+    </div>
+    <div style="margin-top:3px;">{{ score_bar(s) }}</div>
+    {% if s.chips and s.chips.inst_total_today is defined %}
+      <div style="margin-top:3px;font-size:12px;color:#555;">籌碼:三大法人 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張{% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}{% if s.chips.foreign_holding_pct is defined %} · 外資持股 {{ s.chips.foreign_holding_pct }}%{% endif %}</div>
+    {% endif %}
+    {% if s.valuation and (s.valuation.pe or s.valuation.yield_pct) %}
+      <div style="margin-top:2px;font-size:12px;color:#777;">估值:{% if s.valuation.pe %}PE {{ '%.1f'|format(s.valuation.pe) }}{% endif %}{% if s.valuation.yield_pct %} · 殖利率 {{ '%.2f'|format(s.valuation.yield_pct) }}%{% endif %}{% if s.fundamentals and s.fundamentals.eps_latest is defined %} · 最新季EPS {{ s.fundamentals.eps_latest }}{% endif %}</div>
+    {% endif %}
+    {% if s.levels and s.levels.atr14 %}
+      <div style="margin-top:3px;font-size:12px;color:#555;background:#f8f9fa;padding:4px 6px;border-radius:4px;">
+        📍 20MA {{ '%.2f'|format(s.levels.ma20) }} · 60MA {{ '%.2f'|format(s.levels.ma60) }} · <strong>2×ATR 停損參考 {{ '%.2f'|format(s.levels.stop_2atr) }}</strong> ({{ '%.1f'|format(s.levels.stop_2atr_pct) }}%)
+      </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div style="color: #999; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">今日無符合條件的核心標的(可能大盤偏弱或無新鮮突破)。寧缺勿濫。</div>
+{% endif %}
+
+<!-- 三、觀察清單 -->
+<h3 style="color: #8e44ad; margin-top: 24px;">【三】觀察清單 — 醞釀中,放口袋盯 ({{ watch_count }} 檔)</h3>
+<div style="font-size: 12px; color: #888; margin-bottom: 6px;">
+  高信心分、但<strong>還沒出現觸發</strong>(收斂蓄勢 或 相對強度剛轉強)。等它後續帶量發動,再對照核心層的觸發條件進場。
+</div>
+{% if watch %}
+<table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+  <thead>
+    <tr style="background: #f3e5f5; text-align: left;">
+      <th style="padding: 6px;">#</th>
+      <th style="padding: 6px;">代號</th>
+      <th style="padding: 6px;">名稱</th>
+      <th style="padding: 6px;">產業</th>
+      <th style="padding: 6px; text-align: right;">收盤</th>
+      <th style="padding: 6px; text-align: right;">漲跌%</th>
+      <th style="padding: 6px; text-align: right;">20日%</th>
+      <th style="padding: 6px;">型態</th>
+      <th style="padding: 6px; text-align: right;">信心</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in watch %}
+    <tr style="border-bottom: 1px solid #ecf0f1; {% if s.hot_industry %}background: #fff8e1;{% endif %}">
+      <td style="padding: 6px; color:#999;">{{ loop.index }}</td>
+      <td style="padding: 6px;">{% if s.hot_industry %}🔥{% endif %}<strong>{{ s.stock_id }}</strong></td>
+      <td style="padding: 6px;">{{ s.name }}</td>
+      <td style="padding: 6px; color: #777; font-size: 12px;">{{ s.industry }}</td>
+      <td style="padding: 6px; text-align: right;">{{ '%.2f'|format(s.close) if s.close else '-' }}</td>
+      <td style="padding: 6px; text-align: right; color: {% if s.change_pct and s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(s.change_pct) if s.change_pct is not none else '-' }}</td>
+      <td style="padding: 6px; text-align: right; color:#777;">{{ '%+.1f'|format(s.ret20_pct) if s.ret20_pct is not none else '-' }}</td>
+      <td style="padding: 6px;">{{ profile_badge(s.profile) }}</td>
+      <td style="padding: 6px; text-align: right;"><strong style="color:#8e44ad;">{{ s.score }}</strong></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <div style="color: #999; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">今日無醞釀中標的。</div>
+{% endif %}
+
+<!-- 四、產業熱度排行 -->
+<h3 style="color: #2c3e50; margin-top: 24px;">【四】產業熱度排行</h3>
+<div style="font-size: 12px; color: #888; margin-bottom: 6px;">依各產業成分股的「站上季線比例 + 多頭排列比例 + 近 20 日動能」算熱度。前 {{ hot_industries|length }} 名標 🔥,上方名單屬熱門產業的會標記。資金常在熱門產業輪動。</div>
 {% if industry_trends %}
 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
   <thead>
@@ -151,7 +185,6 @@
       <th style="padding: 6px; text-align: right;">近20日</th>
       <th style="padding: 6px; text-align: right;">站季線</th>
       <th style="padding: 6px; text-align: right;">多頭排列</th>
-      <th style="padding: 6px; text-align: right;">命中</th>
       <th style="padding: 6px; text-align: right;">熱度</th>
     </tr>
   </thead>
@@ -164,7 +197,6 @@
       <td style="padding: 6px; text-align: right; color: {% if t.avg_ret20 >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.1f'|format(t.avg_ret20) }}%</td>
       <td style="padding: 6px; text-align: right;">{{ t.breadth_ma60|int }}%</td>
       <td style="padding: 6px; text-align: right;">{{ t.bullish_ratio|int }}%</td>
-      <td style="padding: 6px; text-align: right;">{{ t.combo_hits }}</td>
       <td style="padding: 6px; text-align: right;"><strong>{{ t.score }}</strong></td>
     </tr>
     {% endfor %}
@@ -174,105 +206,11 @@
 <div style="color: #999;">產業資料不足,無法排行。</div>
 {% endif %}
 
-<!-- 三、全市場多訊號交集 -->
-<h3 style="color: #2c3e50; margin-top: 24px;">【三】全市場多訊號交集 ({{ combo_hit_count }} 檔)</h3>
-{% if by_combo %}
-  {% for combo_name, stocks in by_combo.items() %}
-  <h4 style="color: #34495e; margin: 16px 0 8px 0;">▎{{ combo_name }} ({{ stocks|length }} 檔)</h4>
-  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-    <thead>
-      <tr style="background: #ecf0f1; text-align: left;">
-        <th style="padding: 6px;">代號</th>
-        <th style="padding: 6px;">名稱</th>
-        <th style="padding: 6px;">產業</th>
-        <th style="padding: 6px; text-align: right;">收盤</th>
-        <th style="padding: 6px; text-align: right;">漲跌%</th>
-        <th style="padding: 6px;">觸發指標</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in stocks[:30] %}
-      <tr style="border-bottom: 1px solid #ecf0f1; {% if s.hot_industry %}background: #fff8e1;{% endif %}">
-        <td style="padding: 6px;">{% if s.hot_industry %}🔥{% endif %}<strong>{{ s.stock_id }}</strong></td>
-        <td style="padding: 6px;">{{ s.name }}</td>
-        <td style="padding: 6px; color: #777; font-size: 12px;">{{ s.industry }}</td>
-        <td style="padding: 6px; text-align: right;">{{ '%.2f'|format(s.close) if s.close else '-' }}</td>
-        <td style="padding: 6px; text-align: right; color: {% if s.change_pct and s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %};">
-          {{ '%+.2f'|format(s.change_pct) if s.change_pct is not none else '-' }}
-        </td>
-        <td style="padding: 6px; color: #666;">
-          {% for h in s.hits %}{{ label.get(h, h) }}{% if not loop.last %} · {% endif %}{% endfor %}
-        </td>
-      </tr>
-      {% endfor %}
-      {% if stocks|length > 30 %}
-      <tr><td colspan="6" style="padding: 6px; color: #999; font-size: 12px;">…還有 {{ stocks|length - 30 }} 檔(🔥 熱門產業已排前),完整清單見 data/signals/{{ date_str.split(' ')[0] }}.json</td></tr>
-      {% endif %}
-    </tbody>
-  </table>
-  {% endfor %}
-{% else %}
-  <div style="color: #999; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">
-    今日全市場無多訊號交集觸發。
-    {% if single_hit_count > 0 %}
-      <br><span style="color: #777;">(另有 {{ single_hit_count }} 檔僅觸發單一訊號,單一訊號歷史勝率有限,故不列出)</span>
-    {% endif %}
-  </div>
-{% endif %}
-
-<!-- 四、醞釀區 / 發動前觀察 -->
-<h3 style="color: #5e35b1; margin-top: 24px;">【四】醞釀區 / 發動前觀察 ({{ leading_hit_count }} 檔)</h3>
-<div style="background: #ede7f6; border: 1px solid #d1c4e9; padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #5e35b1; margin-bottom: 10px;">
-  這些是「<strong>還沒大漲、但出現領先訊號</strong>」的股票:波動壓縮蓄勢、回測支撐轉強、相對大盤走強、或法人默默吸籌。<br>
-  ⚠️ <strong>越早 = 假訊號越多。</strong>這裡是「觀察名單」不是買進清單 — 把它當成「該盯著看的口袋名單」,等它後續真的出現量價發動,再對照前面的追勢訊號確認。
-  {% if index_below_ma20 %}<br>📉 <strong>注意:大盤目前在月線之下(偏弱),此時還能相對走強的個股特別值得留意。</strong>{% endif %}
-</div>
-{% if by_leading %}
-  {% for sig, stocks in by_leading.items() %}
-  <h4 style="color: #5e35b1; margin: 16px 0 8px 0;">🌱 {{ label.get(sig, sig) }} ({{ stocks|length }} 檔)</h4>
-  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-    <thead>
-      <tr style="background: #f3e5f5; text-align: left;">
-        <th style="padding: 6px;">代號</th>
-        <th style="padding: 6px;">名稱</th>
-        <th style="padding: 6px;">產業</th>
-        <th style="padding: 6px; text-align: right;">收盤</th>
-        <th style="padding: 6px; text-align: right;">漲跌%</th>
-        <th style="padding: 6px;">同時出現的醞釀訊號</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in stocks[:30] %}
-      <tr style="border-bottom: 1px solid #ecf0f1; {% if s.hot_industry %}background: #fff8e1;{% endif %}">
-        <td style="padding: 6px;">{% if s.hot_industry %}🔥{% endif %}<strong>{{ s.stock_id }}</strong></td>
-        <td style="padding: 6px;">{{ s.name }}</td>
-        <td style="padding: 6px; color: #777; font-size: 12px;">{{ s.industry }}</td>
-        <td style="padding: 6px; text-align: right;">{{ '%.2f'|format(s.close) if s.close else '-' }}</td>
-        <td style="padding: 6px; text-align: right; color: {% if s.change_pct and s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %};">
-          {{ '%+.2f'|format(s.change_pct) if s.change_pct is not none else '-' }}
-        </td>
-        <td style="padding: 6px; color: #666;">
-          {% for h in s.leading %}{{ label.get(h, h) }}{% if not loop.last %} · {% endif %}{% endfor %}
-        </td>
-      </tr>
-      {% endfor %}
-      {% if stocks|length > 30 %}
-      <tr><td colspan="6" style="padding: 6px; color: #999; font-size: 12px;">…還有 {{ stocks|length - 30 }} 檔,完整清單見 data/signals/{{ date_str.split(' ')[0] }}.json</td></tr>
-      {% endif %}
-    </tbody>
-  </table>
-  {% endfor %}
-{% else %}
-  <div style="color: #999; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">今日無醞釀訊號。</div>
-{% endif %}
-
 <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;">
 
 <div style="font-size: 12px; color: #999;">
-  完整網頁(階段二上線):<br>
-  https://ray319129.github.io/twse<br><br>
-  資料缺漏: {{ no_data_count }} 檔(yfinance 無資料,常見於剛上市/暫停交易/下市)<br>
-  此信由 GitHub Actions 自動寄出。
+  完整清單(含分數明細)見 data/signals/{{ date_str.split(' ')[0] }}.json<br>
+  全市場 {{ scored_count }} 檔評分 · 資料缺漏 {{ no_data_count }} 檔 · 此信由 GitHub Actions 自動寄出。
 </div>
 
 </body>

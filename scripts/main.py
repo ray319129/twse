@@ -24,12 +24,15 @@ from .storage import (
 )
 from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
+from .scoring import compute_conviction
 from .industry import compute_industry_trends
 from .notify import render_email, send_email
 from .utils import log
 
 HOT_INDUSTRY_TOP_N = 5
 
+# 排除的非主流板別(短線流動性/制度考量)
+EXCLUDE_INDUSTRY_KEYWORDS = ("創新版", "創新板")
 
 STRATEGY_LABEL = {
     "bullish_ma_alignment": "多頭排列",
@@ -46,28 +49,10 @@ STRATEGY_LABEL = {
     "short_cover_with_buy": "融券回補+主力買超",
     "monthly_revenue_growth": "月營收連續成長",
     "eps_positive_high_yield": "EPS+高殖利率",
-    # 領先 / 醞釀型
     "coiling_squeeze": "盤底蓄勢",
     "pullback_to_support": "回測支撐",
     "relative_strength_leader": "相對強勢",
     "chip_accumulation": "籌碼吸籌",
-}
-
-CHIP_STRATEGIES = {
-    "inst_consecutive_buy",
-    "foreign_holding_increase",
-    "short_cover_with_buy",
-}
-FUND_STRATEGIES = {
-    "monthly_revenue_growth",
-    "eps_positive_high_yield",
-}
-# 「發動之前」的領先訊號;在 email 獨立成「醞釀區」,與已觸發的追勢訊號分開呈現。
-LEADING_STRATEGIES = {
-    "coiling_squeeze",
-    "pullback_to_support",
-    "relative_strength_leader",
-    "chip_accumulation",
 }
 
 
@@ -82,24 +67,6 @@ def _is_trading_day(today: date) -> bool:
     if inc.empty:
         return False
     return inc.index.max().date() == today
-
-
-def _need_extra_data(price_hits: dict, combos_cfg: list) -> tuple[bool, bool]:
-    """Returns (need_chips, need_fundamentals) based on which combos this stock could potentially form."""
-    need_chips = need_fund = False
-    for combo in combos_cfg or []:
-        reqs = combo.get("requires", [])
-        chip_reqs = [r for r in reqs if r in CHIP_STRATEGIES]
-        fund_reqs = [r for r in reqs if r in FUND_STRATEGIES]
-        non_extra = [r for r in reqs if r not in CHIP_STRATEGIES and r not in FUND_STRATEGIES]
-        if not (chip_reqs or fund_reqs):
-            continue
-        if all(price_hits.get(r, False) for r in non_extra):
-            if chip_reqs:
-                need_chips = True
-            if fund_reqs:
-                need_fund = True
-    return need_chips, need_fund
 
 
 def _update_chips(stock_id: str, today: date, history_days: int = 35) -> pd.DataFrame:
@@ -129,13 +96,6 @@ def _update_eps(stock_id: str) -> pd.DataFrame:
     if new.empty:
         return load_eps(stock_id)
     return upsert_eps(stock_id, new)
-
-
-def _update_per(stock_id: str) -> pd.DataFrame:
-    new = fetch_per_yield(stock_id, days=10)
-    if new.empty:
-        return load_per(stock_id)
-    return upsert_per(stock_id, new)
 
 
 def _chip_summary(chips_df: pd.DataFrame | None) -> dict:
@@ -194,23 +154,38 @@ def _fund_summary(revenue_df, eps_df, per_df) -> dict:
     return out
 
 
-def _is_quiet_base(df_ind: pd.DataFrame) -> bool:
-    """純價格判斷:布林帶寬度落在近 120 日最低 25% 分位、且近 20 日股價持平。
-    用來決定要不要為這檔「安靜的股票」額外抓籌碼來偵測法人吸籌(籌碼吸籌訊號)。
-    刻意比正式的 coiling_squeeze 寬鬆,當作便宜的前置篩,真正判斷在 screener。"""
-    if df_ind.empty or "bb_width" not in df_ind.columns:
-        return False
-    bw = df_ind["bb_width"].dropna()
-    if len(bw) < 60:
-        return False
-    window = bw.tail(120)
-    if float(bw.iloc[-1]) > float(window.quantile(0.25)):
-        return False
-    if len(df_ind) >= 21:
-        c0 = df_ind["close"].iloc[-1]; c20 = df_ind["close"].iloc[-21]
-        if pd.notna(c0) and pd.notna(c20) and c20 and abs(float(c0) / float(c20) - 1) > 0.12:
-            return False
-    return True
+def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
+                 news: bool = False, screen_cfg: dict | None = None) -> dict:
+    """為入榜股票補:技術座標(免費)+ FinMind 籌碼/財報。原地更新並回傳同一 dict。"""
+    sid = pick["stock_id"]; sname = pick.get("name", "")
+    df = load_prices(sid)
+    if not df.empty and len(df) >= 60:
+        df_ind = compute_all(df)
+        if index_close is not None:
+            df_ind = compute_relative_strength(df_ind, index_close, n=60)
+        pick["levels"] = reference_levels(df_ind)
+        if screen_cfg is not None:
+            scr = screen_stock(df_ind, screen_cfg, valuation=pick.get("valuation"))
+            pick["hits"] = [h for h, v in scr["hits"].items() if v]
+            pick["combos"] = scr["combos"]
+    chips_df = _update_chips(sid, today)
+    if chips_df is not None and not chips_df.empty:
+        cs = _chip_summary(chips_df)
+        if cs:
+            pick["chips"] = cs
+    if fundamentals:
+        revenue_df = _update_revenue(sid)
+        eps_df = _update_eps(sid)
+        if (revenue_df is not None and not revenue_df.empty) or (eps_df is not None and not eps_df.empty):
+            pick["fundamentals"] = _fund_summary(revenue_df, eps_df, None)
+    if news:
+        pick["news"] = fetch_news(sid, sname, limit=5)
+    return pick
+
+
+def _clean_for_json(d: dict) -> dict:
+    """移除不可序列化 / 過大的鍵。"""
+    return {k: v for k, v in d.items() if k != "df_ind"}
 
 
 def daily_run(test_mode: bool = False) -> None:
@@ -226,6 +201,13 @@ def daily_run(test_mode: bool = False) -> None:
         )
         return
 
+    rank_cfg = cfg.get("ranking", {})
+    core_count = int(rank_cfg.get("core_count", 10))
+    watch_count = int(rank_cfg.get("watch_count", 20))
+    min_score = float(rank_cfg.get("min_score", 45))
+    enrich_top_n = int(rank_cfg.get("enrich_top_n", 30))
+    score_cfg = {"min_dollar_volume": float(rank_cfg.get("min_dollar_volume", 30_000_000))}
+
     log.info("Loading stock universe...")
     info = fetch_stock_info()
     universe = filter_tradable_stocks(info)
@@ -240,28 +222,22 @@ def daily_run(test_mode: bool = False) -> None:
     if index_close is not None and len(index_close) >= 20:
         idx_ma20 = index_close.rolling(20).mean()
         index_below_ma20 = bool(index_close.iloc[-1] < idx_ma20.iloc[-1])
-    log.info(f"Index loaded: {0 if index_close is None else len(index_close)} bars, 大盤站上月線={not index_below_ma20}")
+    log.info(f"Index: {0 if index_close is None else len(index_close)} bars, 大盤站上月線={not index_below_ma20}")
 
     market_map = dict(zip(universe["stock_id"], universe.get("type", pd.Series(["twse"] * len(universe)))))
     name_map = dict(zip(universe["stock_id"], universe["stock_name"]))
     industry_map = dict(zip(universe["stock_id"], universe.get("industry_category", pd.Series([""] * len(universe)))))
 
-    market_results: list[dict] = []
-    watchlist_results: list[dict] = []
-    anticipation_results: list[dict] = []
+    scored: list[dict] = []          # 全市場評分(只用免費資料)
     no_data: list[str] = []
     industry_rows: list[dict] = []
-    chips_fetched = 0
-    fund_fetched = 0
-    combos_cfg = cfg.get("combos", [])
 
-    # 籌碼吸籌:為「安靜的股票」額外抓籌碼,但用 max_scan 控制每日 API 用量
-    ca_cfg = cfg.get("leading", {}).get("chip_accumulation", {})
-    chip_scan_enabled = bool(ca_cfg.get("enabled"))
-    chip_scan_cap = int(ca_cfg.get("max_scan", 120))
-    chip_scan_used = 0
-
+    # ---------- 第一遍:全市場用免費資料評分 ----------
     for sid, sname in name_map.items():
+        industry = industry_map.get(sid, "") or ""
+        if any(kw in industry for kw in EXCLUDE_INDUSTRY_KEYWORDS):
+            continue
+
         existing = load_prices(sid)
         market = market_map.get(sid, "twse")
         if existing.empty:
@@ -278,149 +254,112 @@ def daily_run(test_mode: bool = False) -> None:
             else:
                 df = existing
 
-        if len(df) < 60:
+        if len(df) < 120:
             continue
 
         df_ind = compute_all(df)
         if index_close is not None:
             df_ind = compute_relative_strength(df_ind, index_close, n=60)
 
-        price_screen = screen_stock(df_ind, cfg)
-        is_watch = sid in watchlist
-        need_chips_combo, need_fund_combo = _need_extra_data(price_screen["hits"], combos_cfg)
-
-        # 安靜的股票 → 為偵測「法人吸籌」額外抓籌碼(受 max_scan 上限保護)
-        want_chip_scan = (
-            chip_scan_enabled and not is_watch and not need_chips_combo
-            and chip_scan_used < chip_scan_cap and _is_quiet_base(df_ind)
-        )
-
-        chips_df = revenue_df = eps_df = None
-        if is_watch or need_chips_combo or want_chip_scan:
-            chips_df = _update_chips(sid, today)
-            chips_fetched += 1
-            if want_chip_scan:
-                chip_scan_used += 1
-        if is_watch or need_fund_combo:
-            revenue_df = _update_revenue(sid)
-            eps_df = _update_eps(sid)
-            fund_fetched += 1
-
-        full_screen = screen_stock(
-            df_ind, cfg,
-            chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=None,
-            valuation=valuation_snapshot.get(sid, {}),
-        )
-        summary = stock_summary(sid, sname, df_ind, full_screen)
-        industry = industry_map.get(sid, "") or ""
-        summary["industry"] = industry
-        summary["valuation"] = valuation_snapshot.get(sid, {})
-        # 把領先訊號從一般觸發指標切出來,獨立成「醞釀區」呈現
-        summary["leading"] = [h for h in summary["hits"] if h in LEADING_STRATEGIES]
-        summary["hits"] = [h for h in summary["hits"] if h not in LEADING_STRATEGIES]
-        if "relative_strength_leader" in summary["leading"] and index_below_ma20:
-            summary["rs_weak_market"] = True  # 大盤回檔仍相對強勢 = 更值得留意
-
         last = df_ind.iloc[-1]
-        close_v = last.get("close")
-        ma20_v = last.get("ma20")
-        ma60_v = last.get("ma60")
+        close_v = last.get("close"); ma5_v = last.get("ma5")
+        ma20_v = last.get("ma20"); ma60_v = last.get("ma60"); ma120_v = last.get("ma120")
+        prev_c = df_ind["close"].iloc[-2] if len(df_ind) >= 2 else None
+        chg = None
+        if pd.notna(close_v) and prev_c is not None and pd.notna(prev_c) and prev_c:
+            chg = round((close_v / prev_c - 1) * 100, 2)
         ret20 = 0.0
         if len(df_ind) >= 21:
             c0, c20 = df_ind["close"].iloc[-1], df_ind["close"].iloc[-21]
             if pd.notna(c0) and pd.notna(c20) and c20:
                 ret20 = float(c0 / c20 - 1)
+        bullish = bool(
+            pd.notna(ma5_v) and pd.notna(ma20_v) and pd.notna(ma60_v) and pd.notna(ma120_v)
+            and ma5_v > ma20_v > ma60_v > ma120_v and pd.notna(close_v) and close_v > ma5_v
+        )
         industry_rows.append({
-            "stock_id": sid,
-            "industry": industry,
-            "change_pct": summary.get("change_pct") or 0.0,
+            "stock_id": sid, "industry": industry,
+            "change_pct": chg or 0.0,
             "above_ma20": bool(pd.notna(close_v) and pd.notna(ma20_v) and close_v > ma20_v),
             "above_ma60": bool(pd.notna(close_v) and pd.notna(ma60_v) and close_v > ma60_v),
-            "bullish": bool(price_screen["hits"].get("bullish_ma_alignment", False)),
-            "ret20": ret20,
-            "combo_hit": bool(full_screen["combos"]),
+            "bullish": bullish, "ret20": ret20, "combo_hit": False,
         })
 
-        if chips_df is not None:
-            summary["chips"] = _chip_summary(chips_df)
-        if revenue_df is not None or eps_df is not None:
-            summary["fundamentals"] = _fund_summary(revenue_df, eps_df, None)
+        conv = compute_conviction(df_ind, valuation_snapshot.get(sid, {}), cfg=score_cfg)
+        if conv:
+            conv.update({
+                "stock_id": sid, "name": sname, "industry": industry,
+                "close": float(close_v) if pd.notna(close_v) else None,
+                "change_pct": chg,
+                "valuation": valuation_snapshot.get(sid, {}),
+            })
+            scored.append(conv)
 
-        if is_watch or summary["combos"] or summary["leading"]:
-            summary["levels"] = reference_levels(df_ind)
-
-        if summary["combos"] or summary["hits"]:
-            market_results.append(summary)
-
-        if summary["leading"]:
-            anticipation_results.append(summary)
-
-        if is_watch:
-            summary = dict(summary)
-            summary["note"] = watchlist[sid]
-            summary["news"] = fetch_news(sid, sname, limit=5)
-            watchlist_results.append(summary)
+    # ---------- 排序 → 核心 / 觀察 ----------
+    core = sorted(
+        [s for s in scored if s["trigger"] and s["score"] >= min_score],
+        key=lambda x: -x["score"],
+    )[:core_count]
+    core_ids = {s["stock_id"] for s in core}
+    watch = sorted(
+        [s for s in scored if s["brewing"] and not s["trigger"]
+         and s["score"] >= min_score and s["stock_id"] not in core_ids],
+        key=lambda x: -x["score"],
+    )[:watch_count]
 
     industry_trends = compute_industry_trends(industry_rows)
     hot_industries = [t["industry"] for t in industry_trends[:HOT_INDUSTRY_TOP_N]]
     hot_set = set(hot_industries)
+    for s in core + watch:
+        s["hot_industry"] = s.get("industry", "") in hot_set
 
-    for r in market_results:
-        r["hot_industry"] = r.get("industry", "") in hot_set
-    for r in watchlist_results:
-        r["hot_industry"] = r.get("industry", "") in hot_set
-    for r in anticipation_results:
-        r["hot_industry"] = r.get("industry", "") in hot_set
+    # ---------- 第二遍:只對核心 + 自選池補抓 FinMind(控制 API 額度) ----------
+    # 觀察層表格只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind 額度留給真正要進場的核心。
+    for s in core[:enrich_top_n]:
+        _enrich_pick(s, today, index_close, fundamentals=True, screen_cfg=cfg)
+
+    watchlist_results: list[dict] = []
+    for sid, note in watchlist.items():
+        sname = name_map.get(sid, sid)
+        base = next((s for s in scored if s["stock_id"] == sid), None)
+        pick = dict(base) if base else {
+            "stock_id": sid, "name": sname,
+            "close": None, "change_pct": None,
+            "valuation": valuation_snapshot.get(sid, {}),
+        }
+        pick["note"] = note
+        pick["hot_industry"] = pick.get("industry", "") in hot_set
+        _enrich_pick(pick, today, index_close, fundamentals=True, news=True, screen_cfg=cfg)
+        watchlist_results.append(pick)
 
     log.info(
-        f"Watchlist hits: {len(watchlist_results)}, market hits: {len(market_results)}, "
-        f"anticipation hits: {len(anticipation_results)}, "
-        f"chips fetched: {chips_fetched} (吸籌掃描 {chip_scan_used}/{chip_scan_cap}), "
-        f"fundamentals fetched: {fund_fetched}, hot industries: {hot_industries}"
+        f"Scored: {len(scored)} | 核心 {len(core)} / 觀察 {len(watch)} / 自選 {len(watchlist_results)} "
+        f"| 大盤站上月線={not index_below_ma20}"
     )
 
     SIGNALS_DIR.mkdir(parents=True, exist_ok=True)
     with open(SIGNALS_DIR / f"{today.isoformat()}.json", "w", encoding="utf-8") as f:
         json.dump({
             "date": today.isoformat(),
-            "watchlist": watchlist_results,
-            "market": market_results,
-            "anticipation": anticipation_results,
+            "core": [_clean_for_json(s) for s in core],
+            "watch": [_clean_for_json(s) for s in watch],
+            "watchlist": [_clean_for_json(s) for s in watchlist_results],
             "industry_trends": industry_trends,
+            "scored_count": len(scored),
             "no_data_count": len(no_data),
-            "chips_fetched": chips_fetched,
-            "fund_fetched": fund_fetched,
         }, f, ensure_ascii=False, indent=2, default=str)
-
-    by_combo: dict[str, list[dict]] = {}
-    for r in market_results:
-        for c in r["combos"]:
-            by_combo.setdefault(c, []).append(r)
-    # 熱門產業的股票排前面
-    for c in by_combo:
-        by_combo[c].sort(key=lambda x: (not x.get("hot_industry", False), -(x.get("change_pct") or 0)))
-
-    # 醞釀區:依領先訊號分組(一檔可同時出現在多個訊號下)
-    by_leading: dict[str, list[dict]] = {}
-    for r in anticipation_results:
-        for h in r["leading"]:
-            by_leading.setdefault(h, []).append(r)
-    for h in by_leading:
-        by_leading[h].sort(key=lambda x: (not x.get("hot_industry", False), -(x.get("change_pct") or 0)))
-
-    single_hit_count = sum(1 for r in market_results if not r["combos"])
 
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),
+        "core": core,
+        "watch": watch,
         "watchlist": watchlist_results,
-        "by_combo": by_combo,
-        "combo_hit_count": sum(len(v) for v in by_combo.values()),
-        "single_hit_count": single_hit_count,
-        "by_leading": by_leading,
-        "leading_hit_count": len(anticipation_results),
-        "index_below_ma20": index_below_ma20,
+        "core_count": len(core),
+        "watch_count": len(watch),
+        "scored_count": len(scored),
         "industry_trends": industry_trends[:10],
         "hot_industries": hot_industries,
+        "index_below_ma20": index_below_ma20,
         "no_data_count": len(no_data),
         "label": STRATEGY_LABEL,
         "test_mode": test_mode,
@@ -429,8 +368,8 @@ def daily_run(test_mode: bool = False) -> None:
     html = render_email("daily_email.html", ctx)
     subject_prefix = "[測試] " if test_mode else ""
     subject = (
-        f"{subject_prefix}[台股選股] {today.strftime('%Y/%m/%d')} "
-        f"自選池 {len(watchlist_results)} / 交集 {ctx['combo_hit_count']} / 醞釀 {len(anticipation_results)} 檔"
+        f"{subject_prefix}[台股短線] {today.strftime('%Y/%m/%d')} "
+        f"核心 {len(core)} / 觀察 {len(watch)} / 自選 {len(watchlist_results)} 檔"
     )
 
     send_email(subject, html)
