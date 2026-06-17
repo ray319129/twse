@@ -72,11 +72,8 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
     out["atr14"] = atr(out["high"], out["low"], out["close"], 14)
 
     out["bb_lower"], out["bb_mid"], out["bb_upper"] = bbands(out["close"], 20, 2.0)
-<<<<<<< HEAD
     # 布林帶寬度(相對中軌的百分比);越小 = 波動越收斂 = 越可能在盤底蓄勢。
     out["bb_width"] = (out["bb_upper"] - out["bb_lower"]) / out["bb_mid"].replace(0, np.nan)
-=======
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
     out["vol_ma5"] = sma(out["volume"], 5)
     out["vol_ma20"] = sma(out["volume"], 20)
@@ -87,7 +84,6 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-<<<<<<< HEAD
 def compute_relative_strength(df: pd.DataFrame, index_close: pd.Series, n: int = 60) -> pd.DataFrame:
     """Append relative-strength-vs-index columns to a price DataFrame.
 
@@ -108,8 +104,6 @@ def compute_relative_strength(df: pd.DataFrame, index_close: pd.Series, n: int =
     return out
 
 
-=======
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 def reference_levels(df: pd.DataFrame, atr_mult: float = 2.0) -> dict:
     """Snapshot of technical reference levels for the latest bar.
     Returns a dict of value-or-None for each level. Distances ('% from close')

@@ -25,10 +25,7 @@ def evaluate_stock(
     revenue_df: pd.DataFrame | None = None,
     eps_df: pd.DataFrame | None = None,
     per_df: pd.DataFrame | None = None,
-<<<<<<< HEAD
     valuation: dict | None = None,
-=======
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 ) -> dict:
     """Evaluate all enabled strategies for one stock. Missing data → strategy False."""
     hits: dict[str, bool] = {}
@@ -169,7 +166,6 @@ def evaluate_stock(
     if e2_cfg.get("enabled"):
         q = int(e2_cfg.get("eps_quarters", 4))
         ymin = float(e2_cfg.get("yield_min", 0.04)) * 100
-<<<<<<< HEAD
         # 殖利率優先用 per_df,沒有就退而用全市場估值快照(valuation snapshot)。
         # 以前這裡只吃 per_df,而 main.py 把 per_df 寫死 None,導致本策略永遠 False。
         fallback_yield = None
@@ -217,9 +213,6 @@ def evaluate_stock(
             min_buy_days=int(ca_cfg.get("min_buy_days", 6)),
             flat_ret20_max=float(ca_cfg.get("flat_ret20_max", 0.08)),
         )
-=======
-        hits["eps_positive_high_yield"] = _eps_positive_high_yield(eps_df, per_df, q, ymin)
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
     return hits
 
@@ -272,17 +265,12 @@ def _monthly_revenue_growth(rev_df, consecutive: int, latest_yoy_min: float) -> 
     return float(tail.iloc[-1]) >= latest_yoy_min
 
 
-<<<<<<< HEAD
 def _eps_positive_high_yield(eps_df, per_df, quarters: int, yield_min_pct: float, fallback_yield: float | None = None) -> bool:
-=======
-def _eps_positive_high_yield(eps_df, per_df, quarters: int, yield_min_pct: float) -> bool:
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     if eps_df is None or eps_df.empty or "eps" not in eps_df.columns:
         return False
     last_eps = eps_df["eps"].dropna().tail(quarters)
     if len(last_eps) < quarters or not (last_eps > 0).all():
         return False
-<<<<<<< HEAD
     y = None
     if per_df is not None and not per_df.empty and "yield_pct" in per_df.columns:
         s = per_df["yield_pct"].dropna()
@@ -402,14 +390,6 @@ def _chip_accumulation(chips_df, df, lookback: int, min_buy_days: int, flat_ret2
             if abs(float(c0) / float(c20) - 1) > flat_ret20_max:
                 return False
     return True
-=======
-    if per_df is None or per_df.empty or "yield_pct" not in per_df.columns:
-        return False
-    y = per_df["yield_pct"].dropna()
-    if y.empty:
-        return False
-    return float(y.iloc[-1]) >= yield_min_pct
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 
 
 def evaluate_combos(hits: dict, combos_cfg: list[dict]) -> list[str]:
@@ -431,18 +411,12 @@ def screen_stock(
     revenue_df: pd.DataFrame | None = None,
     eps_df: pd.DataFrame | None = None,
     per_df: pd.DataFrame | None = None,
-<<<<<<< HEAD
     valuation: dict | None = None,
-=======
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 ) -> dict:
     hits = evaluate_stock(
         df, cfg,
         chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df, per_df=per_df,
-<<<<<<< HEAD
         valuation=valuation,
-=======
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
     )
     combos = evaluate_combos(hits, cfg.get("combos", []))
     return {"hits": hits, "combos": combos}

@@ -83,7 +83,6 @@ fundamental:
     eps_quarters: 4                # 近 4 季 EPS 都需為正
     yield_min: 0.04                # 殖利率 ≥ 4%
 
-<<<<<<< HEAD
 # F. 領先 / 醞釀型(目標:在發動「之前」就抓到。代價:假訊號較多,當觀察名單用)
 leading:
   coiling_squeeze:                 # F1 盤底蓄勢(波動壓縮)
@@ -113,8 +112,6 @@ leading:
     flat_ret20_max: 0.08           # 但近 20 日股價漲跌幅在 ±8% 內(還沒發動)
     max_scan: 120                  # 每日最多為幾檔「安靜股」額外抓籌碼(控制 API 用量)
 
-=======
->>>>>>> 414df8c9b457775ced4be6676c0b06ea699cba4d
 # 多訊號交集組合
 combos:
   - name: 主升段啟動
