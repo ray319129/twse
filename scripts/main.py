@@ -141,16 +141,17 @@ def _update_per(stock_id: str) -> pd.DataFrame:
 def _chip_summary(chips_df: pd.DataFrame | None) -> dict:
     if chips_df is None or chips_df.empty:
         return {}
-    last = chips_df.iloc[-1]
     out: dict = {}
     if "inst_total" in chips_df.columns:
+        inst = chips_df["inst_total"].dropna()
         streak = 0
-        for v in reversed(chips_df["inst_total"].dropna().values):
+        for v in reversed(inst.values):
             if v > 0:
                 streak += 1
             else:
                 break
-        out["inst_total_today"] = int(last.get("inst_total", 0) or 0)
+        # 用最後一個非 NaN 值;籌碼來源外接合併,最後一列的 inst_total 可能是 NaN。
+        out["inst_total_today"] = int(inst.iloc[-1]) if not inst.empty else 0
         out["inst_buy_streak"] = streak
     if "foreign_holding_pct" in chips_df.columns:
         s = chips_df["foreign_holding_pct"].dropna()
