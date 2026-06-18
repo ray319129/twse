@@ -352,12 +352,29 @@ def daily_run(test_mode: bool = False) -> None:
 
     # 歷史追蹤與績效:回看過去所有核心選股的後續走勢(讀剛寫入的 + 歷史 signals)
     try:
-        performance = build_perf_report(as_of=today)
+        performance = build_perf_report(as_of=today, exit_cfg=cfg.get("exit", {}))
     except Exception as e:
         log.warning(f"performance report failed: {e}")
-        performance = {"summary": {}, "by_profile": {}, "recent": [], "total_picks_tracked": 0, "horizons": []}
+        performance = {"overall": {}, "by_horizon": {}, "exit_sim": {}, "ledger": [],
+                       "ledger_total": 0, "ledger_cap": 50, "horizons": [], "total_tracked": 0}
     with open(DATA_DIR / "performance.json", "w", encoding="utf-8") as f:
         json.dump(performance, f, ensure_ascii=False, indent=2, default=str)
+
+    # 網頁資料包(docs/data.json):網頁讀這一包就能呈現與 email 相同內容並互動分類
+    docs_dir = DATA_DIR.parent / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    with open(docs_dir / "data.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "date": today.isoformat(),
+            "generated_at": now_tpe().strftime("%Y-%m-%d %H:%M"),
+            "index_below_ma20": index_below_ma20,
+            "scored_count": len(scored),
+            "core": [_clean_for_json(s) for s in core],
+            "watch": [_clean_for_json(s) for s in watch],
+            "watchlist": [_clean_for_json(s) for s in watchlist_results],
+            "performance": performance,
+            "label": STRATEGY_LABEL,
+        }, f, ensure_ascii=False, indent=2, default=str)
 
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),

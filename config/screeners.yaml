@@ -92,6 +92,13 @@ ranking:
   min_dollar_volume: 30000000  # 日均成交金額門檻(3000 萬),太低直接淘汰
   enrich_top_n: 30           # 只對排名前 N 名補抓 FinMind 籌碼/財報(控制 API 額度)
 
+# ★ 出場模擬(止盈/止損)— 讓績效追蹤算出「真實交易勝率」,而非固定天期快照。
+# 從選股日收盤進場,之後每日用最高/最低價判斷是否觸價出場;同日都觸及則保守假設先觸止損。
+exit:
+  take_profit: 0.12     # 止盈 +12%
+  stop_loss: 0.06       # 止損 -6%
+  max_hold_days: 20     # 最多持有 20 交易日,到期以收盤出場
+
 # F. 領先 / 醞釀型(舊版,已被上面的 ranking 取代,保留供 screen_stock 標籤用)
 leading:
   coiling_squeeze:                 # F1 盤底蓄勢(波動壓縮)

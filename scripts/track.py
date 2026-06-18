@@ -88,10 +88,55 @@ def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date) -> di
     return out
 
 
-def build_report(index_close: pd.Series | None = None, as_of: date | None = None) -> dict:
+def _simulate_exit(df: pd.DataFrame, sig_date: str, entry: float,
+                   tp: float, sl: float, max_hold: int) -> dict | None:
+    """從選股日收盤進場,逐日用最高/最低價判斷止盈/止損;同日都觸及保守假設先觸止損;
+    持有滿 max_hold 交易日以收盤出場;資料還沒到則標『持有中』(未實現)。"""
+    if df is None or df.empty or "close" not in df.columns:
+        return None
+    pos = df.index.get_indexer([pd.Timestamp(sig_date)])
+    if len(pos) == 0 or pos[0] == -1:
+        return None
+    p0 = int(pos[0]); n = len(df)
+    high = df["high"] if "high" in df.columns else df["close"]
+    low = df["low"] if "low" in df.columns else df["close"]
+    tp_price = entry * (1 + tp); sl_price = entry * (1 - sl)
+    for i in range(1, max_hold + 1):
+        d = p0 + i
+        if d >= n:
+            # 還沒累積到 → 仍持有,回報未實現
+            last = n - 1
+            ret = (float(df["close"].iloc[last]) / entry - 1) if last > p0 else 0.0
+            return {"status": "open", "reason": "持有中", "exit_ret": ret,
+                    "exit_price": float(df["close"].iloc[last]) if last > p0 else entry,
+                    "hold_days": max(last - p0, 0)}
+        if pd.notna(low.iloc[d]) and low.iloc[d] <= sl_price:
+            return {"status": "closed", "reason": "止損", "exit_ret": -sl,
+                    "exit_price": round(sl_price, 2), "hold_days": i}
+        if pd.notna(high.iloc[d]) and high.iloc[d] >= tp_price:
+            return {"status": "closed", "reason": "止盈", "exit_ret": tp,
+                    "exit_price": round(tp_price, 2), "hold_days": i}
+    d = p0 + max_hold
+    if d < n:
+        c = float(df["close"].iloc[d])
+        return {"status": "closed", "reason": "到期", "exit_ret": c / entry - 1,
+                "exit_price": c, "hold_days": max_hold}
+    last = n - 1
+    ret = (float(df["close"].iloc[last]) / entry - 1) if last > p0 else 0.0
+    return {"status": "open", "reason": "持有中", "exit_ret": ret,
+            "exit_price": float(df["close"].iloc[last]) if last > p0 else entry,
+            "hold_days": max(last - p0, 0)}
+
+
+def build_report(index_close: pd.Series | None = None, as_of: date | None = None,
+                 exit_cfg: dict | None = None) -> dict:
     picks = _load_core_picks()
     if as_of is None:
         as_of = date.today()
+    exit_cfg = exit_cfg or {}
+    tp = float(exit_cfg.get("take_profit", 0.12))
+    sl = float(exit_cfg.get("stop_loss", 0.06))
+    max_hold = int(exit_cfg.get("max_hold_days", 20))
 
     rows: list[dict] = []
     for p in picks:
@@ -99,7 +144,8 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         perf = _pick_perf(df, p["date"], p["entry"], as_of)
         if perf is None:
             continue
-        rows.append({**p, **perf})
+        sim = _simulate_exit(df, p["date"], p["entry"], tp, sl, max_hold)
+        rows.append({**p, **perf, "exit": sim})
 
     # ---------- 2. 勝率統計(以最新報酬正負;含所有已有 >=1 交易日的選股) ----------
     matured_any = [r for r in rows if r["trading_elapsed"] >= 1 and r["latest_ret"] is not None]
@@ -125,6 +171,21 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "avg_maxgain": round(sum(mg) / len(mg) * 100, 2) if mg else None,
         }
 
+    # ---------- 出場模擬(止盈/止損)→ 真實已實現勝率 ----------
+    closed = [r["exit"] for r in rows if r.get("exit") and r["exit"]["status"] == "closed"]
+    open_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "open")
+    exit_sim = {"take_profit": round(tp * 100, 1), "stop_loss": round(sl * 100, 1),
+                "max_hold_days": max_hold, "closed": len(closed), "open": open_n}
+    if closed:
+        exit_sim.update({
+            "win_rate": round(sum(1 for e in closed if e["exit_ret"] > 0) / len(closed) * 100, 1),
+            "avg_ret": round(sum(e["exit_ret"] for e in closed) / len(closed) * 100, 2),
+            "avg_hold_days": round(sum(e["hold_days"] for e in closed) / len(closed), 1),
+            "tp_rate": round(sum(1 for e in closed if e["reason"] == "止盈") / len(closed) * 100, 1),
+            "sl_rate": round(sum(1 for e in closed if e["reason"] == "止損") / len(closed) * 100, 1),
+            "time_rate": round(sum(1 for e in closed if e["reason"] == "到期") / len(closed) * 100, 1),
+        })
+
     # ---------- 1. 逐檔追蹤台帳(仍在追蹤的,依最新報酬排序) ----------
     active = [r for r in rows if r["trading_elapsed"] <= ACTIVE_TRADING_DAYS]
     active.sort(key=lambda r: -(r["latest_ret"] if r["latest_ret"] is not None else -9))
@@ -137,12 +198,16 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         "peak_price": round(r["peak_price"], 2) if r["peak_price"] is not None else None,
         "peak_gain_pct": round(r["peak_gain"] * 100, 2) if r["peak_gain"] is not None else None,
         "profile": r.get("profile"), "score": r.get("score"),
+        "exit_reason": r["exit"]["reason"] if r.get("exit") else None,
+        "exit_ret_pct": round(r["exit"]["exit_ret"] * 100, 2) if r.get("exit") else None,
+        "hold_days": r["exit"]["hold_days"] if r.get("exit") else None,
     } for r in active]
 
     return {
         "as_of": as_of.isoformat(),
         "overall": overall,
         "by_horizon": by_horizon,
+        "exit_sim": exit_sim,
         "ledger": ledger,
         "ledger_total": len(active),
         "ledger_cap": LEDGER_EMAIL_CAP,
@@ -164,6 +229,11 @@ def _print_report(rep: dict) -> None:
             continue
         mg = f"{s['avg_maxgain']:+.2f}%" if s["avg_maxgain"] is not None else "-"
         print(f"{names[h]:>5} {s['n']:>5} {s['win_rate']:>5.0f}% {s['avg_ret']:>+8.2f}% {mg:>12}")
+    es = rep.get("exit_sim", {})
+    if es.get("closed"):
+        print(f"\n出場模擬(止盈+{es['take_profit']}% / 止損-{es['stop_loss']}% / 最多{es['max_hold_days']}日):")
+        print(f"  已實現勝率 {es['win_rate']}% · 平均報酬 {es['avg_ret']:+.2f}% · 平均持有 {es['avg_hold_days']} 日"
+              f"  (止盈{es['tp_rate']}% / 止損{es['sl_rate']}% / 到期{es['time_rate']}% · 持有中 {es['open']})")
     print(f"\n台帳(仍追蹤 {rep['ledger_total']} 檔,依報酬排序):")
     print(f"{'選股日':>10} {'代號':>6} {'成本':>8} {'最新':>8} {'天':>3} {'報酬':>8} {'最高漲幅':>9}")
     for r in rep["ledger"][:20]:
@@ -173,5 +243,10 @@ def _print_report(rep: dict) -> None:
 
 
 if __name__ == "__main__":
-    rep = build_report()
+    from .config import load_screeners
+    try:
+        ecfg = load_screeners().get("exit", {})
+    except Exception:
+        ecfg = {}
+    rep = build_report(exit_cfg=ecfg)
     _print_report(rep)
