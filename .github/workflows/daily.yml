@@ -52,7 +52,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ docs/data.json
+          git add data/ docs/
           if ! git diff --cached --quiet; then
             git commit -m "data: $(date -u +'%Y-%m-%d') daily update"
             git push

@@ -52,6 +52,7 @@
 <div class="wrap">
   <h1>📈 台股短線選股</h1>
   <div class="sub" id="sub">載入中…</div>
+  <div id="datebar" style="margin:6px 0 12px;"></div>
 
   <div class="tabs" id="tabs">
     <div class="tab active" data-p="core">核心精選</div>
@@ -155,8 +156,11 @@ function renderPerf(){
   const hname={1:'隔日',3:'3日',5:'5日',10:'10日',20:'20日',30:'30日'};
   let stats=`<div class="stats">`;
   if(o.win_rate!=null) stats+=`<div class="stat"><div class="v">${o.win_rate}%</div><div class="l">勝率(最新報酬) · 總 ${o.total} / 賺 ${o.win} / 賠 ${o.loss}</div></div>`;
-  if(es.closed) stats+=`<div class="stat"><div class="v">${es.win_rate}%</div><div class="l">已實現勝率(止盈+${es.take_profit}%/止損-${es.stop_loss}%) · 平均 ${fmt(es.avg_ret)}% · 持有${es.avg_hold_days}日</div></div>`;
-  if(es.closed) stats+=`<div class="stat"><div class="v" style="font-size:16px">止盈 ${es.tp_rate}% · 止損 ${es.sl_rate}% · 到期 ${es.time_rate}%</div><div class="l">出場原因分布 · 持有中 ${es.open} 檔</div></div>`;
+  if(es.closed){
+    stats+=`<div class="stat"><div class="v">${es.win_rate}%</div><div class="l">已實現勝率 · 平均 ${fmt(es.avg_ret)}% · 持有 ${es.avg_hold_days}日<br><span style="font-size:11px">${es.method||''}(硬停損-${es.hard_stop}%/TP1=${es.r_multiple}R)</span></div></div>`;
+    const rs=Object.entries(es.reasons||{}).map(([k,v])=>`${k} ${v}%`).join(' · ');
+    stats+=`<div class="stat"><div class="v" style="font-size:15px">${rs||'-'}</div><div class="l">出場原因分布 · 持有中 ${es.open} 檔</div></div>`;
+  }
   stats+=`</div>`;
 
   let htab='';
@@ -222,11 +226,36 @@ function tabSwitch(p){
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>tabSwitch(t.dataset.p));
 
-fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
-  DATA=d; LABEL=d.label||{};
+let LATEST=null;
+function setSub(){
+  const d=DATA||{};
   const mkt=d.index_below_ma20?'<span class="down">大盤在月線之下(偏弱)</span>':'<span class="up">大盤站上月線(偏多)</span>';
-  $('#sub').innerHTML=`${d.date} · 全市場 ${d.scored_count} 檔評分 · ${mkt} · 更新 ${d.generated_at||''}`;
-  renderCore();renderWatch();renderWatchlist();renderPerf();
+  const tag=(LATEST&&d.date!==LATEST.date)?' <span style="color:var(--warn)">(歷史)</span>':'';
+  $('#sub').innerHTML=`${d.date||''}${tag} · 全市場 ${d.scored_count||0} 檔評分 · ${mkt}${LATEST&&LATEST.generated_at?' · 更新 '+LATEST.generated_at:''}`;
+}
+function loadDay(dt){
+  if(!LATEST) return;
+  if(dt===LATEST.date){DATA=LATEST;LABEL=LATEST.label||{};setSub();renderCore();renderWatch();renderWatchlist();return;}
+  fetch('./history/'+dt+'.json?'+Date.now()).then(r=>r.json()).then(h=>{
+    DATA=Object.assign({}, LATEST, {date:h.date, core:h.core||[], watch:h.watch||[], watchlist:h.watchlist||[],
+      index_below_ma20:h.index_below_ma20, scored_count:h.scored_count});
+    LABEL=DATA.label||{}; setSub(); renderCore(); renderWatch(); renderWatchlist();
+  }).catch(e=>{$('#p-core').innerHTML=`<div class="err">讀取 ${dt} 失敗:${e}</div>`;});
+}
+fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
+  LATEST=d; DATA=d; LABEL=d.label||{};
+  setSub(); renderCore(); renderWatch(); renderWatchlist(); renderPerf();
+  fetch('./dates.json?'+Date.now()).then(r=>r.json()).then(dates=>{
+    if(!dates||dates.length<2){return;}
+    const sel=document.createElement('select'); sel.className='search';
+    dates.slice().reverse().forEach(dt=>{const o=document.createElement('option');o.value=dt;o.textContent=dt+(dt===LATEST.date?' (最新)':'');sel.appendChild(o);});
+    sel.value=LATEST.date;
+    sel.onchange=()=>loadDay(sel.value);
+    const bar=$('#datebar');
+    bar.innerHTML='<span style="font-size:13px;color:var(--muted)">看哪一天的選股:</span> ';
+    bar.appendChild(sel);
+    bar.insertAdjacentHTML('beforeend',' <span style="font-size:11px;color:var(--muted)">(績效分頁為全期累計,不隨日期變動)</span>');
+  }).catch(()=>{});
 }).catch(e=>{$('#sub').innerHTML='';$('#p-core').innerHTML=`<div class="err">讀取 data.json 失敗:${e}。請先讓 GitHub Actions 跑一次產生 docs/data.json。</div>`;});
 </script>
 </body>

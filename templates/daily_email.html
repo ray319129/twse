@@ -226,12 +226,13 @@
   {% if performance.exit_sim and performance.exit_sim.closed %}
   {% set es = performance.exit_sim %}
   <div style="background:#fef9e7;border:1px solid #f7dc6f;border-radius:6px;padding:10px 14px;margin-bottom:10px;font-size:13px;">
-    🎯 <strong>模擬出場(止盈 +{{ es.take_profit }}% / 止損 -{{ es.stop_loss }}% / 最多持有 {{ es.max_hold_days }} 日)</strong><br>
+    🎯 <strong>模擬出場 — {{ es.method }}</strong>
+    <span style="color:#777;font-size:11px;">(硬停損 -{{ es.hard_stop }}% / TP1={{ es.r_multiple }}R / 最多 {{ es.max_hold_days }} 日)</span><br>
     已實現勝率 <strong style="color:#16a085;">{{ es.win_rate }}%</strong> ·
     平均報酬 <span style="color: {% if es.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(es.avg_ret) }}%</span> ·
     平均持有 {{ es.avg_hold_days }} 日 ·
-    <span style="color:#777;">止盈 {{ es.tp_rate }}% / 止損 {{ es.sl_rate }}% / 到期 {{ es.time_rate }}% · 持有中 {{ es.open }} 檔</span>
-    <div style="color:#999;font-size:11px;margin-top:3px;">這才是「有出場規則」下的真實勝率(固定天期報酬只是參考)。出場規則可在 config 調。</div>
+    <span style="color:#777;">出場:{% for k,v in es.reasons.items() %}{{ k }} {{ v }}%{% if not loop.last %} / {% endif %}{% endfor %} · 持有中 {{ es.open }} 檔</span>
+    <div style="color:#999;font-size:11px;margin-top:3px;">這才是「有出場規則」下的真實勝率(固定天期報酬只是參考)。動能流看 5MA、波段流看 20MA;突破 TP1 後啟動移動停利。規則可在 config 調。</div>
   </div>
   {% endif %}
 

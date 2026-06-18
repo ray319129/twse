@@ -363,18 +363,36 @@ def daily_run(test_mode: bool = False) -> None:
     # 網頁資料包(docs/data.json):網頁讀這一包就能呈現與 email 相同內容並互動分類
     docs_dir = DATA_DIR.parent / "docs"
     docs_dir.mkdir(parents=True, exist_ok=True)
+    core_clean = [_clean_for_json(s) for s in core]
+    watch_clean = [_clean_for_json(s) for s in watch]
+    watchlist_clean = [_clean_for_json(s) for s in watchlist_results]
     with open(docs_dir / "data.json", "w", encoding="utf-8") as f:
         json.dump({
             "date": today.isoformat(),
             "generated_at": now_tpe().strftime("%Y-%m-%d %H:%M"),
             "index_below_ma20": index_below_ma20,
             "scored_count": len(scored),
-            "core": [_clean_for_json(s) for s in core],
-            "watch": [_clean_for_json(s) for s in watch],
-            "watchlist": [_clean_for_json(s) for s in watchlist_results],
+            "core": core_clean,
+            "watch": watch_clean,
+            "watchlist": watchlist_clean,
             "performance": performance,
             "label": STRATEGY_LABEL,
         }, f, ensure_ascii=False, indent=2, default=str)
+
+    # 每日選股快照(供網頁「歷史日期切換」)+ 日期索引
+    hist_dir = docs_dir / "history"
+    hist_dir.mkdir(parents=True, exist_ok=True)
+    with open(hist_dir / f"{today.isoformat()}.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "date": today.isoformat(),
+            "index_below_ma20": index_below_ma20,
+            "scored_count": len(scored),
+            "core": core_clean, "watch": watch_clean, "watchlist": watchlist_clean,
+            "label": STRATEGY_LABEL,
+        }, f, ensure_ascii=False, indent=2, default=str)
+    dates = sorted(p.stem for p in hist_dir.glob("*.json"))
+    with open(docs_dir / "dates.json", "w", encoding="utf-8") as f:
+        json.dump(dates, f, ensure_ascii=False)
 
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),
