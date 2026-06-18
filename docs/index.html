@@ -93,7 +93,9 @@
   .stat .l{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.45;}
 
   /* Table */
-  .tbl-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .tbl-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
+  .tbl-wrap::-webkit-scrollbar{height:6px;} .tbl-wrap::-webkit-scrollbar-thumb{background:#d7dce2;border-radius:3px;}
   table.t{width:100%;border-collapse:collapse;font-size:13px;}
   table.t th{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:.01em;
     text-align:left;padding:12px 14px;background:#fbfcfd;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s;}
@@ -123,7 +125,35 @@
   .note-box{background:var(--accent-bg);border:1px solid #e0e3ff;border-radius:var(--radius-sm);padding:11px 14px;font-size:12.5px;color:var(--accent-ink);margin-bottom:14px;line-height:1.55;}
   .foot-note{color:var(--muted-2);font-size:12px;margin-top:26px;text-align:center;}
   .hot{filter:saturate(1.2);}
-  @media(max-width:600px){.wrap{padding:20px 14px 48px;} .score .v{font-size:20px;} table.t th,table.t td{padding:10px 9px;}}
+  /* 手機版 */
+  @media(max-width:640px){
+    .wrap{padding:16px 12px 48px;}
+    .title{font-size:19px;}
+    .sub{font-size:12.5px;}
+    .datebar{font-size:12px;}
+    /* tabs 改水平滑動,不擠成兩排 */
+    .tabs{display:flex;flex-wrap:nowrap;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:14px 0 18px;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{flex:0 0 auto;padding:7px 14px;}
+    .stats{grid-template-columns:1fr;gap:10px;}
+    .stat{padding:14px 16px;} .stat .v{font-size:22px;}
+    .ccard,.card{padding:14px;}
+    .ccard .top{gap:8px;}
+    .tkr{font-size:15px;}
+    .score .v{font-size:20px;}
+    .meta{font-size:12px;}
+    .plan{padding:10px 12px;} .plan table{font-size:11.5px;} .plan td{padding:4px 4px;}
+    .note-box{font-size:12px;padding:10px 12px;}
+    table.t{font-size:12.5px;} table.t th,table.t td{padding:10px 11px;}
+    /* filters:讓搜尋/下拉撐滿、不溢出 */
+    .filters{gap:6px;}
+    select.sel,input.search{flex:1 1 140px;min-width:0;}
+    .sep{display:none;}
+  }
+  @media(max-width:380px){
+    .tkr{font-size:14px;} .score .v{font-size:18px;}
+    .bar{font-size:10.5px;padding:2px 7px;}
+  }
 </style>
 </head>
 <body>
