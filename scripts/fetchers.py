@@ -121,6 +121,9 @@ def fetch_price_history(stock_id: str, market: str, days: int = 400) -> pd.DataF
     })
     keep = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
     df = df[keep].copy()
+    # yfinance 有時對「剛收盤/未定」的最新一根回傳 NaN 收盤,丟掉(否則均線全毀、評分當掉)
+    if "close" in df.columns:
+        df = df[df["close"].notna()]
     df.index.name = "date"
     df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     return df
@@ -146,6 +149,8 @@ def fetch_index_history(days: int = 400, ticker: str = "^TWII") -> pd.DataFrame:
     })
     keep = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
     df = df[keep].copy()
+    if "close" in df.columns:
+        df = df[df["close"].notna()]
     df.index.name = "date"
     df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     return df

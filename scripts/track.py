@@ -103,10 +103,15 @@ def compute_entry_plan(df: pd.DataFrame, ref_idx: int, ref_price: float, style: 
         init_stop = floor; R = ref_price - init_stop
     tp1 = ref_price + rmult * R
     ph = high.iloc[max(0, ref_idx - 60):ref_idx].max()
+    ma5 = float(df["close"].iloc[max(0, ref_idx - 4):ref_idx + 1].mean())
     return {"ref": round(ref_price, 2), "max_entry": round(ref_price * (1 + max_chase), 2),
             "init_stop": round(init_stop, 2), "tp1": round(tp1, 2), "r_abs": R,
             "risk_pct": round(R / ref_price * 100, 2) if ref_price else None, "style": style,
-            "tp1_resistance": bool(pd.notna(ph) and tp1 <= ph <= tp1 * 1.05)}
+            "tp1_resistance": bool(pd.notna(ph) and tp1 <= ph <= tp1 * 1.05),
+            # 隔日開盤分流(A/B/C)的價位線:平盤帶 ±1%、開高 +1.5%、開低 -1%
+            "flat_lo": round(ref_price * 0.99, 2), "flat_hi": round(ref_price * 1.01, 2),
+            "gap_up_line": round(ref_price * 1.015, 2), "gap_dn_line": round(ref_price * 0.99, 2),
+            "trail_ma": int((exit_cfg.get(style, {}) or {}).get("trail_ma", 5 if style == "momentum" else 10))}
 
 
 def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str,

@@ -127,12 +127,23 @@
       <div style="margin-top:2px;font-size:12px;color:#777;">估值:{% if s.valuation.pe %}PE {{ '%.1f'|format(s.valuation.pe) }}{% endif %}{% if s.valuation.yield_pct %} · 殖利率 {{ '%.2f'|format(s.valuation.yield_pct) }}%{% endif %}{% if s.fundamentals and s.fundamentals.eps_latest is defined %} · 最新季EPS {{ s.fundamentals.eps_latest }}{% endif %}</div>
     {% endif %}
     {% if s.plan %}
-      <div style="margin-top:4px;font-size:12px;color:#2c3e50;background:#eef7f1;border:1px solid #cfe8d8;padding:5px 7px;border-radius:4px;">
-        🎯 <strong>明日進場計畫</strong>:參考價 {{ '%.2f'|format(s.plan.ref) }} ·
-        <strong>進場上限 {{ '%.2f'|format(s.plan.max_entry) }}</strong>(開盤高於此別追)·
-        初始停損 <span style="color:#c0392b;">{{ '%.2f'|format(s.plan.init_stop) }}</span> ·
-        第一目標 TP1 <span style="color:#27ae60;">{{ '%.2f'|format(s.plan.tp1) }}</span> ·
-        風險 {{ '%.1f'|format(s.plan.risk_pct) }}R{% if s.plan.tp1_resistance %} <span style="color:#e67e22;">⚠ TP1 上方有壓力</span>{% endif %}
+    {% set p = s.plan %}
+      <div style="margin-top:6px;font-size:12px;color:#2c3e50;background:#eef7f1;border:1px solid #cfe8d8;padding:7px 9px;border-radius:5px;">
+        🎯 <strong>明日進場決策卡</strong>(昨收 {{ '%.2f'|format(p.ref) }})
+        <table style="width:100%;font-size:11.5px;margin-top:4px;border-collapse:collapse;color:#37474f;">
+          <tr><td style="padding:2px 4px;white-space:nowrap;vertical-align:top;"><strong style="color:#2471a3;">A 平盤</strong><br>開 {{ '%.2f'|format(p.flat_lo) }}~{{ '%.2f'|format(p.flat_hi) }}</td>
+            <td style="padding:2px 4px;">等開盤後 15 分鐘,<strong>突破開盤區間高</strong>再進(別開盤就追);沿用下方停損/TP1。</td></tr>
+          <tr><td style="padding:2px 4px;white-space:nowrap;vertical-align:top;"><strong style="color:#e67e22;">B 開高</strong><br>&gt; {{ '%.2f'|format(p.gap_up_line) }}</td>
+            <td style="padding:2px 4px;">防開高走低:<strong>別市價追</strong>。回測昨收 {{ '%.2f'|format(p.ref) }} 附近不破再進(上限 {{ '%.2f'|format(p.max_entry) }});不回頭就放棄。</td></tr>
+          <tr><td style="padding:2px 4px;white-space:nowrap;vertical-align:top;"><strong style="color:#c0392b;">C 開低</strong><br>&lt; {{ '%.2f'|format(p.gap_dn_line) }}</td>
+            <td style="padding:2px 4px;">別接刀:需<strong>站回開盤價 + 帶量吞噬</strong>、且大盤沒同步下殺才試單;直接跌破停損 {{ '%.2f'|format(p.init_stop) }} 則放棄。</td></tr>
+        </table>
+        <div style="margin-top:3px;padding-top:3px;border-top:1px dashed #cfe8d8;">
+          進場後:<strong style="color:#c0392b;">初始停損 {{ '%.2f'|format(p.init_stop) }}</strong> ·
+          <strong style="color:#27ae60;">TP1 {{ '%.2f'|format(p.tp1) }}</strong>(風險 {{ '%.1f'|format(p.risk_pct) }}R,1:2)·
+          觸 TP1 後改移動停利(收盤跌破 {{ p.trail_ma }}MA 出清){% if p.tp1_resistance %} · <span style="color:#e67e22;">⚠TP1上方有壓</span>{% endif %}
+          <br><span style="color:#888;">停損/TP1 請以<strong>實際成交價</strong>重算;部位用固定風險回推股數(別用固定股數)。</span>
+        </div>
       </div>
     {% endif %}
     {% if s.levels and s.levels.atr14 %}

@@ -46,7 +46,11 @@ def price_path(stock_id: str) -> Path:
 
 
 def load_prices(stock_id: str) -> pd.DataFrame:
-    return _load_parquet(price_path(stock_id))
+    df = _load_parquet(price_path(stock_id))
+    # 安全網:忽略收盤為 NaN 的壞 K 棒(yfinance 偶爾寫入未定收盤),否則均線/評分全毀
+    if not df.empty and "close" in df.columns:
+        df = df[df["close"].notna()]
+    return df
 
 
 def save_prices(stock_id: str, df: pd.DataFrame) -> None:

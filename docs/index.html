@@ -97,7 +97,15 @@ function coreCard(s){
   let lvls='';
   if(lv.atr14){lvls=`<div class="meta">📍 20MA ${num(lv.ma20)} · 60MA ${num(lv.ma60)} · <b>2×ATR 停損參考 ${num(lv.stop_2atr)}</b> (${num(lv.stop_2atr_pct,1)}%)</div>`;}
   let plan='';
-  if(s.plan){const p=s.plan;plan=`<div class="meta" style="background:#eef7f1;border:1px solid #cfe8d8;padding:5px 7px;border-radius:4px;color:#2c3e50;">🎯 <b>明日進場計畫</b>:參考 ${num(p.ref)} · <b>進場上限 ${num(p.max_entry)}</b>(開高於此別追)· 停損 <span class="down">${num(p.init_stop)}</span> · TP1 <span class="up">${num(p.tp1)}</span> · 風險 ${num(p.risk_pct,1)}R${p.tp1_resistance?' <span class="warnc">⚠TP1上方有壓</span>':''}</div>`;}
+  if(s.plan){const p=s.plan;plan=`<div class="meta" style="background:#eef7f1;border:1px solid #cfe8d8;padding:7px 9px;border-radius:5px;color:#2c3e50;">
+    🎯 <b>明日進場決策卡</b>(昨收 ${num(p.ref)})
+    <table style="width:100%;font-size:11.5px;margin-top:4px;border-collapse:collapse;color:#37474f;">
+      <tr><td style="padding:2px 4px;white-space:nowrap;vertical-align:top;"><b style="color:#2471a3;">A 平盤</b><br>開 ${num(p.flat_lo)}~${num(p.flat_hi)}</td><td style="padding:2px 4px;">等開盤後15分,<b>突破開盤區間高</b>再進;別開盤就追。</td></tr>
+      <tr><td style="padding:2px 4px;white-space:nowrap;vertical-align:top;"><b style="color:#e67e22;">B 開高</b><br>&gt; ${num(p.gap_up_line)}</td><td style="padding:2px 4px;">防開高走低:<b>別市價追</b>。回測昨收 ${num(p.ref)} 不破再進(上限 ${num(p.max_entry)});不回頭就放棄。</td></tr>
+      <tr><td style="padding:2px 4px;white-space:nowrap;vertical-align:top;"><b style="color:#c0392b;">C 開低</b><br>&lt; ${num(p.gap_dn_line)}</td><td style="padding:2px 4px;">別接刀:需<b>站回開盤價+帶量吞噬</b>、大盤沒同步崩才試單;破停損 ${num(p.init_stop)} 則放棄。</td></tr>
+    </table>
+    <div style="margin-top:3px;padding-top:3px;border-top:1px dashed #cfe8d8;">進場後:<b class="down">停損 ${num(p.init_stop)}</b> · <b class="up">TP1 ${num(p.tp1)}</b>(${num(p.risk_pct,1)}R,1:2)· 觸TP1後移動停利(收盤破${p.trail_ma}MA出清)${p.tp1_resistance?' · <span class="warnc">⚠TP1上方有壓</span>':''}<br><span style="color:#888;">停損/TP1 以實際成交價重算;部位用固定風險回推股數。</span></div>
+  </div>`;}
   return `<div class="card core">
     <div class="row1"><span class="name">${s.hot_industry?'🔥':''}${s.stock_id} ${s.name} ${badge(s.profile)}</span>
       <span class="score" style="color:var(--core)">${s.score}</span></div>
