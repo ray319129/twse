@@ -96,18 +96,21 @@ function coreCard(s){
   }
   let lvls='';
   if(lv.atr14){lvls=`<div class="meta">📍 20MA ${num(lv.ma20)} · 60MA ${num(lv.ma60)} · <b>2×ATR 停損參考 ${num(lv.stop_2atr)}</b> (${num(lv.stop_2atr_pct,1)}%)</div>`;}
+  let plan='';
+  if(s.plan){const p=s.plan;plan=`<div class="meta" style="background:#eef7f1;border:1px solid #cfe8d8;padding:5px 7px;border-radius:4px;color:#2c3e50;">🎯 <b>明日進場計畫</b>:參考 ${num(p.ref)} · <b>進場上限 ${num(p.max_entry)}</b>(開高於此別追)· 停損 <span class="down">${num(p.init_stop)}</span> · TP1 <span class="up">${num(p.tp1)}</span> · 風險 ${num(p.risk_pct,1)}R${p.tp1_resistance?' <span class="warnc">⚠TP1上方有壓</span>':''}</div>`;}
   return `<div class="card core">
     <div class="row1"><span class="name">${s.hot_industry?'🔥':''}${s.stock_id} ${s.name} ${badge(s.profile)}</span>
       <span class="score" style="color:var(--core)">${s.score}</span></div>
     <div class="meta">收 ${num(s.close)} <span class="${cls(s.change_pct)}">(${fmt(s.change_pct)}%)</span> · ${s.industry||''}
       · <b class="up">${trig}</b>${s.ret5_pct!=null?` · 5日 ${fmt(s.ret5_pct,1)}%`:''}${s.ret20_pct!=null?` · 20日 ${fmt(s.ret20_pct,1)}%`:''}</div>
     <div class="bars">趨勢${Math.round(s.trend*100)} · 強度${Math.round(s.rs*100)} · 時機${Math.round(s.setup*100)} · 品質${Math.round(s.quality*100)} · 量能${Math.round(s.liquidity*100)}</div>
-    ${chip}${val}${lvls}</div>`;
+    ${plan}${chip}${val}${lvls}</div>`;
 }
 
 function renderCore(){
   const c=DATA.core||[];
   $('#p-core').innerHTML = `<div class="note">信心分最高、今天有新鮮觸發(帶量突破 / 回測支撐轉強)、未過熱 → 可考慮進場(${c.length} 檔)。</div>`
+    + `<div class="card" style="background:#eef7f1;border:1px solid #cfe8d8;font-size:12px;color:#1d6f5c;">📌 <b>隔日跳空怎麼辦</b>:依每檔「進場計畫」掛<b>限價單</b>,別市價追。開盤在進場上限內才進;<b>開高超過上限就別追</b>(R:R 已破壞),等回測或放棄;開低破初始停損則作廢。停損/TP1 以實際成交價重算,部位用固定風險回推。</div>`
     + (c.length? c.map(coreCard).join('') : `<div class="card">今日無核心標的(大盤偏弱或無新鮮突破)。寧缺勿濫。</div>`);
 }
 
@@ -157,9 +160,9 @@ function renderPerf(){
   let stats=`<div class="stats">`;
   if(o.win_rate!=null) stats+=`<div class="stat"><div class="v">${o.win_rate}%</div><div class="l">勝率(最新報酬) · 總 ${o.total} / 賺 ${o.win} / 賠 ${o.loss}</div></div>`;
   if(es.closed){
-    stats+=`<div class="stat"><div class="v">${es.win_rate}%</div><div class="l">已實現勝率 · 平均 ${fmt(es.avg_ret)}% · 持有 ${es.avg_hold_days}日<br><span style="font-size:11px">${es.method||''}(硬停損-${es.hard_stop}%/TP1=${es.r_multiple}R)</span></div></div>`;
+    stats+=`<div class="stat"><div class="v">${es.win_rate}%</div><div class="l">已實現勝率 · 平均 ${fmt(es.avg_ret)}% · 持有 ${es.avg_hold_days}日<br><span style="font-size:11px">隔日開盤進場 · 開高>${es.max_chase}%棄單 · 硬停損-${es.hard_stop}%/TP1=${es.r_multiple}R</span></div></div>`;
     const rs=Object.entries(es.reasons||{}).map(([k,v])=>`${k} ${v}%`).join(' · ');
-    stats+=`<div class="stat"><div class="v" style="font-size:15px">${rs||'-'}</div><div class="l">出場原因分布 · 持有中 ${es.open} 檔</div></div>`;
+    stats+=`<div class="stat"><div class="v" style="font-size:15px">${rs||'-'}</div><div class="l">出場原因 · 持有中 ${es.open} · 跳空棄單 ${es.skipped_gap||0} · 待進場 ${es.pending||0}</div></div>`;
   }
   stats+=`</div>`;
 

@@ -86,11 +86,35 @@ def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date) -> di
     return out
 
 
-def _simulate_exit(df: pd.DataFrame, sig_date: str, entry: float, style: str, cfg: dict) -> dict | None:
-    """R 倍數初始停損 + 2R 第一目標(TP1)+ 突破 TP1 後啟動移動停利。
+def compute_entry_plan(df: pd.DataFrame, ref_idx: int, ref_price: float, style: str,
+                       exit_cfg: dict, max_chase: float = 0.03) -> dict:
+    """規劃初始停損 / 風險R / TP1 / 建議進場上限。供盤後給「隔日進場」參考,也供出場模擬共用。
+    初始停損 = max(近 N 根結構低, ref×(1-hard));R = ref - 停損;TP1 = ref + r_multiple×R。"""
+    hard = float(exit_cfg.get("hard_stop", 0.07)); rmult = float(exit_cfg.get("r_multiple", 2.0))
+    sc = exit_cfg.get(style, {}) or {}
+    struct_lb = int(sc.get("struct_lookback", 2 if style == "momentum" else 10))
+    low = df["low"] if "low" in df.columns else df["close"]
+    high = df["high"] if "high" in df.columns else df["close"]
+    floor = ref_price * (1 - hard)
+    lo0 = low.iloc[max(0, ref_idx - struct_lb + 1):ref_idx + 1].min()
+    init_stop = floor if (pd.isna(lo0) or float(lo0) >= ref_price) else max(float(lo0), floor)
+    R = ref_price - init_stop
+    if R <= ref_price * 0.005:
+        init_stop = floor; R = ref_price - init_stop
+    tp1 = ref_price + rmult * R
+    ph = high.iloc[max(0, ref_idx - 60):ref_idx].max()
+    return {"ref": round(ref_price, 2), "max_entry": round(ref_price * (1 + max_chase), 2),
+            "init_stop": round(init_stop, 2), "tp1": round(tp1, 2), "r_abs": R,
+            "risk_pct": round(R / ref_price * 100, 2) if ref_price else None, "style": style,
+            "tp1_resistance": bool(pd.notna(ph) and tp1 <= ph <= tp1 * 1.05)}
 
-    動能流(5MA)/ 波段流(20MA)依風格分流;初始停損取近 N 根結構低但不深於 -hard_stop;
-    移動停利回檔 = clamp(atr_mult × ATR%, min_pct, max_pct);同日雙觸保守假設先觸停損。
+
+def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str,
+                   cfg: dict, max_chase: float = 0.03) -> dict | None:
+    """真實出場模擬:以「隔日開盤」進場(貼近實際,不是盤後收盤),並做跳空保護:
+      - 隔日開盤較選股收盤高 > max_chase → 跳空棄單(不追高)
+      - 隔日開盤已跌破初始停損 → 跳空棄單(開低破停損)
+    進場後:未達 TP1 前盤中破初始停損 / 收盤破均線出場;觸 TP1 啟動移動停利。
     """
     if df is None or df.empty or "close" not in df.columns:
         return None
@@ -98,73 +122,77 @@ def _simulate_exit(df: pd.DataFrame, sig_date: str, entry: float, style: str, cf
     if len(pos) == 0 or pos[0] == -1:
         return None
     p0 = int(pos[0]); n = len(df)
+    e = p0 + 1
+    if e >= n:                       # 今天才選,隔日尚未到 → 待進場
+        return {"status": "pending", "reason": "待隔日進場", "exit_ret": None,
+                "hold_days": 0, "entry_price": None, "gap": None}
     high = df["high"] if "high" in df.columns else df["close"]
     low = df["low"] if "low" in df.columns else df["close"]
     close = df["close"]
-
-    hard = float(cfg.get("hard_stop", 0.07)); rmult = float(cfg.get("r_multiple", 2.0))
+    open_ = df["open"] if "open" in df.columns else close
+    rmult = float(cfg.get("r_multiple", 2.0))
     max_hold = int(cfg.get("max_hold_days", 30))
     sc = cfg.get(style, {}) or {}
-    struct_lb = int(sc.get("struct_lookback", 2 if style == "momentum" else 10))
     ma_stop_p = int(sc.get("ma_stop", 5 if style == "momentum" else 20))
     trail_ma_p = int(sc.get("trail_ma", 5 if style == "momentum" else 10))
     tcfg = cfg.get("trail", {}) or {}
     atr_mult = float(tcfg.get("atr_mult", 1.5))
     rmin = float(tcfg.get("min_pct", 0.03)); rmax = float(tcfg.get("max_pct", 0.07))
-
-    ma_stop = sma(close, ma_stop_p)
-    ma_trail = sma(close, trail_ma_p)
+    ma_stop = sma(close, ma_stop_p); ma_trail = sma(close, trail_ma_p)
     atr = atr_ind(high, low, close, 14)
 
-    # 初始停損:近 struct_lb 根結構低,但虧損不超過 hard_stop
-    floor = entry * (1 - hard)
-    lo0 = low.iloc[max(0, p0 - struct_lb + 1):p0 + 1].min()
-    init_stop = floor if (pd.isna(lo0) or lo0 >= entry) else max(float(lo0), floor)
-    R = entry - init_stop
-    if R <= entry * 0.005:           # 風險過小 → 退用硬停損當風險基準
-        init_stop = floor; R = entry - init_stop
-    tp1 = entry + rmult * R
-    ph = high.iloc[max(0, p0 - 60):p0].max()
-    tp1_resistance = bool(pd.notna(ph) and tp1 <= ph <= tp1 * 1.05)
+    oe = open_.iloc[e]
+    if pd.isna(oe):
+        oe = close.iloc[e] if pd.notna(close.iloc[e]) else sig_close
+    entry = float(oe)
+    gap = (entry / sig_close - 1) if sig_close else 0.0
+    plan = compute_entry_plan(df, p0, entry, style, cfg, max_chase)
+    init_stop = plan["init_stop"]; tp1 = plan["tp1"]; R = plan["r_abs"]
+    base = {"entry_price": round(entry, 2), "gap": round(gap * 100, 2),
+            "init_stop": round(init_stop, 2), "tp1": round(tp1, 2),
+            "r_pct": round(R / entry * 100, 2) if entry else None, "style": style}
 
-    def res(reason, price, i, status="closed"):
-        return {"status": status, "reason": reason, "exit_ret": float(price / entry - 1),
-                "exit_price": round(float(price), 2), "hold_days": i,
-                "style": style, "init_stop": round(init_stop, 2), "tp1": round(tp1, 2),
-                "r_pct": round(R / entry * 100, 2), "tp1_resistance": tp1_resistance}
+    if gap > max_chase:              # 跳空開高 → 不追(R:R 已破壞)
+        return {**base, "status": "skip", "reason": "跳空開高棄單", "exit_ret": None, "hold_days": 0}
+    if gap < -max_chase:             # 跳空開低過大 → 隔夜條件已變,棄單
+        return {**base, "status": "skip", "reason": "跳空開低棄單", "exit_ret": None, "hold_days": 0}
+    if entry <= init_stop:           # 開盤已在停損價下 → 棄單
+        return {**base, "status": "skip", "reason": "跳空開低破停損", "exit_ret": None, "hold_days": 0}
 
-    trailing = False; swing_high = entry
-    for i in range(1, max_hold + 1):
-        d = p0 + i
+    def res(reason, price, hold, status="closed"):
+        return {**base, "status": status, "reason": reason,
+                "exit_ret": float(price / entry - 1), "exit_price": round(float(price), 2),
+                "hold_days": hold}
+
+    trailing = False; swing = entry
+    for i in range(0, max_hold):     # i=0 進場當日(已用開盤進場,當日高低可觸發)
+        d = e + i
         if d >= n:
-            last = n - 1
-            price = float(close.iloc[last]) if last > p0 else entry
-            return res("持有中", price, max(last - p0, 0), status="open")
+            last = n - 1; lc = close.iloc[last]
+            return res("持有中", float(lc) if pd.notna(lc) else entry, max(last - e, 0), status="open")
         hi = high.iloc[d]; lo = low.iloc[d]; cl = close.iloc[d]
         if not trailing:
-            if pd.notna(lo) and lo <= init_stop:                       # 盤中破初始/硬停損
+            if pd.notna(lo) and lo <= init_stop:
                 return res("止損", init_stop, i)
-            if pd.notna(cl) and pd.notna(ma_stop.iloc[d]) and cl < ma_stop.iloc[d]:  # 收盤破均線
+            if pd.notna(cl) and pd.notna(ma_stop.iloc[d]) and cl < ma_stop.iloc[d]:
                 return res("均線停損", cl, i)
-            if pd.notna(hi) and hi >= tp1:                             # 觸 TP1 → 啟動移動停利
-                trailing = True; swing_high = max(entry, float(hi))
-                continue
+            if pd.notna(hi) and hi >= tp1:
+                trailing = True; swing = max(entry, float(hi)); continue
         else:
             atr_pct = float(atr.iloc[d] / cl) if (pd.notna(atr.iloc[d]) and pd.notna(cl) and cl) else rmin
             retr = min(max(atr_mult * atr_pct, rmin), rmax)
-            trail_level = swing_high * (1 - retr)                      # 用今天之前的波段高(保守)
+            trail_level = swing * (1 - retr)
             if pd.notna(lo) and lo <= trail_level:
                 return res("移動停利", trail_level, i)
             if pd.notna(cl) and pd.notna(ma_trail.iloc[d]) and cl < ma_trail.iloc[d]:
                 return res("移動停利", cl, i)
             if pd.notna(hi):
-                swing_high = max(swing_high, float(hi))
-    d = p0 + max_hold
-    if d < n:
-        return res("到期", float(close.iloc[d]), max_hold)
-    last = n - 1
-    price = float(close.iloc[last]) if last > p0 else entry
-    return res("持有中", price, max(last - p0, 0), status="open")
+                swing = max(swing, float(hi))
+    d = e + max_hold - 1
+    if d < n and pd.notna(close.iloc[d]):
+        return res("到期", float(close.iloc[d]), max_hold - 1)
+    last = n - 1; lc = close.iloc[last]
+    return res("持有中", float(lc) if pd.notna(lc) else entry, max(last - e, 0), status="open")
 
 
 def _style_of(pick: dict) -> str:
@@ -172,11 +200,12 @@ def _style_of(pick: dict) -> str:
 
 
 def build_report(index_close: pd.Series | None = None, as_of: date | None = None,
-                 exit_cfg: dict | None = None) -> dict:
+                 exit_cfg: dict | None = None, entry_cfg: dict | None = None) -> dict:
     picks = _load_core_picks()
     if as_of is None:
         as_of = date.today()
     exit_cfg = exit_cfg or {}
+    max_chase = float((entry_cfg or {}).get("max_chase", 0.03))
 
     rows: list[dict] = []
     for p in picks:
@@ -184,7 +213,7 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         perf = _pick_perf(df, p["date"], p["entry"], as_of)
         if perf is None:
             continue
-        sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg)
+        sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase)
         rows.append({**p, **perf, "exit": sim})
 
     # ---------- 勝率統計(以最新報酬正負) ----------
@@ -208,15 +237,18 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "avg_maxgain": round(sum(mg) / len(mg) * 100, 2) if mg else None,
         }
 
-    # ---------- 出場模擬(R 倍數 + 移動停利)→ 已實現勝率 ----------
+    # ---------- 出場模擬(隔日開盤進場 + 跳空保護 + R 倍數 + 移動停利)→ 真實已實現勝率 ----------
     closed = [r["exit"] for r in rows if r.get("exit") and r["exit"]["status"] == "closed"]
     open_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "open")
+    skip_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "skip")
+    pending_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "pending")
     exit_sim = {
-        "method": "R 倍數初始停損 + 2R 目標 + 移動停利",
+        "method": "隔日開盤進場 + 跳空保護 + R 倍數 + 移動停利",
         "hard_stop": round(float(exit_cfg.get("hard_stop", 0.07)) * 100, 1),
         "r_multiple": float(exit_cfg.get("r_multiple", 2.0)),
         "max_hold_days": int(exit_cfg.get("max_hold_days", 30)),
-        "closed": len(closed), "open": open_n,
+        "max_chase": round(max_chase * 100, 1),
+        "closed": len(closed), "open": open_n, "skipped_gap": skip_n, "pending": pending_n,
     }
     if closed:
         reasons = {}
@@ -234,22 +266,26 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
     # ---------- 逐檔追蹤台帳(仍追蹤的,依最新報酬排序) ----------
     active = [r for r in rows if r["trading_elapsed"] <= ACTIVE_TRADING_DAYS]
     active.sort(key=lambda r: -(r["latest_ret"] if r["latest_ret"] is not None else -9))
-    ledger = [{
-        "date": r["date"], "stock_id": r["stock_id"], "name": r["name"],
-        "entry": round(r["entry"], 2),
-        "latest_close": round(r["latest_close"], 2) if r["latest_close"] is not None else None,
-        "days": r["days_elapsed"], "trading_elapsed": r["trading_elapsed"],
-        "ret_pct": round(r["latest_ret"] * 100, 2) if r["latest_ret"] is not None else None,
-        "peak_price": round(r["peak_price"], 2) if r["peak_price"] is not None else None,
-        "peak_gain_pct": round(r["peak_gain"] * 100, 2) if r["peak_gain"] is not None else None,
-        "profile": r.get("profile"), "score": r.get("score"),
-        "exit_reason": r["exit"]["reason"] if r.get("exit") else None,
-        "exit_ret_pct": round(r["exit"]["exit_ret"] * 100, 2) if r.get("exit") else None,
-        "hold_days": r["exit"]["hold_days"] if r.get("exit") else None,
-        "tp1": r["exit"]["tp1"] if r.get("exit") else None,
-        "init_stop": r["exit"]["init_stop"] if r.get("exit") else None,
-        "tp1_resistance": r["exit"].get("tp1_resistance") if r.get("exit") else None,
-    } for r in active]
+    def _led(r):
+        ex = r.get("exit") or {}
+        ex_ret = ex.get("exit_ret")
+        return {
+            "date": r["date"], "stock_id": r["stock_id"], "name": r["name"],
+            "entry": round(r["entry"], 2),
+            "latest_close": round(r["latest_close"], 2) if r["latest_close"] is not None else None,
+            "days": r["days_elapsed"], "trading_elapsed": r["trading_elapsed"],
+            "ret_pct": round(r["latest_ret"] * 100, 2) if r["latest_ret"] is not None else None,
+            "peak_price": round(r["peak_price"], 2) if r["peak_price"] is not None else None,
+            "peak_gain_pct": round(r["peak_gain"] * 100, 2) if r["peak_gain"] is not None else None,
+            "profile": r.get("profile"), "score": r.get("score"),
+            "entry_open": ex.get("entry_price"), "gap_pct": ex.get("gap"),
+            "exit_status": ex.get("status"),
+            "exit_reason": ex.get("reason"),
+            "exit_ret_pct": round(ex_ret * 100, 2) if ex_ret is not None else None,
+            "hold_days": ex.get("hold_days"),
+            "tp1": ex.get("tp1"), "init_stop": ex.get("init_stop"),
+        }
+    ledger = [_led(r) for r in active]
 
     return {
         "as_of": as_of.isoformat(),
@@ -280,21 +316,23 @@ def _print_report(rep: dict) -> None:
     es = rep.get("exit_sim", {})
     if es.get("closed"):
         rs = " / ".join(f"{k}{v}%" for k, v in es.get("reasons", {}).items())
-        print(f"\n出場模擬({es['method']};硬停損-{es['hard_stop']}% / TP1={es['r_multiple']}R / 最多{es['max_hold_days']}日):")
+        print(f"\n出場模擬({es['method']};隔日開盤進場,開高>{es.get('max_chase')}% 棄單,硬停損-{es['hard_stop']}% / TP1={es['r_multiple']}R):")
         print(f"  已實現勝率 {es['win_rate']}% · 平均報酬 {es['avg_ret']:+.2f}% · 平均持有 {es['avg_hold_days']} 日"
-              f"  ({rs} · 持有中 {es['open']})")
+              f"  ({rs} · 持有中 {es['open']} · 跳空棄單 {es.get('skipped_gap',0)} · 待進場 {es.get('pending',0)})")
     print(f"\n台帳(仍追蹤 {rep['ledger_total']} 檔,依報酬排序):")
     for r in rep["ledger"][:20]:
-        ex = f"{r['exit_reason']} {r['exit_ret_pct']:+.1f}%" if r["exit_reason"] else "-"
+        ex = f"{r['exit_reason']} {r['exit_ret_pct']:+.1f}%" if r.get("exit_ret_pct") is not None else (r.get("exit_reason") or "-")
         rt = f"{r['ret_pct']:+.2f}%" if r["ret_pct"] is not None else "-"
+        pk = f"{r['peak_gain_pct']:+.1f}%" if r.get("peak_gain_pct") is not None else "-"
         print(f"  {r['date']} {r['stock_id']:>5} 成本{r['entry']:>8} 最新{str(r['latest_close']):>8} "
-              f"{r['days']:>2}天 報酬{rt:>8} 最高{r['peak_gain_pct']:+.1f}% 出場[{ex}]")
+              f"{r['days']:>2}天 報酬{rt:>8} 最高{pk:>7} 出場[{ex}]")
 
 
 if __name__ == "__main__":
     from .config import load_screeners
     try:
-        ecfg = load_screeners().get("exit", {})
+        cfg = load_screeners()
+        ecfg = cfg.get("exit", {}); encfg = cfg.get("entry", {})
     except Exception:
-        ecfg = {}
-    _print_report(build_report(exit_cfg=ecfg))
+        ecfg = {}; encfg = {}
+    _print_report(build_report(exit_cfg=ecfg, entry_cfg=encfg))

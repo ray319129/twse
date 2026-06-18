@@ -99,6 +99,11 @@
 <div style="font-size: 12px; color: #888; margin-bottom: 8px;">
   信心分最高、<strong>且今天出現新鮮觸發</strong>(帶量突破 或 回測支撐轉強)、且未過熱的標的。依信心分排序。短線(隔日沖/隔週)優先看這層。
 </div>
+<div style="font-size: 12px; color:#1d6f5c; background:#eef7f1; border:1px solid #cfe8d8; padding:8px 12px; border-radius:6px; margin-bottom:10px;">
+  📌 <strong>隔日跳空怎麼辦</strong>:用下方每檔的「進場計畫」掛<strong>限價單</strong>,別掛市價追。
+  ① 開盤價在「進場上限」內 → 可進場;② <strong>開高超過上限 → 別追</strong>,等回測到參考價附近再進、或直接放棄(R:R 已被破壞);
+  ③ 開低跌破「初始停損」→ 此單作廢。停損/TP1 都以你的<strong>實際成交價</strong>重算,部位大小用固定風險回推(別用固定股數)。
+</div>
 {% if core %}
   {% for s in core %}
   <div style="background:#fff; border:1px solid #e0b4b0; border-left:4px solid #c0392b; border-radius:6px; padding:10px 14px; margin-bottom:10px;">
@@ -120,6 +125,15 @@
     {% endif %}
     {% if s.valuation and (s.valuation.pe or s.valuation.yield_pct) %}
       <div style="margin-top:2px;font-size:12px;color:#777;">估值:{% if s.valuation.pe %}PE {{ '%.1f'|format(s.valuation.pe) }}{% endif %}{% if s.valuation.yield_pct %} · 殖利率 {{ '%.2f'|format(s.valuation.yield_pct) }}%{% endif %}{% if s.fundamentals and s.fundamentals.eps_latest is defined %} · 最新季EPS {{ s.fundamentals.eps_latest }}{% endif %}</div>
+    {% endif %}
+    {% if s.plan %}
+      <div style="margin-top:4px;font-size:12px;color:#2c3e50;background:#eef7f1;border:1px solid #cfe8d8;padding:5px 7px;border-radius:4px;">
+        🎯 <strong>明日進場計畫</strong>:參考價 {{ '%.2f'|format(s.plan.ref) }} ·
+        <strong>進場上限 {{ '%.2f'|format(s.plan.max_entry) }}</strong>(開盤高於此別追)·
+        初始停損 <span style="color:#c0392b;">{{ '%.2f'|format(s.plan.init_stop) }}</span> ·
+        第一目標 TP1 <span style="color:#27ae60;">{{ '%.2f'|format(s.plan.tp1) }}</span> ·
+        風險 {{ '%.1f'|format(s.plan.risk_pct) }}R{% if s.plan.tp1_resistance %} <span style="color:#e67e22;">⚠ TP1 上方有壓力</span>{% endif %}
+      </div>
     {% endif %}
     {% if s.levels and s.levels.atr14 %}
       <div style="margin-top:3px;font-size:12px;color:#555;background:#f8f9fa;padding:4px 6px;border-radius:4px;">
@@ -231,8 +245,8 @@
     已實現勝率 <strong style="color:#16a085;">{{ es.win_rate }}%</strong> ·
     平均報酬 <span style="color: {% if es.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(es.avg_ret) }}%</span> ·
     平均持有 {{ es.avg_hold_days }} 日 ·
-    <span style="color:#777;">出場:{% for k,v in es.reasons.items() %}{{ k }} {{ v }}%{% if not loop.last %} / {% endif %}{% endfor %} · 持有中 {{ es.open }} 檔</span>
-    <div style="color:#999;font-size:11px;margin-top:3px;">這才是「有出場規則」下的真實勝率(固定天期報酬只是參考)。動能流看 5MA、波段流看 20MA;突破 TP1 後啟動移動停利。規則可在 config 調。</div>
+    <span style="color:#777;">出場:{% for k,v in es.reasons.items() %}{{ k }} {{ v }}%{% if not loop.last %} / {% endif %}{% endfor %} · 持有中 {{ es.open }} · <strong>跳空棄單 {{ es.skipped_gap }}</strong> · 待進場 {{ es.pending }}</span>
+    <div style="color:#999;font-size:11px;margin-top:3px;">以<strong>隔日開盤</strong>進場模擬(貼近實際):開高超過 {{ es.max_chase }}% 視為跳空棄單(不追)。動能流看 5MA、波段流看 20MA;突破 TP1 後移動停利。規則可在 config 調。</div>
   </div>
   {% endif %}
 

@@ -1,8 +1,10 @@
 from __future__ import annotations
 import argparse
 import json
+import math
 from datetime import date, timedelta
 
+import numpy as np
 import pandas as pd
 
 from .config import (
@@ -26,7 +28,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
-from .track import build_report as build_perf_report
+from .track import build_report as build_perf_report, compute_entry_plan, _style_of
 from .notify import render_email, send_email
 from .utils import log
 
@@ -156,8 +158,10 @@ def _fund_summary(revenue_df, eps_df, per_df) -> dict:
 
 
 def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
-                 news: bool = False, screen_cfg: dict | None = None) -> dict:
-    """為入榜股票補:技術座標(免費)+ FinMind 籌碼/財報。原地更新並回傳同一 dict。"""
+                 news: bool = False, screen_cfg: dict | None = None,
+                 plan_cfg: tuple | None = None) -> dict:
+    """為入榜股票補:技術座標(免費)+ FinMind 籌碼/財報。原地更新並回傳同一 dict。
+    plan_cfg = (exit_cfg, max_chase) 時,額外算「明日進場計畫」(參考價/進場上限/停損/TP1/R)。"""
     sid = pick["stock_id"]; sname = pick.get("name", "")
     df = load_prices(sid)
     if not df.empty and len(df) >= 60:
@@ -169,6 +173,10 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
             scr = screen_stock(df_ind, screen_cfg, valuation=pick.get("valuation"))
             pick["hits"] = [h for h, v in scr["hits"].items() if v]
             pick["combos"] = scr["combos"]
+        if plan_cfg is not None and pick.get("close"):
+            exit_cfg, max_chase = plan_cfg
+            pick["plan"] = compute_entry_plan(df_ind, len(df_ind) - 1, float(pick["close"]),
+                                              _style_of(pick), exit_cfg, max_chase)
     chips_df = _update_chips(sid, today)
     if chips_df is not None and not chips_df.empty:
         cs = _chip_summary(chips_df)
@@ -187,6 +195,23 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
 def _clean_for_json(d: dict) -> dict:
     """移除不可序列化 / 過大的鍵。"""
     return {k: v for k, v in d.items() if k != "df_ind"}
+
+
+def _json_safe(o):
+    """遞迴把 NaN / Inf 轉成 None。Python 的 json 預設會把 float('nan') 寫成裸字 NaN,
+    那不是合法 JSON,瀏覽器 fetch().json() 會整包失敗。寫檔前一律先過這層。"""
+    if isinstance(o, dict):
+        return {k: _json_safe(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_json_safe(v) for v in o]
+    if isinstance(o, float):
+        return o if math.isfinite(o) else None
+    if isinstance(o, np.floating):
+        f = float(o)
+        return f if math.isfinite(f) else None
+    if isinstance(o, np.integer):
+        return int(o)
+    return o
 
 
 def daily_run(test_mode: bool = False) -> None:
@@ -316,8 +341,9 @@ def daily_run(test_mode: bool = False) -> None:
 
     # ---------- 第二遍:只對核心 + 自選池補抓 FinMind(控制 API 額度) ----------
     # 觀察層表格只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind 額度留給真正要進場的核心。
+    plan_cfg = (cfg.get("exit", {}), float(cfg.get("entry", {}).get("max_chase", 0.03)))
     for s in core[:enrich_top_n]:
-        _enrich_pick(s, today, index_close, fundamentals=True, screen_cfg=cfg)
+        _enrich_pick(s, today, index_close, fundamentals=True, screen_cfg=cfg, plan_cfg=plan_cfg)
 
     watchlist_results: list[dict] = []
     for sid, note in watchlist.items():
@@ -340,7 +366,7 @@ def daily_run(test_mode: bool = False) -> None:
 
     SIGNALS_DIR.mkdir(parents=True, exist_ok=True)
     with open(SIGNALS_DIR / f"{today.isoformat()}.json", "w", encoding="utf-8") as f:
-        json.dump({
+        json.dump(_json_safe({
             "date": today.isoformat(),
             "core": [_clean_for_json(s) for s in core],
             "watch": [_clean_for_json(s) for s in watch],
@@ -348,17 +374,17 @@ def daily_run(test_mode: bool = False) -> None:
             "industry_trends": industry_trends,
             "scored_count": len(scored),
             "no_data_count": len(no_data),
-        }, f, ensure_ascii=False, indent=2, default=str)
+        }), f, ensure_ascii=False, indent=2, default=str)
 
     # 歷史追蹤與績效:回看過去所有核心選股的後續走勢(讀剛寫入的 + 歷史 signals)
     try:
-        performance = build_perf_report(as_of=today, exit_cfg=cfg.get("exit", {}))
+        performance = build_perf_report(as_of=today, exit_cfg=cfg.get("exit", {}), entry_cfg=cfg.get("entry", {}))
     except Exception as e:
         log.warning(f"performance report failed: {e}")
         performance = {"overall": {}, "by_horizon": {}, "exit_sim": {}, "ledger": [],
                        "ledger_total": 0, "ledger_cap": 50, "horizons": [], "total_tracked": 0}
     with open(DATA_DIR / "performance.json", "w", encoding="utf-8") as f:
-        json.dump(performance, f, ensure_ascii=False, indent=2, default=str)
+        json.dump(_json_safe(performance), f, ensure_ascii=False, indent=2, default=str)
 
     # 網頁資料包(docs/data.json):網頁讀這一包就能呈現與 email 相同內容並互動分類
     docs_dir = DATA_DIR.parent / "docs"
@@ -367,7 +393,7 @@ def daily_run(test_mode: bool = False) -> None:
     watch_clean = [_clean_for_json(s) for s in watch]
     watchlist_clean = [_clean_for_json(s) for s in watchlist_results]
     with open(docs_dir / "data.json", "w", encoding="utf-8") as f:
-        json.dump({
+        json.dump(_json_safe({
             "date": today.isoformat(),
             "generated_at": now_tpe().strftime("%Y-%m-%d %H:%M"),
             "index_below_ma20": index_below_ma20,
@@ -377,19 +403,19 @@ def daily_run(test_mode: bool = False) -> None:
             "watchlist": watchlist_clean,
             "performance": performance,
             "label": STRATEGY_LABEL,
-        }, f, ensure_ascii=False, indent=2, default=str)
+        }), f, ensure_ascii=False, indent=2, default=str)
 
     # 每日選股快照(供網頁「歷史日期切換」)+ 日期索引
     hist_dir = docs_dir / "history"
     hist_dir.mkdir(parents=True, exist_ok=True)
     with open(hist_dir / f"{today.isoformat()}.json", "w", encoding="utf-8") as f:
-        json.dump({
+        json.dump(_json_safe({
             "date": today.isoformat(),
             "index_below_ma20": index_below_ma20,
             "scored_count": len(scored),
             "core": core_clean, "watch": watch_clean, "watchlist": watchlist_clean,
             "label": STRATEGY_LABEL,
-        }, f, ensure_ascii=False, indent=2, default=str)
+        }), f, ensure_ascii=False, indent=2, default=str)
     dates = sorted(p.stem for p in hist_dir.glob("*.json"))
     with open(docs_dir / "dates.json", "w", encoding="utf-8") as f:
         json.dump(dates, f, ensure_ascii=False)
