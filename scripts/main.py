@@ -164,6 +164,10 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
     plan_cfg = (exit_cfg, max_chase) 時,額外算「明日進場計畫」(參考價/進場上限/停損/TP1/R)。"""
     sid = pick["stock_id"]; sname = pick.get("name", "")
     df = load_prices(sid)
+    if not df.empty:
+        # 對齊基準日:正常跑時 today=當天、本機資料本就 <= today(無作用);
+        # 歷史測試時把價格截到指定日,座標/決策卡才反映那天的收盤。
+        df = df[df.index.date <= today]
     if not df.empty and len(df) >= 60:
         df_ind = compute_all(df)
         if index_close is not None:
@@ -214,11 +218,17 @@ def _json_safe(o):
     return o
 
 
-def daily_run(test_mode: bool = False) -> None:
+def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     assert_env()
     cfg = load_screeners()
     watchlist = load_watchlist()
-    today = now_tpe().date()
+    today = as_of or now_tpe().date()
+    historical = as_of is not None
+    if historical:
+        # 手動指定日期 = 歷史測試:以本機快取價格截到當天為基準,跳過交易日檢查、
+        # 不抓增量資料(結果可重現),寄信前綴 [測試]。完全不影響每日自動跑當天的行為。
+        test_mode = True
+        log.info(f"歷史測試模式:以 {today} 為基準,使用本機快取價格(截到當天),不抓增量。")
 
     if not test_mode and not _is_trading_day(today):
         log.info(
@@ -244,6 +254,8 @@ def daily_run(test_mode: bool = False) -> None:
     # 大盤指數(相對強度用),整個 run 只抓一次
     index_df = fetch_index_history(days=400)
     index_close = index_df["close"] if not index_df.empty else None
+    if historical and index_close is not None:
+        index_close = index_close[index_close.index.date <= today]
     index_below_ma20 = False
     if index_close is not None and len(index_close) >= 20:
         idx_ma20 = index_close.rolling(20).mean()
@@ -267,6 +279,9 @@ def daily_run(test_mode: bool = False) -> None:
         existing = load_prices(sid)
         market = market_map.get(sid, "twse")
         if existing.empty:
+            if historical:
+                # 歷史測試不抓網路;沒有本機快取就略過這檔
+                continue
             new_df = fetch_price_history(sid, market, days=400)
             if new_df.empty:
                 no_data.append(sid)
@@ -274,11 +289,14 @@ def daily_run(test_mode: bool = False) -> None:
             df = upsert_prices(sid, new_df)
         else:
             last_date = existing.index.max().date()
-            if (today - last_date).days >= 1:
+            if not historical and (today - last_date).days >= 1:
                 inc = fetch_price_history(sid, market, days=10)
                 df = upsert_prices(sid, inc) if not inc.empty else existing
             else:
                 df = existing
+
+        if historical:
+            df = df[df.index.date <= today]
 
         if len(df) < 120:
             continue
@@ -450,9 +468,13 @@ def daily_run(test_mode: bool = False) -> None:
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--test", action="store_true", help="Bypass trading-day check; subject prefixed [測試]")
+    p.add_argument("--date", metavar="YYYY-MM-DD",
+                   help="歷史測試:以指定日期為基準,用本機快取價格截到當天(不抓網路增量、"
+                        "跳過交易日檢查、寄[測試]信)。不影響每日自動跑當天的行為。")
     return p.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    daily_run(test_mode=args.test)
+    as_of = date.fromisoformat(args.date) if args.date else None
+    daily_run(test_mode=args.test, as_of=as_of)

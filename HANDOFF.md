@@ -82,6 +82,11 @@ M.daily_run(test_mode=True)
 驗證 JSON:`json.loads(text, parse_constant=lambda c:(_ for _ in()).throw(ValueError(c)))`。
 驗證網頁 JS:抽出 `<script>` 內容 `node --check`。
 
+### 4.1 指定基準日測試 `--date`(休市也能跑)
+`python -m scripts.main --date YYYY-MM-DD`:以指定日為基準,**本機快取價格 + 大盤指數截到當天**(訊號/決策卡/相對強度都反映那天收盤、不取未來棒),跳過交易日檢查、**不抓網路增量**(結果可重現)、寄 `[測試]` 信。沒給 `--date` 時行為完全不變(跑當天)。
+- GitHub Actions → Daily Screener → Run workflow → 填 `date` 欄即可雲端跑。**填了日期的手動跑會跳過 commit**(`if: github.event.inputs.date == ''`),不覆蓋線上 `data.json`;排程與日期留空的手動跑照常 commit。
+- 本機跑會就地寫 `docs/*.json`、`data/signals/<date>.json` 等,測完照慣例 `git checkout -- data/ docs/` + `git clean -fd -- data/signals docs/history`。
+
 ---
 
 ## 5. 目前狀態 / 立即待辦(使用者動作)

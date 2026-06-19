@@ -10,6 +10,10 @@ on:
         description: "Send email with [測試] prefix"
         required: false
         default: "false"
+      date:
+        description: "歷史測試基準日 YYYY-MM-DD(留空=跑當天)。指定後只用本機快取價格、寄[測試]信,且不提交/覆蓋線上資料"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -42,13 +46,16 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
         run: |
-          if [ "${{ github.event.inputs.test }}" = "true" ]; then
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            python -m scripts.main --date "${{ github.event.inputs.date }}"
+          elif [ "${{ github.event.inputs.test }}" = "true" ]; then
             python -m scripts.main --test
           else
             python -m scripts.main
           fi
 
       - name: Commit data updates
+        if: ${{ github.event.inputs.date == '' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
