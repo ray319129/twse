@@ -4,11 +4,12 @@ import time
 import urllib.parse
 from datetime import date, datetime, timedelta
 import pandas as pd
+import requests
 import feedparser
 import yfinance as yf
 
 from .config import FINMIND_TOKEN, META_DIR
-from .utils import http_get_json, log, chunked
+from .utils import http_get_json, log, chunked, UA
 
 # yfinance prints its own ERROR-level "possibly delisted" lines for every miss.
 # We already retry + log via our own helpers, so suppress yfinance's noise.
@@ -427,6 +428,141 @@ def fetch_valuation_snapshot(d: date | None = None) -> dict[str, dict]:
                 return out
     log.warning("Valuation snapshot empty (TWSE BWIBBU unavailable)")
     return {}
+
+
+# ---------- 盤前 / 即時(premarket)----------
+# 全部免費、非官方/盡力而為;任何失敗都回空(呼叫端降級不整包死)。
+
+def _yf_overnight(ticker: str) -> dict | None:
+    """抓某商品最近兩個收盤算隔夜漲跌%。給美股盤前閘門(SOX/NQ/VIX)與 ADR 用。"""
+    try:
+        df = yf.download(ticker, period="7d", progress=False, auto_adjust=False, threads=False)
+    except Exception as e:
+        log.warning(f"yf overnight {ticker} failed: {e}")
+        return None
+    if df is None or df.empty:
+        return None
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    if "Close" not in df.columns:
+        return None
+    close = df["Close"].dropna()
+    if len(close) < 2:
+        return None
+    last = float(close.iloc[-1]); prev = float(close.iloc[-2])
+    pct = (last / prev - 1) * 100 if prev else None
+    return {"last": round(last, 2), "prev": round(prev, 2),
+            "pct": round(pct, 2) if pct is not None else None}
+
+
+def fetch_market_gate() -> dict:
+    """隔夜國際盤(已收)當『大盤盤前閘門』:費半 SOX、NASDAQ 期貨、S&P 期貨、VIX。
+    回傳 {sox/nasdaq/sp500/vix: {last, prev, pct}};抓不到的鍵略過。"""
+    out: dict[str, dict] = {}
+    for key, ticker in (("sox", "^SOX"), ("nasdaq", "NQ=F"), ("sp500", "ES=F"), ("vix", "^VIX")):
+        d = _yf_overnight(ticker)
+        if d:
+            out[key] = d
+    return out
+
+
+def fetch_adr_changes(adr_map: dict[str, str]) -> dict[str, dict]:
+    """台股代號 → 美股 ADR 的隔夜漲跌(個股級盤前佐證)。回傳 {stock_id: {ticker, last, pct}}."""
+    out: dict[str, dict] = {}
+    for sid, tk in (adr_map or {}).items():
+        d = _yf_overnight(tk)
+        if d:
+            out[sid] = {"ticker": tk, **d}
+    return out
+
+
+def fetch_intraday_1m(stock_id: str, market: str) -> pd.DataFrame:
+    """yfinance 當日 1 分K(開盤區間/ORB 用)。回傳 index 為台北時區的 OHLCV;空 DataFrame on failure。
+    用歷史分K(非即時快照)→ 即使 Actions 延遲到開盤後才跑,09:00–09:15 區間仍在,能正確重建。"""
+    ticker = yf_ticker(stock_id, market)
+    try:
+        df = yf.download(ticker, period="1d", interval="1m",
+                         progress=False, auto_adjust=False, threads=False)
+    except Exception as e:
+        log.warning(f"intraday 1m {ticker} failed: {e}")
+        return pd.DataFrame()
+    if df is None or df.empty:
+        return pd.DataFrame()
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    df = df.rename(columns={"Open": "open", "High": "high", "Low": "low",
+                            "Close": "close", "Volume": "volume"})
+    keep = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
+    df = df[keep].copy()
+    try:
+        idx = df.index
+        df.index = idx.tz_convert("Asia/Taipei") if idx.tz is not None else idx.tz_localize("Asia/Taipei")
+    except Exception:
+        pass
+    return df
+
+
+_MIS_INDEX = "https://mis.twse.com.tw/stock/index.jsp"
+_MIS_API = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
+
+
+def _mis_num(x):
+    try:
+        s = str(x).replace(",", "").strip()
+        if s in ("", "-", "--", "N/A"):
+            return None
+        return float(s)
+    except Exception:
+        return None
+
+
+def fetch_mis_quotes(symbols: list[tuple[str, str]]) -> dict[str, dict]:
+    """TWSE MIS 即時/盤前試撮報價(免金鑰、非官方)。symbols=[(stock_id, market)]。
+    08:30–09:00 試撮時 z 可能為 '-',改用最佳買賣中價 / 開盤 / 昨收估『預估開盤價』。
+    回傳 {stock_id: {price, src, open, high, low, prev_close, acc_vol, name}}。失敗回 {}。"""
+    if not symbols:
+        return {}
+
+    def ch(sid: str, mkt: str) -> str:
+        return ("otc_" if mkt == "tpex" else "tse_") + f"{sid}.tw"
+
+    out: dict[str, dict] = {}
+    sess = requests.Session()
+    sess.headers.update({"User-Agent": UA, "Referer": _MIS_INDEX})
+    try:
+        sess.get(_MIS_INDEX, timeout=15)   # 先取 cookie,MIS 對無 cookie 的請求常擋
+    except Exception:
+        pass
+    for batch in chunked(list(symbols), 50):
+        ex_ch = "|".join(ch(s, m) for s, m in batch)
+        params = {"ex_ch": ex_ch, "json": "1", "delay": "0", "_": str(int(time.time() * 1000))}
+        try:
+            r = sess.get(_MIS_API, params=params, timeout=20)
+            r.raise_for_status()
+            j = r.json()
+        except Exception as e:
+            log.warning(f"MIS fetch failed: {e}")
+            continue
+        for it in (j.get("msgArray") or []):
+            sid = str(it.get("c", "")).strip()
+            if not sid:
+                continue
+            z = _mis_num(it.get("z")); o = _mis_num(it.get("o"))
+            h = _mis_num(it.get("h")); l = _mis_num(it.get("l")); y = _mis_num(it.get("y"))
+            bid = _mis_num((it.get("b") or "").split("_")[0])
+            ask = _mis_num((it.get("a") or "").split("_")[0])
+            if z is not None:
+                price, src = z, "成交/試撮"
+            elif bid is not None and ask is not None:
+                price, src = round((bid + ask) / 2, 2), "買賣中價"
+            elif o is not None:
+                price, src = o, "開盤"
+            else:
+                price, src = y, "昨收"
+            out[sid] = {"price": price, "src": src, "open": o, "high": h, "low": l,
+                        "prev_close": y, "acc_vol": _mis_num(it.get("v")), "name": it.get("n", "")}
+        time.sleep(0.4)
+    return out
 
 
 # ---------- Google News RSS ----------

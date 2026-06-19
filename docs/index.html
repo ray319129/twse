@@ -125,6 +125,28 @@
   .note-box{background:var(--accent-bg);border:1px solid #e0e3ff;border-radius:var(--radius-sm);padding:11px 14px;font-size:12.5px;color:var(--accent-ink);margin-bottom:14px;line-height:1.55;}
   .foot-note{color:var(--muted-2);font-size:12px;margin-top:26px;text-align:center;}
   .hot{filter:saturate(1.2);}
+
+  /* 盤中即時 */
+  .live-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .live-upd{font-size:12px;color:var(--muted);}
+  .refresh{padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
+    cursor:pointer;font-size:12.5px;font-weight:600;box-shadow:var(--shadow-sm);transition:all .16s ease;}
+  .refresh:hover{background:#fbfcfd;border-color:#dfe3e8;}
+  .gate{border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;border:1px solid var(--line);}
+  .gate-on{background:var(--up-bg);border-color:#bbf7d0;} .gate-off{background:var(--down-bg);border-color:#fecaca;}
+  .gate-neu{background:#f1f5f9;border-color:#e2e8f0;}
+  .gate .mx{font-size:13px;color:var(--ink-2);margin-top:6px;}
+  .lcard{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--muted-2);
+    border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:10px;box-shadow:var(--shadow-sm);}
+  .lcard.A{border-left-color:var(--up);} .lcard.B{border-left-color:var(--warn);}
+  .lcard.C{border-left-color:var(--down);} .lcard.skip{border-left-color:var(--muted-2);opacity:.82;}
+  .lcard .lt{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+  .lcard .nm2{color:var(--ink-2);font-weight:600;margin-left:4px;}
+  .lcard .scen{font-weight:700;font-size:13px;white-space:nowrap;}
+  .lcard .act{font-size:13px;color:var(--ink);margin-top:6px;}
+  .lcard .lvl{font-size:12px;color:var(--muted);margin-top:5px;}
+  .lcard .lvl b{color:var(--ink-2);}
+  .sec-h2{font-size:14px;font-weight:700;margin:18px 0 10px;color:var(--ink);}
   /* 手機版 */
   @media(max-width:640px){
     .wrap{padding:16px 12px 48px;}
@@ -166,12 +188,14 @@
 
   <div class="tabs" id="tabs">
     <button class="tab active" data-p="core">核心精選</button>
+    <button class="tab" data-p="live">盤中即時</button>
     <button class="tab" data-p="watch">觀察清單</button>
     <button class="tab" data-p="watchlist">自選池</button>
     <button class="tab" data-p="perf">歷史追蹤與績效</button>
   </div>
 
   <div class="panel active" id="p-core"></div>
+  <div class="panel" id="p-live"></div>
   <div class="panel" id="p-watch"></div>
   <div class="panel" id="p-watchlist"></div>
   <div class="panel" id="p-perf"></div>
@@ -368,12 +392,75 @@ function drawLedger(){
   $('#ledtable').querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}drawLedger();});
 }
 
+/* ---------- 盤中即時 ---------- */
+function gateBox(g){
+  if(!g) return '';
+  const lab=g.label||'—';
+  const klass=lab==='risk-on'?'gate-on':lab==='risk-off'?'gate-off':'gate-neu';
+  const col=lab==='risk-on'?'var(--up)':lab==='risk-off'?'var(--down)':'var(--muted)';
+  const seg=[];
+  if(g.sox)seg.push(`費半 SOX <span class="num ${cls(g.sox.pct)}">${fmt(g.sox.pct)}%</span>`);
+  if(g.nasdaq)seg.push(`NASDAQ期 <span class="num ${cls(g.nasdaq.pct)}">${fmt(g.nasdaq.pct)}%</span>`);
+  if(g.sp500)seg.push(`S&P期 <span class="num ${cls(g.sp500.pct)}">${fmt(g.sp500.pct)}%</span>`);
+  if(g.vix)seg.push(`VIX <span class="num">${num(g.vix.last,1)}</span>`);
+  return `<div class="gate ${klass}"><b style="color:${col};font-size:14px">大盤盤前閘門:${lab}</b><div class="mx">${seg.join(' · ')}</div></div>`;
+}
+function liveCard(r){
+  const sc=r.scenario, k=(sc==='A'||sc==='B'||sc==='C')?sc:'skip';
+  const col=sc==='A'?'var(--up)':sc==='B'?'var(--warn)':sc==='C'?'var(--down)':'var(--muted)';
+  const p=r.plan||{};
+  const price=r.price!=null
+    ? `盤前估 <b class="num">${num(r.price)}</b>${r.src?` <span style="color:var(--muted-2)">(${r.src})</span>`:''}${r.gap_pct!=null?` · 對昨收 <span class="num ${cls(r.gap_pct)}">${fmt(r.gap_pct)}%</span>`:''}`
+    : '<span style="color:var(--muted-2)">盤前無報價</span>';
+  const adr=r.adr?` · ADR ${r.adr.ticker} <span class="num ${cls(r.adr.pct)}">${fmt(r.adr.pct)}%</span>`:'';
+  return `<div class="lcard ${k}">
+    <div class="lt"><div class="tkr" style="font-size:15px">${r.stock_id}<span class="nm2">${r.name||''}</span> ${r.profile?badge(r.profile):''}</div>
+      <div class="scen" style="color:${col}">${r.scenario_label||''}</div></div>
+    <div class="lvl">${price}${r.score!=null?` · 信心 <b style="color:var(--accent-ink)">${r.score}</b>`:''}${adr}</div>
+    <div class="act">👉 ${r.action||''}</div>
+    ${p.init_stop!=null?`<div class="lvl">停損 <span class="down">${num(p.init_stop)}</span> · TP1 <span class="up">${num(p.tp1)}</span> · 進場上限 <b>${num(p.max_entry)}</b></div>`:''}
+  </div>`;
+}
+function orbCard(r){
+  const st=r.status, p=r.plan||{};
+  const k=st==='breakout'?'A':st==='pending'?'B':st==='below_orl'?'C':'skip';
+  let body;
+  if(st==='breakout'){const b=r.breakout||{};
+    body=`<b style="color:var(--up)">✅ 已突破開盤區間高 ${num(r.orh)} 於 ${b.time}(收 ${num(b.price)}、量 ${b.vol}) → 可進</b>`
+      +(p.init_stop!=null?`<div class="lvl">停損 <span class="down">${num(p.init_stop)}</span> · TP1 <span class="up">${num(p.tp1)}</span>(以實際成交價重算)</div>`:'');
+  } else if(st==='pending') body=`<span style="color:var(--warn)">⏸ 尚未突破</span> · 區間 ${num(r.orl)}~${num(r.orh)} · 現價 <b class="num">${num(r.last)}</b>`;
+  else if(st==='below_orl') body=`<span style="color:var(--down)">❌ 跌破開盤區間低 ${num(r.orl)}</span>(現價 ${num(r.last)})→ 今日略過`;
+  else body=`<span style="color:var(--muted-2)">1 分K 未到(yfinance 未供或休市)→ 自行確認</span>`;
+  return `<div class="lcard ${k}"><div class="lt"><div class="tkr" style="font-size:15px">${r.stock_id}<span class="nm2">${r.name||''}</span> ${r.profile?badge(r.profile):''}</div>${r.score!=null?`<div class="scen" style="color:var(--accent-ink)">信心 ${r.score}</div>`:''}</div><div class="act">${body}</div></div>`;
+}
+function renderLive(){
+  fetch('./premarket.json?'+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
+    const po=d.preopen,orb=d.orb;
+    const upd=[po&&po.generated_at,orb&&orb.generated_at].filter(Boolean).sort().pop()||'';
+    let h=`<div class="live-head"><div class="live-upd">選股基準日 ${d.date||'—'} · 最後更新 ${upd||'—'} · 每 60 秒自動檢查</div><button class="refresh" id="lrefresh">↻ 重新整理</button></div>`;
+    h+=`<div class="note-box">盤前 08:45 自動分類、開盤後 09:25 自動判突破。掛<b>限價單</b>、別市價追。本頁非逐秒即時,於上述時點(與你手動觸發)更新。</div>`;
+    if(po){h+=gateBox(po.gate);h+=`<div class="sec-h2">盤前分類 — 有效 ${po.valid_count}/${po.total} 檔</div>`;
+      h+=(po.rows||[]).map(liveCard).join('')||'<div class="empty">無資料</div>';}
+    if(orb){h+=`<div class="sec-h2">開盤 15 分 ORB — 已突破 ${orb.fired_count} 檔</div>`;
+      h+=(orb.rows||[]).map(orbCard).join('')||'<div class="empty">無資料</div>';}
+    if(!po&&!orb)h+='<div class="empty">今日盤中資料尚未產生。</div>';
+    $('#p-live').innerHTML=h;
+    const rb=$('#lrefresh');if(rb)rb.onclick=renderLive;
+  }).catch(()=>{$('#p-live').innerHTML='<div class="empty">盤中即時資料尚未產生。系統於每交易日 08:45(盤前分類)與 09:25(開盤15分突破)自動更新;需先有當日盤後核心選股。</div>';});
+}
+let liveTimer=null;
+function startLivePoll(){stopLivePoll();renderLive();liveTimer=setInterval(renderLive,60000);}
+function stopLivePoll(){if(liveTimer){clearInterval(liveTimer);liveTimer=null;}}
+
 /* ---------- tabs / 載入 ---------- */
 function tabSwitch(p){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===p));
   document.querySelectorAll('.panel').forEach(pl=>pl.classList.toggle('active',pl.id==='p-'+p));
 }
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>tabSwitch(t.dataset.p));
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  tabSwitch(t.dataset.p);
+  if(t.dataset.p==='live')startLivePoll();else stopLivePoll();
+});
 
 function loadDay(dt){
   if(!LATEST)return;
@@ -385,7 +472,7 @@ function loadDay(dt){
 }
 fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
   LATEST=d;DATA=d;LABEL=d.label||{};
-  setSub();renderCore();renderWatch();renderWatchlist();renderPerf();
+  setSub();renderCore();renderWatch();renderWatchlist();renderPerf();renderLive();
   fetch('./dates.json?'+Date.now()).then(r=>r.json()).then(dates=>{
     if(!dates||dates.length<2)return;
     const sel=document.createElement('select');sel.className='sel';

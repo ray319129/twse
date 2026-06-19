@@ -38,6 +38,7 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 - `scripts/fetchers.py` — yfinance 價格/指數(**已 dropna(close)**)、FinMind 籌碼/財報、TWSE 估值、Google News。
 - `scripts/storage.py` — parquet 讀寫;`load_prices` **讀取時忽略 NaN 收盤列**。
 - `scripts/{config,industry,notify,utils}.py`、`templates/daily_email.html`、`docs/index.html`(SPA)。
+- **盤前自動看盤(獨立於盤後,見第 9 節)**:`scripts/premarket.py`、`templates/premarket_email.html`、`.github/workflows/premarket.yml`;輸出 `docs/premarket.json`,網頁「盤中即時」分頁讀它。
 - `config/screeners.yaml` — 所有可調參數(見下)。
 - `data/` — prices/、signals/{date}.json、performance.json、meta/。`docs/` — data.json、dates.json、history/{date}.json。
 
@@ -108,3 +109,35 @@ M.daily_run(test_mode=True)
 ## 8. 慣例
 - commit 訊息用繁中,結尾加 `Co-Authored-By: Claude ...`;改完先 py_compile + 離線跑一次驗證再 push;push 前常需 `git pull --rebase`(每日 workflow 會 commit data)。
 - 別把使用者根目錄的「新增 文字文件.txt」(他貼的郵件原文)commit 進去。
+- ⚠️ commit 訊息含中文/多行時,**Bash 工具**別用 PowerShell 的 `@'...'@`(會被當字面值汙染主旨);用 `git commit -F - <<'EOF' … EOF` 這種 bash heredoc。
+
+---
+
+## 9. 盤前自動看盤(premarket)— 已上線,獨立於盤後流程
+解決「隔天開盤同時盯不了 10 檔」:盤前/開盤後自動看盤,只告訴你哪幾檔符合進場。**完全不碰盤後選股**。
+
+### 兩條早盤排程(`.github/workflows/premarket.yml`,用 `github.event.schedule` 分流 phase)
+- **08:45 台北 `--phase preopen`**:讀最近一次盤後核心10 + 各自 `plan` → 抓個股『試撮/預估開盤價』(TWSE MIS API,免金鑰)+ 大盤盤前閘門(yfinance:費半 SOX / NASDAQ 期 NQ=F / S&P 期 ES=F / VIX,投票 risk-on/中性/risk-off)+ ADR 佐證 → 把每檔分類 **A平盤 / B開高 / C開低 / ❌棄單(跳空過進場上限)/ ❌作廢(開盤即破停損)**,寄信。
+- **09:25 台北 `--phase orb`**:對(依真實開盤判為)A 的股抓 **09:00–09:15 yfinance 1分K** → 算開盤區間高 ORH → 判 09:15 後是否**帶量突破**(`premarket.orb.volume_filter`,預設開)→ 寄信「✅已突破可進 / ⏸尚未突破 / ❌跌破區間低」。
+
+### 設計重點 / 注意
+- **ORB 用 yfinance 歷史 1分K(非即時快照)**:Actions 排程常延遲 5~15 分,歷史分K 即使晚抓 09:00–09:15 區間仍在,能正確重建;MIS 只能給「當下」快照,延遲會汙染區間。
+- **誠實邊界**:盤前能決定「棄單/作廢 + 分類 A/B/C + 該等什麼」;最終扣板機 A 由 ORB 自動判,**B(回測不破)/C(站回+吞噬)第一版只回報、不自動觸發**(那需逐筆,屬未來盤中執行層)。
+- `assert_env(require_finmind=False)`:盤前不需 FinMind,只需 Gmail(沿用既有 secrets)。
+- **要有當日盤後核心選股才會動**;`data/signals/<最新>.json` core 為空 → 安靜略過不寄信、不寫網頁。
+- MIS / yfinance 1分K 皆免費非官方,缺資料降級不整包死。
+
+### 網頁「盤中即時」分頁
+- preopen / orb 兩個 phase 除寄信外也寫 **`docs/premarket.json`** 並 commit(workflow `contents: write`,只提交這一個新檔,不碰 data.json)。
+- `docs/index.html` 的 `renderLive()` 讀它,進入分頁時每 60 秒輪詢(cache-bust)+「↻ 重新整理」鈕。**非逐秒即時**:只在 08:45/09:25(與手動觸發)更新,UI 已誠實標示。瀏覽器無法直連 MIS(CORS),故走「Actions 產檔 → 網頁讀檔」。
+
+### config(`config/screeners.yaml` → `premarket`)
+`gate`(SOX/NQ/VIX 門檻)、`orb`(range_minutes 15 / confirm_until 09:30 / volume_filter / volume_mult)、`adr`(台股代號→ADR ticker:2330→TSM、2303→UMC、3711→ASX、2317→HNHPF、2409→AUOTY)。
+
+### 手動測試
+- 雲端:Actions → **Premarket Watch** → Run workflow → 選 `preopen`/`orb`。
+- 本機:`python -m scripts.premarket --phase preopen --test`(需 Gmail 環境變數;會就地寫 `docs/premarket.json`,測完 `rm` 或 `git checkout`)。
+- 離線單元測試:`classify_preopen` / `orb_decide` / `compute_gate` 都是純函式,可餵合成資料驗證(見開發紀錄)。
+
+### 下一步(承第 6 節 #3)
+盤前 MVP 已涵蓋 A 的自動觸發;真正的盤中逐筆執行層(富邦 API 即時報價、B/C 的回測/吞噬自動判、半自動下單)仍是獨立大專案。可先補:台指夜盤接進閘門(FinMind/TAIFEX 隔夜檔);觀察層也納入盤前。

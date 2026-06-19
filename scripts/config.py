@@ -43,8 +43,10 @@ def load_watchlist() -> dict[str, str]:
     return data.get("stocks", {})
 
 
-def assert_env(*, require_mail: bool = True) -> None:
-    needed = {"FINMIND_TOKEN": FINMIND_TOKEN}
+def assert_env(*, require_mail: bool = True, require_finmind: bool = True) -> None:
+    needed = {}
+    if require_finmind:
+        needed["FINMIND_TOKEN"] = FINMIND_TOKEN
     if require_mail:
         needed.update({
             "GMAIL_USER": GMAIL_USER,

@@ -1,0 +1,69 @@
+name: Premarket Watch
+
+on:
+  schedule:
+    # 08:45 台北 = 00:45 UTC → 盤前試撮分類
+    - cron: "45 0 * * 1-5"
+    # 09:25 台北 = 01:25 UTC → 開盤15分 ORB 突破判斷
+    - cron: "25 1 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "手動測試:preopen(盤前分類)或 orb(開盤15分突破)"
+        required: false
+        default: "preopen"
+        type: choice
+        options: ["preopen", "orb"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: premarket-${{ github.event.schedule || github.event.inputs.phase }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run premarket watch
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: |
+          # 排程 01:25 UTC → orb;其餘(00:45 UTC 或手動)依輸入,預設 preopen
+          if [ "${{ github.event.schedule }}" = "25 1 * * 1-5" ]; then
+            PHASE=orb
+          else
+            PHASE="${{ github.event.inputs.phase }}"
+            PHASE="${PHASE:-preopen}"
+          fi
+          echo "phase=$PHASE"
+          python -m scripts.premarket --phase "$PHASE"
+
+      - name: Publish web snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/premarket.json
+          if git diff --cached --quiet; then
+            echo "No premarket snapshot change."
+          else
+            git commit -m "premarket: web snapshot $(date -u +'%Y-%m-%d %H:%M')Z"
+            git pull --rebase origin main || true
+            git push
+          fi

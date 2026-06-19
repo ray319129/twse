@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>{% if phase == 'preopen' %}盤前快報{% else %}開盤15分 ORB{% endif %} - {{ date_str }}</title>
+</head>
+<body style="font-family: -apple-system, 'Segoe UI', 'Microsoft JhengHei', sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; color: #222; background: #fafafa;">
+
+{% macro num(v, d=2) -%}
+{%- if v is none -%}-{%- else -%}{{ ('%.' ~ d ~ 'f')|format(v) }}{%- endif -%}
+{%- endmacro %}
+
+{% macro pct(v) -%}
+{%- if v is none -%}-{%- else -%}<span style="color: {% if v >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ '%+.2f'|format(v) }}%</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro badge(p) -%}
+{%- if p == '動能' %}<span style="background:#fff1f2;color:#e11d48;padding:1px 7px;border-radius:10px;font-size:11px;">動能</span>
+{%- elif p == '品質' %}<span style="background:#eff6ff;color:#2563eb;padding:1px 7px;border-radius:10px;font-size:11px;">品質</span>
+{%- elif p %}<span style="background:#f1f5f9;color:#64748b;padding:1px 7px;border-radius:10px;font-size:11px;">{{ p }}</span>{% endif -%}
+{%- endmacro %}
+
+{% if phase == 'preopen' %}
+{# ===================== 盤前快報 ===================== #}
+<h2 style="border-bottom:2px solid #0f172a;padding-bottom:6px;margin-bottom:6px;">
+  🌅 盤前快報 {% if test_mode %}<span style="color:#c0392b;">[測試]</span>{% endif %}
+</h2>
+<div style="font-size:12px;color:#888;margin-bottom:14px;">
+  {{ date_str }} · 依 {{ pick_date }} 盤後核心選股 · 有效 <strong>{{ valid_count }}</strong>/{{ total }} 檔
+</div>
+
+{% set gl = gate.label %}
+{% set gc = '#16a34a' if gl == 'risk-on' else ('#dc2626' if gl == 'risk-off' else '#64748b') %}
+{% set gbg = '#ecfdf3' if gl == 'risk-on' else ('#fef2f2' if gl == 'risk-off' else '#f1f5f9') %}
+<div style="background:{{ gbg }};border:1px solid {{ gc }}33;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+  <strong style="color:{{ gc }};">大盤盤前閘門:{{ gl }}</strong>
+  <div style="font-size:13px;color:#444;margin-top:6px;">
+    {% if gate.sox %}費半 SOX {{ pct(gate.sox.pct) }} · {% endif %}
+    {% if gate.nasdaq %}NASDAQ期 {{ pct(gate.nasdaq.pct) }} · {% endif %}
+    {% if gate.sp500 %}S&amp;P期 {{ pct(gate.sp500.pct) }} · {% endif %}
+    {% if gate.vix %}VIX {{ num(gate.vix.last, 1) }} ({{ pct(gate.vix.pct) }}){% endif %}
+  </div>
+  {% if gl == 'risk-off' %}<div style="font-size:12px;color:#dc2626;margin-top:5px;">→ 偏空:開低一律不接,整體保守、嚴守停損。</div>
+  {% elif gl == 'risk-on' %}<div style="font-size:12px;color:#16a34a;margin-top:5px;">→ 偏多:可照決策卡正常執行。</div>{% endif %}
+</div>
+
+<div style="background:#fffbeb;border:1px solid #fde68a;padding:9px 13px;border-radius:6px;font-size:12px;color:#92400e;margin-bottom:14px;">
+  ⚠️ 試撮價在 08:30–09:00 會跳動,僅供分類;<strong>掛限價單、別市價追</strong>。最終扣板機請看盤(A 交給 ORB 報告)。
+</div>
+
+{% for r in rows %}
+{% set sc = r.scenario %}
+{% set col = '#16a34a' if sc == 'A' else ('#d97706' if sc == 'B' else ('#dc2626' if sc == 'C' else '#94a3b8')) %}
+<div style="background:#fff;border:1px solid #e5e7eb;border-left:4px solid {{ col }};border-radius:8px;padding:11px 14px;margin-bottom:10px;">
+  <div style="font-size:15px;font-weight:700;">
+    {{ r.stock_id }} <span style="color:#475569;font-weight:600;">{{ r.name }}</span> {{ badge(r.profile) }}
+    <span style="float:right;color:{{ col }};font-weight:700;">{{ r.scenario_label }}</span>
+  </div>
+  <div style="font-size:13px;color:#334155;margin-top:5px;">
+    {% if r.price is not none %}盤前估 <strong>{{ num(r.price) }}</strong>{% if r.src %} <span style="color:#94a3b8;">({{ r.src }})</span>{% endif %}{% if r.gap_pct is defined %} · 對昨收 {{ pct(r.gap_pct) }}{% endif %}{% else %}<span style="color:#94a3b8;">盤前無報價</span>{% endif %}
+    {% if r.score is not none %} · 信心 <strong style="color:#4f46e5;">{{ r.score }}</strong>{% endif %}
+  </div>
+  <div style="font-size:13px;color:#0f172a;margin-top:6px;">👉 {{ r.action }}</div>
+  {% if r.plan %}
+  <div style="font-size:12px;color:#64748b;margin-top:5px;">
+    停損 <span style="color:#dc2626;">{{ num(r.plan.init_stop) }}</span> ·
+    TP1 <span style="color:#16a34a;">{{ num(r.plan.tp1) }}</span> ·
+    進場上限 {{ num(r.plan.max_entry) }} ·
+    平盤帶 {{ num(r.plan.flat_lo) }}~{{ num(r.plan.flat_hi) }}
+  </div>
+  {% endif %}
+  {% if r.adr %}
+  <div style="font-size:12px;color:#475569;margin-top:5px;">ADR {{ r.adr.ticker }} 隔夜 {{ pct(r.adr.pct) }} → 個股盤前佐證</div>
+  {% endif %}
+</div>
+{% endfor %}
+
+{% else %}
+{# ===================== 開盤15分 ORB ===================== #}
+<h2 style="border-bottom:2px solid #0f172a;padding-bottom:6px;margin-bottom:6px;">
+  🔔 開盤15分 ORB {% if test_mode %}<span style="color:#c0392b;">[測試]</span>{% endif %}
+</h2>
+<div style="font-size:12px;color:#888;margin-bottom:14px;">
+  {{ date_str }} · 依 {{ pick_date }} 盤後核心選股 · 已突破 <strong>{{ fired_count }}</strong> 檔
+</div>
+<div style="background:#eef2ff;border:1px solid #e0e7ff;padding:9px 13px;border-radius:6px;font-size:12px;color:#4338ca;margin-bottom:14px;">
+  開盤區間 = 09:00–09:{{ '%02d'|format(orb_cfg.range_minutes if orb_cfg.range_minutes else 15) }}{% if orb_cfg.volume_filter %} · 突破需帶量(量 &gt; 區間均量){% endif %} · 觀察到 {{ orb_cfg.confirm_until }}
+</div>
+
+{% for r in rows %}
+{% set st = r.status %}
+{% set col = '#16a34a' if st == 'breakout' else ('#d97706' if st == 'pending' else ('#dc2626' if st == 'below_orl' else '#94a3b8')) %}
+<div style="background:#fff;border:1px solid #e5e7eb;border-left:4px solid {{ col }};border-radius:8px;padding:11px 14px;margin-bottom:10px;">
+  <div style="font-size:15px;font-weight:700;">
+    {{ r.stock_id }} <span style="color:#475569;font-weight:600;">{{ r.name }}</span> {{ badge(r.profile) }}
+    {% if r.scenario_label %}<span style="color:#94a3b8;font-size:12px;font-weight:600;"> {{ r.scenario_label }}</span>{% endif %}
+    {% if r.score is not none %}<span style="float:right;color:#4f46e5;font-weight:700;">信心 {{ r.score }}</span>{% endif %}
+  </div>
+  <div style="font-size:13px;margin-top:6px;">
+    {% if st == 'breakout' %}
+      <strong style="color:#16a34a;">✅ 已突破開盤區間高 {{ num(r.orh) }} 於 {{ r.breakout.time }}（收 {{ num(r.breakout.price) }}，量 {{ r.breakout.vol }}）→ 可進</strong>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">停損 <span style="color:#dc2626;">{{ num(r.plan.init_stop) }}</span> · TP1 <span style="color:#16a34a;">{{ num(r.plan.tp1) }}</span>（以實際成交價重算,固定風險回推股數）</div>
+    {% elif st == 'pending' %}
+      <span style="color:#d97706;">⏸ 尚未突破</span> · 區間 {{ num(r.orl) }}~{{ num(r.orh) }} · 現價 {{ num(r.last) }} · 續盯到 {{ orb_cfg.confirm_until }}
+    {% elif st == 'below_orl' %}
+      <span style="color:#dc2626;">❌ 跌破開盤區間低 {{ num(r.orl) }}</span>（現價 {{ num(r.last) }}）→ 今日略過
+    {% else %}
+      <span style="color:#94a3b8;">1分K 未到（yfinance 未供或休市）→ 請自行確認</span>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<div style="color:#9ca3af;font-size:11px;margin-top:20px;text-align:center;">
+  盤前自動看盤 · 免費資料盡力而為 · 本信為條件分類結果,非投資建議
+</div>
+</body>
+</html>

@@ -147,6 +147,29 @@ leading:
     flat_ret20_max: 0.08           # 但近 20 日股價漲跌幅在 ±8% 內(還沒發動)
     max_scan: 120                  # 每日最多為幾檔「安靜股」額外抓籌碼(控制 API 用量)
 
+# ★ 盤前自動看盤(scripts/premarket.py)— 不影響盤後選股流程
+# phase=preopen(約 08:45):抓個股試撮價 + 美股隔夜閘門 → 把昨晚核心10分類 A/B/C、刷掉棄單/作廢
+# phase=orb(約 09:25):對 A(平盤)股抓開盤 15 分 1分K → 判斷帶量突破開盤區間高 → 通知可進
+premarket:
+  enabled: true
+  gate:                     # 大盤盤前閘門:美股隔夜(已收)投票決定 risk-on / 中性 / risk-off
+    sox_riskon: 1.0         # 費半隔夜 >= +1% 視為偏多一票
+    sox_riskoff: -2.0       # 費半隔夜 <= -2% 視為偏空一票(台股權值=半導體,SOX 最相關)
+    nq_riskon: 1.0
+    nq_riskoff: -1.5
+    vix_high: 25            # VIX >= 25 → 偏空一票(預期跳空大、整體轉保守)
+  orb:
+    range_minutes: 15       # 開盤區間 = 09:00 起算前幾分鐘(09:00–09:15)
+    confirm_until: "09:30"  # 突破確認觀察到幾點為止
+    volume_filter: true     # 帶量過濾:突破K成交量 > 開盤區間均量 × volume_mult 才算有效(過濾假突破)
+    volume_mult: 1.0
+  adr:                      # 台股代號 → 美股 ADR ticker(個股級盤前佐證;無 ADR 的股自動略過)
+    "2330": TSM             # 台積電
+    "2303": UMC             # 聯電
+    "3711": ASX             # 日月光投控
+    "2317": HNHPF           # 鴻海(OTC ADR,流動性偏低)
+    "2409": AUOTY           # 友達
+
 # 多訊號交集組合
 combos:
   - name: 主升段啟動
