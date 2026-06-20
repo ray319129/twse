@@ -242,7 +242,9 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     watch_count = int(rank_cfg.get("watch_count", 20))
     min_score = float(rank_cfg.get("min_score", 45))
     enrich_top_n = int(rank_cfg.get("enrich_top_n", 30))
-    score_cfg = {"min_dollar_volume": float(rank_cfg.get("min_dollar_volume", 30_000_000))}
+    # 信心分設定:scoring 區塊(權重/門檻)+ 沿用 ranking 的流動性門檻
+    score_cfg = dict(cfg.get("scoring", {}) or {})
+    score_cfg["min_dollar_volume"] = float(rank_cfg.get("min_dollar_volume", 30_000_000))
 
     log.info("Loading stock universe...")
     info = fetch_stock_info()

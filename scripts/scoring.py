@@ -24,13 +24,25 @@ def _clip01(x: float) -> float:
     return max(0.0, min(1.0, float(x)))
 
 
+def _g(cfg: dict, path: str, default):
+    """讀巢狀 config(如 'rs.ratio_hi'),缺則回 default(= 現行硬寫值,確保不設 config 時行為不變)。"""
+    cur = cfg
+    for part in path.split("."):
+        if not isinstance(cur, dict) or part not in cur:
+            return default
+        cur = cur[part]
+    return cur if cur is not None else default
+
+
 def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: dict | None = None) -> dict | None:
     """回傳評分 dict;資料不足或流動性過低回 None(直接淘汰,不進排序)。
 
     df 需是 compute_all()(+ compute_relative_strength())後的價格 DataFrame。
+    所有門檻/權重皆可由 cfg(= config/screeners.yaml 的 scoring 區塊)覆寫;預設值等同原硬寫值。
     """
     cfg = cfg or {}
-    if df is None or len(df) < 120:
+    min_len = int(_g(cfg, "min_history", 120))
+    if df is None or len(df) < min_len:
         return None
     last = df.iloc[-1]
     close = _v(last, "close")
@@ -43,15 +55,16 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
     rs_ratio = _v(last, "rs_ratio")
     open_ = _v(last, "open")
     prev_close = _v(df.iloc[-2], "close") if len(df) >= 2 else np.nan
-    ma60_past = df["ma60"].iloc[-21] if (len(df) >= 21 and "ma60" in df.columns) else np.nan
+    slope_lb = int(_g(cfg, "trend.ma60_slope_lookback", 21))
+    ma60_past = df["ma60"].iloc[-slope_lb] if (len(df) >= slope_lb and "ma60" in df.columns) else np.nan
 
     # ---------- 流動性:日均成交金額 = 收盤 × 20 日均量。太低直接淘汰 ----------
-    min_dollar = float(cfg.get("min_dollar_volume", 30_000_000))   # 3000 萬元
+    min_dollar = float(cfg.get("min_dollar_volume", _g(cfg, "liquidity.min_dollar_volume", 30_000_000)))
+    span = float(_g(cfg, "liquidity.span", 50))
     dollar_vol = close * vol_ma20 if pd.notna(vol_ma20) else np.nan
     if pd.isna(dollar_vol) or dollar_vol < min_dollar:
         return None
-    # 3000萬→0,約 15 億→1
-    liquidity = _clip01(np.log10(dollar_vol / min_dollar) / np.log10(50))
+    liquidity = _clip01(np.log10(dollar_vol / min_dollar) / np.log10(span))   # min→0,min×span→1
 
     # ---------- 趨勢健康 (0~1) ----------
     trend_bits = [
@@ -64,45 +77,61 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
     trend = sum(1 for b in trend_bits if b) / len(trend_bits)
 
     # ---------- 相對強度 (0~1) ----------
+    rs_lo = float(_g(cfg, "rs.ratio_lo", 0.95)); rs_hi = float(_g(cfg, "rs.ratio_hi", 1.30))
     rs = 0.0
-    if pd.notna(rs_ratio):
-        rs = _clip01((rs_ratio - 0.95) / (1.30 - 0.95))   # 0.95→0, 1.30→1
+    if pd.notna(rs_ratio) and rs_hi > rs_lo:
+        rs = _clip01((rs_ratio - rs_lo) / (rs_hi - rs_lo))
     rs_rising = False
+    rs_rise_lb = int(_g(cfg, "rs.rising_lookback", 10))
+    rs_blend = float(_g(cfg, "rs.rising_blend", 0.8))
     if "rs_line" in df.columns:
         rl = df["rs_line"].dropna()
-        if len(rl) >= 11:
-            rs_rising = float(rl.iloc[-1]) > float(rl.iloc[-11])
+        if len(rl) >= rs_rise_lb + 1:
+            rs_rising = float(rl.iloc[-1]) > float(rl.iloc[-1 - rs_rise_lb])
             if rs_rising:
-                rs = _clip01(rs * 0.8 + 0.2)
+                rs = _clip01(rs * rs_blend + (1 - rs_blend))
 
     # ---------- 短線時機 / 量能 (0~1) ----------
-    volx = _clip01((vol_ratio - 0.8) / (2.0 - 0.8)) if pd.notna(vol_ratio) else 0.0
+    vr_lo = float(_g(cfg, "setup.vol_ratio_lo", 0.8)); vr_hi = float(_g(cfg, "setup.vol_ratio_hi", 2.0))
+    vb_lo = float(_g(cfg, "setup.vbias_lo", 0.8)); vb_hi = float(_g(cfg, "setup.vbias_hi", 1.6))
+    mom_lb = int(_g(cfg, "setup.mom_lookback", 10)); mom_full = float(_g(cfg, "setup.mom_full", 0.15))
+    w_volx = float(_g(cfg, "setup.w_volx", 0.45)); w_vbias = float(_g(cfg, "setup.w_vbias", 0.25))
+    w_mom = float(_g(cfg, "setup.w_mom", 0.30))
+    volx = _clip01((vol_ratio - vr_lo) / (vr_hi - vr_lo)) if (pd.notna(vol_ratio) and vr_hi > vr_lo) else 0.0
     vbias = 0.0
-    if pd.notna(vol_ma5) and pd.notna(vol_ma20) and vol_ma20 > 0:
-        vbias = _clip01((vol_ma5 / vol_ma20 - 0.8) / (1.6 - 0.8))
-    ret10 = np.nan
-    if len(df) >= 11:
-        c10 = df["close"].iloc[-11]
-        if pd.notna(c10) and c10 > 0:
-            ret10 = close / c10 - 1
-    mom = _clip01(ret10 / 0.15) if pd.notna(ret10) else 0.0   # 10 日 +15% → 1
-    setup = 0.45 * volx + 0.25 * vbias + 0.30 * mom
+    if pd.notna(vol_ma5) and pd.notna(vol_ma20) and vol_ma20 > 0 and vb_hi > vb_lo:
+        vbias = _clip01((vol_ma5 / vol_ma20 - vb_lo) / (vb_hi - vb_lo))
+    ret_mom = np.nan
+    if len(df) >= mom_lb + 1:
+        cN = df["close"].iloc[-1 - mom_lb]
+        if pd.notna(cN) and cN > 0:
+            ret_mom = close / cN - 1
+    mom = _clip01(ret_mom / mom_full) if (pd.notna(ret_mom) and mom_full) else 0.0
+    setup = w_volx * volx + w_vbias * vbias + w_mom * mom
 
     # ---------- 品質估值 (0~1) from 估值快照 ----------
-    quality = 0.5   # 沒資料給中性
+    quality = float(_g(cfg, "quality.default", 0.5))   # 沒資料給中性
+    pe_good = float(_g(cfg, "quality.pe_good", 25)); pe_ok = float(_g(cfg, "quality.pe_ok", 40))
+    yld_full = float(_g(cfg, "quality.yield_full", 5.0))
+    pb_good = float(_g(cfg, "quality.pb_good", 3)); pb_ok = float(_g(cfg, "quality.pb_ok", 6))
     if valuation:
         pe = valuation.get("pe"); yld = valuation.get("yield_pct"); pb = valuation.get("pb")
         q = []
         if pe is not None:
-            q.append(1.0 if 0 < pe <= 25 else 0.5 if 0 < pe <= 40 else 0.1 if pe > 40 else 0.0)
+            q.append(1.0 if 0 < pe <= pe_good else 0.5 if 0 < pe <= pe_ok else 0.1 if pe > pe_ok else 0.0)
         if yld is not None:
-            q.append(_clip01(yld / 5.0))
+            q.append(_clip01(yld / yld_full) if yld_full else 0.0)
         if pb is not None:
-            q.append(1.0 if 0 < pb <= 3 else 0.5 if 0 < pb <= 6 else 0.2)
+            q.append(1.0 if 0 < pb <= pb_good else 0.5 if 0 < pb <= pb_ok else 0.2)
         if q:
             quality = sum(q) / len(q)
 
     # ---------- 過熱懲罰 ----------
+    ex_ret5 = float(_g(cfg, "exhausted.ret5_max", 0.22))
+    ex_ext = float(_g(cfg, "exhausted.ext_ma20_max", 0.18))
+    ex_rsi = float(_g(cfg, "exhausted.rsi_max", 88))
+    ex_limit = float(_g(cfg, "exhausted.limit_up", 0.095))
+    ex_penalty = float(_g(cfg, "exhausted.penalty", 0.55))
     ret5 = np.nan
     if len(df) >= 6:
         c5 = df["close"].iloc[-6]
@@ -110,37 +139,44 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
             ret5 = close / c5 - 1
     ext_ma20 = (close / ma20 - 1) if (pd.notna(ma20) and ma20 > 0) else 0.0
     chg = (close / prev_close - 1) if (pd.notna(prev_close) and prev_close > 0) else 0.0
-    limit_up_today = bool(chg >= 0.095)
+    limit_up_today = bool(chg >= ex_limit)
     exhausted = bool(
-        (pd.notna(ret5) and ret5 > 0.22)        # 5 日漲 > 22%
-        or ext_ma20 > 0.18                       # 乖離 20MA > 18%
-        or (pd.notna(rsi14) and rsi14 > 88)
+        (pd.notna(ret5) and ret5 > ex_ret5)
+        or ext_ma20 > ex_ext
+        or (pd.notna(rsi14) and rsi14 > ex_rsi)
         or limit_up_today
     )
 
     # ---------- 今天新鮮觸發(可進場) ----------
+    bo_lb = int(_g(cfg, "trigger.breakout_lookback", 20))
+    bo_vr = float(_g(cfg, "trigger.breakout_vol_ratio", 1.5))
+    pb_near = float(_g(cfg, "trigger.pullback_near_ma20", 0.04))
+    pb_tol = float(_g(cfg, "trigger.pullback_ma60_tol", 0.98))
     breakout = False
-    if len(df) >= 20:
-        hi20 = df["close"].iloc[-20:].max()
+    if len(df) >= bo_lb:
+        hi_n = df["close"].iloc[-bo_lb:].max()
         breakout = bool(
-            close >= hi20 and pd.notna(vol_ratio) and vol_ratio >= 1.5
+            close >= hi_n and pd.notna(vol_ratio) and vol_ratio >= bo_vr
             and pd.notna(open_) and close > open_
         )
     pullback_turn = False
     if pd.notna(ma20) and ma20 > 0 and pd.notna(ma60) and ma60 > 0 and pd.notna(ma60_past) and ma60 > ma60_past:
-        near20 = abs(close - ma20) / ma20 <= 0.04
-        above60 = close >= ma60 * 0.98
+        near20 = abs(close - ma20) / ma20 <= pb_near
+        above60 = close >= ma60 * pb_tol
         green = pd.notna(prev_close) and close > prev_close
         kd_up = pd.notna(k) and pd.notna(d) and k >= d
         pullback_turn = bool(near20 and above60 and (green or kd_up))
     trigger = bool((breakout or pullback_turn) and not exhausted)
 
     # ---------- 醞釀中(還沒觸發,但在蓄勢)→ 觀察層 ----------
+    co_lb = int(_g(cfg, "brewing.coiling_lookback", 120))
+    co_q = float(_g(cfg, "brewing.coiling_quantile", 0.20))
+    co_abs = float(_g(cfg, "brewing.coiling_abs_width", 0.06))
     coiling = False
     if "bb_width" in df.columns:
         bw = df["bb_width"].dropna()
         if len(bw) >= 60:
-            coiling = bool(float(bw.iloc[-1]) <= float(bw.tail(120).quantile(0.20)) or float(bw.iloc[-1]) <= 0.06)
+            coiling = bool(float(bw.iloc[-1]) <= float(bw.tail(co_lb).quantile(co_q)) or float(bw.iloc[-1]) <= co_abs)
     brewing = bool(
         (not trigger) and (not exhausted)
         and (pd.notna(ma60) and close > ma60)
@@ -148,13 +184,19 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
     )
 
     # ---------- 加總 ----------
-    raw = 100.0 * (0.25 * trend + 0.25 * rs + 0.25 * setup + 0.15 * quality + 0.10 * liquidity)
+    w_trend = float(_g(cfg, "weights.trend", 0.25)); w_rs = float(_g(cfg, "weights.rs", 0.25))
+    w_setup = float(_g(cfg, "weights.setup", 0.25)); w_quality = float(_g(cfg, "weights.quality", 0.15))
+    w_liq = float(_g(cfg, "weights.liquidity", 0.10))
+    raw = 100.0 * (w_trend * trend + w_rs * rs + w_setup * setup + w_quality * quality + w_liq * liquidity)
     if exhausted:
-        raw *= 0.55
+        raw *= ex_penalty
 
-    if rs + setup > trend + quality + 0.30:
+    mom_margin = float(_g(cfg, "profile.momentum_margin", 0.30))
+    q_min_q = float(_g(cfg, "profile.quality_min_q", 0.70))
+    q_min_trend = float(_g(cfg, "profile.quality_min_trend", 0.60))
+    if rs + setup > trend + quality + mom_margin:
         profile = "動能"
-    elif quality >= 0.70 and trend >= 0.60:
+    elif quality >= q_min_q and trend >= q_min_trend:
         profile = "品質"
     else:
         profile = "均衡"

@@ -92,6 +92,63 @@ ranking:
   min_dollar_volume: 30000000  # 日均成交金額門檻(3000 萬),太低直接淘汰
   enrich_top_n: 30           # 只對排名前 N 名補抓 FinMind 籌碼/財報(控制 API 額度)
 
+# ★ 信心分權重與門檻(scripts/scoring.py compute_conviction)
+# 全部可調;留空則用程式內預設(= 下列數值)。改這裡就能系統化調參、不必動 .py。
+scoring:
+  min_history: 120           # K 棒少於此直接跳過
+  weights:                   # 五面向加權(建議總和=1,但不強制)
+    trend: 0.25              # 趨勢健康
+    rs: 0.25                 # 相對強度
+    setup: 0.25             # 短線時機/量能
+    quality: 0.15            # 品質估值
+    liquidity: 0.10          # 流動性
+  liquidity:
+    span: 50                 # 流動性分:日均額 = min×span 時得 1 分(對數)
+    # min_dollar_volume 仍沿用 ranking.min_dollar_volume(避免重複)
+  trend:
+    ma60_slope_lookback: 21  # 60MA 今日 vs 幾個交易日前(判季線上揚)
+  rs:
+    ratio_lo: 0.95           # rs_ratio 映射下界(0 分)
+    ratio_hi: 1.30           # rs_ratio 映射上界(1 分)
+    rising_lookback: 10      # rs_line 今日 vs 幾日前(判仍在轉強)
+    rising_blend: 0.8        # 轉強時:rs = rs×blend + (1-blend)
+  setup:
+    vol_ratio_lo: 0.8        # 今日量比映射下界
+    vol_ratio_hi: 2.0        # 今日量比映射上界
+    vbias_lo: 0.8            # vol_ma5/vol_ma20 映射下界
+    vbias_hi: 1.6            # 上界
+    mom_lookback: 10         # 動能回看天數
+    mom_full: 0.15           # 該期間漲幅達此 → 動能滿分(10日+15%)
+    w_volx: 0.45             # setup 內三項權重(建議總和=1)
+    w_vbias: 0.25
+    w_mom: 0.30
+  quality:
+    default: 0.5             # 無估值資料時的中性分
+    pe_good: 25              # PE ≤ good → 1;≤ ok → 0.5;> ok → 0.1
+    pe_ok: 40
+    yield_full: 5.0          # 殖利率達此(%)→ 滿分
+    pb_good: 3               # PB ≤ good → 1;≤ ok → 0.5;其餘 0.2
+    pb_ok: 6
+  exhausted:                 # 過熱判定(任一成立即重罰)
+    ret5_max: 0.22           # 近 5 日漲幅超過 → 過熱
+    ext_ma20_max: 0.18       # 乖離 20MA 超過 → 過熱
+    rsi_max: 88              # RSI14 超過 → 過熱
+    limit_up: 0.095          # 今日漲幅 ≥ 此視為漲停
+    penalty: 0.55            # 過熱時總分 × 此
+  trigger:                   # 「今天新鮮觸發」(進核心的條件)
+    breakout_lookback: 20    # 近 N 日收盤高
+    breakout_vol_ratio: 1.5  # 突破需量比 ≥ 此
+    pullback_near_ma20: 0.04 # 距 20MA 在此內算回測到位
+    pullback_ma60_tol: 0.98  # 收盤 ≥ 60MA×此
+  brewing:                   # 「醞釀中」(進觀察的條件)
+    coiling_lookback: 120    # 布林帶寬分位回看
+    coiling_quantile: 0.20   # 帶寬 ≤ 此分位算收斂
+    coiling_abs_width: 0.06  # 或帶寬絕對值 ≤ 此
+  profile:                   # 風格分類門檻
+    momentum_margin: 0.30    # rs+setup 超過 trend+quality 此值 → 動能
+    quality_min_q: 0.70      # 品質分 ≥ 且
+    quality_min_trend: 0.60  # 趨勢分 ≥ → 品質
+
 # ★ 進場(跳空保護)— 解決「盤後算的價,隔天跳空就失效」的痛點。
 # 系統假設「隔日開盤」進場(貼近實際),並用 max_chase 限制追價:開太高就棄單,不追。
 entry:
