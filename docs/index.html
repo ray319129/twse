@@ -258,7 +258,7 @@ function coreCard(s,i){
       <div><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${s.stock_id}<span class="nm">${s.name}</span> ${badge(s.profile)}</div>
         <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span> · ${s.industry||''} · <b style="color:var(--up)">${trig}</b>${s.ret5_pct!=null?` · 5日 <span class="${cls(s.ret5_pct)} num">${fmt(s.ret5_pct,1)}%</span>`:''}${s.ret20_pct!=null?` · 20日 <span class="${cls(s.ret20_pct)} num">${fmt(s.ret20_pct,1)}%</span>`:''}</div>
       </div>
-      <div class="score"><div class="v" style="color:var(--accent-ink)">${s.score}</div><div class="l">信心分</div></div>
+      <div class="score"><div class="v" style="color:var(--accent-ink)">${s.score}</div><div class="l">信心分</div>${s.chip_bonus>0?`<div class="l" style="color:var(--up);font-weight:700;text-transform:none">籌碼 +${s.chip_bonus}</div>`:''}</div>
     </div>
     ${bars(s)}${planBox(s.plan)}${chip}${val}
   </div>`;

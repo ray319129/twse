@@ -148,6 +148,15 @@ scoring:
     momentum_margin: 0.30    # rs+setup 超過 trend+quality 此值 → 動能
     quality_min_q: 0.70      # 品質分 ≥ 且
     quality_min_trend: 0.60  # 趨勢分 ≥ → 品質
+  # stage-2 籌碼加成:只對「核心候選」(已 enrich 抓籌碼)加分後重排,不影響全市場評分。
+  # 因 FinMind 免費額度有限,無法對全市場抓籌碼;故先用基礎信心分選出候選,再用籌碼決定誰進核心。
+  chip_bonus:
+    enabled: true
+    candidate_count: 15      # 取基礎信心分前 N 的觸發股當候選,加籌碼分後重排取 core_count
+    weight: 10               # 籌碼滿分最多加此分到「排名分」(原信心分 score 顯示不變)
+    streak_full: 5           # 法人連買達此天數 → 連買項滿分
+    foreign_full: 2.0        # 30 日外資持股增加此百分點 → 外資項滿分
+    short_cover_thr: 0.05    # 融券較前日減少 ≥ 此(5%)→ 回補項得分
 
 # ★ 進場(跳空保護)— 解決「盤後算的價,隔天跳空就失效」的痛點。
 # 系統假設「隔日開盤」進場(貼近實際),並用 max_chase 限制追價:開太高就棄單,不追。

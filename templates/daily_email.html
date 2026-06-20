@@ -109,7 +109,7 @@
   <div style="background:#fff; border:1px solid #e0b4b0; border-left:4px solid #c0392b; border-radius:6px; padding:10px 14px; margin-bottom:10px;">
     <div style="font-size:15px;font-weight:bold;">
       #{{ loop.index }} {% if s.hot_industry %}🔥{% endif %}{{ s.stock_id }} {{ s.name }} {{ profile_badge(s.profile) }}
-      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong></span>
+      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}</span>
     </div>
     <div style="font-size:13px;color:#444;margin-top:3px;">
       收 {{ '%.2f'|format(s.close) }}

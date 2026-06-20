@@ -218,6 +218,52 @@ def _json_safe(o):
     return o
 
 
+def _clip01(x: float) -> float:
+    return max(0.0, min(1.0, float(x)))
+
+
+def _chip_signal(chips: dict | None, cfg: dict) -> float | None:
+    """把 enrich 抓到的籌碼摘要轉成 0~1 訊號(供 stage-2 重排)。
+    無籌碼資料回 None(視為中性、不加也不扣分)。"""
+    if not chips:
+        return None
+    parts: list[float] = []
+    streak = chips.get("inst_buy_streak")
+    if streak is not None:
+        full = float(cfg.get("streak_full", 5)) or 1.0
+        parts.append(_clip01(streak / full))                 # 法人連買天數
+    fchg = chips.get("foreign_holding_change_30d")
+    if fchg is not None:
+        full = float(cfg.get("foreign_full", 2.0)) or 1.0
+        parts.append(_clip01(fchg / full))                   # 30日外資持股變化(降→0)
+    inst_today = chips.get("inst_total_today")
+    if inst_today is not None:
+        parts.append(1.0 if inst_today > 0 else 0.0)         # 今日法人淨買
+    schg = chips.get("short_change_pct")
+    if schg is not None:
+        thr = float(cfg.get("short_cover_thr", 0.05)) * 100
+        parts.append(1.0 if schg <= -thr else 0.0)           # 融券回補
+    if not parts:
+        return None
+    return sum(parts) / len(parts)
+
+
+def _rank_core(candidates: list[dict], chip_cfg: dict, core_count: int) -> list[dict]:
+    """stage-2 籌碼重排:對已 enrich(抓到籌碼)的核心候選算 chip_bonus、加成後重排取前 core_count。
+    chip_bonus 寫進 rank_score(排名用),原 score(信心分)語意不變;無籌碼資料 → bonus 0(中性不扣分)。"""
+    chip_on = bool(chip_cfg.get("enabled", False))
+    weight = float(chip_cfg.get("weight", 10))
+    for s in candidates:
+        if chip_on:
+            sig = _chip_signal(s.get("chips"), chip_cfg)
+            s["chip_signal"] = round(sig, 2) if sig is not None else None
+            s["chip_bonus"] = round(weight * (sig or 0.0), 1)
+            s["rank_score"] = round(float(s["score"]) + s["chip_bonus"], 1)
+        else:
+            s["rank_score"] = float(s["score"])
+    return sorted(candidates, key=lambda x: -x["rank_score"])[:core_count]
+
+
 def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     assert_env()
     cfg = load_screeners()
@@ -341,11 +387,26 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             })
             scored.append(conv)
 
-    # ---------- 排序 → 核心 / 觀察 ----------
-    core = sorted(
+    # ---------- 排序 → 候選池 →(籌碼 stage-2 重排)→ 核心 / 觀察 ----------
+    chip_cfg = (cfg.get("scoring", {}) or {}).get("chip_bonus", {}) or {}
+    chip_on = bool(chip_cfg.get("enabled", False))
+    cand_n = int(chip_cfg.get("candidate_count", core_count)) if chip_on else core_count
+
+    trigger_sorted = sorted(
         [s for s in scored if s["trigger"] and s["score"] >= min_score],
         key=lambda x: -x["score"],
-    )[:core_count]
+    )
+    # 候選池:基礎信心分最高的觸發股(略多於 core_count,讓籌碼能改變誰進核心);受 enrich_top_n 上限保護 API
+    core_candidates = trigger_sorted[:max(cand_n, core_count)][:enrich_top_n]
+
+    # ---------- 第二遍:對核心候選 + 自選池補抓 FinMind(控制 API 額度) ----------
+    # 觀察層只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind 額度留給真正要進場的核心候選。
+    plan_cfg = (cfg.get("exit", {}), float(cfg.get("entry", {}).get("max_chase", 0.03)))
+    for s in core_candidates:
+        _enrich_pick(s, today, index_close, fundamentals=True, screen_cfg=cfg, plan_cfg=plan_cfg)
+
+    # 籌碼加成後重排取核心(無籌碼資料 → bonus 0,中性不扣分);信心分 score 仍維持基礎分語意
+    core = _rank_core(core_candidates, chip_cfg, core_count)
     core_ids = {s["stock_id"] for s in core}
     watch = sorted(
         [s for s in scored if s["brewing"] and not s["trigger"]
@@ -358,12 +419,6 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     hot_set = set(hot_industries)
     for s in core + watch:
         s["hot_industry"] = s.get("industry", "") in hot_set
-
-    # ---------- 第二遍:只對核心 + 自選池補抓 FinMind(控制 API 額度) ----------
-    # 觀察層表格只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind 額度留給真正要進場的核心。
-    plan_cfg = (cfg.get("exit", {}), float(cfg.get("entry", {}).get("max_chase", 0.03)))
-    for s in core[:enrich_top_n]:
-        _enrich_pick(s, today, index_close, fundamentals=True, screen_cfg=cfg, plan_cfg=plan_cfg)
 
     watchlist_results: list[dict] = []
     for sid, note in watchlist.items():
