@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # 需完整歷史才能乾淨 pull --rebase / push
 
       - uses: actions/setup-python@v5
         with:
@@ -57,6 +59,11 @@ jobs:
 
       - name: Publish web snapshot
         run: |
+          # 核心 0 檔 / 休市 / 抓不到報價時,premarket 不會產生此檔 → 乾淨跳過,不要讓 job 失敗
+          if [ ! -f docs/premarket.json ]; then
+            echo "No premarket.json produced (no core picks / market closed); nothing to publish."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/premarket.json
