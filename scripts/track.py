@@ -204,6 +204,43 @@ def _style_of(pick: dict) -> str:
     return "momentum" if (pick.get("profile") == "動能" or pick.get("breakout")) else "swing"
 
 
+def _forward_from_entry(df: pd.DataFrame, e: int, entry_price: float) -> dict | None:
+    """從『進場日 e(隔日開盤進場)』起算的前向收盤報酬與最高漲幅。
+    用於『被跳空開高 skip 的票,若當初照開盤買進』的機會成本分析(純測量,不影響出場模擬)。"""
+    if df is None or df.empty or not entry_price or e < 0 or e >= len(df):
+        return None
+    n = len(df)
+    high = df["high"] if "high" in df.columns else df["close"]
+    close = df["close"]
+    out: dict = {"rets": {}, "maxgain": {}}
+    for h in HORIZONS:
+        tp = e + h
+        if tp < n:
+            c = close.iloc[tp]
+            out["rets"][h] = float(c / entry_price - 1) if pd.notna(c) else None
+            hi = high.iloc[e:tp + 1].max()
+            out["maxgain"][h] = float(hi / entry_price - 1) if pd.notna(hi) else None
+        else:
+            out["rets"][h] = None
+            out["maxgain"][h] = None
+    last = n - 1
+    lc = close.iloc[last]
+    out["latest_ret"] = float(lc / entry_price - 1) if pd.notna(lc) else None
+    hi_all = high.iloc[e:last + 1].max()
+    out["peak_gain"] = float(hi_all / entry_price - 1) if pd.notna(hi_all) else None
+    return out
+
+
+def _avg_pct(vals: list[float]) -> float | None:
+    vals = [v for v in vals if v is not None]
+    return round(sum(vals) / len(vals) * 100, 2) if vals else None
+
+
+def _win_rate(vals: list[float]) -> float | None:
+    vals = [v for v in vals if v is not None]
+    return round(sum(1 for v in vals if v > 0) / len(vals) * 100, 1) if vals else None
+
+
 def build_report(index_close: pd.Series | None = None, as_of: date | None = None,
                  exit_cfg: dict | None = None, entry_cfg: dict | None = None) -> dict:
     picks = _load_core_picks()
@@ -219,7 +256,14 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         if perf is None:
             continue
         sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase)
-        rows.append({**p, **perf, "exit": sim})
+        row = {**p, **perf, "exit": sim}
+        # 機會成本測量:被「跳空開高棄單」的票,若當初照隔日開盤買進的前向表現(純量化,不改交易規則)
+        if sim and sim.get("status") == "skip" and sim.get("gap") is not None and sim["gap"] > 0:
+            pos = df.index.get_indexer([pd.Timestamp(p["date"])])
+            if len(pos) and pos[0] != -1:
+                row["skip_fwd"] = _forward_from_entry(df, int(pos[0]) + 1, sim.get("entry_price"))
+                row["skip_gap"] = sim["gap"]   # 百分比
+        rows.append(row)
 
     # ---------- 勝率統計(以最新報酬正負) ----------
     matured = [r for r in rows if r["trading_elapsed"] >= 1 and r["latest_ret"] is not None]
@@ -292,11 +336,73 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         }
     ledger = [_led(r) for r in active]
 
+    # ---------- 選股 vs 執行 拆分 + 跳空棄單機會成本(純測量,不影響上面的交易規則) ----------
+    # signal_return:選股能力 = 從「選股日收盤」持有到最新(全部已成熟 picks,不含任何執行規則)
+    signal = {
+        "n": len(matured),
+        "win_rate": _win_rate([r["latest_ret"] for r in matured]),
+        "avg_ret": _avg_pct([r["latest_ret"] for r in matured]),
+        "avg_maxgain": _avg_pct([r["peak_gain"] for r in matured]),
+    }
+    # execution_return:實際規則(隔日開盤進場 + 跳空保護 + 停損/移動停利),只有 closed 真正實現
+    execution = {
+        "n_closed": len(closed), "n_skip": skip_n, "n_open": open_n, "n_pending": pending_n,
+        "win_rate": exit_sim.get("win_rate"), "avg_ret": exit_sim.get("avg_ret"),
+        "avg_hold_days": exit_sim.get("avg_hold_days"),
+    }
+    # 選股 vs 執行 差距:同一組「已決策」(closed ∪ skip)上比較。
+    # signal=照選股收盤持有到最新;exec=照規則(skip 視為未進場、報酬 0)。delta<0 代表執行層在扣分。
+    decided = [r for r in rows if r.get("exit") and r["exit"]["status"] in ("closed", "skip")
+               and r["latest_ret"] is not None]
+    sig_avg = _avg_pct([r["latest_ret"] for r in decided])
+    exec_vals = [(r["exit"]["exit_ret"] if r["exit"]["status"] == "closed" else 0.0) for r in decided
+                 if not (r["exit"]["status"] == "closed" and r["exit"].get("exit_ret") is None)]
+    exec_avg = _avg_pct(exec_vals)
+    signal_vs_exec = {
+        "n_decided": len(decided),
+        "signal_avg_ret": sig_avg, "exec_avg_ret": exec_avg,
+        "delta": (round(exec_avg - sig_avg, 2) if (sig_avg is not None and exec_avg is not None) else None),
+        "note": "signal=照選股收盤持有到最新;exec=照規則(跳空棄單視為未進場,報酬0)。delta<0 表示執行層在扣分。",
+    }
+    # 跳空開高棄單的機會成本:這些票若當初照隔日開盤買進,後續表現如何?
+    skipped = [r for r in rows if r.get("skip_fwd")]
+    skip_cost = {"n": len(skipped)}
+    if skipped:
+        skip_cost.update({
+            "win_rate": _win_rate([r["skip_fwd"]["latest_ret"] for r in skipped]),
+            "avg_ret": _avg_pct([r["skip_fwd"]["latest_ret"] for r in skipped]),
+            "avg_maxgain": _avg_pct([r["skip_fwd"]["peak_gain"] for r in skipped]),
+        })
+        buckets = [("3-6%", 3, 6), ("6-8%", 6, 8), (">8%", 8, 1e9)]
+        by_gap = {}
+        for lab, lo, hi in buckets:
+            grp = [r for r in skipped if lo <= r["skip_gap"] < hi]
+            if grp:
+                by_gap[lab] = {
+                    "n": len(grp),
+                    "win_rate": _win_rate([r["skip_fwd"]["latest_ret"] for r in grp]),
+                    "avg_ret": _avg_pct([r["skip_fwd"]["latest_ret"] for r in grp]),
+                    "avg_maxgain": _avg_pct([r["skip_fwd"]["peak_gain"] for r in grp]),
+                }
+        skip_cost["by_gap"] = by_gap
+        by_h = {}
+        for h in HORIZONS:
+            mg = [r["skip_fwd"]["maxgain"].get(h) for r in skipped if r["skip_fwd"]["maxgain"].get(h) is not None]
+            rt = [r["skip_fwd"]["rets"].get(h) for r in skipped if r["skip_fwd"]["rets"].get(h) is not None]
+            if rt:
+                by_h[h] = {"n": len(rt), "win_rate": _win_rate(rt),
+                           "avg_ret": _avg_pct(rt), "avg_maxgain": _avg_pct(mg)}
+        skip_cost["by_horizon"] = by_h
+
     return {
         "as_of": as_of.isoformat(),
         "overall": overall,
         "by_horizon": by_horizon,
         "exit_sim": exit_sim,
+        "signal": signal,
+        "execution": execution,
+        "signal_vs_exec": signal_vs_exec,
+        "skip_cost": skip_cost,
         "ledger": ledger,
         "ledger_total": len(active),
         "ledger_cap": LEDGER_EMAIL_CAP,

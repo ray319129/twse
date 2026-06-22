@@ -782,8 +782,29 @@ function renderPerf(){
     <div id="ledtable"></div>`
     :`<div class="empty"><span class="ei">⏳</span>績效資料累積中 — 選股需經過至少 1 個交易日才有後續報酬,系統每天自動更新。</div>`;
 
+  /* 選股 vs 執行 + 跳空棄單機會成本(有 signal 資料才顯示) */
+  const sx=p.signal_vs_exec||{}, sig=p.signal||{}, sk=p.skip_cost||{};
+  let edge='';
+  if(isNum(sig.avg_ret)){
+    let cards='<div class="stats">';
+    cards+=`<div class="stat"><div class="v ${cls(sig.avg_ret)}">${fmt(sig.avg_ret)}%</div><div class="l">選股報酬 signal<br>從選股日收盤持有到最新 · 勝率 ${isNum(sig.win_rate)?sig.win_rate+'%':'-'} · ${isNum(sig.n)?sig.n:0} 檔</div></div>`;
+    cards+=`<div class="stat"><div class="v ${cls(sx.exec_avg_ret)}">${isNum(sx.exec_avg_ret)?fmt(sx.exec_avg_ret)+'%':'—'}</div><div class="l">執行報酬 execution<br>照規則(跳空棄單視為未進場)· ${isNum(sx.n_decided)?sx.n_decided:0} 筆已決策</div></div>`;
+    cards+=`<div class="stat"><div class="v ${cls(sx.delta)}">${isNum(sx.delta)?fmt(sx.delta)+'%':'—'}</div><div class="l">執行層 ${isNum(sx.delta)?(sx.delta<0?'<span class="down">在扣分</span>':'<span class="up">在加分</span>'):'—'}<br>execution − signal(edge 在選股還是執行)</div></div>`;
+    cards+='</div>';
+    const bg=sk.by_gap||{}, keys=Object.keys(bg);
+    let skTab;
+    if(isNum(sk.n)&&sk.n>0&&keys.length){
+      skTab=`<div class="tbl-wrap"><table class="t"><thead><tr><th>跳空區間</th><th class="r">樣本</th><th class="r">勝率</th><th class="r">平均報酬</th><th class="r">平均最高漲幅</th></tr></thead><tbody>`
+        +keys.map(k=>{const s=bg[k]||{};return `<tr><td class="tk">${esc(k)}</td><td class="r num">${isNum(s.n)?s.n:'-'}</td><td class="r num">${isNum(s.win_rate)?s.win_rate+'%':'-'}</td><td class="r num ${cls(s.avg_ret)}">${fmt(s.avg_ret)}%</td><td class="r num" style="color:var(--warn)">${isNum(s.avg_maxgain)?fmt(s.avg_maxgain)+'%':'-'}</td></tr>`;}).join('')
+        +`</tbody></table></div><div class="hint">「跳空開高棄單」的票若當初照隔日開盤買進的後續表現;明顯為正 = 3% 一刀切在錯失 alpha。</div>`;
+    } else {
+      skTab=`<div class="empty" style="padding:14px"><span class="ei">⏳</span>尚無「跳空棄單」樣本可評估(需有開高超過門檻且已成熟的交易)。</div>`;
+    }
+    edge=`<div class="sec-h"><span class="bar"></span>選股 vs 執行 — edge 在哪?</div>${cards}<div class="sec-h"><span class="bar"></span>跳空棄單機會成本</div>${skTab}`;
+  }
+
   const histNote=isHist?'<span class="tag-latest">最新</span> 績效統計與台帳恆顯示最新資料,不隨上方選股日切換。':'';
-  $('#p-perf').innerHTML=`<div class="lead">每天自動更新過去所有核心選股後續走勢(以每日收盤計)。共追蹤 <b>${isNum(p.total_tracked)?p.total_tracked:0}</b> 檔。${histNote}</div>`+stats+htab+ledArea;
+  $('#p-perf').innerHTML=`<div class="lead">每天自動更新過去所有核心選股後續走勢(以每日收盤計)。共追蹤 <b>${isNum(p.total_tracked)?p.total_tracked:0}</b> 檔。${histNote}</div>`+stats+htab+edge+ledArea;
 
   if(LED.length){
     /* chip clicks only update state + redraw rows; rebuild the chip bar's active state in place
