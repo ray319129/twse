@@ -320,10 +320,48 @@ def run_orb(test_mode: bool = False) -> None:
     log.info(f"ORB 報告已寄:已突破 {len(fired)} 檔")
 
 
+# ---------- 排程自動判斷 ----------
+# GitHub Actions 的 schedule 事件不保證準時觸發(實測常晚 40 分鐘以上),
+# 所以改成 workflow 每 5 分鐘 poll 一次,由這裡判斷『時間到了沒、今天寄過沒』,
+# 該寄才寄,否則安靜跳過 —— 不再依賴 github.event.schedule 字串去猜 phase。
+
+PREOPEN_DUE_HHMM = "08:45"
+ORB_DUE_HHMM = "09:25"
+
+
+def _phase_already_sent(phase: str, pick_date: str) -> bool:
+    """讀 docs/premarket.json,判斷『這組選股(pick_date)的這個 phase』是否已經寄過。
+    沿用既有的 web snapshot 當冪等標記,高頻 polling 也不會對同一個 phase 重複寄信。"""
+    path = DATA_DIR.parent / "docs" / "premarket.json"
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    return data.get("date") == pick_date and phase in data
+
+
+def run_auto(test_mode: bool = False) -> None:
+    snap = _load_latest_picks()
+    pick_date = snap.get("date", "")
+    if not pick_date:
+        log.info("auto:找不到最近核心選股,略過。")
+        return
+    now_hhmm = now_tpe().strftime("%H:%M")
+    if now_hhmm >= PREOPEN_DUE_HHMM and not _phase_already_sent("preopen", pick_date):
+        run_preopen(test_mode=test_mode)
+    elif now_hhmm >= ORB_DUE_HHMM and not _phase_already_sent("orb", pick_date):
+        run_orb(test_mode=test_mode)
+    else:
+        log.info(f"auto:現在 {now_hhmm},尚未到時間或今日已寄,略過。")
+
+
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--phase", choices=["preopen", "orb"], default="preopen",
-                   help="preopen=盤前試撮分類;orb=開盤15分突破判斷")
+    p.add_argument("--phase", choices=["auto", "preopen", "orb"], default="auto",
+                   help="auto=依現在時間+今天寄過沒自動判斷(高頻 polling 用);"
+                        "preopen=強制盤前試撮分類;orb=強制開盤15分突破判斷")
     p.add_argument("--test", action="store_true", help="主旨加 [測試] 前綴")
     return p.parse_args()
 
@@ -333,5 +371,7 @@ if __name__ == "__main__":
     assert_env(require_finmind=False)   # 盤前不需要 FinMind,只需 Gmail
     if args.phase == "orb":
         run_orb(test_mode=args.test)
+    elif args.phase == "auto":
+        run_auto(test_mode=args.test)
     else:
         run_preopen(test_mode=args.test)

@@ -2,8 +2,10 @@ name: Daily Screener
 
 on:
   schedule:
-    # 16:30 Asia/Taipei = 08:30 UTC, weekdays only
-    - cron: "30 8 * * 1-5"
+    # GitHub 的 schedule 事件不保證準時觸發(實測常晚 1~2 小時),改成每 5 分鐘
+    # poll 一次(08:00–11:55 UTC = 16:00–19:55 台北,涵蓋 16:30 目標時間 + 緩衝)。
+    # 「Check if due」步驟會擋掉還沒到時間 / 今天已經跑過的 tick,不會重複跑全市場掃描。
+    - cron: "*/5 8-11 * * 1-5"
   workflow_dispatch:
     inputs:
       test:
@@ -29,17 +31,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check if due
+        id: gate
+        run: |
+          # 手動觸發一律放行;排程觸發(高頻 poll)才需要擋『還沒到 16:30』或『今天已經跑過』,
+          # 避免每 5 分鐘的 tick 重複跑一次全市場掃描。
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          today_tpe=$(TZ=Asia/Taipei date +%Y-%m-%d)
+          now_hhmm=$(TZ=Asia/Taipei date +%H:%M)
+          if [ -f "data/signals/${today_tpe}.json" ]; then
+            echo "今日($today_tpe)已經跑過 daily screener,略過。"
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$now_hhmm" < "16:30" ]]; then
+            echo "還沒到 16:30(現在 $now_hhmm 台北),略過。"
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.should_run == 'true'
         with:
           python-version: "3.11"
           cache: pip
 
       - name: Install deps
+        if: steps.gate.outputs.should_run == 'true'
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run daily screener
+        if: steps.gate.outputs.should_run == 'true'
         env:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
@@ -55,7 +81,7 @@ jobs:
           fi
 
       - name: Commit data updates
-        if: ${{ github.event.inputs.date == '' }}
+        if: ${{ steps.gate.outputs.should_run == 'true' && github.event.inputs.date == '' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
