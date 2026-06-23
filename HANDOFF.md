@@ -117,7 +117,10 @@ M.daily_run(test_mode=True)
 ## 9. 盤前自動看盤(premarket)— 已上線,獨立於盤後流程
 解決「隔天開盤同時盯不了 10 檔」:盤前/開盤後自動看盤,只告訴你哪幾檔符合進場。**完全不碰盤後選股**。
 
-### 兩條早盤排程(`.github/workflows/premarket.yml`,用 `github.event.schedule` 分流 phase)
+### 觸發方式(重要):外部 cron → workflow_dispatch
+GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 在 08:45 / 09:25(台北,一~五)呼叫 `workflow_dispatch` API**(觸發的 run 通常幾秒啟動 → 準時、免開電腦)。設定步驟見 [SETUP_PREMARKET_CRON.md](SETUP_PREMARKET_CRON.md)(含建 PAT + cron-job.org)。`premarket.yml` 用 `inputs.phase`(preopen/orb)分流;也可在 Actions 分頁手動 Run workflow。若 cron-job.org 當天掛掉則該日不自動跑(可手動補)。
+
+### 兩個 phase(`.github/workflows/premarket.yml`)
 - **08:45 台北 `--phase preopen`**:讀最近一次盤後核心10 + 各自 `plan` → 抓個股『試撮/預估開盤價』(TWSE MIS API,免金鑰)+ 大盤盤前閘門(yfinance:費半 SOX / NASDAQ 期 NQ=F / S&P 期 ES=F / VIX,投票 risk-on/中性/risk-off)+ ADR 佐證 → 把每檔分類 **A平盤 / B開高 / C開低 / ❌棄單(跳空過進場上限)/ ❌作廢(開盤即破停損)**,寄信。
 - **09:25 台北 `--phase orb`**:對(依真實開盤判為)A 的股抓 **09:00–09:15 yfinance 1分K** → 算開盤區間高 ORH → 判 09:15 後是否**帶量突破**(`premarket.orb.volume_filter`,預設開)→ 寄信「✅已突破可進 / ⏸尚未突破 / ❌跌破區間低」。
 
