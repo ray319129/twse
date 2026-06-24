@@ -1,6 +1,6 @@
 {
   "date": "2026-06-24",
-  "generated_at": "2026-06-24 15:15",
+  "generated_at": "2026-06-24 16:56",
   "index_below_ma20": false,
   "scored_count": 960,
   "core": [
@@ -92,97 +92,6 @@
       "hot_industry": true
     },
     {
-      "score": 74.1,
-      "trend": 1.0,
-      "rs": 0.4,
-      "setup": 0.77,
-      "quality": 0.83,
-      "liquidity": 0.73,
-      "exhausted": false,
-      "trigger": true,
-      "brewing": false,
-      "breakout": true,
-      "pullback_turn": false,
-      "limit_up_today": false,
-      "profile": "品質",
-      "ret5_pct": 10.7,
-      "ret20_pct": 9.9,
-      "dollar_vol_m": 531.0,
-      "stock_id": "3014",
-      "name": "聯陽",
-      "industry": "半導體業",
-      "close": 166.0,
-      "change_pct": 3.11,
-      "valuation": {
-        "pe": 17.41,
-        "yield_pct": 5.28,
-        "pb": 4.31
-      },
-      "levels": {
-        "close": 166.0,
-        "ma5": 159.3,
-        "ma5_diff_pct": 4.04,
-        "ma20": 151.075,
-        "ma20_diff_pct": 8.99,
-        "ma60": 135.80833333333334,
-        "ma60_diff_pct": 18.19,
-        "ma120": 126.82916666666667,
-        "ma120_diff_pct": 23.6,
-        "ma240": 128.16875,
-        "ma240_diff_pct": 22.79,
-        "high_60": 166.0,
-        "low_60": 114.5,
-        "high_20": 166.0,
-        "low_20": 136.5,
-        "bb_lower": 136.48850660804038,
-        "bb_upper": 165.6614933919596,
-        "atr14": 8.464285714285714,
-        "stop_2atr": 149.07,
-        "stop_2atr_pct": -10.2
-      },
-      "hits": [
-        "bullish_ma_alignment",
-        "above_240ma",
-        "volume_price_surge",
-        "n_day_high",
-        "relative_strength_leader"
-      ],
-      "combos": [],
-      "plan": {
-        "ref": 166.0,
-        "max_entry": 170.98,
-        "init_stop": 158.5,
-        "tp1": 181.0,
-        "r_abs": 7.5,
-        "risk_pct": 4.52,
-        "style": "momentum",
-        "tp1_resistance": false,
-        "flat_lo": 164.34,
-        "flat_hi": 167.66,
-        "gap_up_line": 168.49,
-        "gap_dn_line": 164.34,
-        "trail_ma": 5
-      },
-      "chips": {
-        "inst_total_today": 353467,
-        "inst_buy_streak": 5,
-        "foreign_holding_pct": 22.88,
-        "foreign_holding_change_30d": 2.36,
-        "short_change_pct": 0.0
-      },
-      "fundamentals": {
-        "revenue_latest_ym": "2026-05",
-        "revenue_yoy": -8.24,
-        "revenue_consecutive_growth_months": 1,
-        "eps_latest": 2.85,
-        "eps_quarters_loaded": 8
-      },
-      "chip_signal": 0.75,
-      "chip_bonus": 7.5,
-      "rank_score": 81.6,
-      "hot_industry": true
-    },
-    {
       "score": 72.8,
       "trend": 1.0,
       "rs": 0.38,
@@ -255,8 +164,8 @@
         "trail_ma": 5
       },
       "chips": {
-        "inst_total_today": 1086256,
-        "inst_buy_streak": 4,
+        "inst_total_today": 2199396,
+        "inst_buy_streak": 5,
         "foreign_holding_pct": 9.39,
         "foreign_holding_change_30d": 1.42,
         "short_change_pct": -31.9
@@ -268,9 +177,9 @@
         "eps_latest": 0.17,
         "eps_quarters_loaded": 8
       },
-      "chip_signal": 0.88,
-      "chip_bonus": 8.8,
-      "rank_score": 81.6,
+      "chip_signal": 0.93,
+      "chip_bonus": 9.3,
+      "rank_score": 82.1,
       "hot_industry": false
     },
     {
@@ -347,8 +256,8 @@
         "trail_ma": 5
       },
       "chips": {
-        "inst_total_today": 129804,
-        "inst_buy_streak": 1,
+        "inst_total_today": 1221651,
+        "inst_buy_streak": 2,
         "foreign_holding_pct": 38.73,
         "foreign_holding_change_30d": -1.42,
         "short_change_pct": 12.4
@@ -360,10 +269,101 @@
         "eps_latest": 2.94,
         "eps_quarters_loaded": 8
       },
-      "chip_signal": 0.3,
-      "chip_bonus": 3.0,
-      "rank_score": 76.4,
+      "chip_signal": 0.35,
+      "chip_bonus": 3.5,
+      "rank_score": 76.9,
       "hot_industry": false
+    },
+    {
+      "score": 74.1,
+      "trend": 1.0,
+      "rs": 0.4,
+      "setup": 0.77,
+      "quality": 0.83,
+      "liquidity": 0.73,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "profile": "品質",
+      "ret5_pct": 10.7,
+      "ret20_pct": 9.9,
+      "dollar_vol_m": 531.0,
+      "stock_id": "3014",
+      "name": "聯陽",
+      "industry": "半導體業",
+      "close": 166.0,
+      "change_pct": 3.11,
+      "valuation": {
+        "pe": 17.41,
+        "yield_pct": 5.28,
+        "pb": 4.31
+      },
+      "levels": {
+        "close": 166.0,
+        "ma5": 159.3,
+        "ma5_diff_pct": 4.04,
+        "ma20": 151.075,
+        "ma20_diff_pct": 8.99,
+        "ma60": 135.80833333333334,
+        "ma60_diff_pct": 18.19,
+        "ma120": 126.82916666666667,
+        "ma120_diff_pct": 23.6,
+        "ma240": 128.16875,
+        "ma240_diff_pct": 22.79,
+        "high_60": 166.0,
+        "low_60": 114.5,
+        "high_20": 166.0,
+        "low_20": 136.5,
+        "bb_lower": 136.48850660804038,
+        "bb_upper": 165.6614933919596,
+        "atr14": 8.464285714285714,
+        "stop_2atr": 149.07,
+        "stop_2atr_pct": -10.2
+      },
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "volume_price_surge",
+        "n_day_high",
+        "relative_strength_leader"
+      ],
+      "combos": [],
+      "plan": {
+        "ref": 166.0,
+        "max_entry": 170.98,
+        "init_stop": 158.5,
+        "tp1": 181.0,
+        "r_abs": 7.5,
+        "risk_pct": 4.52,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 164.34,
+        "flat_hi": 167.66,
+        "gap_up_line": 168.49,
+        "gap_dn_line": 164.34,
+        "trail_ma": 5
+      },
+      "chips": {
+        "inst_total_today": -158611,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 22.88,
+        "foreign_holding_change_30d": 2.36,
+        "short_change_pct": 0.0
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": -8.24,
+        "revenue_consecutive_growth_months": 1,
+        "eps_latest": 2.85,
+        "eps_quarters_loaded": 8
+      },
+      "chip_signal": 0.25,
+      "chip_bonus": 2.5,
+      "rank_score": 76.6,
+      "hot_industry": true
     },
     {
       "score": 73.2,
@@ -437,8 +437,8 @@
         "trail_ma": 5
       },
       "chips": {
-        "inst_total_today": -97976,
-        "inst_buy_streak": 0,
+        "inst_total_today": 444322,
+        "inst_buy_streak": 1,
         "foreign_holding_pct": 6.34,
         "foreign_holding_change_30d": -3.47,
         "short_change_pct": 21.06
@@ -450,9 +450,9 @@
         "eps_latest": 0.24,
         "eps_quarters_loaded": 8
       },
-      "chip_signal": 0.0,
-      "chip_bonus": 0.0,
-      "rank_score": 73.2,
+      "chip_signal": 0.3,
+      "chip_bonus": 3.0,
+      "rank_score": 76.2,
       "hot_industry": false
     },
     {
@@ -524,8 +524,8 @@
         "trail_ma": 10
       },
       "chips": {
-        "inst_total_today": 597893,
-        "inst_buy_streak": 1,
+        "inst_total_today": -279655,
+        "inst_buy_streak": 0,
         "foreign_holding_pct": 19.32,
         "foreign_holding_change_30d": -3.73,
         "short_change_pct": -4.67
@@ -537,180 +537,10 @@
         "eps_latest": 2.17,
         "eps_quarters_loaded": 9
       },
-      "chip_signal": 0.3,
-      "chip_bonus": 3.0,
-      "rank_score": 71.5,
+      "chip_signal": 0.0,
+      "chip_bonus": 0.0,
+      "rank_score": 68.5,
       "hot_industry": false
-    },
-    {
-      "score": 63.8,
-      "trend": 0.8,
-      "rs": 1.0,
-      "setup": 0.2,
-      "quality": 0.5,
-      "liquidity": 0.63,
-      "exhausted": false,
-      "trigger": true,
-      "brewing": false,
-      "breakout": false,
-      "pullback_turn": true,
-      "limit_up_today": false,
-      "profile": "均衡",
-      "ret5_pct": -5.3,
-      "ret20_pct": 6.7,
-      "dollar_vol_m": 359.0,
-      "stock_id": "8182",
-      "name": "加高",
-      "industry": "電子零組件業",
-      "close": 48.70000076293945,
-      "change_pct": 2.96,
-      "valuation": {},
-      "levels": {
-        "close": 48.70000076293945,
-        "ma5": 49.5,
-        "ma5_diff_pct": -1.64,
-        "ma20": 48.51999988555908,
-        "ma20_diff_pct": 0.37,
-        "ma60": 40.10250005722046,
-        "ma60_diff_pct": 17.65,
-        "ma120": 33.64083334604899,
-        "ma120_diff_pct": 30.92,
-        "ma240": 29.847916682561237,
-        "ma240_diff_pct": 38.71,
-        "high_60": 57.0,
-        "low_60": 27.450000762939453,
-        "high_20": 57.0,
-        "low_20": 43.04999923706055,
-        "bb_lower": 40.69356686204431,
-        "bb_upper": 56.346432909073854,
-        "atr14": 4.471429007393973,
-        "stop_2atr": 39.76,
-        "stop_2atr_pct": -18.36
-      },
-      "hits": [
-        "above_240ma",
-        "pullback_to_support"
-      ],
-      "combos": [],
-      "plan": {
-        "ref": 48.7,
-        "max_entry": 50.16,
-        "init_stop": 46.4,
-        "tp1": 53.3,
-        "r_abs": 2.299999237060547,
-        "risk_pct": 4.72,
-        "style": "swing",
-        "tp1_resistance": false,
-        "flat_lo": 48.21,
-        "flat_hi": 49.19,
-        "gap_up_line": 49.43,
-        "gap_dn_line": 48.21,
-        "trail_ma": 10
-      },
-      "chips": {
-        "inst_total_today": 280287,
-        "inst_buy_streak": 2,
-        "foreign_holding_pct": 52.87,
-        "foreign_holding_change_30d": 1.13,
-        "short_change_pct": -15.71
-      },
-      "fundamentals": {
-        "revenue_latest_ym": "2026-05",
-        "revenue_yoy": 0.12,
-        "revenue_consecutive_growth_months": 2,
-        "eps_latest": 0.14,
-        "eps_quarters_loaded": 8
-      },
-      "chip_signal": 0.74,
-      "chip_bonus": 7.4,
-      "rank_score": 71.2,
-      "hot_industry": false
-    },
-    {
-      "score": 63.6,
-      "trend": 1.0,
-      "rs": 0.62,
-      "setup": 0.23,
-      "quality": 0.5,
-      "liquidity": 1.0,
-      "exhausted": false,
-      "trigger": true,
-      "brewing": false,
-      "breakout": false,
-      "pullback_turn": true,
-      "limit_up_today": false,
-      "profile": "均衡",
-      "ret5_pct": 6.6,
-      "ret20_pct": 1.5,
-      "dollar_vol_m": 2724.0,
-      "stock_id": "3264",
-      "name": "欣銓",
-      "industry": "半導體業",
-      "close": 234.5,
-      "change_pct": 0.43,
-      "valuation": {},
-      "levels": {
-        "close": 234.5,
-        "ma5": 230.8,
-        "ma5_diff_pct": 1.58,
-        "ma20": 226.2,
-        "ma20_diff_pct": 3.54,
-        "ma60": 209.35,
-        "ma60_diff_pct": 10.72,
-        "ma120": 175.36666666666667,
-        "ma120_diff_pct": 25.22,
-        "ma240": 128.69750016530355,
-        "ma240_diff_pct": 45.12,
-        "high_60": 248.5,
-        "low_60": 155.5,
-        "high_20": 243.5,
-        "low_20": 211.0,
-        "bb_lower": 205.6614611291997,
-        "bb_upper": 246.73853887080028,
-        "atr14": 15.035714285714286,
-        "stop_2atr": 204.43,
-        "stop_2atr_pct": -12.82
-      },
-      "hits": [
-        "bullish_ma_alignment",
-        "above_240ma",
-        "pullback_to_support",
-        "relative_strength_leader"
-      ],
-      "combos": [],
-      "plan": {
-        "ref": 234.5,
-        "max_entry": 241.53,
-        "init_stop": 218.08,
-        "tp1": 267.33,
-        "r_abs": 16.41500000000002,
-        "risk_pct": 7.0,
-        "style": "swing",
-        "tp1_resistance": false,
-        "flat_lo": 232.16,
-        "flat_hi": 236.84,
-        "gap_up_line": 238.02,
-        "gap_dn_line": 232.16,
-        "trail_ma": 10
-      },
-      "chips": {
-        "inst_total_today": 3295629,
-        "inst_buy_streak": 3,
-        "foreign_holding_pct": 35.89,
-        "foreign_holding_change_30d": 7.26,
-        "short_change_pct": 0.0
-      },
-      "fundamentals": {
-        "revenue_latest_ym": "2026-05",
-        "revenue_yoy": 32.96,
-        "revenue_consecutive_growth_months": 3,
-        "eps_latest": 1.95,
-        "eps_quarters_loaded": 8
-      },
-      "chip_signal": 0.65,
-      "chip_bonus": 6.5,
-      "rank_score": 70.1,
-      "hot_industry": true
     },
     {
       "score": 62.8,
@@ -800,6 +630,95 @@
       "hot_industry": true
     },
     {
+      "score": 63.0,
+      "trend": 1.0,
+      "rs": 0.2,
+      "setup": 0.65,
+      "quality": 0.44,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "profile": "均衡",
+      "ret5_pct": 10.7,
+      "ret20_pct": 29.7,
+      "dollar_vol_m": 2439.0,
+      "stock_id": "1326",
+      "name": "台化",
+      "industry": "塑膠工業",
+      "close": 57.70000076293945,
+      "change_pct": 8.66,
+      "valuation": {
+        "pe": 354.0,
+        "yield_pct": 1.13,
+        "pb": 0.83
+      },
+      "levels": {
+        "close": 57.70000076293945,
+        "ma5": 54.98000030517578,
+        "ma5_diff_pct": 4.71,
+        "ma20": 51.51500015258789,
+        "ma20_diff_pct": 10.72,
+        "ma60": 49.177500025431314,
+        "ma60_diff_pct": 14.77,
+        "ma120": 44.20208330154419,
+        "ma120_diff_pct": 23.39,
+        "ma240": 36.634166701634726,
+        "ma240_diff_pct": 36.51,
+        "high_60": 57.70000076293945,
+        "low_60": 44.25,
+        "high_20": 57.70000076293945,
+        "low_20": 45.400001525878906,
+        "bb_lower": 43.74047374218727,
+        "bb_upper": 59.289526562988506,
+        "atr14": 3.4535718645368303,
+        "stop_2atr": 50.79,
+        "stop_2atr_pct": -11.97
+      },
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "volume_price_surge",
+        "n_day_high"
+      ],
+      "combos": [],
+      "plan": {
+        "ref": 57.7,
+        "max_entry": 59.43,
+        "init_stop": 53.66,
+        "tp1": 65.78,
+        "r_abs": 4.039000053405765,
+        "risk_pct": 7.0,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 57.12,
+        "flat_hi": 58.28,
+        "gap_up_line": 58.57,
+        "gap_dn_line": 57.12,
+        "trail_ma": 5
+      },
+      "chips": {
+        "inst_total_today": 21471781,
+        "inst_buy_streak": 1,
+        "foreign_holding_pct": 38.0,
+        "foreign_holding_change_30d": 0.73
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 15.45,
+        "revenue_consecutive_growth_months": 3,
+        "eps_latest": 1.07,
+        "eps_quarters_loaded": 8
+      },
+      "chip_signal": 0.52,
+      "chip_bonus": 5.2,
+      "rank_score": 68.2,
+      "hot_industry": false
+    },
+    {
       "score": 68.0,
       "trend": 0.8,
       "rs": 1.0,
@@ -870,7 +789,7 @@
         "trail_ma": 10
       },
       "chips": {
-        "inst_total_today": -5520641,
+        "inst_total_today": -896247,
         "inst_buy_streak": 0,
         "foreign_holding_pct": 38.33,
         "foreign_holding_change_30d": -6.09,
@@ -886,6 +805,90 @@
       "chip_signal": 0.0,
       "chip_bonus": 0.0,
       "rank_score": 68.0,
+      "hot_industry": false
+    },
+    {
+      "score": 63.8,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.2,
+      "quality": 0.5,
+      "liquidity": 0.63,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "breakout": false,
+      "pullback_turn": true,
+      "limit_up_today": false,
+      "profile": "均衡",
+      "ret5_pct": -5.3,
+      "ret20_pct": 6.7,
+      "dollar_vol_m": 359.0,
+      "stock_id": "8182",
+      "name": "加高",
+      "industry": "電子零組件業",
+      "close": 48.70000076293945,
+      "change_pct": 2.96,
+      "valuation": {},
+      "levels": {
+        "close": 48.70000076293945,
+        "ma5": 49.5,
+        "ma5_diff_pct": -1.64,
+        "ma20": 48.51999988555908,
+        "ma20_diff_pct": 0.37,
+        "ma60": 40.10250005722046,
+        "ma60_diff_pct": 17.65,
+        "ma120": 33.64083334604899,
+        "ma120_diff_pct": 30.92,
+        "ma240": 29.847916682561237,
+        "ma240_diff_pct": 38.71,
+        "high_60": 57.0,
+        "low_60": 27.450000762939453,
+        "high_20": 57.0,
+        "low_20": 43.04999923706055,
+        "bb_lower": 40.69356686204431,
+        "bb_upper": 56.346432909073854,
+        "atr14": 4.471429007393973,
+        "stop_2atr": 39.76,
+        "stop_2atr_pct": -18.36
+      },
+      "hits": [
+        "above_240ma",
+        "pullback_to_support"
+      ],
+      "combos": [],
+      "plan": {
+        "ref": 48.7,
+        "max_entry": 50.16,
+        "init_stop": 46.4,
+        "tp1": 53.3,
+        "r_abs": 2.299999237060547,
+        "risk_pct": 4.72,
+        "style": "swing",
+        "tp1_resistance": false,
+        "flat_lo": 48.21,
+        "flat_hi": 49.19,
+        "gap_up_line": 49.43,
+        "gap_dn_line": 48.21,
+        "trail_ma": 10
+      },
+      "chips": {
+        "inst_total_today": -838167,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 52.87,
+        "foreign_holding_change_30d": 1.13,
+        "short_change_pct": -15.71
+      },
+      "fundamentals": {
+        "revenue_latest_ym": "2026-05",
+        "revenue_yoy": 0.12,
+        "revenue_consecutive_growth_months": 2,
+        "eps_latest": 0.14,
+        "eps_quarters_loaded": 8
+      },
+      "chip_signal": 0.39,
+      "chip_bonus": 3.9,
+      "rank_score": 67.7,
       "hot_industry": false
     }
   ],
@@ -1484,7 +1487,7 @@
       ],
       "combos": [],
       "chips": {
-        "inst_total_today": -1369156,
+        "inst_total_today": -36686919,
         "inst_buy_streak": 0,
         "foreign_holding_pct": 69.95,
         "short_change_pct": -8.2
@@ -1506,7 +1509,7 @@
         {
           "title": "是誰在倒貨？台積電尾盤爆逾1.3萬張賣單兇手、兩大警訊曝光 - Yahoo股市",
           "link": "https://news.google.com/rss/articles/CBMilgNBVV95cUxNTnFzakdlTFlaMHpkVG5OQjJkRks5Y3c4ci1XdlM5MEpBSktFVjZFcGxkc2hiMERfRjh6Mm9yUjlXMFh6cDE5R3IzaS12cUtDNXI4VXprLVFSeEpyZERiSW1sY2UtWW1SVVRyX3lZeEhSdDM3bkxMUWxmY0xOa0otQXowdGVEQjkyTnJHYi1MbmViVVNPZFd2cHVWTEtTLTNKSFFEY0NBRGFTQ1ppN3VTWEYtVDhYODRiQTJjczFxLU5GWkt6UFJ3Yk51TW9BVU9RaVNjcUR2TmdjZzBEeXNaZVlMbWgyYUhBOVVuYWlqWFlRZmdzWFlQM3dDb3l3RlRrZk1BZkhES1ZQT3U0clkxQ183UmlDLXprNE1VSFYyeE02NzV3UHUtVkdXWndhcTYxNXlJMTdNazNVNTF4QU9XTlIwQzhZdlZHdDVyMF9BQVFZTFFMUkJJenRvN2IwVXk1Y0h6RS1hRTBfY1pkOWVRbm9OX09ZX1lDaDNjWjlDaVVUYmJvZ05LbGs3N0pBQ0V5VjRieXVB?oc=5",
-          "published": "Wed, 24 Jun 2026 05:55:56 GMT",
+          "published": "Wed, 24 Jun 2026 05:58:33 GMT",
           "source": "Yahoo股市"
         },
         {
@@ -1585,8 +1588,8 @@
       ],
       "combos": [],
       "chips": {
-        "inst_total_today": 324091,
-        "inst_buy_streak": 3,
+        "inst_total_today": -4149259,
+        "inst_buy_streak": 0,
         "foreign_holding_pct": 55.84,
         "short_change_pct": -12.86
       },
@@ -1611,22 +1614,22 @@
           "source": "Yahoo股市"
         },
         {
-          "title": "聯發科獨拿 Google TPU 新單 - 經濟日報",
-          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5XRlNnV2lZakdjUFc4dmxkek1TVlU4cVZweG5TRWNWRmVIdzdRZHpIanZjT2FLVjl1TG5aT1J1TmZJRGJKUm83azBad3d0NTZNMmFmVlkzYld6QdIBX0FVX3lxTE50N2E2WE53RzFaVHlUdGlBN2ZfVW1PSlQ4YlRZeUpwcGVRRmx3TXQ1eUdldENaQ1ZkWXlzS2Fhdk5oZXdoQmM0QVpuNzA1eFlBY1RmZ1p5dmFUV1NiN3A0?oc=5",
-          "published": "Mon, 22 Jun 2026 09:00:00 GMT",
-          "source": "經濟日報"
-        },
-        {
-          "title": "AI通膨扛不住了！ 聯發科發函通知客戶漲價 - 自由財經",
-          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE5xRUFRNWZzMmZwakdxTnhKekdoUF9FbGNubHhDVFBvLTJ2UDRBVnExSXRRWHMwTlhGelVuMW9zaEp2aTFNQ0loTWtvOHR6OW1Nb2lUejJQMEFYdTFwZnV30gFkQVVfeXFMT2JVNmlzZzAwaHU2OXBvY0psRFI3OURRWkI0UXh5R2JDR1UzYUIzSnB2WlNDQjctbjdaTy10QnVtcWl5cVJ3UWlfMkdDR28wTzBMLU1ZNTVjZml6cGNqTFdjOUtrYg?oc=5",
-          "published": "Mon, 22 Jun 2026 23:06:29 GMT",
-          "source": "自由財經"
-        },
-        {
           "title": "複製國巨(2327)三個月漲400%奇蹟？聯發科(2454)、創意(3443)、世芯-KY(3661)....台股老手點名「下半年17檔大黑馬股」：被動元件噴完換它 - 今周刊",
           "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOZzBuTTlrZzdxWGw0R0pmb2hkQjNXUWpsN0QtSFF3SEliLTNuVGV6N2d1QUlBU2xhbW4tUUpHeUI2VHgxX3lKdEFYRU9keXB6NnAyN0F6ZDJIMC16enNoUVFET0hnWEpWOVN3X0xFbHkxZFZMUjUzakxlZERMU1gzXw?oc=5",
           "published": "Mon, 22 Jun 2026 07:00:00 GMT",
           "source": "今周刊"
+        },
+        {
+          "title": "聯發科獨拿 Google TPU 新單 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5XRlNnV2lZakdjUFc4dmxkek1TVlU4cVZweG5TRWNWRmVIdzdRZHpIanZjT2FLVjl1TG5aT1J1TmZJRGJKUm83azBad3d0NTZNMmFmVlkzYld6QdIBX0FVX3lxTE50N2E2WE53RzFaVHlUdGlBN2ZfVW1PSlQ4YlRZeUpwcGVRRmx3TXQ1eUdldENaQ1ZkWXlzS2Fhdk5oZXdoQmM0QVpuNzA1eFlBY1RmZ1p5dmFUV1NiN3A0?oc=5",
+          "published": "Tue, 23 Jun 2026 09:00:00 GMT",
+          "source": "經濟日報"
+        },
+        {
+          "title": "〈焦點股〉聯發科發漲價函 領軍多檔IC設計漲停 - news.cnyes.com",
+          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE85WHJZQ09TRTEtSlJRdHdOMlNJRWFBTElaWXh5VV9LTkRYd0dkVS14di1zdUQ4MzlwSlY1eFo3cmZidUN1bldDR1c3cklZcEU?oc=5",
+          "published": "Tue, 23 Jun 2026 03:21:57 GMT",
+          "source": "news.cnyes.com"
         }
       ]
     },
@@ -1686,7 +1689,7 @@
       ],
       "combos": [],
       "chips": {
-        "inst_total_today": -33183866,
+        "inst_total_today": -11903461,
         "inst_buy_streak": 0,
         "foreign_holding_pct": 41.31,
         "short_change_pct": -19.95
@@ -1706,9 +1709,9 @@
           "source": "Yahoo股市"
         },
         {
-          "title": "2317 鴻海 - 23-June -2026 當日個股 – 三大法人合計賣... - 股市爆料同學會 - CMoney",
-          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1RaU4xUlFFOHE5SVM0MUFnUFUtUkczY0dTQmF6TEJza0pNX0dsVG5IVWZ0QUZpZFAxQ2RfbG91ZDY3aDZyLVZIdmJnMGNBdWJhcXlEWEhCZzU?oc=5",
-          "published": "Tue, 23 Jun 2026 17:34:52 GMT",
+          "title": "2317 鴻海 - 鴻海攜手SHARP 深化策略合作，聚焦 AI、能源與機器人新興事業- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1qSzExSjczNDlLSlY4dHE1RUlwVW0wb2k0UkJFRldYdEN2Z3M0M2otaDZZYTdiNWNPOW9fVVJQUk5ZN0JNMnlKYVBtTGlWZkc0Z0lqQ2F1Umk?oc=5",
+          "published": "Tue, 23 Jun 2026 15:36:28 GMT",
           "source": "CMoney"
         },
         {
@@ -1718,9 +1721,9 @@
           "source": "UDN"
         },
         {
-          "title": "2317 鴻海 - 今天大盤臉綠🥹譽哥也臉綠了🤣 - 股市爆料同學會 - CMoney",
-          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1HZHRENlZTSXVLUVA4RXVycGo2RDU4Umd1SEZFajNHeGZweUd5eWhlb3A1S2tuR2VZOEE4eXJ2RndiMjdyNUlFVXpub1RPSEJYdXFlcHV3eDE?oc=5",
-          "published": "Tue, 23 Jun 2026 15:10:00 GMT",
+          "title": "2317 鴻海 - 費半重挫近9%、台股盤中摜破46K，兩大族群逆風突圍！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFB1QlE2dkhVUFZXYkhHMFNTb3hMbGhSVWhfWnl0ejZKaF8zMlJOZzdDbElQeVRuNzN2RE1lVE1ma0NEcGtMOUtFb3lHS3hJSWZSQ0NySTVwTE4?oc=5",
+          "published": "Tue, 23 Jun 2026 16:40:06 GMT",
           "source": "CMoney"
         },
         {
@@ -1787,7 +1790,7 @@
       ],
       "combos": [],
       "chips": {
-        "inst_total_today": -3145014,
+        "inst_total_today": -6849170,
         "inst_buy_streak": 0,
         "foreign_holding_pct": 63.95
       },
@@ -1806,12 +1809,6 @@
           "source": "Yahoo股市"
         },
         {
-          "title": "台達電(2308) 個股概覽 | 個股 - 股市 - CMoney",
-          "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBYSC1FOXZmSnVKcWVpck5EYjRvcjRCWjE0eDVtaUQ1cFpvRmEyb2VGNlZvdEwtUXg1OUM0aVNrNmFlWkF1eWwtMmtTM2x0OEVvUFVn?oc=5",
-          "published": "Tue, 23 Jun 2026 23:53:11 GMT",
-          "source": "CMoney"
-        },
-        {
           "title": "【即時新聞】台達電(2308)爆量重挫逾4%，這「3檔概念股」還能逢低卡位嗎？ - CMoney投資網誌",
           "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPMHJxQlhibXNzd1pweHpGWjBYdFJIY1Y2TTBNZUZfc01fMjBVUEh4c2ZndnZZczFKVTVwdmt2aFJuWHp5LWNxQWltVFowTVg2S2ZtQzI5dlhhS3VBSGp4UThXc25wUFBzSVgwWVJWZU9KWHQxbDlCMzVRMWxZdy1tVmpHdlJESzQwOWdNNDYxMzI?oc=5",
           "published": "Wed, 24 Jun 2026 03:03:34 GMT",
@@ -1828,6 +1825,12 @@
           "link": "https://news.google.com/rss/articles/CBMikARBVV95cUxPV3d0VnJiY1FYc1BKQ3FvUUNNM2VadEs0NE5iQUxHTldnaWZHaFJwOXljbmVEN1doMkFuWV9mZlZkSnhQR09QZWlrZllRRy1HMkdSUnZBRUx0LWtNZkN2UllMT2Jzc000ZDd5dEk5M1Q5X3JoV3llekxaem9fQUV5Ymh0NE5zTVFaV25NUmp4bTlLTENPeWZNQlJCMzVsQi1uQzhwUWFIT3hXS2ZEN01KNlhDRHVQMG91WVZXLVFCUmxJNWJCM3ZHNFBkQnU3S2UyUHV0V3F6TTdQMkxoMk1fU21YY1FLSTJVNmx4ZGw3dS1rMms2ZWhnRDlKX1k1c0RjUTRfMlY0ZzBkRGJ0OEV1UUVRMFlsbGFWN19XcVktM0FsZ1lnNXZJZzJGcWdaaFY2Z3FpZGx3YXBZcVpGajJkbUIxN0J2UEpOUS02eldHblYxN21NeE1mamdVQ3FyVUgxTENfWFFUREk5a0J0S0lNMTQ0MzRKeHZMVjcyTDcwNUlPTE42Y0tsbUF4WDF2TGFPWXVqWHpmam8xc0NxQVVkSklyR1VtZi1CalhucXl6ZmJKUXh0M1RLTnc0aTNOWlFyRVhRQXAxVkZPTnJpUmNYdlhEUVBLcmtrOU5xdEhvdGZnVjdDUElOQWV2RmJPREo3TTBQWVVLeW5kVkswclkxQkZqdC1jaEZGanl0cHJXQVk?oc=5",
           "published": "Mon, 22 Jun 2026 03:39:38 GMT",
           "source": "Yahoo股市"
+        },
+        {
+          "title": "台達電獲調升目標價！00896狂押8%直接吃補…今為最後買進日明除息| 存股族愛ETF | 股市 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5Qbktldm9DYW1DZjhlN1NZRVBrcldjcDlFTHBKODY0NTRYeDRmV0x4SW9hVXVyczNXdXR3WjdiV2FDYzhPTnpJcnZvYUVNTy1ndklz?oc=5",
+          "published": "Mon, 15 Jun 2026 07:00:00 GMT",
+          "source": "UDN"
         }
       ]
     },
@@ -1888,8 +1891,8 @@
       ],
       "combos": [],
       "chips": {
-        "inst_total_today": -99734,
-        "inst_buy_streak": 0,
+        "inst_total_today": 101002,
+        "inst_buy_streak": 1,
         "foreign_holding_pct": 33.79,
         "short_change_pct": 17.78
       },
@@ -1908,16 +1911,16 @@
           "source": "今周刊"
         },
         {
-          "title": "大立光 CPO 報捷大驚奇 技術領先市場三個世代 | 產業熱點 | 產業 - 經濟日報",
-          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9kZFlCdmZZS1NpX2VjYnQzNFRTZTIzd1NGbUJzWWtJbEg2LXZaLVNMb2pXeURUc2pyb2FoNEtFTVJRV1NhRVpjWm1mdkM5NFo2YnpwYndHXzRvQQ?oc=5",
-          "published": "Mon, 22 Jun 2026 09:00:00 GMT",
-          "source": "經濟日報"
-        },
-        {
           "title": "大立光股東會／CPO試產線9月啟動、第4季將比往年忙，外資大調目標價，今日股價直衝漲停｜股市話題 - sinotrade.com.tw",
           "link": "https://news.google.com/rss/articles/CBMi0gRBVV95cUxNOEoyRUM5bmhJYnVZd3hKMWljVWE1aEVKUU5WSWFLWXVvRkg4ZFkwck1hNVFwNFRsV0R5eXZiTFpMVGtiamxZVlhRMkRMazNYRXlaeHhBWFRSbGVDajJuamRnRFhDZ0E3ejA3cklCTFNjTjIybVEtXzU3MFRGQXV3Q0ZsbFUtVUFjRWo1MzJSbFU5NHlBRFJEbkpwX1VHelo5VmJTa25TOHJVZ0xhVlMwWTF4cVl2Qm1qVldMalQ1Z0I4YlVvejYtUElYaTQzaGgyaWlzemVDV2tjZ0tuaFNTNzA5aUxjUDRzeGE5cFNRWFRqQmZIbVo4RnQzY2ROQ3psUmpQelRIdzN6Yi1UQUhoYk82R25IUU8tZ045bGlYOXFzbXFuMUo3R1ZtQ21EUGZzbHM1U3dvZGhpaXM1ZHlFWmNTTU04TE1FSUVnQkZSbV9DUU11NjlMRTJHZW95cXp0UElDbEtka1Y1LTJmaGdjU2ltRllXMUVrdTFYbUJPb0Y0ZkpWLWpHZXlqdmhCa2ZTc2o1UWgycFdqWUhtcl9TRnN0SUIwUktVZTBDdGNqNE9rTzhwOTRVNlJSYk0wUkNQcmZpaDlBY09KVTI3VlN5cWdZZElwYmRLcVVIQmV0eTE5S1V3VFREZHVOVEhkOTBYWnY4WWp0QVp6WVZBVDNrWXJZRUVLTEdlNXRxYTBvTEZEc3c4MThLaFhIczJPUVlDbFhCS1FVRkpTanhVYzhid0EtSzRkSDNkck9QVF9tQTRCcDZFSVE3cnE5ODlFSm9hZkE?oc=5",
           "published": "Tue, 09 Jun 2026 07:00:00 GMT",
           "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "義隆揮軍光通訊傳喜訊 攜手大立光進擊市場 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9lWVRGYkplVHBRTVFwVzJPTnNrYnphcktZc2NCYmU5aFRPQTN1ZTRzY1ZTVXUwQXlfaUYtTnhQMzY5N1BjOXpwUDdoUkdXNWpJWlpIaHhCYUhJQdIBX0FVX3lxTE5JeVB4bGRYVDRDUXVOYWJHOGpRbm9IcWJVSnEzTWJxXzFyWFgwSkJCc3BySE5LNmpiTXBWQjhzN2s1WTZCXzhpMUYxUTRYOTNGWlBvTlRwN2pUX1ZGVHVR?oc=5",
+          "published": "Tue, 23 Jun 2026 09:00:00 GMT",
+          "source": "經濟日報"
         },
         {
           "title": "3008 大立光- 股市最新爆料，掌握股友們對眾個股股價、技術分析、新聞的第一手... - 股市爆料同學會 - CMoney",
@@ -2525,28 +2528,6 @@
       },
       {
         "date": "2026-06-24",
-        "stock_id": "3014",
-        "name": "聯陽",
-        "entry": 166.0,
-        "latest_close": 166.0,
-        "days": 0,
-        "trading_elapsed": 0,
-        "ret_pct": 0.0,
-        "peak_price": 166.0,
-        "peak_gain_pct": 0.0,
-        "profile": "品質",
-        "score": 74.1,
-        "entry_open": null,
-        "gap_pct": null,
-        "exit_status": "pending",
-        "exit_reason": "待隔日進場",
-        "exit_ret_pct": null,
-        "hold_days": 0,
-        "tp1": null,
-        "init_stop": null
-      },
-      {
-        "date": "2026-06-24",
         "stock_id": "2363",
         "name": "矽統",
         "entry": 69.2,
@@ -2580,6 +2561,28 @@
         "peak_gain_pct": 0.0,
         "profile": "動能",
         "score": 73.4,
+        "entry_open": null,
+        "gap_pct": null,
+        "exit_status": "pending",
+        "exit_reason": "待隔日進場",
+        "exit_ret_pct": null,
+        "hold_days": 0,
+        "tp1": null,
+        "init_stop": null
+      },
+      {
+        "date": "2026-06-24",
+        "stock_id": "3014",
+        "name": "聯陽",
+        "entry": 166.0,
+        "latest_close": 166.0,
+        "days": 0,
+        "trading_elapsed": 0,
+        "ret_pct": 0.0,
+        "peak_price": 166.0,
+        "peak_gain_pct": 0.0,
+        "profile": "品質",
+        "score": 74.1,
         "entry_open": null,
         "gap_pct": null,
         "exit_status": "pending",
@@ -2635,50 +2638,6 @@
       },
       {
         "date": "2026-06-24",
-        "stock_id": "8182",
-        "name": "加高",
-        "entry": 48.7,
-        "latest_close": 48.7,
-        "days": 0,
-        "trading_elapsed": 0,
-        "ret_pct": 0.0,
-        "peak_price": 48.7,
-        "peak_gain_pct": 0.0,
-        "profile": "均衡",
-        "score": 63.8,
-        "entry_open": null,
-        "gap_pct": null,
-        "exit_status": "pending",
-        "exit_reason": "待隔日進場",
-        "exit_ret_pct": null,
-        "hold_days": 0,
-        "tp1": null,
-        "init_stop": null
-      },
-      {
-        "date": "2026-06-24",
-        "stock_id": "3264",
-        "name": "欣銓",
-        "entry": 234.5,
-        "latest_close": 234.5,
-        "days": 0,
-        "trading_elapsed": 0,
-        "ret_pct": 0.0,
-        "peak_price": 234.5,
-        "peak_gain_pct": 0.0,
-        "profile": "均衡",
-        "score": 63.6,
-        "entry_open": null,
-        "gap_pct": null,
-        "exit_status": "pending",
-        "exit_reason": "待隔日進場",
-        "exit_ret_pct": null,
-        "hold_days": 0,
-        "tp1": null,
-        "init_stop": null
-      },
-      {
-        "date": "2026-06-24",
         "stock_id": "8299",
         "name": "群聯",
         "entry": 2500.0,
@@ -2701,6 +2660,28 @@
       },
       {
         "date": "2026-06-24",
+        "stock_id": "1326",
+        "name": "台化",
+        "entry": 57.7,
+        "latest_close": 57.7,
+        "days": 0,
+        "trading_elapsed": 0,
+        "ret_pct": 0.0,
+        "peak_price": 57.7,
+        "peak_gain_pct": 0.0,
+        "profile": "均衡",
+        "score": 63.0,
+        "entry_open": null,
+        "gap_pct": null,
+        "exit_status": "pending",
+        "exit_reason": "待隔日進場",
+        "exit_ret_pct": null,
+        "hold_days": 0,
+        "tp1": null,
+        "init_stop": null
+      },
+      {
+        "date": "2026-06-24",
         "stock_id": "3673",
         "name": "TPK-KY",
         "entry": 83.6,
@@ -2712,6 +2693,28 @@
         "peak_gain_pct": 0.0,
         "profile": "品質",
         "score": 68.0,
+        "entry_open": null,
+        "gap_pct": null,
+        "exit_status": "pending",
+        "exit_reason": "待隔日進場",
+        "exit_ret_pct": null,
+        "hold_days": 0,
+        "tp1": null,
+        "init_stop": null
+      },
+      {
+        "date": "2026-06-24",
+        "stock_id": "8182",
+        "name": "加高",
+        "entry": 48.7,
+        "latest_close": 48.7,
+        "days": 0,
+        "trading_elapsed": 0,
+        "ret_pct": 0.0,
+        "peak_price": 48.7,
+        "peak_gain_pct": 0.0,
+        "profile": "均衡",
+        "score": 63.8,
         "entry_open": null,
         "gap_pct": null,
         "exit_status": "pending",
