@@ -15,7 +15,8 @@
 ## 1. 架構與資料流
 
 ```
-GitHub Actions cron 16:30 台北 (.github/workflows/daily.yml)
+外部 cron(cron-job.org)~16:00 台北 → workflow_dispatch (.github/workflows/daily.yml)
+  ※ GitHub 內建 schedule 已移除(會延遲);觸發見 SETUP_PREMARKET_CRON.md
   └ python -m scripts.main
       1. fetch_stock_info → filter_tradable_stocks(全市場約 1900 檔)
       2. fetch_valuation_snapshot(TWSE 估值,1 次免費) + fetch_index_history(^TWII 大盤,1 次)

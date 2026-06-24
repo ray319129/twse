@@ -1,9 +1,8 @@
 name: Daily Screener
 
+# 觸發改由外部準時 cron(cron-job.org)→ workflow_dispatch(GitHub 內建 schedule 會延遲)。
+# 設定見 repo 根目錄 SETUP_PREMARKET_CRON.md。也可在 Actions 分頁手動 Run workflow。
 on:
-  schedule:
-    # 16:30 Asia/Taipei = 08:30 UTC, weekdays only
-    - cron: "30 8 * * 1-5"
   workflow_dispatch:
     inputs:
       test:
@@ -28,6 +27,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # 需完整歷史才能乾淨 pull --rebase / push(與 premarket 並存避免衝突)
 
       - uses: actions/setup-python@v5
         with:
@@ -62,6 +63,7 @@ jobs:
           git add data/ docs/
           if ! git diff --cached --quiet; then
             git commit -m "data: $(date -u +'%Y-%m-%d') daily update"
+            git pull --rebase origin main || true
             git push
           else
             echo "No data changes to commit."

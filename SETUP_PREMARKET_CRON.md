@@ -4,8 +4,10 @@
 > 在精準時間呼叫 GitHub 的 `workflow_dispatch` API,觸發的 run **通常幾秒內啟動** → 準時、免開電腦、免費。
 > 程式都已就緒,你只需做下面兩步(約 10 分鐘,一次性)。
 
-時間:**盤前 08:45、盤中 09:25(台北,週一~五)**。
-對應 UTC:**00:45、01:25(週一~五)**。
+三條排程(台北,週一~五):
+- **盤前 08:45**(premarket preopen) · UTC 00:45
+- **盤中 09:25**(premarket orb) · UTC 01:25
+- **盤後 ~16:00**(daily 選股)· UTC 08:00 —— ⚠️ 別早於 ~15:30,台股 13:30 收盤後 yfinance 當日 K 棒約需 1.5~2 小時才齊,太早會抓不到當天資料而跳過。建議 16:00。
 
 ---
 
@@ -52,6 +54,11 @@
    - **Title**:`premarket orb`
    - **時間**:**09:25**(或 UTC **01:25**)Mon–Fri
    - **Request body**:`{"ref":"main","inputs":{"phase":"orb"}}`
+4. **建第三個(盤後 daily 選股)**:同樣的 Headers,但改 URL/時間/body
+   - **Title**:`daily screener`
+   - **URL**(注意是 `daily.yml`):`https://api.github.com/repos/ray319129/twse/actions/workflows/daily.yml/dispatches`
+   - **時間**:**16:00**(或 UTC **08:00**)Mon–Fri　※別早於 15:30(見上方說明)
+   - **Request body**:`{"ref":"main"}`　(daily 不需 phase;會正常跑當天並提交資料)
 
 ---
 
@@ -69,9 +76,10 @@
 
 ## 注意事項
 
-- **已移除 GitHub 內建 schedule**:現在 premarket 只由「cron-job.org 觸發」或「手動」啟動。
+- **premarket 與 daily 都已移除 GitHub 內建 schedule**:現在三條都只由「cron-job.org 觸發」或「手動」啟動。
   好處是不再延遲、也不會一天收到「準時 + 遲到」兩封重複信;代價是若 cron-job.org 當天掛了,
-  那天就不會自動跑(可手動補觸發)。
+  那天就不會自動跑(可在 Actions → 對應 workflow → Run workflow 手動補)。
+- **daily 是整個系統的源頭**:它沒跑當天就沒有核心選股,隔天 premarket 也會空跑。所以 daily 那條 cron 尤其別漏設;若哪天 cron-job.org 出狀況,記得手動補跑 daily。
 - **仍要先有當日盤後核心選股**才有內容:premarket 讀最近一次 Daily Screener 的核心 10;
   若那天核心 0 檔,它會乾淨跳過(不寄信、不報錯)。
 - PAT 到期(90 天)後記得到 cron-job.org 兩個排程把 Authorization 換成新 token。
