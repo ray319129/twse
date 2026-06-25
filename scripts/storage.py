@@ -7,7 +7,10 @@ CHIPS_DIR = DATA_DIR / "chips"
 REVENUE_DIR = DATA_DIR / "revenue"
 EPS_DIR = DATA_DIR / "eps"
 PER_DIR = DATA_DIR / "per"
-for _d in (CHIPS_DIR, REVENUE_DIR, EPS_DIR, PER_DIR):
+FINANCIALS_DIR = DATA_DIR / "financials"
+BALANCE_DIR = DATA_DIR / "balance"
+CASHFLOW_DIR = DATA_DIR / "cashflow"
+for _d in (CHIPS_DIR, REVENUE_DIR, EPS_DIR, PER_DIR, FINANCIALS_DIR, BALANCE_DIR, CASHFLOW_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 
@@ -134,3 +137,41 @@ def load_per(stock_id: str) -> pd.DataFrame:
 
 def upsert_per(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
     return _upsert(per_path(stock_id), new_df, _load_parquet)
+
+
+# Quarterly fundamentals: financial statements / balance sheet / cash flow (index = quarter-end date)
+
+def financials_path(stock_id: str) -> Path:
+    return FINANCIALS_DIR / f"{stock_id}.parquet"
+
+
+def load_financials(stock_id: str) -> pd.DataFrame:
+    return _load_parquet(financials_path(stock_id))
+
+
+def upsert_financials(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
+    return _upsert(financials_path(stock_id), new_df, _load_parquet)
+
+
+def balance_path(stock_id: str) -> Path:
+    return BALANCE_DIR / f"{stock_id}.parquet"
+
+
+def load_balance(stock_id: str) -> pd.DataFrame:
+    return _load_parquet(balance_path(stock_id))
+
+
+def upsert_balance(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
+    return _upsert(balance_path(stock_id), new_df, _load_parquet)
+
+
+def cashflow_path(stock_id: str) -> Path:
+    return CASHFLOW_DIR / f"{stock_id}.parquet"
+
+
+def load_cashflow(stock_id: str) -> pd.DataFrame:
+    return _load_parquet(cashflow_path(stock_id))
+
+
+def upsert_cashflow(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
+    return _upsert(cashflow_path(stock_id), new_df, _load_parquet)

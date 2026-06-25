@@ -109,7 +109,7 @@
   <div style="background:#fff; border:1px solid #e0b4b0; border-left:4px solid #c0392b; border-radius:6px; padding:10px 14px; margin-bottom:10px;">
     <div style="font-size:15px;font-weight:bold;">
       #{{ loop.index }} {% if s.hot_industry %}🔥{% endif %}{{ s.stock_id }} {{ s.name }} {{ profile_badge(s.profile) }}
-      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}</span>
+      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}{% if s.catalyst_bonus and s.catalyst_bonus > 0 %} <span style="color:#5e35b1;font-size:12px;">題材 +{{ s.catalyst_bonus }}</span>{% endif %}{% if s.fund_bonus and s.fund_bonus > 0 %} <span style="color:#2471a3;font-size:12px;">基本面 +{{ s.fund_bonus }}</span>{% endif %}</span>
     </div>
     <div style="font-size:13px;color:#444;margin-top:3px;">
       收 {{ '%.2f'|format(s.close) }}
@@ -125,6 +125,16 @@
     {% endif %}
     {% if s.valuation and (s.valuation.pe or s.valuation.yield_pct) %}
       <div style="margin-top:2px;font-size:12px;color:#777;">估值:{% if s.valuation.pe %}PE {{ '%.1f'|format(s.valuation.pe) }}{% endif %}{% if s.valuation.yield_pct %} · 殖利率 {{ '%.2f'|format(s.valuation.yield_pct) }}%{% endif %}{% if s.fundamentals and s.fundamentals.eps_latest is defined %} · 最新季EPS {{ s.fundamentals.eps_latest }}{% endif %}</div>
+    {% endif %}
+    {% if s.catalysts %}
+      <div style="margin-top:3px;font-size:12px;color:#444;">題材:{% for c in s.catalysts %}<span style="background:#eef2ff;color:#4f46e5;padding:1px 7px;border-radius:5px;margin-right:4px;">{{ c.type }}{% if c.confidence is defined %} {{ (c.confidence*100)|int }}%{% endif %}</span>{% endfor %}{% if s.catalyst_summary %} <span style="color:#888;">{{ s.catalyst_summary }}</span>{% endif %}</div>
+    {% endif %}
+    {% if s.risk_flags %}
+      <div style="margin-top:2px;font-size:12px;color:#c0392b;">⚠ 風險:{{ s.risk_flags|join(' · ') }}</div>
+    {% endif %}
+    {% set ff = s.fundamentals %}
+    {% if ff and (ff.gross_margin is defined or ff.roe is defined or ff.debt_ratio is defined or ff.revenue_yoy is defined) %}
+      <div style="margin-top:2px;font-size:12px;color:#777;">基本面:{% if ff.gross_margin is defined %}毛利 {{ ff.gross_margin }}%{% endif %}{% if ff.operating_margin is defined %} · 營益 {{ ff.operating_margin }}%{% endif %}{% if ff.roe is defined %} · ROE {{ ff.roe }}%{% endif %}{% if ff.debt_ratio is defined %} · 負債 {{ ff.debt_ratio }}%{% endif %}{% if ff.revenue_yoy is defined %} · 月營收YoY {{ ff.revenue_yoy }}%{% endif %}</div>
     {% endif %}
     {% if s.plan %}
     {% set p = s.plan %}

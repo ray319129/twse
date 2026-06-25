@@ -29,6 +29,8 @@ from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
 from .track import build_report as build_perf_report, compute_entry_plan, _style_of
+from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
+from .catalyst import classify_catalysts, catalyst_score
 from .notify import render_email, send_email
 from .utils import log
 
@@ -188,11 +190,19 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
             pick["chips"] = cs
     if fundamentals:
         revenue_df = _update_revenue(sid)
-        eps_df = _update_eps(sid)
-        if (revenue_df is not None and not revenue_df.empty) or (eps_df is not None and not eps_df.empty):
-            pick["fundamentals"] = _fund_summary(revenue_df, eps_df, None)
+        fin, bal, cf = update_fundamentals(sid)              # FinMind 季財報/資產負債/現金流(快取新鮮就不重抓)
+        summ = fundamental_summary(fin, bal, cf, revenue_df)
+        if summ:
+            pick["fundamentals"] = summ
     if news:
-        pick["news"] = fetch_news(sid, sname, limit=5)
+        cat_cfg = ((screen_cfg or {}).get("scoring", {}) or {}).get("catalyst_bonus", {}) or {}
+        pick["news"] = fetch_news(sid, sname, limit=int(cat_cfg.get("max_news", 25)))
+        if cat_cfg.get("enabled"):
+            res = classify_catalysts(sid, sname, pick["news"], cat_cfg)   # 無 key/錯誤 → None,優雅降級
+            if res is not None:
+                pick["catalysts"] = res.get("catalysts", [])
+                pick["catalyst_summary"] = res.get("summary", "")
+                pick["risk_flags"] = res.get("risk_flags", [])
     return pick
 
 
@@ -248,19 +258,34 @@ def _chip_signal(chips: dict | None, cfg: dict) -> float | None:
     return sum(parts) / len(parts)
 
 
-def _rank_core(candidates: list[dict], chip_cfg: dict, core_count: int) -> list[dict]:
-    """stage-2 籌碼重排:對已 enrich(抓到籌碼)的核心候選算 chip_bonus、加成後重排取前 core_count。
-    chip_bonus 寫進 rank_score(排名用),原 score(信心分)語意不變;無籌碼資料 → bonus 0(中性不扣分)。"""
-    chip_on = bool(chip_cfg.get("enabled", False))
-    weight = float(chip_cfg.get("weight", 10))
+def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int) -> list[dict]:
+    """stage-2 重排:對已 enrich 的核心候選算 籌碼 + 基本面 + 新聞催化劑 三種加成,
+    全部併入 rank_score 後重排取前 core_count。原 score(信心分)語意不變;
+    各加成可由 config 個別開關,無資料 → 該項 bonus 0(中性不扣分)。"""
+    chip_cfg = scoring_cfg.get("chip_bonus", {}) or {}
+    fund_cfg = scoring_cfg.get("fundamental_bonus", {}) or {}
+    cat_cfg = scoring_cfg.get("catalyst_bonus", {}) or {}
+    chip_w = float(chip_cfg.get("weight", 10))
+    fund_w = float(fund_cfg.get("weight", 5))
+    cat_w = float(cat_cfg.get("weight", 8))
     for s in candidates:
-        if chip_on:
+        bonus = 0.0
+        if chip_cfg.get("enabled", False):
             sig = _chip_signal(s.get("chips"), chip_cfg)
             s["chip_signal"] = round(sig, 2) if sig is not None else None
-            s["chip_bonus"] = round(weight * (sig or 0.0), 1)
-            s["rank_score"] = round(float(s["score"]) + s["chip_bonus"], 1)
-        else:
-            s["rank_score"] = float(s["score"])
+            s["chip_bonus"] = round(chip_w * (sig or 0.0), 1)
+            bonus += s["chip_bonus"]
+        if fund_cfg.get("enabled", False):
+            fs = fundamental_score(s.get("fundamentals") or {}, fund_cfg)
+            s["fund_signal"] = round(fs, 2) if fs is not None else None
+            s["fund_bonus"] = round(fund_w * (fs or 0.0), 1)
+            bonus += s["fund_bonus"]
+        if cat_cfg.get("enabled", False):
+            cs = catalyst_score(s.get("catalysts"), cat_cfg)
+            s["catalyst_signal"] = round(cs, 2) if cs is not None else None
+            s["catalyst_bonus"] = round(cat_w * (cs or 0.0), 1)
+            bonus += s["catalyst_bonus"]
+        s["rank_score"] = round(float(s["score"]) + bonus, 1)
     return sorted(candidates, key=lambda x: -x["rank_score"])[:core_count]
 
 
@@ -387,8 +412,9 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             })
             scored.append(conv)
 
-    # ---------- 排序 → 候選池 →(籌碼 stage-2 重排)→ 核心 / 觀察 ----------
-    chip_cfg = (cfg.get("scoring", {}) or {}).get("chip_bonus", {}) or {}
+    # ---------- 排序 → 候選池 →(stage-2 重排:籌碼+基本面+催化劑)→ 核心 / 觀察 ----------
+    scoring_cfg = (cfg.get("scoring", {}) or {})
+    chip_cfg = scoring_cfg.get("chip_bonus", {}) or {}
     chip_on = bool(chip_cfg.get("enabled", False))
     cand_n = int(chip_cfg.get("candidate_count", core_count)) if chip_on else core_count
 
@@ -396,17 +422,17 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         [s for s in scored if s["trigger"] and s["score"] >= min_score],
         key=lambda x: -x["score"],
     )
-    # 候選池:基礎信心分最高的觸發股(略多於 core_count,讓籌碼能改變誰進核心);受 enrich_top_n 上限保護 API
+    # 候選池:基礎信心分最高的觸發股(略多於 core_count,讓 stage-2 加成能改變誰進核心);受 enrich_top_n 上限保護 API
     core_candidates = trigger_sorted[:max(cand_n, core_count)][:enrich_top_n]
 
-    # ---------- 第二遍:對核心候選 + 自選池補抓 FinMind(控制 API 額度) ----------
-    # 觀察層只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind 額度留給真正要進場的核心候選。
+    # ---------- 第二遍:對核心候選 + 自選池補抓 FinMind 籌碼/財報 + 新聞催化劑(控制 API 額度) ----------
+    # 觀察層只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind/LLM 額度留給真正要進場的核心候選。
     plan_cfg = (cfg.get("exit", {}), float(cfg.get("entry", {}).get("max_chase", 0.03)))
     for s in core_candidates:
-        _enrich_pick(s, today, index_close, fundamentals=True, screen_cfg=cfg, plan_cfg=plan_cfg)
+        _enrich_pick(s, today, index_close, fundamentals=True, news=True, screen_cfg=cfg, plan_cfg=plan_cfg)
 
-    # 籌碼加成後重排取核心(無籌碼資料 → bonus 0,中性不扣分);信心分 score 仍維持基礎分語意
-    core = _rank_core(core_candidates, chip_cfg, core_count)
+    # stage-2 加成(籌碼/基本面/催化劑)後重排取核心;無資料 → 該項 bonus 0(中性不扣分);信心分 score 不變
+    core = _rank_core(core_candidates, scoring_cfg, core_count)
     core_ids = {s["stock_id"] for s in core}
     watch = sorted(
         [s for s in scored if s["brewing"] and not s["trigger"]

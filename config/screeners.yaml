@@ -157,6 +157,27 @@ scoring:
     streak_full: 5           # 法人連買達此天數 → 連買項滿分
     foreign_full: 2.0        # 30 日外資持股增加此百分點 → 外資項滿分
     short_cover_thr: 0.05    # 融券較前日減少 ≥ 此(5%)→ 回補項得分
+  # stage-2 基本面加成:獲利能力/成長性/財務體質(FinMind 季財報,只對核心候選)。
+  # 短線落後指標 → 低權重,主要當體質過濾。enabled:false 可關。
+  fundamental_bonus:
+    enabled: true
+    weight: 5                # 基本面滿分最多加此分(低於籌碼,因短線落後)
+    gross_full: 40           # 毛利率達此(%)→ 該項滿分
+    operating_full: 20       # 營益率達此(%)→ 滿分
+    revenue_yoy_full: 20     # 月營收年增達此(%)→ 滿分
+    eps_yoy_full: 30         # EPS 年增達此(%)→ 滿分
+    debt_good: 30            # 負債比 ≤ 此 → 體質項滿分
+    debt_bad: 70             # 負債比 ≥ 此 → 0 分
+  # stage-2 新聞催化劑加成:Claude Haiku 對近 30 天新聞做事件分類(只對核心候選)。
+  # 需 ANTHROPIC_API_KEY(沒設自動略過、不報錯)。對短線價值高 → 權重略高於基本面。
+  catalyst_bonus:
+    enabled: true
+    weight: 8                # 催化劑滿分最多加此分
+    model: claude-haiku-4-5  # 分類用模型(成本最低)
+    max_news: 25             # 每檔最多餵幾則標題
+    max_tokens: 800
+    full: 1.5                # Σ(confidence×類別權重) 除以此後夾 [0,1]
+    # weights:               # 可選:覆寫各催化劑類別權重(預設見 scripts/catalyst.py)
 
 # ★ 進場(跳空保護)— 解決「盤後算的價,隔天跳空就失效」的痛點。
 # 系統假設「隔日開盤」進場(貼近實際),並用 max_chase 限制追價:開太高就棄單,不追。

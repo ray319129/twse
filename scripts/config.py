@@ -18,6 +18,7 @@ for _d in (PRICES_DIR, META_DIR, SIGNALS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")   # 選用:新聞事件 AI 分類;沒設就自動略過
 GMAIL_USER = os.environ.get("GMAIL_USER", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 MAIL_TO = os.environ.get("MAIL_TO") or GMAIL_USER

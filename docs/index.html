@@ -673,14 +673,38 @@ function coreCard(s,i){
     if(ff&&isNum(ff.eps_latest))parts.push(`最新季EPS ${num(ff.eps_latest,2)}`);
     if(parts.length)val=`<div class="row-meta"><span class="ml">估值</span>${parts.join(' · ')}</div>`;
   }
+  // 基本面(毛利/營益/ROE/負債/月營收YoY)
+  let fund2='';
+  if(ff&&(isNum(ff.gross_margin)||isNum(ff.roe)||isNum(ff.debt_ratio)||isNum(ff.revenue_yoy))){
+    const fp=[];
+    if(isNum(ff.gross_margin))fp.push(`毛利 ${num(ff.gross_margin,1)}%`);
+    if(isNum(ff.operating_margin))fp.push(`營益 ${num(ff.operating_margin,1)}%`);
+    if(isNum(ff.roe))fp.push(`ROE ${num(ff.roe,1)}%`);
+    if(isNum(ff.debt_ratio))fp.push(`負債 ${num(ff.debt_ratio,1)}%`);
+    if(isNum(ff.revenue_yoy))fp.push(`月營收YoY <span class="${cls(ff.revenue_yoy)} num">${fmt(ff.revenue_yoy,1)}%</span>`);
+    fund2=`<div class="row-meta"><span class="ml">基本面</span>${fp.join(' · ')}</div>`;
+  }
+  // 題材(新聞催化劑)+ 風險旗標
+  let cat='';
+  if(s.catalysts&&s.catalysts.length){
+    const tags=s.catalysts.map(c=>`<span style="display:inline-block;background:var(--accent-bg);color:var(--accent-ink);padding:1px 8px;border-radius:6px;font-size:11px;font-weight:700;margin:2px 4px 2px 0">${esc(c.type)}${isNum(c.confidence)?` ${Math.round(c.confidence*100)}%`:''}</span>`).join('');
+    cat=`<div class="row-meta"><span class="ml">題材</span>${tags}${s.catalyst_summary?`<span style="color:var(--muted)">${esc(s.catalyst_summary)}</span>`:''}</div>`;
+  }
+  const rf=(s.risk_flags&&s.risk_flags.length)?`<div class="row-meta"><span class="ml" style="background:var(--down-bg);color:var(--down)">風險</span><span style="color:var(--down)">${s.risk_flags.map(esc).join(' · ')}</span></div>`:'';
+  // 分數區:三種 stage-2 加成各自顯示
+  const bonuses=[];
+  if(isNum(s.chip_bonus)&&s.chip_bonus>0)bonuses.push(`籌碼 +${iv(s.chip_bonus)}`);
+  if(isNum(s.catalyst_bonus)&&s.catalyst_bonus>0)bonuses.push(`題材 +${iv(s.catalyst_bonus)}`);
+  if(isNum(s.fund_bonus)&&s.fund_bonus>0)bonuses.push(`基本面 +${iv(s.fund_bonus)}`);
+  const bonusHtml=bonuses.map(b=>`<div class="chipb">${b}</div>`).join('');
   return `<div class="ccard">
     <div class="top">
       <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${esc(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}</div>
         <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}<span class="mdot"></span><span class="trig">${trig}</span>${isNum(s.ret5_pct)?`<span class="mdot"></span>5日 <span class="${cls(s.ret5_pct)} num">${fmt(s.ret5_pct,1)}%</span>`:''}${isNum(s.ret20_pct)?`<span class="mdot"></span>20日 <span class="${cls(s.ret20_pct)} num">${fmt(s.ret20_pct,1)}%</span>`:''}</div>
       </div>
-      <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${isNum(s.chip_bonus)&&s.chip_bonus>0?`<div class="chipb">籌碼 +${iv(s.chip_bonus)}</div>`:''}</div>
+      <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
     </div>
-    ${bars(s)}${planBox(s.plan)}${chip}${val}
+    ${bars(s)}${planBox(s.plan)}${cat}${rf}${chip}${val}${fund2}
   </div>`;
 }
 function renderCore(){

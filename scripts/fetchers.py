@@ -337,6 +337,66 @@ def fetch_eps_quarterly(stock_id: str, quarters: int = 6) -> pd.DataFrame:
     return out.set_index("date").sort_index()
 
 
+def _fetch_statement(dataset: str, stock_id: str, type_map: dict[str, tuple], quarters: int = 8) -> pd.DataFrame:
+    """通用財報 pivot:FinMind 的 type/value/date 長表 → 以季末日為 index、type_map 鍵為欄的寬表。
+    type_map = {欄名: (可能的 FinMind type 名稱...)}。任何缺漏回空欄,整個失敗回空 DataFrame。"""
+    end = date.today()
+    start = end - timedelta(days=quarters * 100)
+    rows = fetch_finmind(dataset, data_id=stock_id,
+                         start_date=start.isoformat(), end_date=end.isoformat())
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    if not {"type", "value", "date"}.issubset(df.columns):
+        return pd.DataFrame()
+    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.tz_localize(None).dt.normalize()
+    df = df.dropna(subset=["date"])
+    out = pd.DataFrame(index=pd.Index(sorted(df["date"].unique()), name="date"))
+    for col, candidates in type_map.items():
+        sub = df[df["type"].isin(candidates)]
+        if not sub.empty:
+            out[col] = sub.groupby("date")["value"].last()
+    return out.sort_index().dropna(how="all")
+
+
+# FinMind 財報 type 名稱在不同期間/版本略有差異,各給幾個候選。
+_FS_TYPES = {
+    "revenue": ("Revenue", "OperatingRevenue", "TotalOperatingRevenue"),
+    "gross_profit": ("GrossProfit", "GrossProfitLoss", "GrossProfitFromOperations"),
+    "operating_income": ("OperatingIncome", "OperatingIncomeLoss", "OperatingProfit", "NetOperatingIncome"),
+    "net_income": ("IncomeAfterTaxes", "ProfitAfterTax", "NetIncome", "ProfitLoss",
+                   "IncomeAfterTax", "NetIncomeLoss"),
+    "eps": ("EPS", "BasicEarningsPerShare", "EarningsPerShare"),
+}
+_BS_TYPES = {
+    "total_assets": ("TotalAssets",),
+    "total_liab": ("TotalLiabilities", "Liabilities"),
+    "equity": ("Equity", "TotalEquity", "EquityAttributableToOwnersOfParent", "TotalEquityAndLiabilities"),
+}
+_CF_TYPES = {
+    "op_cashflow": ("CashFlowsProvidedFromOperatingActivities", "CashFlowsFromOperatingActivities",
+                    "NetCashProvidedByOperatingActivities", "CashProvidedByOperatingActivities"),
+    "invest_cashflow": ("CashFlowsProvidedFromInvestingActivities", "CashFlowsFromInvestingActivities"),
+    "capex": ("AcquisitionOfPropertyPlantAndEquipment", "PaymentsToAcquirePropertyPlantAndEquipment"),
+}
+
+
+def fetch_financial_statements(stock_id: str, quarters: int = 8) -> pd.DataFrame:
+    """季財報明細(營收/毛利/營益/淨利/EPS)。空 DataFrame on failure."""
+    return _fetch_statement("TaiwanStockFinancialStatements", stock_id, _FS_TYPES, quarters)
+
+
+def fetch_balance_sheet(stock_id: str, quarters: int = 8) -> pd.DataFrame:
+    """季資產負債(總資產/總負債/股東權益)。空 DataFrame on failure."""
+    return _fetch_statement("TaiwanStockBalanceSheet", stock_id, _BS_TYPES, quarters)
+
+
+def fetch_cashflow(stock_id: str, quarters: int = 8) -> pd.DataFrame:
+    """季現金流(營業/投資現金流、資本支出)。空 DataFrame on failure."""
+    return _fetch_statement("TaiwanStockCashFlowsStatement", stock_id, _CF_TYPES, quarters)
+
+
 def fetch_per_yield(stock_id: str, days: int = 10) -> pd.DataFrame:
     """Recent days of PER / dividend yield / PBR. Returns DataFrame indexed by date."""
     end = date.today()

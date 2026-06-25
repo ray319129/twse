@@ -19,3 +19,6 @@ Jinja2>=3.1
 # 時間處理
 python-dateutil>=2.8
 pytz>=2024.1
+
+# 新聞事件 AI 分類(Claude Haiku;無 ANTHROPIC_API_KEY 時自動略過,不影響其餘流程)
+anthropic>=0.40

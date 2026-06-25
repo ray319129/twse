@@ -114,11 +114,12 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 [main.py](scripts/main.py)、參數 `config/screeners.yaml: ranking` + `scoring.chip_bonus`:
 1. **候選池** = `trigger 且 score ≥ min_score(45)` 依基礎信心分降序取前 `candidate_count(15)`(略多於核心數,受 `enrich_top_n` 上限保護 API)。
 2. **enrich**:對候選補抓 FinMind 籌碼/財報 + 算決策卡。
-3. **籌碼 stage-2 重排**([`_rank_core`](scripts/main.py)):`rank_score = 信心分 + chip_bonus`,`chip_bonus = weight(10) × chip_signal`。
-   - `chip_signal`(0~1)= 法人連買天數 / 30日外資持股變化 / 今日法人淨買 / 融券回補 四項平均(有幾項算幾項)。
-   - **無籌碼資料 → bonus 0(中性、不扣分)**,避免資料覆蓋偏差。
-   - `score`(信心分)語意不變;只有排名與顯示的「籌碼 +X」用 `rank_score`/`chip_bonus`。
-4. **核心** = 候選依 `rank_score` 降序取前 `core_count(10)`(籌碼可改變誰進核心)。
+3. **stage-2 重排**([`_rank_core`](scripts/main.py)):`rank_score = 信心分 + chip_bonus + fund_bonus + catalyst_bonus`(三項可各自開關)。
+   - **籌碼** `chip_bonus = weight(10) × chip_signal`;`chip_signal`(0~1)= 法人連買 / 30日外資持股變化 / 今日法人淨買 / 融券回補 四項平均。
+   - **基本面** `fund_bonus = weight(5) × fundamental_score`([fundamentals.py](scripts/fundamentals.py)):毛利率/營益率/EPS正、月營收YoY/EPS YoY、負債比/營業現金流 三組平均(FinMind 季財報,快取新鮮就不重抓)。短線落後 → 低權重。
+   - **新聞催化劑** `catalyst_bonus = weight(8) × catalyst_score`([catalyst.py](scripts/catalyst.py)):Claude Haiku 對近30天新聞做事件分類(新訂單/擴產/法說利多/AI/輝達·蘋果·Google供應鏈/政策·匯率受惠/產業轉機),強制 json_schema + evidence 引用防幻覺。**需 `ANTHROPIC_API_KEY`,沒設自動略過(bonus 0,不報錯)**。
+   - **任何一項無資料 → 該 bonus 0(中性、不扣分)**;`score`(信心分)語意不變,排名與「籌碼/題材/基本面 +X」顯示用 `rank_score` 與各 bonus。
+4. **核心** = 候選依 `rank_score` 降序取前 `core_count(10)`(stage-2 加成可改變誰進核心)。
 5. **觀察** = `brewing 且 非 trigger 且 score ≥ 45 且 不在核心`,取前 `watch_count(20)`(觀察層不抓籌碼、不加成)。
 6. 熱門產業標記:產業近況排序取前 5,核心/觀察標 🔥。
 
@@ -207,6 +208,8 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 | `ranking` | core_count 10 / watch_count 20 / **min_score 45** / min_dollar_volume 3000萬 / enrich_top_n 30 |
 | `scoring` | **(新)** weights 五面向 / rs / setup / quality / exhausted / trigger / brewing / profile 全部門檻 |
 | `scoring.chip_bonus` | **(新)** enabled / candidate_count 15 / weight 10 / streak_full / foreign_full / short_cover_thr — 核心候選的籌碼 stage-2 重排 |
+| `scoring.fundamental_bonus` | **(新)** enabled / weight 5 / gross_full / operating_full / revenue_yoy_full / eps_yoy_full / debt_good / debt_bad — FinMind 季財報基本面 |
+| `scoring.catalyst_bonus` | **(新)** enabled / weight 8 / model(haiku) / max_news / full / weights — Claude 新聞催化劑(需 ANTHROPIC_API_KEY) |
 | `entry` | max_chase **3%**(隔日開盤追價上限) |
 | `exit` | hard_stop **7%** / r_multiple **2.0** / max_hold_days 30 / momentum{struct_lookback 2, ma_stop 5, trail_ma 5} / swing{10,20,10} / trail{atr_mult 1.5, min 3%, max 7%} |
 | `leading` | 四個領先訊號的 lookback/門檻(僅標籤用) |
