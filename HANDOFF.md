@@ -39,6 +39,7 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 - `scripts/fetchers.py` — yfinance 價格/指數(**已 dropna(close)**)、FinMind 籌碼/財報、TWSE 估值、Google News。
 - `scripts/storage.py` — parquet 讀寫;`load_prices` **讀取時忽略 NaN 收盤列**。
 - `scripts/{config,industry,notify,utils}.py`、`templates/daily_email.html`、`docs/index.html`(SPA)。
+  - `docs/index.html` 前端輔助(2026-06-26 加):`slink(id)` 把股票代號(全分頁)做成連結 → `cmoney.tw/forum/stock/<代號>`(新分頁看走勢/技術線圖);`whyPanel(s)` 核心卡可摺疊「為什麼選這檔(解讀)」,把信心分五維(`s.trend/rs/setup/quality/liquidity`)+stage-2 加成+題材 `evidence`+`risk_flags` 翻成白話,**純用既有資料、零 API**。改 SPA 後務必 `node --check`(抽 `<script>` 驗語法)。
 - **盤前自動看盤(獨立於盤後,見第 9 節)**:`scripts/premarket.py`、`templates/premarket_email.html`、`.github/workflows/premarket.yml`;輸出 `docs/premarket.json`,網頁「盤中即時」分頁讀它。
 - `config/screeners.yaml` — 所有可調參數(見下)。
 - `data/` — prices/、signals/{date}.json、performance.json、meta/。`docs/` — data.json、dates.json、history/{date}.json。
