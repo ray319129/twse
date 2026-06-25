@@ -52,7 +52,7 @@ _SYSTEM = (
     "請只根據『實際出現在標題裡的內容』判斷是否出現下列催化劑類別,"
     "每個判定的催化劑都必須在 evidence 欄『原文引用』觸發它的那則標題;"
     "找不到明確根據就不要列出該類別(寧缺勿濫)。confidence 0~1。"
-    "summary 用一句繁體中文摘要;risk_flags 列出標題中的負面/風險訊號(如訴訟、下修、利空),沒有就空陣列。"
+    "summary 用一句繁體中文摘要;risk_flags 每則用『簡短片語』(每則 ≤30 字,如「遭調查」「Q1 財測下修」「外資調降評等」),列出標題中的負面/風險訊號,沒有就空陣列。"
     "只做分類,不要預測漲跌。"
 )
 
@@ -116,7 +116,7 @@ def classify_catalysts(stock_id: str, name: str, news_items: list[dict],
                          "evidence": str(c.get("evidence"))[:120]})
     return {"catalysts": cats,
             "summary": str(data.get("summary", ""))[:200],
-            "risk_flags": [str(x)[:40] for x in (data.get("risk_flags") or [])][:5]}
+            "risk_flags": [str(x)[:80] for x in (data.get("risk_flags") or [])][:5]}
 
 
 def catalyst_score(catalysts: list[dict] | None, cfg: dict | None = None) -> float | None:

@@ -276,6 +276,17 @@
   table.t tbody tr:hover td{background:var(--surface-2);}
   table.t tbody tr:last-child td{border-bottom:none;}
   table.t .tk{font-weight:800;color:var(--ink);}
+  a.slink{color:inherit;text-decoration:none;border-bottom:1px dashed var(--muted-2);cursor:pointer;}
+  a.slink:hover{color:var(--accent-ink);border-bottom-color:var(--accent-ink);}
+  details.why{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;}
+  details.why>summary{cursor:pointer;font-weight:700;font-size:12.5px;color:var(--accent-ink);list-style:none;user-select:none;}
+  details.why>summary::-webkit-details-marker{display:none;}
+  details.why>summary::before{content:'▸ ';}
+  details.why[open]>summary::before{content:'▾ ';}
+  details.why ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;line-height:1.7;color:var(--ink-2);}
+  details.why li{margin:3px 0;}
+  details.why .ev{font-size:12px;margin:2px 0 2px 6px;}
+  details.why .whyfoot{margin-top:8px;font-size:11px;color:var(--muted-2);line-height:1.5;}
 
   /* ---------- Filters ---------- */
   .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:13px;}
@@ -417,6 +428,8 @@ const cls=v=>!isNum(v)?'flat':(v>0?'up':v<0?'down':'flat');
 const iv=(v,suffix='')=>!isNum(v)?'-':String(Number(v))+suffix;
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const badge=p=>p==='動能'?'<span class="badge b-mom">動能</span>':p==='品質'?'<span class="badge b-qual">品質</span>':p?`<span class="badge b-bal">${esc(p)}</span>`:'<span class="badge b-bal">—</span>';
+// 股票代號 → 連到 CMoney 個股頁(新分頁)。只把代號做成連結,其餘排版不變。
+const slink=id=>`<a class="slink" href="https://www.cmoney.tw/forum/stock/${encodeURIComponent(String(id==null?'':id))}" target="_blank" rel="noopener" title="在 CMoney 看 ${esc(id)} 走勢/技術線圖">${esc(id)}↗</a>`;
 let DATA=null,LATEST=null,LABEL={};
 const lbl=h=>LABEL[h]||h;
 
@@ -543,7 +556,7 @@ function renderDash(){
     ${picks.length?picks.map((s,i)=>`<div class="pick">
       <div class="rk">${i+1}</div>
       <div class="pinfo">
-        <div class="pn"><span class="id">${s.hot_industry?'🔥':''}${esc(s.stock_id)}</span><span class="nm">${esc(s.name)}</span> ${badge(s.profile)}</div>
+        <div class="pn"><span class="id">${s.hot_industry?'🔥':''}${slink(s.stock_id)}</span><span class="nm">${esc(s.name)}</span> ${badge(s.profile)}</div>
         <div class="pmeta">收 ${num(s.close)} <span class="${cls(s.change_pct)}">${fmt(s.change_pct)}%</span> · ${esc(s.industry)||''}</div>
       </div>
       <div class="pscore"><div class="v">${iv(s.score)}</div>${isNum(s.chip_bonus)&&s.chip_bonus>0?`<div class="b">籌碼 +${iv(s.chip_bonus)}</div>`:''}</div>
@@ -653,6 +666,35 @@ function planBox(p){
     </div>
   </div>`;
 }
+// 「為什麼選這檔」— 純用已算好的資料把信心分各維度+催化劑翻成白話,零額外 API/token。
+function whyPanel(s){
+  const dim=(label,v,hi,mid,lo)=>{if(!isNum(v))return null;const p=Math.round(Math.max(0,Math.min(1,Number(v)))*100);
+    return `<b>${label} ${p}</b> — ${p>=70?hi:(p>=45?mid:lo)}`;};
+  const pts=[];
+  pts.push(s.breakout?'今日<b>帶量突破</b> — 價量同步站上近期壓力,屬「剛啟動」型,順勢進場。'
+         :s.pullback_turn?'今日<b>回測支撐轉強</b> — 多頭中回檔到均線止穩、買盤回流,屬「低接轉強」型。'
+         :'今日出現新鮮進場訊號。');
+  [dim('趨勢',s.trend,'完整多頭排列、站穩均線','均線偏多但未全多排','均線轉弱,留意'),
+   dim('強度',s.rs,'明顯強於大盤、資金流入','與大盤同步','弱於大盤'),
+   dim('時機',s.setup,'短線時機佳(量縮整理剛轉強)','時機普通','時機偏弱,主要靠突破帶動'),
+   dim('品質',s.quality,'體質/財務穩健','體質中等','體質普通、偏題材'),
+   dim('量能',s.liquidity,'成交活絡、進出容易','量能尚可','量能偏低,掛單注意滑價')
+  ].forEach(d=>{if(d)pts.push(d);});
+  const bz=[];
+  if(isNum(s.chip_bonus)&&s.chip_bonus>0)bz.push(`籌碼 +${iv(s.chip_bonus)}(法人站買方)`);
+  if(isNum(s.catalyst_bonus)&&s.catalyst_bonus>0)bz.push(`題材 +${iv(s.catalyst_bonus)}(新聞催化)`);
+  if(isNum(s.fund_bonus)&&s.fund_bonus>0)bz.push(`基本面 +${iv(s.fund_bonus)}(財報加分)`);
+  if(bz.length)pts.push('信心分加成:'+bz.join(' · '));
+  if(s.catalysts&&s.catalysts.length){
+    const ev=s.catalysts.filter(c=>c.evidence).map(c=>`<div class="ev">・<b>${esc(c.type)}</b>${isNum(c.confidence)?` ${Math.round(c.confidence*100)}%`:''}:<span style="color:var(--muted)">「${esc(c.evidence)}」</span></div>`).join('');
+    if(ev)pts.push('題材依據(新聞原文,AI 標註):'+ev);
+  }
+  if(s.risk_flags&&s.risk_flags.length)pts.push(`<span style="color:var(--down)">⚠ 風險:${s.risk_flags.map(esc).join(' · ')}</span>`);
+  return `<details class="why"><summary>為什麼選這檔(解讀)</summary>
+    <ul>${pts.map(p=>`<li>${p}</li>`).join('')}</ul>
+    <div class="whyfoot">系統把信心分各維度與新聞催化「翻成白話」,非漲跌預測;實際進出依上方決策卡,並自負風險。</div>
+  </details>`;
+}
 function coreCard(s,i){
   const trig=s.breakout?'帶量突破':s.pullback_turn?'回測轉強':'觸發';
   let chip='';
@@ -699,12 +741,12 @@ function coreCard(s,i){
   const bonusHtml=bonuses.map(b=>`<div class="chipb">${b}</div>`).join('');
   return `<div class="ccard">
     <div class="top">
-      <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${esc(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}</div>
+      <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}</div>
         <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}<span class="mdot"></span><span class="trig">${trig}</span>${isNum(s.ret5_pct)?`<span class="mdot"></span>5日 <span class="${cls(s.ret5_pct)} num">${fmt(s.ret5_pct,1)}%</span>`:''}${isNum(s.ret20_pct)?`<span class="mdot"></span>20日 <span class="${cls(s.ret20_pct)} num">${fmt(s.ret20_pct,1)}%</span>`:''}</div>
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
     </div>
-    ${bars(s)}${planBox(s.plan)}${cat}${rf}${chip}${val}${fund2}
+    ${bars(s)}${planBox(s.plan)}${cat}${rf}${chip}${val}${fund2}${whyPanel(s)}
   </div>`;
 }
 function renderCore(){
@@ -722,7 +764,7 @@ function renderWatch(){
   if(!w.length){$('#p-watch').innerHTML=`<div class="lead">高信心分但還沒觸發,放口袋盯。</div><div class="empty"><span class="ei">👀</span>今日無醞釀中標的。</div>`;return;}
   const rows=w.map((r,i)=>`<tr>
     <td class="num" style="color:var(--muted-2)">${i+1}</td>
-    <td class="tk">${r.hot_industry?'🔥 ':''}${esc(r.stock_id)}</td>
+    <td class="tk">${r.hot_industry?'🔥 ':''}${slink(r.stock_id)}</td>
     <td>${esc(r.name)}</td>
     <td style="color:var(--muted)">${esc(r.industry)||''}</td>
     <td class="r num">${num(r.close)}</td>
@@ -748,7 +790,7 @@ function renderWatchlist(){
     const news=(s.news||[]).slice(0,3).filter(n=>n&&n.title).map(n=>{const safe=/^https?:\/\//i.test(n.link||'');return `<li style="margin:3px 0">${safe?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a>`:esc(n.title)}</li>`;}).join('');
     return `<div class="ccard">
       <div class="top">
-        <div style="min-width:0"><div class="tkr">🔔 ${esc(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${s.profile?badge(s.profile):''}</div>
+        <div style="min-width:0"><div class="tkr">🔔 ${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${s.profile?badge(s.profile):''}</div>
           ${s.note?`<div class="meta">備註:${esc(s.note)}</div>`:''}
           <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}</div>
         </div>
@@ -856,7 +898,7 @@ function drawLedger(){
   const arrow=k=>sortKey===k?(sortDir<0?' ↓':' ↑'):'';
   const cols=[
     {k:'date',t:'選股日',f:r=>`<span style="color:var(--muted)">${esc(r.date)}</span>`},
-    {k:'stock_id',t:'代號',f:r=>`<span class="tk">${esc(r.stock_id)}</span>`},
+    {k:'stock_id',t:'代號',f:r=>`<span class="tk">${slink(r.stock_id)}</span>`},
     {k:'name',t:'名稱',f:r=>esc(r.name)},
     {k:'profile',t:'型態',f:r=>badge(r.profile)},
     {k:'entry',t:'成本',r:1,f:r=>`<span class="num">${num(r.entry)}</span>`},
@@ -897,7 +939,7 @@ function liveCard(r){
     : '<span style="color:var(--muted-2)">盤前無報價</span>';
   const adr=(r.adr&&r.adr.ticker)?` · ADR ${esc(r.adr.ticker)} <span class="num ${cls(r.adr.pct)}">${fmt(r.adr.pct)}%</span>`:'';
   return `<div class="lcard ${k}">
-    <div class="lt"><div class="tkr" style="font-size:15px">${esc(r.stock_id)}<span class="nm2">${esc(r.name)||''}</span> ${r.profile?badge(r.profile):''}</div>
+    <div class="lt"><div class="tkr" style="font-size:15px">${slink(r.stock_id)}<span class="nm2">${esc(r.name)||''}</span> ${r.profile?badge(r.profile):''}</div>
       <div class="scen" style="color:${col}">${esc(r.scenario_label)||''}</div></div>
     <div class="lvl">${price}${isNum(r.score)?` · 信心 <b style="color:var(--accent-ink)">${iv(r.score)}</b>`:''}${adr}</div>
     <div class="act">👉 ${esc(r.action)||'—'}</div>
@@ -914,7 +956,7 @@ function orbCard(r){
   } else if(st==='pending') body=`<span style="color:var(--warn)">⏸ 尚未突破</span> · 區間 ${num(r.orl)}~${num(r.orh)} · 現價 <b class="num">${num(r.last)}</b>`;
   else if(st==='below_orl') body=`<span style="color:var(--down)">❌ 跌破開盤區間低 ${num(r.orl)}</span>(現價 ${num(r.last)})→ 今日略過`;
   else body=`<span style="color:var(--muted-2)">1 分K 未到(yfinance 未供或休市)→ 自行確認</span>`;
-  return `<div class="lcard ${k}"><div class="lt"><div class="tkr" style="font-size:15px">${esc(r.stock_id)}<span class="nm2">${esc(r.name)||''}</span> ${r.profile?badge(r.profile):''}</div>${isNum(r.score)?`<div class="scen" style="color:var(--accent-ink)">信心 ${iv(r.score)}</div>`:''}</div><div class="act">${body}</div></div>`;
+  return `<div class="lcard ${k}"><div class="lt"><div class="tkr" style="font-size:15px">${slink(r.stock_id)}<span class="nm2">${esc(r.name)||''}</span> ${r.profile?badge(r.profile):''}</div>${isNum(r.score)?`<div class="scen" style="color:var(--accent-ink)">信心 ${iv(r.score)}</div>`:''}</div><div class="act">${body}</div></div>`;
 }
 function renderLive(force){
   /* only render into the live panel if it's still the active tab (avoid stale writes from a fired interval) */
