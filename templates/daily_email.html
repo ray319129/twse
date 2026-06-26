@@ -129,6 +129,9 @@
     {% if s.catalysts %}
       <div style="margin-top:3px;font-size:12px;color:#444;">題材:{% for c in s.catalysts %}<span style="background:#eef2ff;color:#4f46e5;padding:1px 7px;border-radius:5px;margin-right:4px;">{{ c.type }}{% if c.confidence is defined %} {{ (c.confidence*100)|int }}%{% endif %}</span>{% endfor %}{% if s.catalyst_summary %} <span style="color:#888;">{{ s.catalyst_summary }}</span>{% endif %}</div>
     {% endif %}
+    {% if s.target_prices %}
+      <div style="margin-top:2px;font-size:12px;color:#444;">法人目標價:{% for t in s.target_prices %}{{ t.broker }} {{ t.price }}元{% if t.asof %}({{ t.asof }}){% endif %}{% if not loop.last %} · {% endif %}{% endfor %} <span style="color:#999;">(新聞轉述,非完整)</span></div>
+    {% endif %}
     {% if s.risk_flags %}
       <div style="margin-top:2px;font-size:12px;color:#c0392b;">⚠ 風險:{{ s.risk_flags|join(' · ') }}</div>
     {% endif %}

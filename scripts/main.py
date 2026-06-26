@@ -207,6 +207,7 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
                 pick["catalysts"] = res.get("catalysts", [])
                 pick["catalyst_summary"] = res.get("summary", "")
                 pick["risk_flags"] = res.get("risk_flags", [])
+                pick["target_prices"] = res.get("target_prices", [])
     return pick
 
 

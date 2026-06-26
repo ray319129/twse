@@ -1,7 +1,9 @@
-"""新聞事件 AI 分析(催化劑偵測)— stage-2,只對核心候選算。
+"""新聞事件 AI 分析(催化劑偵測 + 目標價摘錄)— stage-2,只對核心候選算。
 
-把近 ~30 天的新聞標題丟給 Claude Haiku,結構化分類成固定催化劑類別(強制 json_schema,
-每個催化劑必附 evidence 引用實際標題 → 防幻覺)。只做「分類」不做「漲跌預測」,當軟訊號。
+把近 ~30 天的新聞標題丟給 Claude Haiku,結構化分類成固定催化劑類別,並摘錄標題中提到的
+法人/券商目標價(強制 json_schema,每筆都必附 evidence 引用實際標題 → 防幻覺)。
+只做「分類/摘錄」不做「漲跌預測」,當軟訊號。target_prices 只是「新聞剛好有報導才抓到」,
+不是完整即時的目標價清單(沒有免費合法管道能拿到全市場目標價,見專案記憶)。
 
 沒有 ANTHROPIC_API_KEY、未安裝 anthropic、或任何呼叫錯誤 → 一律回 None,不影響其餘流程。
 成本:Haiku 4.5($1/$5 每百萬 token),每天約 15 檔 × ~2K token ≈ 數美分。
@@ -42,8 +44,22 @@ _SCHEMA = {
         },
         "summary": {"type": "string"},
         "risk_flags": {"type": "array", "items": {"type": "string"}},
+        "target_prices": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "broker": {"type": "string"},
+                    "price": {"type": "number"},
+                    "asof": {"type": "string"},
+                    "evidence": {"type": "string"},
+                },
+                "required": ["broker", "price", "evidence"],
+                "additionalProperties": False,
+            },
+        },
     },
-    "required": ["catalysts", "summary", "risk_flags"],
+    "required": ["catalysts", "summary", "risk_flags", "target_prices"],
     "additionalProperties": False,
 }
 
@@ -53,7 +69,10 @@ _SYSTEM = (
     "每個判定的催化劑都必須在 evidence 欄『原文引用』觸發它的那則標題;"
     "找不到明確根據就不要列出該類別(寧缺勿濫)。confidence 0~1。"
     "summary 用一句繁體中文摘要;risk_flags 每則用『簡短片語』(每則 ≤30 字,如「遭調查」「Q1 財測下修」「外資調降評等」),列出標題中的負面/風險訊號,沒有就空陣列。"
-    "只做分類,不要預測漲跌。"
+    "target_prices 列出標題中明確提到的法人/券商目標價(如「外資喊上看680元」「OO投顧目標價250元」):"
+    "broker 填券商/外資/投顧名稱,price 填數字(元),asof 填標題日期(無法判斷就留空字串),"
+    "evidence 必須是原文引用該標題;標題沒有明確數字就不要列,沒有就空陣列。"
+    "只做分類/摘錄,不要預測漲跌,不要自己估算或杜撰目標價。"
 )
 
 
@@ -66,7 +85,7 @@ def _clip01(x) -> float:
 
 def classify_catalysts(stock_id: str, name: str, news_items: list[dict],
                        cfg: dict | None = None) -> dict | None:
-    """回傳 {catalysts:[{type,confidence,evidence}], summary, risk_flags} 或 None(降級)。"""
+    """回傳 {catalysts:[{type,confidence,evidence}], summary, risk_flags, target_prices:[{broker,price,asof,evidence}]} 或 None(降級)。"""
     cfg = cfg or {}
     if not ANTHROPIC_API_KEY or not news_items:
         return None
@@ -114,9 +133,22 @@ def classify_catalysts(stock_id: str, name: str, news_items: list[dict],
         if t in CATALYST_TYPES and c.get("evidence"):
             cats.append({"type": t, "confidence": round(_clip01(c.get("confidence")), 2),
                          "evidence": str(c.get("evidence"))[:120]})
+    tps = []
+    for t in (data.get("target_prices") or []):
+        try:
+            price = round(float(t.get("price")), 2)
+        except (TypeError, ValueError):
+            continue
+        broker = str(t.get("broker") or "").strip()
+        if not broker or not t.get("evidence"):
+            continue
+        tps.append({"broker": broker[:30], "price": price,
+                    "asof": str(t.get("asof") or "")[:20],
+                    "evidence": str(t.get("evidence"))[:120]})
     return {"catalysts": cats,
             "summary": str(data.get("summary", ""))[:200],
-            "risk_flags": [str(x)[:80] for x in (data.get("risk_flags") or [])][:5]}
+            "risk_flags": [str(x)[:80] for x in (data.get("risk_flags") or [])][:5],
+            "target_prices": tps[:5]}
 
 
 def catalyst_score(catalysts: list[dict] | None, cfg: dict | None = None) -> float | None:

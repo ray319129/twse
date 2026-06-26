@@ -47,6 +47,7 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 ### config/screeners.yaml 可調區塊
 - `ranking`: core_count 10 / watch_count 20 / min_score 45 / min_dollar_volume 3000萬 / enrich_top_n 30
 - `scoring`: 信心分權重/門檻全抽進此區塊(預設=原硬寫值);含 stage-2 重排三加成 `chip_bonus`(籌碼)/`fundamental_bonus`(FinMind 季財報:毛利/營益/ROE/負債/現金流,[fundamentals.py](scripts/fundamentals.py))/`catalyst_bonus`(Claude Haiku 對30天新聞做事件分類,[catalyst.py](scripts/catalyst.py),需 `ANTHROPIC_API_KEY`、沒設自動略過)。各 `enabled:false` 可關。詳見 [STRATEGY.md](STRATEGY.md)。
+  - **法人目標價摘錄(2026-06-26 加,同一支 catalyst.py LLM call,零額外成本)**:同一次 Haiku 呼叫多問一欄 `target_prices`(每筆 broker/price/asof/evidence,evidence 必為新聞原文引用,寧缺勿濫)。**誠實邊界**:只是「新聞剛好有報導才抓到」,不是完整即時目標價清單——查證過台灣沒有免費合法 API 能拿到完整法人目標價或券商分點資料(分點/目標價皆已查證見專案記憶,別重查)。不影響信心分(`catalyst_score` 只算 catalysts,不算 target_prices),純資訊呈現。網頁 `docs/index.html` 核心卡顯示一行(`tp` 變數)+ `whyPanel` 展開原文引用;email `templates/daily_email.html` 同步顯示一行。
 - 新 secret(選用):`ANTHROPIC_API_KEY`(GitHub Actions secret)→ 啟用新聞催化劑 AI 分類(Haiku,每日數美分);沒設則 catalyst_bonus 恆 0、不報錯。
 - `entry`: max_chase 0.03(隔日開盤 ±3% 以上跳空棄單)
 - `exit`: hard_stop 0.07 / r_multiple 2.0 / max_hold_days 30 / momentum{struct_lookback 2, ma_stop 5, trail_ma 5} / swing{10,20,10} / trail{atr_mult 1.5, min_pct .03, max_pct .07}

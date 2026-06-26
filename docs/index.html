@@ -716,6 +716,10 @@ function whyPanel(s){
     const ev=s.catalysts.filter(c=>c.evidence).map(c=>`<div class="ev">・<b>${esc(c.type)}</b>${isNum(c.confidence)?` ${Math.round(c.confidence*100)}%`:''}:<span style="color:var(--muted)">「${esc(c.evidence)}」</span></div>`).join('');
     if(ev)pts.push('題材依據(新聞原文,AI 標註):'+ev);
   }
+  if(s.target_prices&&s.target_prices.length){
+    const tpEv=s.target_prices.map(t=>`<div class="ev">・<b>${esc(t.broker)}</b> ${isNum(t.price)?num(t.price):'?'}元${t.asof?`(${esc(t.asof)})`:''}:<span style="color:var(--muted)">「${esc(t.evidence)}」</span></div>`).join('');
+    pts.push('法人目標價(新聞轉述,AI 標註,僅新聞有報導才抓到,非完整即時清單):'+tpEv);
+  }
   if(s.risk_flags&&s.risk_flags.length)pts.push(`<span style="color:var(--down)">⚠ 風險:${s.risk_flags.map(esc).join(' · ')}</span>`);
   return `<details class="why"><summary>為什麼選這檔(解讀)</summary>
     <ul>${pts.map(p=>`<li>${p}</li>`).join('')}</ul>
@@ -760,6 +764,8 @@ function coreCard(s,i){
     cat=`<div class="row-meta"><span class="ml">題材</span>${tags}${s.catalyst_summary?`<span style="color:var(--muted)">${esc(s.catalyst_summary)}</span>`:''}</div>`;
   }
   const rf=(s.risk_flags&&s.risk_flags.length)?`<div class="row-meta"><span class="ml" style="background:var(--down-bg);color:var(--down)">風險</span><span style="color:var(--down)">${s.risk_flags.map(esc).join(' · ')}</span></div>`:'';
+  // 法人目標價(新聞轉述,非完整即時清單,見 whyPanel 原文引用)
+  const tp=(s.target_prices&&s.target_prices.length)?`<div class="row-meta"><span class="ml">法人目標價</span>${s.target_prices.map(t=>`${esc(t.broker)} <b class="num">${isNum(t.price)?num(t.price):'?'}</b>元${t.asof?`(${esc(t.asof)})`:''}`).join(' · ')}<span style="color:var(--muted-2);font-size:11px">(新聞轉述,非完整)</span></div>`:'';
   // 分數區:三種 stage-2 加成各自顯示
   const bonuses=[];
   if(isNum(s.chip_bonus)&&s.chip_bonus>0)bonuses.push(`籌碼 +${iv(s.chip_bonus)}`);
@@ -773,7 +779,7 @@ function coreCard(s,i){
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
     </div>
-    ${kbars(s)}${bars(s)}${planBox(s.plan)}${cat}${rf}${chip}${val}${fund2}${whyPanel(s)}
+    ${kbars(s)}${bars(s)}${planBox(s.plan)}${cat}${tp}${rf}${chip}${val}${fund2}${whyPanel(s)}
   </div>`;
 }
 function renderCore(){
