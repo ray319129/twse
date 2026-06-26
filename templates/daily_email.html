@@ -267,10 +267,10 @@
     🎯 <strong>模擬出場 — {{ es.method }}</strong>
     <span style="color:#777;font-size:11px;">(硬停損 -{{ es.hard_stop }}% / TP1={{ es.r_multiple }}R / 最多 {{ es.max_hold_days }} 日)</span><br>
     已實現勝率 <strong style="color:#16a085;">{{ es.win_rate }}%</strong> ·
-    平均報酬 <span style="color: {% if es.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(es.avg_ret) }}%</span> ·
+    平均報酬(已扣成本) <span style="color: {% if es.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(es.avg_ret) }}%</span>{% if es.avg_ret_gross is defined %}<span style="color:#999;font-size:11px;">(扣前 {{ '%+.2f'|format(es.avg_ret_gross) }}%,成本 {{ '%.2f'|format(es.avg_cost_pct) }}%)</span>{% endif %} ·
     平均持有 {{ es.avg_hold_days }} 日 ·
     <span style="color:#777;">出場:{% for k,v in es.reasons.items() %}{{ k }} {{ v }}%{% if not loop.last %} / {% endif %}{% endfor %} · 持有中 {{ es.open }} · <strong>跳空棄單 {{ es.skipped_gap }}</strong> · 待進場 {{ es.pending }}</span>
-    <div style="color:#999;font-size:11px;margin-top:3px;">以<strong>隔日開盤</strong>進場模擬(貼近實際):開高超過 {{ es.max_chase }}% 視為跳空棄單(不追)。動能流看 5MA、波段流看 20MA;突破 TP1 後移動停利。規則可在 config 調。</div>
+    <div style="color:#999;font-size:11px;margin-top:3px;">以<strong>隔日開盤</strong>進場模擬(貼近實際):開高超過 {{ es.max_chase }}% 視為跳空棄單(不追)。動能流看 5MA、波段流看 20MA;突破 TP1 後移動停利。報酬已扣手續費 {{ es.fee_rate }}%×2 + 證交稅 {{ es.tax_rate }}% + 滑價 {{ es.slippage_pct }}%×2(可在 config cost 區塊調)。</div>
   </div>
   {% endif %}
 

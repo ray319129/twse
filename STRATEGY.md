@@ -158,8 +158,7 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 4. 同日同時觸停損與 TP1 → **保守假設先觸停損**(寧可低估獲利)。
 5. 風格分流:`profile=動能 或 breakout` → 動能流(停損緊、看 5MA);否則波段流(看 20MA)。
 6. 最長持有 `max_hold_days(30)`,到期以收盤出場。
-
-> ⚠️ **目前出場模擬未扣交易成本**(手續費/證交稅/滑價)— 這是 HANDOFF 列的第一優先待辦。
+7. **已扣交易成本**(2026-06-27 加,`config: cost`):買賣各收一次手續費(`fee_rate×fee_discount`)+ 滑價,賣出再收證交稅;`exit_ret` 為扣成本後淨報酬,`exit_ret_gross`/`cost_pct` 保留扣前報酬與成本佔比供對照。函式 [track.py `_net_return`](scripts/track.py)。
 
 ---
 
@@ -212,6 +211,7 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 | `scoring.catalyst_bonus` | **(新)** enabled / weight 8 / model(haiku) / max_news / full / weights — Claude 新聞催化劑(需 ANTHROPIC_API_KEY) |
 | `entry` | max_chase **3%**(隔日開盤追價上限) |
 | `exit` | hard_stop **7%** / r_multiple **2.0** / max_hold_days 30 / momentum{struct_lookback 2, ma_stop 5, trail_ma 5} / swing{10,20,10} / trail{atr_mult 1.5, min 3%, max 7%} |
+| `cost` | **(新)** fee_rate 0.1425% / fee_discount 0.6 / tax_rate 0.15% / slippage_pct 0.1% — 出場模擬扣交易成本用,依自己券商折數調 |
 | `leading` | 四個領先訊號的 lookback/門檻(僅標籤用) |
 | `premarket` | gate 門檻 / orb(15分,09:30,帶量) / adr 對照表 |
 
@@ -239,6 +239,6 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 
 ### 建議的優化順序(個人觀點)
 1. ~~把 scoring 的硬寫參數抽進 config~~ ✅ 已完成。
-2. **出場加交易成本** → 拿到「接近真實」的勝率基準。
+2. ~~出場加交易成本~~ ✅ 已完成(2026-06-27)。
 3. 累積 1~2 個月實單/紙上績效後,用「哪種 profile / 分數區間 / 觸發型態真有 edge」回調權重(A、C、G)。
 4. 再處理品質面向(B)與大盤環境納入(F)。

@@ -484,7 +484,8 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
 
     # 歷史追蹤與績效:回看過去所有核心選股的後續走勢(讀剛寫入的 + 歷史 signals)
     try:
-        performance = build_perf_report(as_of=today, exit_cfg=cfg.get("exit", {}), entry_cfg=cfg.get("entry", {}))
+        performance = build_perf_report(as_of=today, exit_cfg=cfg.get("exit", {}), entry_cfg=cfg.get("entry", {}),
+                                         cost_cfg=cfg.get("cost", {}))
     except Exception as e:
         log.warning(f"performance report failed: {e}")
         performance = {"overall": {}, "by_horizon": {}, "exit_sim": {}, "ledger": [],

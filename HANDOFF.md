@@ -1,7 +1,8 @@
 # 台股短線選股系統 — 交接文件 (HANDOFF)
 
-> 給新對話的冷啟動說明。讀完這份就能接續開發。最後更新 commit:`5ae52ec5`（之後以 `git log` 為準）。
+> 給新對話的冷啟動說明。讀完這份就能接續開發。最後更新隨 commit 同步(以 `git log` 為準)。
 > repo: github.com/ray319129/twse · 分支 main · 平台 Windows + Python(CI 用 3.11)
+> ⚠️ **慣例(使用者明確要求):每完成一件實質改動,結束前一定先補這份 HANDOFF 再 push,別等提醒。**
 
 ---
 
@@ -96,11 +97,12 @@ M.daily_run(test_mode=True)
 ---
 
 ## 5. 目前狀態 / 立即待辦(使用者動作)
-- ⏳ **線上 docs/data.json 還是 6/18(bug 期間)那份,核心 0 檔**。需到 GitHub **Actions → Daily Screener → Run workflow** 觸發一次,才會用修好的程式產生 核心10 + 決策卡 + 乾淨 JSON;Pages 重部署後網頁才完整。
+- 6/26 每日排程已正常跑過一次(`75efce0cf data: 2026-06-26 daily update`),線上 data.json 不再是 6/18 bug 期間那份。之後每個交易日排程會自動更新,無需手動觸發。
 - GitHub Pages 已啟用(/docs),網頁可載入。
+- ✅ **2026-06-27:出場模擬已納入交易成本**(見下方第6節 #1,已完成)。下次排程跑完後,信件/網頁的「已實現勝率/平均報酬」會自動變成扣成本後的數字。
 
-## 6. 下一步任務(已規劃、尚未做)
-1. **【優先】交易成本納入出場模擬**:手續費(0.1425%×折扣,買賣各一)+ 證交稅 0.15%(賣出)+ 滑價。讓已實現勝率/報酬接近真實到手 → 這是驗證「有沒有 edge」最關鍵的一塊。
+## 6. 下一步任務
+1. ~~【優先】交易成本納入出場模擬~~ ✅ **2026-06-27 已完成**:新增 `config/screeners.yaml` → `cost` 區塊(fee_rate 0.1425% / fee_discount 0.6 / tax_rate 0.15% / slippage_pct 0.1%,皆可調)。`scripts/track.py` 新增 `_net_return()`:買進價×(1+滑價)×(1+手續費),賣出價×(1-滑價)×(1-手續費-證交稅),`exit_ret` 改為扣成本後淨報酬;保留 `exit_ret_gross`/`cost_pct` 供對照。`exit_sim` 摘要新增 `avg_ret_gross`/`avg_cost_pct`/`fee_rate`/`tax_rate`/`slippage_pct`。email([daily_email.html](templates/daily_email.html))與網頁核心統計卡([index.html](docs/index.html))已同步顯示「扣前/成本」對照。`scripts/main.py` 呼叫 `build_perf_report` 時多傳 `cost_cfg=cfg.get("cost", {})`。詳見 [STRATEGY.md](STRATEGY.md) 第5節。
 2. **累積 1~2 個月真實數據後,用績效回頭調評分權重**(哪種 profile / 分數區間 / 觸發型態真有 edge)。
 3. **盤中執行層(獨立大專案)**:富邦 API 即時報價 + 開盤區間/VWAP/帶量吞噬判讀 + 提醒或半自動下單。需盤中持續運行的程式(非 Actions)+ 資安考量。日線測不出盤中順序,這層才能真正執行 A/B/C。
 4. (選配)自選池/觀察層也納入績效追蹤;大盤/產業過濾進階規則。

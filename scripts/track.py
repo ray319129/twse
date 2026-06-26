@@ -114,12 +114,24 @@ def compute_entry_plan(df: pd.DataFrame, ref_idx: int, ref_price: float, style: 
             "trail_ma": int((exit_cfg.get(style, {}) or {}).get("trail_ma", 5 if style == "momentum" else 10))}
 
 
+def _net_return(entry: float, exit_price: float, cost_cfg: dict | None) -> float:
+    """扣交易成本後的真實報酬:買賣各收手續費(×折數)+滑價,賣出再收證交稅。"""
+    cost_cfg = cost_cfg or {}
+    fee = float(cost_cfg.get("fee_rate", 0.001425)) * float(cost_cfg.get("fee_discount", 1.0))
+    tax = float(cost_cfg.get("tax_rate", 0.0015))
+    slip = float(cost_cfg.get("slippage_pct", 0.0))
+    buy_cost = entry * (1 + slip) * (1 + fee)
+    sell_proceeds = exit_price * (1 - slip) * (1 - fee - tax)
+    return sell_proceeds / buy_cost - 1 if buy_cost else 0.0
+
+
 def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str,
-                   cfg: dict, max_chase: float = 0.03) -> dict | None:
+                   cfg: dict, max_chase: float = 0.03, cost_cfg: dict | None = None) -> dict | None:
     """真實出場模擬:以「隔日開盤」進場(貼近實際,不是盤後收盤),並做跳空保護:
       - 隔日開盤較選股收盤高 > max_chase → 跳空棄單(不追高)
       - 隔日開盤已跌破初始停損 → 跳空棄單(開低破停損)
     進場後:未達 TP1 前盤中破初始停損 / 收盤破均線出場;觸 TP1 啟動移動停利。
+    exit_ret 已扣交易成本(手續費×2+證交稅+滑價,見 cost_cfg);exit_ret_gross 為扣成本前報酬,供對照。
     """
     if df is None or df.empty or "close" not in df.columns:
         return None
@@ -165,9 +177,12 @@ def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str
         return {**base, "status": "skip", "reason": "跳空開低破停損", "exit_ret": None, "hold_days": 0}
 
     def res(reason, price, hold, status="closed"):
+        gross = float(price / entry - 1)
+        net = _net_return(entry, float(price), cost_cfg)
         return {**base, "status": status, "reason": reason,
-                "exit_ret": float(price / entry - 1), "exit_price": round(float(price), 2),
-                "hold_days": hold}
+                "exit_ret": net, "exit_ret_gross": gross,
+                "cost_pct": round((gross - net) * 100, 2),
+                "exit_price": round(float(price), 2), "hold_days": hold}
 
     trailing = False; swing = entry
     for i in range(0, max_hold):     # i=0 進場當日(已用開盤進場,當日高低可觸發)
@@ -242,7 +257,8 @@ def _win_rate(vals: list[float]) -> float | None:
 
 
 def build_report(index_close: pd.Series | None = None, as_of: date | None = None,
-                 exit_cfg: dict | None = None, entry_cfg: dict | None = None) -> dict:
+                 exit_cfg: dict | None = None, entry_cfg: dict | None = None,
+                 cost_cfg: dict | None = None) -> dict:
     picks = _load_core_picks()
     if as_of is None:
         as_of = date.today()
@@ -255,7 +271,7 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         perf = _pick_perf(df, p["date"], p["entry"], as_of)
         if perf is None:
             continue
-        sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase)
+        sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase, cost_cfg)
         row = {**p, **perf, "exit": sim}
         # 機會成本測量:被「跳空開高棄單」的票,若當初照隔日開盤買進的前向表現(純量化,不改交易規則)
         if sim and sim.get("status") == "skip" and sim.get("gap") is not None and sim["gap"] > 0:
@@ -291,6 +307,7 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
     open_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "open")
     skip_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "skip")
     pending_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "pending")
+    cost_cfg = cost_cfg or {}
     exit_sim = {
         "method": "隔日開盤進場 + 跳空保護 + R 倍數 + 移動停利",
         "hard_stop": round(float(exit_cfg.get("hard_stop", 0.07)) * 100, 1),
@@ -298,6 +315,10 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         "max_hold_days": int(exit_cfg.get("max_hold_days", 30)),
         "max_chase": round(max_chase * 100, 1),
         "closed": len(closed), "open": open_n, "skipped_gap": skip_n, "pending": pending_n,
+        "cost_included": bool(cost_cfg),
+        "fee_rate": round(float(cost_cfg.get("fee_rate", 0.001425)) * float(cost_cfg.get("fee_discount", 1.0)) * 100, 4),
+        "tax_rate": round(float(cost_cfg.get("tax_rate", 0.0015)) * 100, 2),
+        "slippage_pct": round(float(cost_cfg.get("slippage_pct", 0.0)) * 100, 2),
     }
     if closed:
         reasons = {}
@@ -308,6 +329,8 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         exit_sim.update({
             "win_rate": round(sum(1 for e in closed if e["exit_ret"] > 0) / len(closed) * 100, 1),
             "avg_ret": round(sum(e["exit_ret"] for e in closed) / len(closed) * 100, 2),
+            "avg_ret_gross": round(sum(e["exit_ret_gross"] for e in closed) / len(closed) * 100, 2),
+            "avg_cost_pct": round(sum(e["cost_pct"] for e in closed) / len(closed), 2),
             "avg_hold_days": round(sum(e["hold_days"] for e in closed) / len(closed), 1),
             "reasons": reasons,
         })
@@ -331,6 +354,8 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "exit_status": ex.get("status"),
             "exit_reason": ex.get("reason"),
             "exit_ret_pct": round(ex_ret * 100, 2) if ex_ret is not None else None,
+            "exit_ret_gross_pct": round(ex["exit_ret_gross"] * 100, 2) if ex.get("exit_ret_gross") is not None else None,
+            "cost_pct": ex.get("cost_pct"),
             "hold_days": ex.get("hold_days"),
             "tp1": ex.get("tp1"), "init_stop": ex.get("init_stop"),
         }
@@ -428,7 +453,8 @@ def _print_report(rep: dict) -> None:
     if es.get("closed"):
         rs = " / ".join(f"{k}{v}%" for k, v in es.get("reasons", {}).items())
         print(f"\n出場模擬({es['method']};隔日開盤進場,開高>{es.get('max_chase')}% 棄單,硬停損-{es['hard_stop']}% / TP1={es['r_multiple']}R):")
-        print(f"  已實現勝率 {es['win_rate']}% · 平均報酬 {es['avg_ret']:+.2f}% · 平均持有 {es['avg_hold_days']} 日"
+        print(f"  已實現勝率 {es['win_rate']}% · 平均報酬(已扣成本) {es['avg_ret']:+.2f}%"
+              f"(扣前 {es.get('avg_ret_gross', 0):+.2f}%,成本 {es.get('avg_cost_pct', 0):.2f}%) · 平均持有 {es['avg_hold_days']} 日"
               f"  ({rs} · 持有中 {es['open']} · 跳空棄單 {es.get('skipped_gap',0)} · 待進場 {es.get('pending',0)})")
     print(f"\n台帳(仍追蹤 {rep['ledger_total']} 檔,依報酬排序):")
     for r in rep["ledger"][:20]:
@@ -443,7 +469,7 @@ if __name__ == "__main__":
     from .config import load_screeners
     try:
         cfg = load_screeners()
-        ecfg = cfg.get("exit", {}); encfg = cfg.get("entry", {})
+        ecfg = cfg.get("exit", {}); encfg = cfg.get("entry", {}); ccfg = cfg.get("cost", {})
     except Exception:
-        ecfg = {}; encfg = {}
-    _print_report(build_report(exit_cfg=ecfg, entry_cfg=encfg))
+        ecfg = {}; encfg = {}; ccfg = {}
+    _print_report(build_report(exit_cfg=ecfg, entry_cfg=encfg, cost_cfg=ccfg))
