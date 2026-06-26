@@ -76,16 +76,21 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 本機有 ~1976 個 `data/prices/*.parquet`(到約 6/18)。可 monkeypatch 網路函式跑完整 `daily_run`:
 ```python
 import scripts.main as M
+import scripts.fundamentals as F
 M.fetch_stock_info=lambda *a,**k: <cached info df>
 M.fetch_valuation_snapshot=lambda *a,**k: {}
 M.fetch_index_history=lambda *a,**k: <equal-weight proxy from closes>
 M.fetch_price_history=lambda *a,**k: pd.DataFrame()   # 不動 data 檔
-M.fetch_chips_history / fetch_monthly_revenue / fetch_eps_quarterly = lambda: pd.DataFrame()
+M.fetch_chips_history = M.fetch_monthly_revenue = M.fetch_eps_quarterly = lambda *a,**k: pd.DataFrame()
 M.fetch_news=lambda *a,**k: []
 M.send_email=lambda *a,**k: None
+# ⚠️ 財報三支(fetch_financial_statements/fetch_balance_sheet/fetch_cashflow)
+#    一定要 patch scripts.fundamentals 模組層級,patch scripts.main 沒用(見下方踩雷)
+F.fetch_financial_statements = F.fetch_balance_sheet = F.fetch_cashflow = lambda *a,**k: pd.DataFrame()
 M.daily_run(test_mode=True)
 # 之後務必 git checkout -- data/ ; rm 測試產生的 docs/*.json 與 data/signals/<today>.json
 ```
+**踩雷(2026-06-27 發現)**:`scripts/fundamentals.py` 開頭 `from .fetchers import fetch_financial_statements, fetch_balance_sheet, fetch_cashflow`——這是把名字綁進 `fundamentals.py` 自己的模組命名空間,跟 `scripts.main` 完全無關(`main.py` 根本沒 import 這三支)。早期版本只 patch `M.fetch_xxx` 卻沒 patch 這三支,結果 `update_fundamentals()` 內部呼叫時解析到的是 `fundamentals.py` 命名空間裡**未被替換的原函式**,照樣對 `api.finmindtrade.com` 發真實 HTTP request(假 token 收 400,且 `fetch_finmind` 內建 retries=2/delay=2.0 會重試拖慢測試)。**規則:`from X import f` 之後想攔截 `f`,要 patch 「呼叫它的那個模組」的命名空間(此例是 `scripts.fundamentals.f`),不是定義它的模組(`scripts.fetchers.f`)、也不是其他 import 過它的模組(`scripts.main` 沒 import 過,patch 了也是白搭)。**`fetch_per_yield` 目前只在 `main.py` import 但無任何呼叫點(死 import),離線測試不用管它。
 驗證 JSON:`json.loads(text, parse_constant=lambda c:(_ for _ in()).throw(ValueError(c)))`。
 驗證網頁 JS:抽出 `<script>` 內容 `node --check`。
 
