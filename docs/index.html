@@ -220,6 +220,10 @@
   .meta b{color:var(--ink-2);font-weight:700;}
   .trig{color:var(--up-ink);font-weight:700;background:var(--up-bg);border:1px solid var(--up-line);padding:1px 8px;border-radius:6px;font-size:12px;}
 
+  .kbars{margin-top:10px;border-radius:8px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line-soft);padding:6px 4px 4px;}
+  .kbars svg{display:block;width:100%;height:64px;}
+  .kbars .kfoot{font-size:10.5px;color:var(--muted-2);text-align:right;padding:2px 6px 0;}
+
   .bars{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
   .bar{font-size:11px;color:var(--muted);background:var(--surface-3);padding:4px 9px;border-radius:8px;font-weight:600;
     display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;}
@@ -645,6 +649,29 @@ function svgI(n){
 /* ============================================================
    核心
    ============================================================ */
+// 迷你日K棒圖(近 40 交易日)— 純 SVG,零外部套件;無 s.ohlc(舊資料/降級)時回傳空字串,不報錯。
+function kbars(s){
+  const o=s.ohlc;
+  if(!o||!o.length)return '';
+  const W=320,H=64,padL=2,padR=2,padT=5,padB=5;
+  const n=o.length, cw=(W-padL-padR)/n, bw=Math.max(1,cw*0.62);
+  let lo=Infinity,hi=-Infinity;
+  for(const c of o){if(c.every(isNum)){lo=Math.min(lo,c[2]);hi=Math.max(hi,c[1]);}}
+  if(!isFinite(lo)||!isFinite(hi)||hi<=lo)return '';
+  const span=hi-lo;
+  const y=v=>padT+(H-padT-padB)*(1-(v-lo)/span);
+  let bars='';
+  o.forEach((c,i)=>{
+    if(!c.every(isNum))return;
+    const [op,hg,lw,cl]=c;
+    const x=padL+cw*i+cw/2, up=cl>=op, col=up?'var(--up)':'var(--down)';
+    const yo=y(op),yc=y(cl),yh=y(hg),yl=y(lw);
+    const top=Math.min(yo,yc), bh=Math.max(1,Math.abs(yc-yo));
+    bars+=`<line x1="${x.toFixed(1)}" y1="${yh.toFixed(1)}" x2="${x.toFixed(1)}" y2="${yl.toFixed(1)}" style="stroke:${col};stroke-width:1"/>`;
+    bars+=`<rect x="${(x-bw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" style="fill:${col}"/>`;
+  });
+  return `<div class="kbars"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg><div class="kfoot">近 ${n} 日K線(資料延遲至前日收盤)</div></div>`;
+}
 function bars(s){
   const m=[['趨勢',s.trend],['強度',s.rs],['時機',s.setup],['品質',s.quality],['量能',s.liquidity]];
   return `<div class="bars">${m.map(([k,v])=>{const has=isNum(v);const pct=has?Math.max(0,Math.min(1,Number(v))):0;return `<span class="bar">${k} <span class="mb"><i style="width:${(pct*100).toFixed(0)}%"></i></span> <b>${has?Math.round(pct*100):'-'}</b></span>`;}).join('')}</div>`;
@@ -746,7 +773,7 @@ function coreCard(s,i){
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
     </div>
-    ${bars(s)}${planBox(s.plan)}${cat}${rf}${chip}${val}${fund2}${whyPanel(s)}
+    ${kbars(s)}${bars(s)}${planBox(s.plan)}${cat}${rf}${chip}${val}${fund2}${whyPanel(s)}
   </div>`;
 }
 function renderCore(){

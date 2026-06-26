@@ -175,6 +175,10 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
         if index_close is not None:
             df_ind = compute_relative_strength(df_ind, index_close, n=60)
         pick["levels"] = reference_levels(df_ind)
+        # 近 40 個交易日 OHLC → 網頁畫迷你日K棒圖(零額外 API,純既有 parquet 價格)。
+        ohlc_tail = df.tail(40)[["open", "high", "low", "close"]]
+        pick["ohlc"] = [[round(float(o), 2), round(float(h), 2), round(float(l), 2), round(float(c), 2)]
+                        for o, h, l, c in ohlc_tail.itertuples(index=False)]
         if screen_cfg is not None:
             scr = screen_stock(df_ind, screen_cfg, valuation=pick.get("valuation"))
             pick["hits"] = [h for h, v in scr["hits"].items() if v]
