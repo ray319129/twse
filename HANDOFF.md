@@ -34,10 +34,10 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 ### 檔案地圖
 - `scripts/main.py` — 主流程 `daily_run()`;`_json_safe`(NaN→null)、`_enrich_pick`、`STRATEGY_LABEL`。
 - `scripts/scoring.py` — **信心分** `compute_conviction()`:趨勢25+相對強度25+短線時機量能25+品質15+流動性10,過熱(5日>22%/乖離20MA>18%/RSI>88/漲停)× 0.55 重罰。回傳 trigger/brewing/exhausted/profile 等。
-- `scripts/track.py` — **出場模擬 + 績效**:`compute_entry_plan()`(停損/TP1/A·B·C價位線)、`_simulate_exit()`(隔日開盤進場+跳空保護)、`build_report()`(台帳/勝率/各天期/出場統計)。可 `python -m scripts.track` 單獨跑。
+- `scripts/track.py` — **出場模擬 + 績效**:`compute_entry_plan()`(停損/TP1/A·B·C價位線)、`compute_position_size()`(2026-06-27 加,資金×風險%÷R 反推建議張數)、`_net_return()`(扣手續費/證交稅/滑價)、`_simulate_exit()`(隔日開盤進場+跳空保護,2026-06-27 加催化劑放寬棄單門檻)、`build_report()`(台帳/勝率/各天期/出場統計)。可 `python -m scripts.track` 單獨跑。
 - `scripts/indicators.py` — 手刻指標(MA/KD/MACD/RSI/ATR/布林/bb_width)、`compute_relative_strength`(rs_line/rs_ratio,需大盤)。
 - `scripts/screener.py` — 舊 12 策略 + 4 combo + 4 領先訊號(現降為自選池標籤用)。
-- `scripts/fetchers.py` — yfinance 價格/指數(**已 dropna(close)**)、FinMind 籌碼/財報、TWSE 估值、Google News。
+- `scripts/fetchers.py` — yfinance 價格/指數(**已 dropna(close)**)、FinMind 籌碼/財報、TWSE 估值(`fetch_valuation_snapshot`)+ TPEx 上櫃估值(`fetch_valuation_snapshot_tpex`,2026-06-27 加)、Google News。
 - `scripts/storage.py` — parquet 讀寫;`load_prices` **讀取時忽略 NaN 收盤列**。
 - `scripts/{config,industry,notify,utils}.py`、`templates/daily_email.html`、`docs/index.html`(SPA)。
   - `docs/index.html` 前端輔助(2026-06-26 加):`slink(id)` 把股票代號(全分頁)做成連結 → `cmoney.tw/forum/stock/<代號>`(新分頁看走勢/技術線圖);`whyPanel(s)` 核心卡可摺疊「為什麼選這檔(解讀)」,把信心分五維(`s.trend/rs/setup/quality/liquidity`)+stage-2 加成+題材 `evidence`+`risk_flags` 翻成白話,**純用既有資料、零 API**。改 SPA 後務必 `node --check`(抽 `<script>` 驗語法)。
@@ -47,11 +47,13 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 
 ### config/screeners.yaml 可調區塊
 - `ranking`: core_count 10 / watch_count 20 / min_score 45 / min_dollar_volume 3000萬 / enrich_top_n 30
-- `scoring`: 信心分權重/門檻全抽進此區塊(預設=原硬寫值);含 stage-2 重排三加成 `chip_bonus`(籌碼)/`fundamental_bonus`(FinMind 季財報:毛利/營益/ROE/負債/現金流,[fundamentals.py](scripts/fundamentals.py))/`catalyst_bonus`(Claude Haiku 對30天新聞做事件分類,[catalyst.py](scripts/catalyst.py),需 `ANTHROPIC_API_KEY`、沒設自動略過)。各 `enabled:false` 可關。詳見 [STRATEGY.md](STRATEGY.md)。
+- `scoring`: 信心分權重/門檻全抽進此區塊(預設=原硬寫值);含 stage-2 重排四加成 `chip_bonus`(籌碼)/`fundamental_bonus`(FinMind 季財報:毛利/營益/ROE/負債/現金流,[fundamentals.py](scripts/fundamentals.py))/`catalyst_bonus`(Claude Haiku 對30天新聞做事件分類,[catalyst.py](scripts/catalyst.py),需 `ANTHROPIC_API_KEY`、沒設自動略過)/`industry_bonus`(2026-06-27 加,身處當下最強產業前 top_n 名才加分,預設關閉)。各 `enabled:false` 可關。詳見 [STRATEGY.md](STRATEGY.md)。
   - **法人目標價摘錄(2026-06-26 加,同一支 catalyst.py LLM call,零額外成本)**:同一次 Haiku 呼叫多問一欄 `target_prices`(每筆 broker/price/asof/evidence,evidence 必為新聞原文引用,寧缺勿濫)。**誠實邊界**:只是「新聞剛好有報導才抓到」,不是完整即時目標價清單——查證過台灣沒有免費合法 API 能拿到完整法人目標價或券商分點資料(分點/目標價皆已查證見專案記憶,別重查)。不影響信心分(`catalyst_score` 只算 catalysts,不算 target_prices),純資訊呈現。網頁 `docs/index.html` 核心卡顯示一行(`tp` 變數)+ `whyPanel` 展開原文引用;email `templates/daily_email.html` 同步顯示一行。
 - 新 secret(選用):`ANTHROPIC_API_KEY`(GitHub Actions secret)→ 啟用新聞催化劑 AI 分類(Haiku,每日數美分);沒設則 catalyst_bonus 恆 0、不報錯。
-- `entry`: max_chase 0.03(隔日開盤 ±3% 以上跳空棄單)
+- `entry`: max_chase 0.03(隔日開盤 ±3% 以上跳空棄單);`catalyst_chase`(2026-06-27 加,預設關閉)強催化劑+帶量時放寬開高棄單門檻。
 - `exit`: hard_stop 0.07 / r_multiple 2.0 / max_hold_days 30 / momentum{struct_lookback 2, ma_stop 5, trail_ma 5} / swing{10,20,10} / trail{atr_mult 1.5, min_pct .03, max_pct .07}
+- `cost`(交易成本,2026-06-27 加,2026-06-27 同日修正稅率): fee_rate 0.001425×fee_discount 0.6 / **tax_rate 0.003(一般證交稅)** / tax_rate_daytrade 0.0015(僅 hold_days==0 才用)/ slippage_pct 0.001
+- `account`(建議風險倉位,2026-06-27 加,預設關閉): enabled false / capital 0 / risk_pct 0.01
 
 ---
 
@@ -99,13 +101,20 @@ M.daily_run(test_mode=True)
 ## 5. 目前狀態 / 立即待辦(使用者動作)
 - 6/26 每日排程已正常跑過一次(`75efce0cf data: 2026-06-26 daily update`),線上 data.json 不再是 6/18 bug 期間那份。之後每個交易日排程會自動更新,無需手動觸發。
 - GitHub Pages 已啟用(/docs),網頁可載入。
-- ✅ **2026-06-27:出場模擬已納入交易成本**(見下方第6節 #1,已完成)。下次排程跑完後,信件/網頁的「已實現勝率/平均報酬」會自動變成扣成本後的數字。
+- ✅ **2026-06-27:出場模擬已納入交易成本**(見下方第6節 #1)。下次排程跑完後,信件/網頁的「已實現勝率/平均報酬」會自動變成扣成本後的數字。
+- ✅ **2026-06-27:大量查證網路策略/研究後,做了一輪優化**(見下方第6節 #1~#5):修正證交稅預設值、補上櫃估值資料源、加建議倉位、跳空分級、產業加成。全部預設值為「修 bug/補資料」性質的已直接啟用;新功能類(建議倉位/跳空分級/產業加成)預設關閉,要在 config 手動開。
 
 ## 6. 下一步任務
-1. ~~【優先】交易成本納入出場模擬~~ ✅ **2026-06-27 已完成**:新增 `config/screeners.yaml` → `cost` 區塊(fee_rate 0.1425% / fee_discount 0.6 / tax_rate 0.15% / slippage_pct 0.1%,皆可調)。`scripts/track.py` 新增 `_net_return()`:買進價×(1+滑價)×(1+手續費),賣出價×(1-滑價)×(1-手續費-證交稅),`exit_ret` 改為扣成本後淨報酬;保留 `exit_ret_gross`/`cost_pct` 供對照。`exit_sim` 摘要新增 `avg_ret_gross`/`avg_cost_pct`/`fee_rate`/`tax_rate`/`slippage_pct`。email([daily_email.html](templates/daily_email.html))與網頁核心統計卡([index.html](docs/index.html))已同步顯示「扣前/成本」對照。`scripts/main.py` 呼叫 `build_perf_report` 時多傳 `cost_cfg=cfg.get("cost", {})`。詳見 [STRATEGY.md](STRATEGY.md) 第5節。
-2. **累積 1~2 個月真實數據後,用績效回頭調評分權重**(哪種 profile / 分數區間 / 觸發型態真有 edge)。
-3. **盤中執行層(獨立大專案)**:富邦 API 即時報價 + 開盤區間/VWAP/帶量吞噬判讀 + 提醒或半自動下單。需盤中持續運行的程式(非 Actions)+ 資安考量。日線測不出盤中順序,這層才能真正執行 A/B/C。
-4. (選配)自選池/觀察層也納入績效追蹤;大盤/產業過濾進階規則。
+1. ~~【優先】交易成本納入出場模擬~~ ✅ **2026-06-27 已完成,且當天稍後又修正一次稅率**:新增 `config/screeners.yaml` → `cost` 區塊。`scripts/track.py` 新增 `_net_return()`:買進價×(1+滑價)×(1+手續費),賣出價×(1-滑價)×(1-手續費-證交稅)。
+   - ⚠️ **稅率修正(同日)**:查證後發現「當沖證交稅減半0.15%」只適用同日買賣且需另外申請當沖權限,本系統設計是隔日開盤才進場,本來就不是當沖。`tax_rate` 預設改回一般稅率 **0.3%**;新增 `tax_rate_daytrade: 0.0015`,只有 `hold_days==0`(進場當天就出場,理論上才可能符合當沖)才套用,且系統無法驗證帳戶資格,當作邊際近似值。
+   - `exit_ret` 為扣成本後淨報酬;保留 `exit_ret_gross`/`cost_pct` 供對照。`exit_sim` 摘要新增 `avg_ret_gross`/`avg_cost_pct`/`fee_rate`/`tax_rate`/`tax_rate_daytrade`/`slippage_pct`。email/網頁已同步顯示「扣前/成本」對照。詳見 [STRATEGY.md](STRATEGY.md) 第5節。
+2. ✅ **2026-06-27 已完成:補接 TPEx 上櫃估值 API**(`scripts/fetchers.py` 新增 `fetch_valuation_snapshot_tpex()`,打 `tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis`,免費、零金鑰)。`scripts/main.py` 的 `daily_run()` 抓完 TWSE 估值後再合併 TPEx,解決「上櫃股估值快照常缺、品質面向恆拿中性0.5」的問題(STRATEGY.md 第10節B項)。實測約888檔上櫃股有解。
+3. ✅ **2026-06-27 已完成:建議風險倉位**(`config: account`,預設關閉)。`scripts/track.py` 新增 `compute_position_size(plan, account_cfg)`:資金×風險% ÷ R(初始停損價差)反推建議張數,把 R-multiple 框架用滿(研究指出倉位規模對績效變異影響遠大於進場訊號本身)。要填自己的 `capital`/`risk_pct` 並把 `enabled` 改 true 才會在決策卡顯示。
+4. ✅ **2026-06-27 已完成:跳空棄單分級**(`config: entry.catalyst_chase`,預設關閉)。強催化劑(`catalyst_signal` 達門檻)+ 進場當日帶量(量比達門檻)時,開高棄單門檻放寬到 `max_chase+extra_chase`,而非一律棄單——查證顯示「有強催化劑的突破缺口」回補率遠低於無故跳空。`scripts/track.py` `_simulate_exit()` 新增 `catalyst_signal`/`catalyst_chase_cfg` 參數;`_load_core_picks()` 多讀 `catalyst_signal`。需 `scoring.catalyst_bonus` 也開啟才有效。開低棄單規則不變(別接刀)。
+5. ✅ **2026-06-27 已完成:產業相對強度納入 stage-2 排序**(`config: scoring.industry_bonus`,預設關閉)。`scripts/main.py` 把 `compute_industry_trends()` 移到 `_rank_core()` 之前算,傳入產業排名;身處當下最強產業(前 `top_n` 名)依排名線性給 0~`weight` 分加成,概念對應 IBD 產業群組排名。零額外 API,沿用既有 `industry_rows`。
+6. **累積 1~2 個月真實數據後,用績效回頭調評分權重**(哪種 profile / 分數區間 / 觸發型態真有 edge)。
+7. **盤中執行層(獨立大專案)**:富邦 API 即時報價 + 開盤區間/VWAP/帶量吞噬判讀 + 提醒或半自動下單。需盤中持續運行的程式(非 Actions)+ 資安考量。日線測不出盤中順序,這層才能真正執行 A/B/C。
+8. (選配,暫緩,需先有真實績效資料才該做)絕對門檻→分位數排名重構(Stockopedia StockRank 式);大盤/RSI情境化規則。研究上有支持,但本系統樣本只經歷多頭、無法驗證,屬於過擬合風險,別先猜著改。
 
 ## 7. 必記前提(誠實風險)
 - **策略尚未驗證有 edge**:樣本太少、過去只經歷多頭、回測未扣成本。**先紙上跟單、讓【五】歷史追蹤累積真實已實現勝率再說**,別急著實盤或斷言穩賺。

@@ -490,6 +490,45 @@ def fetch_valuation_snapshot(d: date | None = None) -> dict[str, dict]:
     return {}
 
 
+_TPEX_PERATIO_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis"
+
+
+def fetch_valuation_snapshot_tpex() -> dict[str, dict]:
+    """All OTC(上櫃,TPEx)stocks' PE / yield / PB,最新可用交易日,ONE official free call(無需日期參數,
+    遇假日會自動回最近交易日)。回傳格式跟 fetch_valuation_snapshot(TWSE 上市)一致,供合併使用 —
+    解決品質面向「上櫃股估值快照常缺,只能拿中性0.5」的問題(2026-06-27 加)。失敗回空字典,呼叫端降級不死。
+    """
+    try:
+        j = http_get_json(_TPEX_PERATIO_URL, retries=1, delay=2.0)
+    except Exception as e:
+        log.warning(f"TPEx valuation snapshot failed: {e}")
+        return {}
+    if not isinstance(j, list):
+        return {}
+    out: dict[str, dict] = {}
+    for row in j:
+        sid = str(row.get("SecuritiesCompanyCode", "")).strip()
+        if not sid:
+            continue
+        rec = {}
+        pe = _to_float(row.get("PriceEarningRatio"))
+        if pe is not None:
+            rec["pe"] = pe
+        yld = _to_float(row.get("YieldRatio"))
+        if yld is not None:
+            rec["yield_pct"] = yld
+        pb = _to_float(row.get("PriceBookRatio"))
+        if pb is not None:
+            rec["pb"] = pb
+        if rec:
+            out[sid] = rec
+    if out:
+        log.info(f"TPEx valuation snapshot: {len(out)} stocks")
+    else:
+        log.warning("TPEx valuation snapshot empty")
+    return out
+
+
 # ---------- 盤前 / 即時(premarket)----------
 # 全部免費、非官方/盡力而為;任何失敗都回空(呼叫端降級不整包死)。
 

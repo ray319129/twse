@@ -15,7 +15,7 @@ from .fetchers import (
     fetch_stock_info, filter_tradable_stocks, fetch_news,
     fetch_price_history, fetch_chips_history,
     fetch_monthly_revenue, fetch_eps_quarterly, fetch_per_yield,
-    fetch_valuation_snapshot, fetch_index_history,
+    fetch_valuation_snapshot, fetch_valuation_snapshot_tpex, fetch_index_history,
 )
 from .storage import (
     load_prices, upsert_prices,
@@ -28,7 +28,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
-from .track import build_report as build_perf_report, compute_entry_plan, _style_of
+from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
 from .catalyst import classify_catalysts, catalyst_score
 from .notify import render_email, send_email
@@ -187,6 +187,10 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
             exit_cfg, max_chase = plan_cfg
             pick["plan"] = compute_entry_plan(df_ind, len(df_ind) - 1, float(pick["close"]),
                                               _style_of(pick), exit_cfg, max_chase)
+            account_cfg = (screen_cfg or {}).get("account", {})
+            position = compute_position_size(pick["plan"], account_cfg)
+            if position:
+                pick["position"] = position
     chips_df = _update_chips(sid, today)
     if chips_df is not None and not chips_df.empty:
         cs = _chip_summary(chips_df)
@@ -263,16 +267,20 @@ def _chip_signal(chips: dict | None, cfg: dict) -> float | None:
     return sum(parts) / len(parts)
 
 
-def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int) -> list[dict]:
-    """stage-2 重排:對已 enrich 的核心候選算 籌碼 + 基本面 + 新聞催化劑 三種加成,
+def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int,
+               industry_rank: dict[str, int] | None = None) -> list[dict]:
+    """stage-2 重排:對已 enrich 的核心候選算 籌碼 + 基本面 + 新聞催化劑 + 產業相對強度 四種加成,
     全部併入 rank_score 後重排取前 core_count。原 score(信心分)語意不變;
     各加成可由 config 個別開關,無資料 → 該項 bonus 0(中性不扣分)。"""
     chip_cfg = scoring_cfg.get("chip_bonus", {}) or {}
     fund_cfg = scoring_cfg.get("fundamental_bonus", {}) or {}
     cat_cfg = scoring_cfg.get("catalyst_bonus", {}) or {}
+    ind_cfg = scoring_cfg.get("industry_bonus", {}) or {}
     chip_w = float(chip_cfg.get("weight", 10))
     fund_w = float(fund_cfg.get("weight", 5))
     cat_w = float(cat_cfg.get("weight", 8))
+    ind_w = float(ind_cfg.get("weight", 4))
+    ind_top_n = int(ind_cfg.get("top_n", 5))
     for s in candidates:
         bonus = 0.0
         if chip_cfg.get("enabled", False):
@@ -290,6 +298,12 @@ def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int) -> li
             s["catalyst_signal"] = round(cs, 2) if cs is not None else None
             s["catalyst_bonus"] = round(cat_w * (cs or 0.0), 1)
             bonus += s["catalyst_bonus"]
+        if ind_cfg.get("enabled", False) and industry_rank is not None:
+            rk = industry_rank.get(s.get("industry", ""))
+            ind_sig = max(0.0, (ind_top_n - rk) / ind_top_n) if (rk is not None and rk < ind_top_n) else 0.0
+            s["industry_signal"] = round(ind_sig, 2) if rk is not None else None
+            s["industry_bonus"] = round(ind_w * ind_sig, 1)
+            bonus += s["industry_bonus"]
         s["rank_score"] = round(float(s["score"]) + bonus, 1)
     return sorted(candidates, key=lambda x: -x["rank_score"])[:core_count]
 
@@ -328,6 +342,11 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     log.info(f"Universe: {len(universe)} tradable stocks")
 
     valuation_snapshot = fetch_valuation_snapshot(today)
+    n_twse = len(valuation_snapshot)
+    valuation_snapshot_tpex = fetch_valuation_snapshot_tpex()
+    if valuation_snapshot_tpex:
+        valuation_snapshot = {**valuation_snapshot_tpex, **valuation_snapshot}  # 股號不重複,TWSE/TPEx 互補(上櫃股不再恆缺估值)
+        log.info(f"Valuation snapshot merged: TWSE {n_twse} + TPEx {len(valuation_snapshot_tpex)}")
 
     # 大盤指數(相對強度用),整個 run 只抓一次
     index_df = fetch_index_history(days=400)
@@ -430,14 +449,18 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     # 候選池:基礎信心分最高的觸發股(略多於 core_count,讓 stage-2 加成能改變誰進核心);受 enrich_top_n 上限保護 API
     core_candidates = trigger_sorted[:max(cand_n, core_count)][:enrich_top_n]
 
+    # 產業排行(用全市場第一遍資料就能算,不需等 enrich)→ 同時供 stage-2 產業加成 + 熱門產業🔥標記
+    industry_trends = compute_industry_trends(industry_rows)
+    industry_rank = {t["industry"]: i for i, t in enumerate(industry_trends)}  # 0 = 最強產業
+
     # ---------- 第二遍:對核心候選 + 自選池補抓 FinMind 籌碼/財報 + 新聞催化劑(控制 API 額度) ----------
     # 觀察層只用評分階段已有的欄位,不補抓 → 把稀缺的 FinMind/LLM 額度留給真正要進場的核心候選。
     plan_cfg = (cfg.get("exit", {}), float(cfg.get("entry", {}).get("max_chase", 0.03)))
     for s in core_candidates:
         _enrich_pick(s, today, index_close, fundamentals=True, news=True, screen_cfg=cfg, plan_cfg=plan_cfg)
 
-    # stage-2 加成(籌碼/基本面/催化劑)後重排取核心;無資料 → 該項 bonus 0(中性不扣分);信心分 score 不變
-    core = _rank_core(core_candidates, scoring_cfg, core_count)
+    # stage-2 加成(籌碼/基本面/催化劑/產業相對強度)後重排取核心;無資料 → 該項 bonus 0(中性不扣分);信心分 score 不變
+    core = _rank_core(core_candidates, scoring_cfg, core_count, industry_rank)
     core_ids = {s["stock_id"] for s in core}
     watch = sorted(
         [s for s in scored if s["brewing"] and not s["trigger"]
@@ -445,7 +468,6 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         key=lambda x: -x["score"],
     )[:watch_count]
 
-    industry_trends = compute_industry_trends(industry_rows)
     hot_industries = [t["industry"] for t in industry_trends[:HOT_INDUSTRY_TOP_N]]
     hot_set = set(hot_industries)
     for s in core + watch:

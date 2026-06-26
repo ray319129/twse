@@ -43,6 +43,7 @@ def _load_core_picks() -> list[dict]:
                 "date": sig_date, "stock_id": sid, "name": p.get("name", ""),
                 "entry": float(entry), "score": p.get("score"), "profile": p.get("profile"),
                 "breakout": bool(p.get("breakout")), "pullback_turn": bool(p.get("pullback_turn")),
+                "catalyst_signal": p.get("catalyst_signal"),
             })
     seen = set(); uniq = []
     for p in picks:
@@ -114,21 +115,57 @@ def compute_entry_plan(df: pd.DataFrame, ref_idx: int, ref_price: float, style: 
             "trail_ma": int((exit_cfg.get(style, {}) or {}).get("trail_ma", 5 if style == "momentum" else 10))}
 
 
-def _net_return(entry: float, exit_price: float, cost_cfg: dict | None) -> float:
-    """扣交易成本後的真實報酬:買賣各收手續費(×折數)+滑價,賣出再收證交稅。"""
+def _net_return(entry: float, exit_price: float, cost_cfg: dict | None, hold_days: int | None = None) -> float:
+    """扣交易成本後的真實報酬:買賣各收手續費(×折數)+滑價,賣出再收證交稅。
+    證交稅預設一般稅率 0.3%;只有「進場與出場同一天」(hold_days==0,理論上才符合當沖定義)
+    且 config 設了 tax_rate_daytrade 時,才套用當沖減半稅率 0.15%(2027年底前)——
+    本系統設計是隔日開盤才進場,正常出場(hold_days≥1)本來就不是當沖,不能套用減半稅率。
+    """
     cost_cfg = cost_cfg or {}
     fee = float(cost_cfg.get("fee_rate", 0.001425)) * float(cost_cfg.get("fee_discount", 1.0))
-    tax = float(cost_cfg.get("tax_rate", 0.0015))
     slip = float(cost_cfg.get("slippage_pct", 0.0))
+    if hold_days == 0 and "tax_rate_daytrade" in cost_cfg:
+        tax = float(cost_cfg["tax_rate_daytrade"])
+    else:
+        tax = float(cost_cfg.get("tax_rate", 0.003))
     buy_cost = entry * (1 + slip) * (1 + fee)
     sell_proceeds = exit_price * (1 - slip) * (1 - fee - tax)
     return sell_proceeds / buy_cost - 1 if buy_cost else 0.0
 
 
+def compute_position_size(plan: dict | None, account_cfg: dict | None) -> dict | None:
+    """依帳戶資金 × 單筆風險% 反推建議張數(1張=1000股)— 把 R 倍數框架用完整。
+    research:倉位規模對績效變異的影響遠大於進場訊號本身(Van Tharp),但這系統原本只給價位線、沒給張數。
+    預設關閉(account.enabled=false);使用者填自己資金與風險%才會顯示,不填就不出現(不臆測)。
+    """
+    account_cfg = account_cfg or {}
+    if not account_cfg.get("enabled") or not plan or not plan.get("r_abs"):
+        return None
+    capital = float(account_cfg.get("capital", 0) or 0)
+    risk_pct = float(account_cfg.get("risk_pct", 0.01))
+    r_abs = float(plan["r_abs"])
+    if capital <= 0 or risk_pct <= 0 or r_abs <= 0:
+        return None
+    risk_budget = capital * risk_pct
+    lots = int(risk_budget // (r_abs * 1000))
+    ref = float(plan.get("ref") or 0)
+    return {
+        "capital": round(capital), "risk_pct": round(risk_pct * 100, 2),
+        "risk_budget_ntd": round(risk_budget),
+        "suggested_lots": lots,
+        "position_cost_ntd": round(lots * 1000 * ref) if (lots and ref) else 0,
+        "actual_risk_ntd": round(lots * 1000 * r_abs) if lots else 0,
+    }
+
+
 def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str,
-                   cfg: dict, max_chase: float = 0.03, cost_cfg: dict | None = None) -> dict | None:
+                   cfg: dict, max_chase: float = 0.03, cost_cfg: dict | None = None,
+                   catalyst_signal: float | None = None, catalyst_chase_cfg: dict | None = None) -> dict | None:
     """真實出場模擬:以「隔日開盤」進場(貼近實際,不是盤後收盤),並做跳空保護:
       - 隔日開盤較選股收盤高 > max_chase → 跳空棄單(不追高)
+        例外:有強催化劑(catalyst_signal ≥ min_catalyst_score)+ 進場當日帶量(量比 ≥ min_vol_ratio)時,
+        棄單門檻放寬到 max_chase+extra_chase(`entry.catalyst_chase`,預設關閉)——
+        研究顯示「有強催化劑的突破缺口」回補率遠低於無催化劑的缺口,值得放寬而非一律棄單。
       - 隔日開盤已跌破初始停損 → 跳空棄單(開低破停損)
     進場後:未達 TP1 前盤中破初始停損 / 收盤破均線出場;觸 TP1 啟動移動停利。
     exit_ret 已扣交易成本(手續費×2+證交稅+滑價,見 cost_cfg);exit_ret_gross 為扣成本前報酬,供對照。
@@ -169,16 +206,30 @@ def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str
             "init_stop": round(init_stop, 2), "tp1": round(tp1, 2),
             "r_pct": round(R / entry * 100, 2) if entry else None, "style": style}
 
-    if gap > max_chase:              # 跳空開高 → 不追(R:R 已破壞)
-        return {**base, "status": "skip", "reason": "跳空開高棄單", "exit_ret": None, "hold_days": 0}
-    if gap < -max_chase:             # 跳空開低過大 → 隔夜條件已變,棄單
+    if gap > max_chase:              # 跳空開高 → 預設不追(R:R 已破壞)
+        chased = False
+        cc = catalyst_chase_cfg or {}
+        if cc.get("enabled") and catalyst_signal is not None \
+                and catalyst_signal >= float(cc.get("min_catalyst_score", 0.5)) \
+                and gap <= max_chase + float(cc.get("extra_chase", 0.02)):
+            vol = df["volume"] if "volume" in df.columns else None
+            if vol is not None:
+                vol_ma5 = sma(vol, 5)
+                vma = vol_ma5.iloc[e]
+                vr = float(vol.iloc[e] / vma) if (pd.notna(vma) and vma) else None
+                if vr is not None and vr >= float(cc.get("min_vol_ratio", 1.5)):
+                    chased = True
+                    base["chased_catalyst"] = True
+        if not chased:
+            return {**base, "status": "skip", "reason": "跳空開高棄單", "exit_ret": None, "hold_days": 0}
+    if gap < -max_chase:             # 跳空開低過大 → 隔夜條件已變,棄單(無論催化劑都別接刀)
         return {**base, "status": "skip", "reason": "跳空開低棄單", "exit_ret": None, "hold_days": 0}
     if entry <= init_stop:           # 開盤已在停損價下 → 棄單
         return {**base, "status": "skip", "reason": "跳空開低破停損", "exit_ret": None, "hold_days": 0}
 
     def res(reason, price, hold, status="closed"):
         gross = float(price / entry - 1)
-        net = _net_return(entry, float(price), cost_cfg)
+        net = _net_return(entry, float(price), cost_cfg, hold_days=hold)
         return {**base, "status": status, "reason": reason,
                 "exit_ret": net, "exit_ret_gross": gross,
                 "cost_pct": round((gross - net) * 100, 2),
@@ -264,6 +315,7 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         as_of = date.today()
     exit_cfg = exit_cfg or {}
     max_chase = float((entry_cfg or {}).get("max_chase", 0.03))
+    catalyst_chase_cfg = (entry_cfg or {}).get("catalyst_chase", {})
 
     rows: list[dict] = []
     for p in picks:
@@ -271,7 +323,8 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         perf = _pick_perf(df, p["date"], p["entry"], as_of)
         if perf is None:
             continue
-        sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase, cost_cfg)
+        sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase, cost_cfg,
+                             catalyst_signal=p.get("catalyst_signal"), catalyst_chase_cfg=catalyst_chase_cfg)
         row = {**p, **perf, "exit": sim}
         # 機會成本測量:被「跳空開高棄單」的票,若當初照隔日開盤買進的前向表現(純量化,不改交易規則)
         if sim and sim.get("status") == "skip" and sim.get("gap") is not None and sim["gap"] > 0:
@@ -307,6 +360,7 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
     open_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "open")
     skip_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "skip")
     pending_n = sum(1 for r in rows if r.get("exit") and r["exit"]["status"] == "pending")
+    chased_n = sum(1 for r in rows if r.get("exit") and r["exit"].get("chased_catalyst"))
     cost_cfg = cost_cfg or {}
     exit_sim = {
         "method": "隔日開盤進場 + 跳空保護 + R 倍數 + 移動停利",
@@ -315,9 +369,12 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         "max_hold_days": int(exit_cfg.get("max_hold_days", 30)),
         "max_chase": round(max_chase * 100, 1),
         "closed": len(closed), "open": open_n, "skipped_gap": skip_n, "pending": pending_n,
+        "chased_catalyst": chased_n,
         "cost_included": bool(cost_cfg),
         "fee_rate": round(float(cost_cfg.get("fee_rate", 0.001425)) * float(cost_cfg.get("fee_discount", 1.0)) * 100, 4),
-        "tax_rate": round(float(cost_cfg.get("tax_rate", 0.0015)) * 100, 2),
+        "tax_rate": round(float(cost_cfg.get("tax_rate", 0.003)) * 100, 2),
+        "tax_rate_daytrade": (round(float(cost_cfg["tax_rate_daytrade"]) * 100, 2)
+                               if "tax_rate_daytrade" in cost_cfg else None),
         "slippage_pct": round(float(cost_cfg.get("slippage_pct", 0.0)) * 100, 2),
     }
     if closed:

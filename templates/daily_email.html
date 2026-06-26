@@ -109,7 +109,7 @@
   <div style="background:#fff; border:1px solid #e0b4b0; border-left:4px solid #c0392b; border-radius:6px; padding:10px 14px; margin-bottom:10px;">
     <div style="font-size:15px;font-weight:bold;">
       #{{ loop.index }} {% if s.hot_industry %}🔥{% endif %}{{ s.stock_id }} {{ s.name }} {{ profile_badge(s.profile) }}
-      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}{% if s.catalyst_bonus and s.catalyst_bonus > 0 %} <span style="color:#5e35b1;font-size:12px;">題材 +{{ s.catalyst_bonus }}</span>{% endif %}{% if s.fund_bonus and s.fund_bonus > 0 %} <span style="color:#2471a3;font-size:12px;">基本面 +{{ s.fund_bonus }}</span>{% endif %}</span>
+      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}{% if s.catalyst_bonus and s.catalyst_bonus > 0 %} <span style="color:#5e35b1;font-size:12px;">題材 +{{ s.catalyst_bonus }}</span>{% endif %}{% if s.fund_bonus and s.fund_bonus > 0 %} <span style="color:#2471a3;font-size:12px;">基本面 +{{ s.fund_bonus }}</span>{% endif %}{% if s.industry_bonus and s.industry_bonus > 0 %} <span style="color:#d35400;font-size:12px;">產業 +{{ s.industry_bonus }}</span>{% endif %}</span>
     </div>
     <div style="font-size:13px;color:#444;margin-top:3px;">
       收 {{ '%.2f'|format(s.close) }}
@@ -156,6 +156,9 @@
           <strong style="color:#27ae60;">TP1 {{ '%.2f'|format(p.tp1) }}</strong>(風險 {{ '%.1f'|format(p.risk_pct) }}R,1:2)·
           觸 TP1 後改移動停利(收盤跌破 {{ p.trail_ma }}MA 出清){% if p.tp1_resistance %} · <span style="color:#e67e22;">⚠TP1上方有壓</span>{% endif %}
           <br><span style="color:#888;">停損/TP1 請以<strong>實際成交價</strong>重算;部位用固定風險回推股數(別用固定股數)。</span>
+          {% if s.position %}
+          <br>💰 <strong>建議倉位</strong>:{{ s.position.suggested_lots }} 張(資金 {{ '{:,.0f}'.format(s.position.capital) }}×風險{{ s.position.risk_pct }}% = 風險預算 {{ '{:,.0f}'.format(s.position.risk_budget_ntd) }} 元;進場成本約 {{ '{:,.0f}'.format(s.position.position_cost_ntd) }} 元,實際風險約 {{ '{:,.0f}'.format(s.position.actual_risk_ntd) }} 元)
+          {% endif %}
         </div>
       </div>
     {% endif %}
@@ -269,8 +272,8 @@
     已實現勝率 <strong style="color:#16a085;">{{ es.win_rate }}%</strong> ·
     平均報酬(已扣成本) <span style="color: {% if es.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(es.avg_ret) }}%</span>{% if es.avg_ret_gross is defined %}<span style="color:#999;font-size:11px;">(扣前 {{ '%+.2f'|format(es.avg_ret_gross) }}%,成本 {{ '%.2f'|format(es.avg_cost_pct) }}%)</span>{% endif %} ·
     平均持有 {{ es.avg_hold_days }} 日 ·
-    <span style="color:#777;">出場:{% for k,v in es.reasons.items() %}{{ k }} {{ v }}%{% if not loop.last %} / {% endif %}{% endfor %} · 持有中 {{ es.open }} · <strong>跳空棄單 {{ es.skipped_gap }}</strong> · 待進場 {{ es.pending }}</span>
-    <div style="color:#999;font-size:11px;margin-top:3px;">以<strong>隔日開盤</strong>進場模擬(貼近實際):開高超過 {{ es.max_chase }}% 視為跳空棄單(不追)。動能流看 5MA、波段流看 20MA;突破 TP1 後移動停利。報酬已扣手續費 {{ es.fee_rate }}%×2 + 證交稅 {{ es.tax_rate }}% + 滑價 {{ es.slippage_pct }}%×2(可在 config cost 區塊調)。</div>
+    <span style="color:#777;">出場:{% for k,v in es.reasons.items() %}{{ k }} {{ v }}%{% if not loop.last %} / {% endif %}{% endfor %} · 持有中 {{ es.open }} · <strong>跳空棄單 {{ es.skipped_gap }}</strong> · 待進場 {{ es.pending }}{% if es.chased_catalyst %} · <span style="color:#8e44ad;">催化劑放寬進場 {{ es.chased_catalyst }}</span>{% endif %}</span>
+    <div style="color:#999;font-size:11px;margin-top:3px;">以<strong>隔日開盤</strong>進場模擬(貼近實際):開高超過 {{ es.max_chase }}% 視為跳空棄單(不追)。動能流看 5MA、波段流看 20MA;突破 TP1 後移動停利。報酬已扣手續費 {{ es.fee_rate }}%×2 + 證交稅 {{ es.tax_rate }}%(進出同日才用當沖減半稅率 {{ es.tax_rate_daytrade }}%)+ 滑價 {{ es.slippage_pct }}%×2(可在 config cost 區塊調)。</div>
   </div>
   {% endif %}
 

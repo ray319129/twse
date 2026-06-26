@@ -427,6 +427,7 @@ const $=(s,el=document)=>el.querySelector(s);
 const isNum=v=>v!==null&&v!==undefined&&v!==''&&!isNaN(v)&&isFinite(Number(v));
 const fmt=(v,d=2)=>!isNum(v)?'-':(v>=0?'+':'')+Number(v).toFixed(d);
 const num=(v,d=2)=>!isNum(v)?'-':Number(v).toFixed(d);
+const fmtInt=v=>!isNum(v)?'-':Math.round(Number(v)).toLocaleString('en-US');
 const cls=v=>!isNum(v)?'flat':(v>0?'up':v<0?'down':'flat');
 /* score / integer-ish numeric display: '-' when missing, no 'null'/'NaN' leak */
 const iv=(v,suffix='')=>!isNum(v)?'-':String(Number(v))+suffix;
@@ -676,8 +677,9 @@ function bars(s){
   const m=[['趨勢',s.trend],['強度',s.rs],['時機',s.setup],['品質',s.quality],['量能',s.liquidity]];
   return `<div class="bars">${m.map(([k,v])=>{const has=isNum(v);const pct=has?Math.max(0,Math.min(1,Number(v))):0;return `<span class="bar">${k} <span class="mb"><i style="width:${(pct*100).toFixed(0)}%"></i></span> <b>${has?Math.round(pct*100):'-'}</b></span>`;}).join('')}</div>`;
 }
-function planBox(p){
+function planBox(p,pos){
   if(!p) return '';
+  const posLine=pos?`<br>💰 <b>建議倉位</b>:${isNum(pos.suggested_lots)?pos.suggested_lots:'-'} 張(資金 ${fmtInt(pos.capital)}×風險${pos.risk_pct}% = 風險預算 ${fmtInt(pos.risk_budget_ntd)} 元;成本約 ${fmtInt(pos.position_cost_ntd)} 元,實際風險約 ${fmtInt(pos.actual_risk_ntd)} 元)`:'';
   return `<div class="plan">
     <div class="ph">🎯 明日進場決策卡 <span class="ref">· 昨收 ${num(p.ref)}</span></div>
     <table>
@@ -689,7 +691,7 @@ function planBox(p){
           <td>別接刀:需<b>站回開盤價 + 帶量吞噬</b>、大盤沒同步崩才試單;破停損 ${num(p.init_stop)} 則放棄。</td></tr>
     </table>
     <div class="foot">進場後:<span class="down" style="font-weight:800">停損 ${num(p.init_stop)}</span> · <span class="up" style="font-weight:800">TP1 ${num(p.tp1)}</span>(${num(p.risk_pct,1)}R · 1:2)· 觸 TP1 後移動停利(收盤破 ${isNum(p.trail_ma)?p.trail_ma:'—'}MA 出清)${p.tp1_resistance?' · <span style="color:var(--warn);font-weight:700">⚠ TP1 上方有壓</span>':''}
-      <span class="tiny">停損 / TP1 以實際成交價重算;部位用固定風險回推股數。</span>
+      <span class="tiny">停損 / TP1 以實際成交價重算;部位用固定風險回推股數。</span>${posLine}
     </div>
   </div>`;
 }
@@ -711,6 +713,7 @@ function whyPanel(s){
   if(isNum(s.chip_bonus)&&s.chip_bonus>0)bz.push(`籌碼 +${iv(s.chip_bonus)}(法人站買方)`);
   if(isNum(s.catalyst_bonus)&&s.catalyst_bonus>0)bz.push(`題材 +${iv(s.catalyst_bonus)}(新聞催化)`);
   if(isNum(s.fund_bonus)&&s.fund_bonus>0)bz.push(`基本面 +${iv(s.fund_bonus)}(財報加分)`);
+  if(isNum(s.industry_bonus)&&s.industry_bonus>0)bz.push(`產業 +${iv(s.industry_bonus)}(身處強勢產業)`);
   if(bz.length)pts.push('信心分加成:'+bz.join(' · '));
   if(s.catalysts&&s.catalysts.length){
     const ev=s.catalysts.filter(c=>c.evidence).map(c=>`<div class="ev">・<b>${esc(c.type)}</b>${isNum(c.confidence)?` ${Math.round(c.confidence*100)}%`:''}:<span style="color:var(--muted)">「${esc(c.evidence)}」</span></div>`).join('');
@@ -771,6 +774,7 @@ function coreCard(s,i){
   if(isNum(s.chip_bonus)&&s.chip_bonus>0)bonuses.push(`籌碼 +${iv(s.chip_bonus)}`);
   if(isNum(s.catalyst_bonus)&&s.catalyst_bonus>0)bonuses.push(`題材 +${iv(s.catalyst_bonus)}`);
   if(isNum(s.fund_bonus)&&s.fund_bonus>0)bonuses.push(`基本面 +${iv(s.fund_bonus)}`);
+  if(isNum(s.industry_bonus)&&s.industry_bonus>0)bonuses.push(`產業 +${iv(s.industry_bonus)}`);
   const bonusHtml=bonuses.map(b=>`<div class="chipb">${b}</div>`).join('');
   return `<div class="ccard">
     <div class="top">
@@ -779,7 +783,7 @@ function coreCard(s,i){
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
     </div>
-    ${kbars(s)}${bars(s)}${planBox(s.plan)}${cat}${tp}${rf}${chip}${val}${fund2}${whyPanel(s)}
+    ${kbars(s)}${bars(s)}${planBox(s.plan,s.position)}${cat}${tp}${rf}${chip}${val}${fund2}${whyPanel(s)}
   </div>`;
 }
 function renderCore(){
@@ -848,9 +852,9 @@ function renderPerf(){
   let stats='<div class="stats">';
   if(isNum(o.win_rate))stats+=`<div class="stat"><div class="v">${o.win_rate}%</div><div class="l">勝率(最新報酬)<br>總 ${isNum(o.total)?o.total:'-'} · <span class="up">賺 ${isNum(o.win)?o.win:'-'}</span> · <span class="down">賠 ${isNum(o.loss)?o.loss:'-'}</span></div></div>`;
   if(isNum(es.closed)&&es.closed>0){
-    stats+=`<div class="stat"><div class="v">${isNum(es.win_rate)?es.win_rate+'%':'-'}</div><div class="l">已實現勝率 · 平均(已扣成本) <span class="${cls(es.avg_ret)}">${fmt(es.avg_ret)}%</span>${isNum(es.avg_ret_gross)?` <span style="color:var(--muted-2)">(扣前${fmt(es.avg_ret_gross)}%)</span>`:''} · 持有 ${isNum(es.avg_hold_days)?es.avg_hold_days+'日':'-'}<br><span style="color:var(--muted-2)">隔日開盤進場 · 開高&gt;${isNum(es.max_chase)?es.max_chase:'-'}%棄單 · 停損-${isNum(es.hard_stop)?es.hard_stop:'-'}%/TP1=${isNum(es.r_multiple)?es.r_multiple:'-'}R · 含手續費${isNum(es.fee_rate)?es.fee_rate:'-'}%×2+稅${isNum(es.tax_rate)?es.tax_rate:'-'}%+滑價${isNum(es.slippage_pct)?es.slippage_pct:'-'}%×2</span></div></div>`;
+    stats+=`<div class="stat"><div class="v">${isNum(es.win_rate)?es.win_rate+'%':'-'}</div><div class="l">已實現勝率 · 平均(已扣成本) <span class="${cls(es.avg_ret)}">${fmt(es.avg_ret)}%</span>${isNum(es.avg_ret_gross)?` <span style="color:var(--muted-2)">(扣前${fmt(es.avg_ret_gross)}%)</span>`:''} · 持有 ${isNum(es.avg_hold_days)?es.avg_hold_days+'日':'-'}<br><span style="color:var(--muted-2)">隔日開盤進場 · 開高&gt;${isNum(es.max_chase)?es.max_chase:'-'}%棄單 · 停損-${isNum(es.hard_stop)?es.hard_stop:'-'}%/TP1=${isNum(es.r_multiple)?es.r_multiple:'-'}R · 含手續費${isNum(es.fee_rate)?es.fee_rate:'-'}%×2+稅${isNum(es.tax_rate)?es.tax_rate:'-'}%(同日出場才用當沖${isNum(es.tax_rate_daytrade)?es.tax_rate_daytrade:'-'}%)+滑價${isNum(es.slippage_pct)?es.slippage_pct:'-'}%×2</span></div></div>`;
     const rs=Object.entries(es.reasons||{}).map(([k,v])=>`${esc(k)} ${isNum(v)?v:'-'}%`).join(' · ');
-    stats+=`<div class="stat"><div class="v" style="font-size:15px;font-weight:700">${rs||'—'}</div><div class="l">出場原因 · 持有中 ${isNum(es.open)?es.open:0} · 跳空棄單 ${isNum(es.skipped_gap)?es.skipped_gap:0} · 待進場 ${isNum(es.pending)?es.pending:0}</div></div>`;
+    stats+=`<div class="stat"><div class="v" style="font-size:15px;font-weight:700">${rs||'—'}</div><div class="l">出場原因 · 持有中 ${isNum(es.open)?es.open:0} · 跳空棄單 ${isNum(es.skipped_gap)?es.skipped_gap:0} · 待進場 ${isNum(es.pending)?es.pending:0}${es.chased_catalyst?` · <span style="color:#8e44ad">催化劑放寬進場 ${es.chased_catalyst}</span>`:''}</div></div>`;
   }
   stats+='</div>';
 

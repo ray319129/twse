@@ -72,7 +72,7 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 - PE:`0<PE≤25→1`、`≤40→0.5`、`>40→0.1`
 - 殖利率:`clip01(殖利率/5%)`
 - PB:`0<PB≤3→1`、`≤6→0.5`、其餘 0.2
-- **沒有估值資料 → 給中性 0.5**(注意:估值快照只涵蓋上市;上櫃股常拿 0.5)。
+- **沒有估值資料 → 給中性 0.5**。2026-06-27 起估值快照已合併 TWSE(上市)+ TPEx(上櫃,[fetch_valuation_snapshot_tpex](scripts/fetchers.py)),上櫃股不再恆缺,只有兩邊都查無資料的極少數股票才會落到中性 0.5。
 
 ### 2.6 過熱重罰(exhausted)
 任一成立即 `raw × 0.55`([scoring.py:106-119](scripts/scoring.py)):
@@ -114,14 +114,15 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 [main.py](scripts/main.py)、參數 `config/screeners.yaml: ranking` + `scoring.chip_bonus`:
 1. **候選池** = `trigger 且 score ≥ min_score(45)` 依基礎信心分降序取前 `candidate_count(15)`(略多於核心數,受 `enrich_top_n` 上限保護 API)。
 2. **enrich**:對候選補抓 FinMind 籌碼/財報 + 算決策卡。
-3. **stage-2 重排**([`_rank_core`](scripts/main.py)):`rank_score = 信心分 + chip_bonus + fund_bonus + catalyst_bonus`(三項可各自開關)。
+3. **stage-2 重排**([`_rank_core`](scripts/main.py)):`rank_score = 信心分 + chip_bonus + fund_bonus + catalyst_bonus + industry_bonus`(四項可各自開關)。
    - **籌碼** `chip_bonus = weight(10) × chip_signal`;`chip_signal`(0~1)= 法人連買 / 30日外資持股變化 / 今日法人淨買 / 融券回補 四項平均。
    - **基本面** `fund_bonus = weight(5) × fundamental_score`([fundamentals.py](scripts/fundamentals.py)):毛利率/營益率/EPS正、月營收YoY/EPS YoY、負債比/營業現金流 三組平均(FinMind 季財報,快取新鮮就不重抓)。短線落後 → 低權重。
    - **新聞催化劑** `catalyst_bonus = weight(8) × catalyst_score`([catalyst.py](scripts/catalyst.py)):Claude Haiku 對近30天新聞做事件分類(新訂單/擴產/法說利多/AI/輝達·蘋果·Google供應鏈/政策·匯率受惠/產業轉機),強制 json_schema + evidence 引用防幻覺。**需 `ANTHROPIC_API_KEY`,沒設自動略過(bonus 0,不報錯)**。
-   - **任何一項無資料 → 該 bonus 0(中性、不扣分)**;`score`(信心分)語意不變,排名與「籌碼/題材/基本面 +X」顯示用 `rank_score` 與各 bonus。
+   - **產業相對強度**(2026-06-27 加,預設關閉)`industry_bonus = weight(4) × industry_signal`;`industry_signal` 依個股所屬產業在 [industry.py](scripts/industry.py) 排行的名次線性給分(第1名=1.0,第`top_n`名≈0,超出 top_n=0)。概念對應 IBD 產業群組排名,零額外 API(沿用全市場第一遍已算好的 `industry_rows`,計算時機已提前到 `_rank_core` 之前)。
+   - **任何一項無資料 → 該 bonus 0(中性、不扣分)**;`score`(信心分)語意不變,排名與「籌碼/題材/基本面/產業 +X」顯示用 `rank_score` 與各 bonus。
 4. **核心** = 候選依 `rank_score` 降序取前 `core_count(10)`(stage-2 加成可改變誰進核心)。
 5. **觀察** = `brewing 且 非 trigger 且 score ≥ 45 且 不在核心`,取前 `watch_count(20)`(觀察層不抓籌碼、不加成)。
-6. 熱門產業標記:產業近況排序取前 5,核心/觀察標 🔥。
+6. 熱門產業標記:產業近況排序取前 5,核心/觀察標 🔥(與 industry_bonus 共用同一份 `industry_trends` 排行,只是門檻/用途不同)。
 
 > 為何用 stage-2 而非全市場評分:FinMind 免費額度無法對 ~1900 檔抓籌碼,故先用免費資料選出候選,再用「已抓到的籌碼」決定誰進核心。`scoring.chip_bonus.enabled: false` 可關閉、回到純信心分排序。
 
@@ -144,6 +145,8 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 
 隔日開盤分 **A 平盤 / B 開高 / C 開低** 三劇本,盤中照表手動執行(盤前自動看盤會用這些線分類,見第 8 節)。
 
+**建議風險倉位**(2026-06-27 加,[track.py `compute_position_size`](scripts/track.py),預設關閉 `config: account`):資金 × 單筆風險% ÷ R(上面的初始停損價差)反推建議張數(1張=1000股)。把 R-multiple 框架用滿——研究指出倉位規模對績效變異的影響遠大於進場訊號本身,但系統原本只給價位線、沒給張數。要填 `account.capital`/`risk_pct` 並 `enabled: true` 才會在決策卡顯示「建議倉位」。
+
 ---
 
 ## 5. 出場模擬(R 倍數 + 移動停利)
@@ -151,14 +154,15 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 函式 [track.py:117 `_simulate_exit`](scripts/track.py),參數 `config: exit/entry`。算「真實已實現勝率」用:
 
 1. **進場 = 隔日開盤**(非選股日收盤),做跳空保護:
-   - 開盤較選股收盤高 > `max_chase(3%)` → **跳空開高棄單**
-   - 開盤低於 −max_chase,或開盤已 ≤ 初始停損 → **棄單/作廢**
+   - 開盤較選股收盤高 > `max_chase(3%)` → **跳空開高棄單**。例外(2026-06-27 加,`config: entry.catalyst_chase`,預設關閉):選股當天有強催化劑(`catalyst_signal ≥ min_catalyst_score`)+ 進場當日帶量(量比 ≥ `min_vol_ratio`)→ 門檻放寬到 `max_chase+extra_chase` 才棄單。查證顯示有強催化劑的突破缺口回補率遠低於無故跳空,值得放寬而非一律棄單;`exit.chased_catalyst` 標記這類例外進場的單。
+   - 開盤低於 −max_chase,或開盤已 ≤ 初始停損 → **棄單/作廢**(這側不論催化劑都不放寬,別接刀)
 2. 進場後,**未達 TP1 前**:盤中破初始停損 → 止損;收盤跌破均線(動能 5MA / 波段 20MA)→ 均線停損。
 3. **觸 TP1(高點 ≥ tp1)後啟動移動停利**:回檔幅度用 **ATR 自適應**(`1.5×ATR%`,夾在 3%~7%);收盤跌破移動均線(動能 5MA / 波段 10MA)出清。
 4. 同日同時觸停損與 TP1 → **保守假設先觸停損**(寧可低估獲利)。
 5. 風格分流:`profile=動能 或 breakout` → 動能流(停損緊、看 5MA);否則波段流(看 20MA)。
 6. 最長持有 `max_hold_days(30)`,到期以收盤出場。
 7. **已扣交易成本**(2026-06-27 加,`config: cost`):買賣各收一次手續費(`fee_rate×fee_discount`)+ 滑價,賣出再收證交稅;`exit_ret` 為扣成本後淨報酬,`exit_ret_gross`/`cost_pct` 保留扣前報酬與成本佔比供對照。函式 [track.py `_net_return`](scripts/track.py)。
+   - ⚠️ **稅率修正(同日)**:查證後發現「當沖證交稅減半0.15%」只適用同日買賣且需另外申請當沖權限。本系統設計是隔日開盤才進場,正常出場(`hold_days≥1`)本來就不是當沖,**`tax_rate` 預設改回一般稅率 0.3%**;新增 `tax_rate_daytrade(0.0015)`,只有 `hold_days==0`(進場當天就出場)才套用,且系統無法驗證帳戶當沖資格,當作邊際近似值,別當成全面適用的真實稅率。
 
 ---
 
@@ -209,9 +213,12 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 | `scoring.chip_bonus` | **(新)** enabled / candidate_count 15 / weight 10 / streak_full / foreign_full / short_cover_thr — 核心候選的籌碼 stage-2 重排 |
 | `scoring.fundamental_bonus` | **(新)** enabled / weight 5 / gross_full / operating_full / revenue_yoy_full / eps_yoy_full / debt_good / debt_bad — FinMind 季財報基本面 |
 | `scoring.catalyst_bonus` | **(新)** enabled / weight 8 / model(haiku) / max_news / full / weights — Claude 新聞催化劑(需 ANTHROPIC_API_KEY) |
+| `scoring.industry_bonus` | **(2026-06-27 加,預設關閉)** enabled / weight 4 / top_n 5 — 身處當下最強產業前 top_n 名才加分 |
 | `entry` | max_chase **3%**(隔日開盤追價上限) |
+| `entry.catalyst_chase` | **(2026-06-27 加,預設關閉)** enabled / extra_chase 0.02 / min_catalyst_score 0.5 / min_vol_ratio 1.5 — 強催化劑+帶量時放寬開高棄單門檻 |
 | `exit` | hard_stop **7%** / r_multiple **2.0** / max_hold_days 30 / momentum{struct_lookback 2, ma_stop 5, trail_ma 5} / swing{10,20,10} / trail{atr_mult 1.5, min 3%, max 7%} |
-| `cost` | **(新)** fee_rate 0.1425% / fee_discount 0.6 / tax_rate 0.15% / slippage_pct 0.1% — 出場模擬扣交易成本用,依自己券商折數調 |
+| `cost` | **(2026-06-27 加,同日修正稅率)** fee_rate 0.1425% / fee_discount 0.6 / **tax_rate 0.3%(一般證交稅)** / tax_rate_daytrade 0.15%(僅 hold_days==0)/ slippage_pct 0.1% |
+| `account` | **(2026-06-27 加,預設關閉)** enabled / capital 0 / risk_pct 0.01 — 建議風險倉位(資金×風險%÷R反推張數) |
 | `leading` | 四個領先訊號的 lookback/門檻(僅標籤用) |
 | `premarket` | gate 門檻 / orb(15分,09:30,帶量) / adr 對照表 |
 
@@ -221,11 +228,11 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 
 **A. ✅ 已完成:信心分參數已全部抽進 `config/screeners.yaml` 的 `scoring:` 區塊**(權重、相對強度映射、動能、量能、過熱門檻、突破/回測、醞釀、風格)。預設值 = 原硬寫值(已驗證 12/12 檔分數不變)。現在可純靠改 config 系統化調參。
 
-**B. 品質面向偏弱**:無估值就給 0.5;上櫃股估值快照常缺 → 大量股票品質固定 0.5,15% 權重等於半失效。可考慮上櫃估值來源,或無資料時降權而非給 0.5。
+**B. ✅ 2026-06-27 已完成:品質面向上櫃股缺估值** — 補接 [TPEx 上櫃估值 API](scripts/fetchers.py)(`fetch_valuation_snapshot_tpex`),不再恆給中性 0.5。
 
-**C. 面向之間可能重疊/雙算**:`setup` 的 mom(10日漲幅)與「過熱罰」(5日22%)方向相反互相拉扯;trend 與 rs 也部分相關。可檢查是否造成「漲多的分數先被加再被罰」。
+**C. 面向之間可能重疊/雙算**:`setup` 的 mom(10日漲幅)與「過熱罰」(5日22%)方向相反互相拉扯;trend 與 rs 也部分相關。可檢查是否造成「漲多的分數先被加再被罰」。研究上「分位數排名取代絕對門檻」(Stockopedia StockRank 式)能緩解這個問題,但屬架構級改動,要等真實績效資料驗證現有面向後才該做(見H項)。
 
-**D. 出場未扣成本**:勝率/報酬偏樂觀(HANDOFF 第一待辦)。在驗證 edge 前,所有勝率都要打折看。
+**D. ✅ 2026-06-27 已完成:出場已扣成本**(見第5節),且同日修正了證交稅率假設(0.15%→0.3%一般稅率)。
 
 **E. breakout 用「收盤」近20日高、量比對的是 5日均量**:可考慮改用「最高價」突破與對 20 日均量,定義更嚴謹。
 
@@ -239,6 +246,8 @@ raw = 100 × (0.25·趨勢 + 0.25·相對強度 + 0.25·時機量能 + 0.15·品
 
 ### 建議的優化順序(個人觀點)
 1. ~~把 scoring 的硬寫參數抽進 config~~ ✅ 已完成。
-2. ~~出場加交易成本~~ ✅ 已完成(2026-06-27)。
-3. 累積 1~2 個月實單/紙上績效後,用「哪種 profile / 分數區間 / 觸發型態真有 edge」回調權重(A、C、G)。
-4. 再處理品質面向(B)與大盤環境納入(F)。
+2. ~~出場加交易成本~~ ✅ 已完成(2026-06-27,同日修正稅率)。
+3. ~~品質面向上櫃股缺估值(B)~~ ✅ 已完成(2026-06-27)。
+4. ~~建議風險倉位 / 跳空棄單分級 / 產業相對強度加成~~ ✅ 已完成(2026-06-27,皆預設關閉,需手動開)。
+5. 累積 1~2 個月實單/紙上績效後,用「哪種 profile / 分數區間 / 觸發型態真有 edge」回調權重(C、G);也才能驗證新加的三個關閉中功能該不該開。
+6. 再處理大盤環境納入(F)、絕對門檻→分位數排名重構(架構級,需先有真實績效資料)。
