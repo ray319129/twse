@@ -7,7 +7,9 @@
 ---
 
 ## 0. 一句話定位
-盤後在 **GitHub Actions** 自動跑的台股**短線**(隔日沖/隔週/月內)選股系統:全市場用免費資料算 0~100 信心分 → 排序出「核心 10 + 觀察 20」→ 寄 Email + 更新互動網頁(GitHub Pages),並**自動追蹤每檔選股後續績效**(含止盈止損出場模擬)。完全免費、無自有伺服器。
+盤後在 **GitHub Actions** 自動跑的台股**短線**(隔日沖/隔週/月內)選股系統:全市場用免費資料算 0~100 信心分 → 排序出「核心 10 + 觀察 20」→ 寄 Email + 更新互動網頁(GitHub Pages),並**自動追蹤每檔選股後續績效**(含止盈止損出場模擬)。完全免費、無自有伺服器(2026-06-30 起多一層**選用**的 Vercel serverless,見第 10 節,不影響原本完全免費的批次流程)。
+
+**2026-06-30 新增「個股健檢」模組**(`scripts/health/`):財務體質/成長能力/估值分析/風險分析/技術面/籌碼分析/新聞分析七個 Engine,可解釋(每個數字附公式/來源/更新時間)、可換投資風格權重,見第 10 節。
 
 使用者(Ray)是**短線交易者**,用富邦證券。重點訴求:不要追高、要能驗證勝率、視覺要現代化。
 
@@ -42,8 +44,9 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 - `scripts/{config,industry,notify,utils}.py`、`templates/daily_email.html`、`docs/index.html`(SPA)。
   - `docs/index.html` 前端輔助(2026-06-26 加):`slink(id)` 把股票代號(全分頁)做成連結 → `cmoney.tw/forum/stock/<代號>`(新分頁看走勢/技術線圖);`whyPanel(s)` 核心卡可摺疊「為什麼選這檔(解讀)」,把信心分五維(`s.trend/rs/setup/quality/liquidity`)+stage-2 加成+題材 `evidence`+`risk_flags` 翻成白話,**純用既有資料、零 API**。改 SPA 後務必 `node --check`(抽 `<script>` 驗語法)。
 - **盤前自動看盤(獨立於盤後,見第 9 節)**:`scripts/premarket.py`、`templates/premarket_email.html`、`.github/workflows/premarket.yml`;輸出 `docs/premarket.json`,網頁「盤中即時」分頁讀它。
+- **個股健檢(2026-06-30 新增,獨立於盤後排序,見第 10 節)**:`scripts/health/`(9 個 Engine + orchestrator)、`api/health.py`(Vercel 即時查詢,選用)、`vercel.json`、`VERCEL_SETUP.md`;輸出 `docs/health/{代號}.json` + `docs/health/index.json` + `docs/health/industry_benchmarks.json`,網頁「個股健檢」分頁讀它。
 - `config/screeners.yaml` — 所有可調參數(見下)。
-- `data/` — prices/、signals/{date}.json、performance.json、meta/。`docs/` — data.json、dates.json、history/{date}.json。
+- `data/` — prices/、signals/{date}.json、performance.json、meta/、health/(同業平均彙總)。`docs/` — data.json、dates.json、history/{date}.json、health/(個股健檢報告)。
 
 ### config/screeners.yaml 可調區塊
 - `ranking`: core_count 10 / watch_count 20 / min_score 45 / min_dollar_volume 3000萬 / enrich_top_n 30
@@ -54,6 +57,7 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 - `exit`: hard_stop 0.07 / r_multiple 2.0 / max_hold_days 30 / momentum{struct_lookback 2, ma_stop 5, trail_ma 5} / swing{10,20,10} / trail{atr_mult 1.5, min_pct .03, max_pct .07}
 - `cost`(交易成本,2026-06-27 加,2026-06-27 同日修正稅率): fee_rate 0.001425×fee_discount 0.6 / **tax_rate 0.003(一般證交稅)** / tax_rate_daytrade 0.0015(僅 hold_days==0 才用)/ slippage_pct 0.001
 - `account`(建議風險倉位,2026-06-27 加,預設關閉): enabled false / capital 0 / risk_pct 0.01
+- `health`(個股健檢,2026-06-30 加,見第 10 節): enabled true / quarters 20 / per_history_days 1825 / weights.{value_investing,growth_investing,short_term} / risk_cap / news / ai_summary / industry_min_sample
 
 ---
 
@@ -160,3 +164,47 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 
 ### 下一步(承第 6 節 #3)
 盤前 MVP 已涵蓋 A 的自動觸發;真正的盤中逐筆執行層(富邦 API 即時報價、B/C 的回測/吞噬自動判、半自動下單)仍是獨立大專案。可先補:台指夜盤接進閘門(FinMind/TAIFEX 隔夜檔);觀察層也納入盤前。
+
+---
+
+## 10. 個股健檢(Stock Health)— 2026-06-30 新增,獨立模組
+
+> 設計方案全文(架構決策的「為什麼」、各 Engine 公式細節、Tier1/Tier2 誠實邊界)見對話留存的設計文件;這裡只記實作現況與接續開發要點。`specs/07_stock_health.md` 有完整面向/公式速查表。
+
+### 一句話定位
+不是只給分數,是回答「這家公司現在值不值得投資」。9 個獨立 Engine(財務體質/成長能力/估值分析/風險分析/技術面/籌碼分析/新聞分析/AI解讀/Final Scoring)+ 可解釋的 Metric 契約(每個數字都附公式/來源/asof/更新時間/缺資料原因),總分依「價值投資/成長投資/短線交易」三組可切換權重,Risk 命中 Critical 規則時總分強制封頂(不是平均稀釋掉)。
+
+### 雙路徑架構
+- **路徑 A(批次,免費,核心+自選池)**:`scripts/main.py daily_run()` 在既有 stage-2 enrichment 之後,對核心10+自選池呼叫 `scripts/health/engine.py: build_ctx_batch()` + `compute_stock_health()`,寫 `docs/health/{代號}.json` + `docs/health/index.json`(manifest)。同時用 `scripts/health/industry_benchmark.py` 掃描本地已累積的 `data/financials|balance/*.parquet`(吃核心榜每天輪動的副產品,零額外 API)彙總同業平均,寫 `data/health/industry_benchmarks.json` 並複製一份到 `docs/health/`(供路徑 B 讀取)。
+- **路徑 B(即時,選用,任意代號)**:`api/health.py`(Vercel Python Serverless Function)reuse 同一套 `scripts/health/*` 引擎,平行抓取(ThreadPoolExecutor)後現抓現算,**不依賴本地 parquet 累積**(serverless 無持久磁碟)。預設**未啟用**——需照 [VERCEL_SETUP.md](VERCEL_SETUP.md) 部署,並把 `docs/index.html` 的 `HEALTH_API_ENABLED` 改 `true` 才會在前端被呼叫。沒部署也完全不影響路徑 A 正常運作。
+
+### 檔案地圖
+- `scripts/health/metric.py` — 可解釋性資料契約(`metric()`/`engine_result()`),所有 Engine 共用。
+- `scripts/health/quarterly.py` — 季資料存取小工具(`last`/`at`/`yoy`/`qoq`/`trend`/`ratio`/`cagr`/`consecutive`),financial/growth/risk 三個 Engine 共用,避免重複造輪子。
+- `scripts/health/{financial,growth,value,risk,technical,chip,news}_engine.py` — 七個面向,各自 `compute(ctx) -> engine_result`。
+- `scripts/health/ai_summary.py` — 規則產生事實句(零成本),LLM 只負責潤飾語句(prompt 強制不能新增數字/結論),沒 `ANTHROPIC_API_KEY` 自動降級成純規則句。
+- `scripts/health/industry_benchmark.py` — 同業平均彙總(吃本地已累積快取,零額外 API)。
+- `scripts/health/scoring.py` — Final Scoring Engine:三組投資風格權重、Risk Critical 封頂、星等診斷、Swing Score(當沖/隔日沖/波段/中長線適合度)。
+- `scripts/health/engine.py` — Orchestrator/Registry(`ENGINES` dict)+ `build_ctx_batch()`(批次路徑專用的額外資料補抓:20季財報、長窗PE/PB、持股分散表)。
+- `api/health.py` + `vercel.json` + `VERCEL_SETUP.md` — 路徑 B。
+- `docs/index.html` 新分頁「個股健檢」:搜尋框 + 健康總分(沿用既有 `donut()`)+ 雷達圖(純 SVG,新函式 `healthRadar()`)+ 風險燈號 + AI 解讀 + 投資風格切換(純前端重算,不重打 API)+ 短線評估 + 選配 DCF + 泛型 Engine 卡片(`engineCard()`/`metricRow()`,新增 Engine 不必改前端)。
+
+### 這次順手擴充的既有檔案(都是新增欄位/防護,沒改既有行為)
+- `scripts/fetchers.py`:`_BS_TYPES`/`_CF_TYPES`/`_FS_TYPES` 新增流動資產/流動負債/存貨/應收帳款/現金/短期長期借款/折舊攤銷/利息費用欄位(候選名稱**未實測驗證**,缺資料時對應指標自動標 missing,不影響既有 `fundamental_bonus`);新增 `fetch_holder_distribution()`(集保庫存股權分散表,大戶持股/股東人數,欄位名稱同樣未實測驗證);`fetch_news()` 新增 `published_date` 欄位(feedparser 已解析好的日期,供新聞 7/30/90 天分桶,**不影響**既有 `catalyst.py` 用法)。
+- `scripts/storage.py`:`_upsert()`/`upsert_revenue()` 寫入失敗(唯讀檔案系統,Vercel 會踩到)改成只記警告、不拋例外(`_try_write_parquet`),批次路徑(正常有寫入權限)行為不變。
+- `scripts/indicators.py`:新增 `adx()`(獨立函式,不進 `compute_all()` 既有輸出欄位,零風險)。
+- `config/screeners.yaml`:新增 `health:` 區塊。
+
+### ⚠️ 還沒做 / 已知限制(誠實列出,別假裝做完了)
+1. **這次只做到本機合成資料驗證**,沒有真實 FinMind token 跑過完整一次(離線測試全程 monkeypatch 掉 FinMind 呼叫)。**下次排程實際跑、或本機餵真 token 跑一次 `--date`**,務必檢查:`_BS_TYPES`/`_CF_TYPES` 新增的候選欄位名稱(current_assets/current_liab/inventory/accounts_receivable/cash/short_term_debt/long_term_debt/depreciation_amortization/interest_expense)有沒有命中 FinMind 實際回傳的 type 名稱——命中失敗就只是該指標顯示「資料不足」,不會讓流程當掉,但價值/財務/風險面向會比預期空。
+2. **`fetch_holder_distribution()` 解析的 `TaiwanStockHoldingSharesPer` 真實欄位 schema 同樣未驗證**,大戶持股/股東人數兩項可能一開始是空的,需要拿真實 API 回應核對 `level_col`/`people_col`/`pct_col` 候選名單。
+3. **DCF/EV-EBITDA** 屬於假設密集型,刻意不計入分數,公式/假設已攤開在 `value_engine.py`/前端,但沒有拿真實財報數字驗證過合理性。
+4. **Tier 2 風險(董監質押/重大違約/重大減資/財報重編)** 仍是「沒有確認可行的免費資料源」狀態,只能靠新聞最佳努力涵蓋——別在未來對話裡講成「已經在監控」。
+5. **Vercel 即時路徑(api/health.py)只做過 monkeypatch 過的本機邏輯測試**,從沒真的 `vercel deploy` 過,也沒驗證過 serverless function 的實際 bundle 體積會不會超過平台上限(reuse 了含 yfinance 的整包 `scripts/`)——`VERCEL_SETUP.md` 已誠實列出這個風險,要部署的人務必先試跑一次再依賴它。
+6. **權重數字(三組投資風格、各 Tier1 風險規則的 penalty 分數)都是設計時的合理猜測**,沒有用真實績效回頭驗證過,跟 `compute_conviction` 當初的態度一樣:先讓系統能跑、能解釋,**累積真實資料後再回頭調參數**,不要假裝這組權重已經調優。
+
+### 下一步建議
+1. 排程實際跑一次(或本機用真 `FINMIND_TOKEN` 跑 `--date`),核對上面 ⚠️ #1/#2 的欄位命中狀況,修正 `_BS_TYPES`/`_CF_TYPES`/`fetch_holder_distribution` 的候選名稱。
+2. 觀察 `docs/health/*.json` 實際內容,確認 Financial/Growth/Value 面向不是恆缺資料。
+3. 想要任意代號即時查再做 Vercel 部署(`VERCEL_SETUP.md`),非必要功能,路徑 A 已經可獨立運作。
+4. 累積一段時間後,比照 `STRATEGY.md` 對信心分的態度,回頭檢視三組投資風格權重與 Tier1 風險規則門檻是否合理。

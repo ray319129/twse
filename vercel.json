@@ -1,0 +1,8 @@
+{
+  "outputDirectory": "docs",
+  "functions": {
+    "api/health.py": {
+      "maxDuration": 60
+    }
+  }
+}

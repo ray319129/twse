@@ -285,6 +285,38 @@ premarket:
     "2317": HNHPF           # 鴻海(OTC ADR,流動性偏低)
     "2409": AUOTY           # 友達
 
+# ★ 個股健檢(Stock Health)— 2026-06-30 新增。獨立模組(scripts/health/),只對「核心+自選池」
+# (與既有 stage-2 enrichment 同一份名單,零額外 API 預算風險)每日批次算好,寫 docs/health/{代號}.json。
+# 任意代號即時查由 Vercel serverless(api/health.py)另外處理,讀同一套 scripts/health 引擎,
+# 共用這份 config(單一事實來源,財務公式不會「批次一套、即時一套」)。
+health:
+  enabled: true
+  quarters: 20              # 季財報抓取季數(5年CAGR需≥20季;比既有 fundamental_bonus 的8季長,逐日累積)
+  per_history_days: 1825    # PE/PB/殖利率歷史窗(天),供 Value Engine 百分位/合理價估算
+  # 三組投資風格的權重(財務/成長/估值/風險/技術/籌碼/新聞,總和不強制=100,Final Scoring 會用
+  # 「有資料的面向權重」重新正規化)。前端可即時切換,純前端加權重算,不必重打 API。
+  weights:
+    value_investing:    {financial: 30, growth: 10, value: 30, risk: 20, technical: 5,  chip: 0,  news: 5}
+    growth_investing:   {financial: 20, growth: 30, value: 10, risk: 15, technical: 15, chip: 5,  news: 5}
+    short_term:          {financial: 5,  growth: 5,  value: 0,  risk: 15, technical: 35, chip: 25, news: 15}
+  # Risk Engine 命中 Critical 規則時,無論其他面向多高,總分強制封頂(唯一不走加權平均的例外)。
+  risk_cap:
+    Critical: 40.0
+  # 健檢新聞分析(scripts/health/news_engine.py):逐則新聞標記,90天視窗,單次 Haiku 呼叫
+  # (與既有 scoring.catalyst_bonus 的 catalyst.py 是「不同schema、不同用途」的獨立呼叫,
+  # 不是同一支,需 ANTHROPIC_API_KEY,沒設自動降級成 score=None)。
+  news:
+    model: claude-haiku-4-5
+    max_news: 60
+    max_tokens: 1600
+  # AI 解讀潤飾(scripts/health/ai_summary.py):規則先產生事實句,LLM 只能重組句子,
+  # 不能新增數字/結論(prompt 強制),沒有 API key 自動降級成純規則句。
+  ai_summary:
+    model: claude-haiku-4-5
+    max_tokens: 400
+  # 同業平均彙總(scripts/health/industry_benchmark.py)的最小樣本數,< 此一律不顯示同業平均。
+  industry_min_sample: 3
+
 # 多訊號交集組合
 combos:
   - name: 主升段啟動

@@ -69,7 +69,12 @@ def fetch_stock_info(force: bool = False) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     # FinMind returns columns: industry_category, stock_id, stock_name, type, date
     # type: 'twse' = 上市, 'tpex' = 上櫃
-    df.to_parquet(cache, index=False)
+    try:
+        df.to_parquet(cache, index=False)
+    except Exception as e:
+        # 唯讀檔案系統(個股健檢即時查詢路徑跑在 Vercel serverless 會踩到)→ 只記錄,
+        # 仍回傳這次抓到的資料,不影響呼叫端。
+        log.warning(f"stock_info cache 寫入失敗(唯讀檔案系統?略過快取):{e}")
     return df
 
 
@@ -281,6 +286,64 @@ def fetch_chips_history(stock_id: str, start: date, end: date) -> pd.DataFrame:
 fetch_institutional_history = fetch_chips_history
 
 
+# ---------- FinMind 集保庫存股權分散表(大戶持股 / 股東人數)— 個股健檢 Chip Engine 用,2026-06-30 ----------
+
+def _parse_level_lower_bound(level: str) -> float | None:
+    """'400,001-1,000,000' / '1,000,001以上' 之類的級距字串 → 取下界數字(股數)。
+    解析失敗回 None。用『取數字下界』而非比對完整字串,對 FinMind 格式微調較不脆弱。"""
+    import re
+    if not isinstance(level, str):
+        return None
+    m = re.search(r"[\d,]+", level)
+    if not m:
+        return None
+    try:
+        return float(m.group(0).replace(",", ""))
+    except ValueError:
+        return None
+
+
+def fetch_holder_distribution(stock_id: str, start: date, end: date,
+                              big_holder_floor_shares: float = 400_000) -> pd.DataFrame:
+    """集保庫存股權分散表(TaiwanStockHoldingSharesPer):依持股級距回傳大戶持股比例與股東人數。
+    big_holder_floor_shares 預設 40 萬股(=400張,籌碼圈慣用的「大戶」門檻)。
+
+    回傳 DataFrame(index=date):
+        big_holder_pct      該日級距下界 >= big_holder_floor_shares 的 percent 加總
+        shareholders_total   該日所有級距 people 加總(股東人數)
+
+    FinMind 此資料集欄位名稱未經本機實測驗證(可行性研究見專案文件);任何一步解析失敗
+    就回傳空 DataFrame,呼叫端(chip_engine)需把它當「可能缺資料」處理,不可假設必有值。
+    """
+    rows = fetch_finmind(
+        "TaiwanStockHoldingSharesPer", data_id=stock_id,
+        start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    level_col = next((c for c in ("HoldingSharesLevel", "holding_shares_level") if c in df.columns), None)
+    people_col = next((c for c in ("people", "People", "HoldingSharesPeople") if c in df.columns), None)
+    pct_col = next((c for c in ("percent", "Percent", "HoldingSharesPercent") if c in df.columns), None)
+    if not level_col or not pct_col:
+        return pd.DataFrame()
+    df["_lower"] = df[level_col].apply(_parse_level_lower_bound)
+    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+    df["percent"] = pd.to_numeric(df[pct_col], errors="coerce")
+    if people_col:
+        df["people"] = pd.to_numeric(df[people_col], errors="coerce")
+
+    # 避免 groupby().apply 在不同 pandas 版本(本專案曾遇 2.x/3.0 混跑)行為不一致,
+    # 改用純 groupby().sum() 向量化聚合。
+    all_dates = pd.Index(sorted(df["date"].unique()), name="date")
+    out = pd.DataFrame(index=all_dates)
+    big = df.loc[df["_lower"] >= big_holder_floor_shares].groupby("date")["percent"].sum()
+    out["big_holder_pct"] = big.reindex(all_dates).fillna(0.0)
+    if people_col:
+        out["shareholders_total"] = df.groupby("date")["people"].sum().reindex(all_dates)
+    return out.sort_index()
+
+
 # ---------- FinMind fundamentals (monthly revenue, EPS, PER/yield) ----------
 
 def fetch_monthly_revenue(stock_id: str, months: int = 18) -> pd.DataFrame:
@@ -368,17 +431,32 @@ _FS_TYPES = {
     "net_income": ("IncomeAfterTaxes", "ProfitAfterTax", "NetIncome", "ProfitLoss",
                    "IncomeAfterTax", "NetIncomeLoss"),
     "eps": ("EPS", "BasicEarningsPerShare", "EarningsPerShare"),
+    # 個股健檢(利息保障倍數)新增,2026-06-30。候選名稱未實測驗證,缺資料時 interest_expense
+    # 會是 None(健檢模組自動跳過該指標,不影響其他面向),不影響既有 fundamental_bonus 流程。
+    "interest_expense": ("InterestExpense", "FinanceCosts", "InterestExpenseNet"),
 }
 _BS_TYPES = {
     "total_assets": ("TotalAssets",),
     "total_liab": ("TotalLiabilities", "Liabilities"),
     "equity": ("Equity", "TotalEquity", "EquityAttributableToOwnersOfParent", "TotalEquityAndLiabilities"),
+    # 個股健檢新增,2026-06-30(流動比/速動比/應收應付異常/EV 用)。候選名稱未實測驗證,
+    # 缺資料時對應指標回 None(健檢 Metric 契約的 missing_reason),不影響既有信心分流程。
+    "current_assets": ("CurrentAssets",),
+    "current_liab": ("CurrentLiabilities",),
+    "inventory": ("Inventories", "Inventory"),
+    "accounts_receivable": ("AccountsReceivableNet", "NotesAccountsReceivableNet", "AccountsReceivable"),
+    "cash": ("CashAndCashEquivalents", "Cash"),
+    "short_term_debt": ("ShortTermBorrowings", "ShortTermLoans"),
+    "long_term_debt": ("LongTermBorrowings", "BondsPayable", "LongTermLoansPayable"),
 }
 _CF_TYPES = {
     "op_cashflow": ("CashFlowsProvidedFromOperatingActivities", "CashFlowsFromOperatingActivities",
                     "NetCashProvidedByOperatingActivities", "CashProvidedByOperatingActivities"),
     "invest_cashflow": ("CashFlowsProvidedFromInvestingActivities", "CashFlowsFromInvestingActivities"),
     "capex": ("AcquisitionOfPropertyPlantAndEquipment", "PaymentsToAcquirePropertyPlantAndEquipment"),
+    # 個股健檢新增,2026-06-30(EV/EBITDA 用)。
+    "depreciation_amortization": ("DepreciationAmortizationExpense", "DepreciationDepletionAndAmortisation",
+                                   "DepreciationAndAmortisationExpenseContinuingOperations"),
 }
 
 
@@ -676,10 +754,21 @@ def fetch_news(stock_id: str, name: str, limit: int = 10) -> list[dict]:
         return []
     items = []
     for e in feed.entries[:limit]:
+        # published_parsed 是 feedparser 已解析好的 time.struct_time,比自己再 parse
+        # 原始 RFC822 字串(如 catalyst.py 舊作法 [:16] 截字串)可靠;個股健檢 News Engine
+        # 要把新聞按 7/30/90 天分桶,需要這個乾淨日期。失敗就留 None,不影響既有 published 欄位。
+        published_date = None
+        pp = getattr(e, "published_parsed", None)
+        if pp:
+            try:
+                published_date = date(pp.tm_year, pp.tm_mon, pp.tm_mday).isoformat()
+            except Exception:
+                published_date = None
         items.append({
             "title": getattr(e, "title", ""),
             "link": getattr(e, "link", ""),
             "published": getattr(e, "published", ""),
+            "published_date": published_date,
             "source": getattr(getattr(e, "source", None), "title", ""),
         })
     return items

@@ -2,6 +2,7 @@
 
 > 本文描述「**實際在跑的程式邏輯**」(以 code 為準,非舊 spec 理想)。對照 commit 以 `git log` 為準。
 > 數值若與 `config/screeners.yaml` 不同,**以 config 為準**;標「(硬寫)」者代表寫死在 `.py`、目前不可由 config 調(見第 10 節)。
+> 本文只涵蓋「短線信心分排序」這套邏輯。**個股健檢**(財務/成長/估值/風險/技術/籌碼/新聞七面向可解釋分析,獨立模組、不影響本文任何邏輯)另見 [specs/07_stock_health.md](specs/07_stock_health.md) 與 [HANDOFF.md](HANDOFF.md) 第 10 節。
 
 ---
 

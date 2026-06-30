@@ -22,17 +22,27 @@ def _normalize_index(df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_index()
 
 
+def _try_write_parquet(df: pd.DataFrame, path: Path) -> None:
+    """寫入失敗(例如 Vercel serverless 唯讀檔案系統,個股健檢即時查詢路徑會踩到)
+    只記錄、不拋例外 —— 呼叫端永遠拿得到記憶體內算好的 DataFrame,只是這次沒能落地快取。"""
+    try:
+        df.to_parquet(path)
+    except Exception as e:
+        import logging
+        logging.getLogger("twse").warning(f"parquet 寫入失敗(唯讀檔案系統?略過快取):{path.name}: {e}")
+
+
 def _upsert(path: Path, new_df: pd.DataFrame, loader) -> pd.DataFrame:
     if new_df.empty:
         return loader(path)
     cur = loader(path)
     new_df = _normalize_index(new_df.copy())
     if cur.empty:
-        new_df.to_parquet(path)
+        _try_write_parquet(new_df, path)
         return new_df
     combined = pd.concat([cur, new_df])
     combined = combined[~combined.index.duplicated(keep="last")].sort_index()
-    combined.to_parquet(path)
+    _try_write_parquet(combined, path)
     return combined
 
 
@@ -103,11 +113,11 @@ def upsert_revenue(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
     cur = load_revenue(stock_id)
     new_df = new_df.copy()
     if cur.empty:
-        new_df.to_parquet(revenue_path(stock_id))
+        _try_write_parquet(new_df, revenue_path(stock_id))
         return new_df
     combined = pd.concat([cur, new_df])
     combined = combined[~combined.index.duplicated(keep="last")].sort_index()
-    combined.to_parquet(revenue_path(stock_id))
+    _try_write_parquet(combined, revenue_path(stock_id))
     return combined
 
 

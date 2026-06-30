@@ -379,6 +379,82 @@
     .gcol-3,.gcol-4{grid-column:span 12;}
     .tkr{font-size:14px;} .score .v{font-size:19px;}
   }
+
+  /* ============================================================
+     個股健檢(Stock Health)— 2026-06-30 新增
+     ============================================================ */
+  .health-search{display:flex;gap:8px;margin-bottom:12px;}
+  .health-input{flex:1 1 auto;min-width:0;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius-sm);padding:9px 13px;font-size:14px;color:var(--ink);}
+  .health-input:focus{outline:none;border-color:var(--accent);box-shadow:var(--ring);}
+  .health-quicklist{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px;font-size:12px;}
+  .hq-label{color:var(--muted);margin-right:2px;}
+  .hq-chip{background:var(--surface);border:1px solid var(--line);color:var(--ink-2);border-radius:999px;
+    padding:4px 11px;font-size:12px;font-weight:600;cursor:pointer;}
+  .hq-chip:hover{border-color:var(--accent);color:var(--accent-ink);}
+
+  .health-top{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:20px 22px;margin-bottom:14px;}
+  .health-score-block{text-align:center;}
+  .health-score-block .ring{width:84px;height:84px;}
+  .health-score-block .ring svg{width:84px;height:84px;}
+  .health-score-block .rlabel{font-size:20px;}
+  .health-stars{font-size:17px;color:var(--warn);letter-spacing:1px;margin-top:6px;}
+  .health-label{font-weight:800;font-size:14px;margin-top:2px;}
+  .health-reason{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .health-radar-block svg{width:100%;max-width:220px;height:auto;display:block;margin:0 auto;}
+  .health-meta-block{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:8px;min-width:180px;}
+  .health-style-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .hs-tgl{padding:5px 11px;font-size:11.5px;}
+  .hs-tgl.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .health-cap-note{color:var(--down-ink);font-weight:700;}
+  .health-missing-note{color:var(--muted-2);}
+
+  .health-summary-card #health-narrative{font-size:13.5px;line-height:1.7;color:var(--ink-2);}
+  .health-pc{margin-top:10px;font-size:12.5px;}
+  .health-pc ul{margin:4px 0 0;padding-left:18px;line-height:1.7;color:var(--ink-2);}
+
+  .health-swing{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .health-swing-box{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:var(--radius-xs);
+    padding:10px 9px;text-align:center;}
+  .hsb-l{font-size:11px;color:var(--muted);font-weight:600;}
+  .hsb-v{font-size:19px;font-weight:800;margin-top:4px;}
+  .hsb-r{font-size:10px;color:var(--muted-2);margin-top:4px;line-height:1.4;}
+
+  .health-dcf{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+  .health-dcf-assump{color:var(--muted);margin-top:3px;}
+  .health-dcf-formula{color:var(--muted-2);font-size:11.5px;margin-top:6px;line-height:1.6;}
+
+  .health-engines{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
+  details.health-engine-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;}
+  details.health-engine-card>summary{cursor:pointer;list-style:none;display:flex;align-items:center;
+    justify-content:space-between;gap:8px;}
+  details.health-engine-card>summary::-webkit-details-marker{display:none;}
+  details.health-engine-card>summary::before{content:'▸ ';color:var(--muted-2);}
+  details.health-engine-card[open]>summary::before{content:'▾ ';}
+  .health-metric-list{margin-top:12px;border-top:1px solid var(--line-soft);}
+  details.hm-row{border-bottom:1px solid var(--line-soft);padding:8px 0;}
+  details.hm-row>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;
+    font-size:12.5px;flex-wrap:wrap;}
+  details.hm-row>summary::-webkit-details-marker{display:none;}
+  .hm-label{display:flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:600;min-width:170px;}
+  .hm-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;}
+  .hm-val{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .hm-ind{color:var(--muted);font-size:11.5px;}
+  .hm-missing{color:var(--muted-2);font-size:11.5px;font-style:italic;}
+  .hm-detail{margin-top:6px;padding-left:4px;font-size:11.5px;color:var(--muted);line-height:1.7;}
+  .hm-detail b{color:var(--muted-2);font-weight:700;}
+  .hm-note{margin-top:8px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  .health-foot{margin-top:16px;font-size:11px;color:var(--muted-2);line-height:1.6;}
+
+  @media(max-width:760px){
+    .health-top{grid-template-columns:1fr;text-align:center;}
+    .health-meta-block{align-items:center;}
+    .health-swing{grid-template-columns:repeat(2,1fr);}
+    .hm-label{min-width:120px;}
+  }
 </style>
 </head>
 <body>
@@ -409,6 +485,7 @@
     <button class="tab" data-p="live" role="tab" aria-selected="false" aria-controls="p-live">盤中即時</button>
     <button class="tab" data-p="watch" role="tab" aria-selected="false" aria-controls="p-watch">觀察清單</button>
     <button class="tab" data-p="watchlist" role="tab" aria-selected="false" aria-controls="p-watchlist">自選池</button>
+    <button class="tab" data-p="health" role="tab" aria-selected="false" aria-controls="p-health">個股健檢</button>
     <button class="tab" data-p="perf" role="tab" aria-selected="false" aria-controls="p-perf">歷史追蹤與績效</button>
   </div>
 
@@ -417,6 +494,7 @@
   <div class="panel" id="p-live" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-watch" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-watchlist" role="tabpanel" tabindex="0"></div>
+  <div class="panel" id="p-health" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-perf" role="tabpanel" tabindex="0"></div>
 
   <div class="foot-note">資料每個交易日由 GitHub Actions 自動更新 · 本頁為條件排序結果,非投資建議</div>
@@ -437,6 +515,14 @@ const badge=p=>p==='動能'?'<span class="badge b-mom">動能</span>':p==='品�
 const slink=id=>`<a class="slink" href="https://www.cmoney.tw/forum/stock/${encodeURIComponent(String(id==null?'':id))}" target="_blank" rel="noopener" title="在 CMoney 看 ${esc(id)} 走勢/技術線圖">${esc(id)}↗</a>`;
 let DATA=null,LATEST=null,LABEL={};
 const lbl=h=>LABEL[h]||h;
+/* 個股健檢狀態(2026-06-30 新增)。HEALTH_API_ENABLED=false(預設):只用每日批次的
+   docs/health/*.json,不嘗試任意代號即時查詢。部署 Vercel(docs+api 同一個 project)後
+   改 true 即可啟用;HEALTH_API_BASE 同源部署留空字串(相對路徑 /api/health 即可,
+   不會有 CORS 問題);若 API 部署在不同網域,填那個網域(例如 'https://xxx.vercel.app',
+   不要結尾斜線)。 */
+let HEALTH_TAB_INIT=false,HEALTH_CACHE={},HEALTH_STYLE='value_investing';
+const HEALTH_API_ENABLED=false;
+const HEALTH_API_BASE='';
 
 /* ---------- shared premarket fetch (de-dupe dashboard live-strip vs live tab) ---------- */
 let _pmCache=null,_pmTs=0,_pmInflight=null;
@@ -1023,6 +1109,221 @@ function startLivePoll(){stopLivePoll();renderLive(true);liveTimer=setInterval((
 function stopLivePoll(){if(liveTimer){clearInterval(liveTimer);liveTimer=null;}}
 
 /* ============================================================
+   個股健檢(Stock Health)— 2026-06-30 新增
+   設計原則:每個分數都可點開回推依據(formula/source/asof/missing_reason),
+   後端 scripts/health/engine.py 已把 9 個面向算好,這裡只負責「泛型渲染」——
+   新增 Engine 不必改這段前端程式碼,只要 JSON 多一個 engines[] 項目就會自動出現一張卡。
+   ============================================================ */
+const HEALTH_RISK_COLOR={Low:'var(--up)',Medium:'var(--warn)',High:'var(--down)',Critical:'var(--down)'};
+const HEALTH_RISK_DOT={Low:'🟢',Medium:'🟡',High:'🟠',Critical:'🔴'};
+const HEALTH_MISSING_LABEL={stale_cache:'快取不夠新/不夠長,持續累積中',api_unavailable:'資料來源這次抓不到',not_applicable:'目前不適用或無此資料'};
+const HEALTH_STATUS_ARROW={improving:'<span class="up">↑</span>',worsening:'<span class="down">↓</span>',stable:'<span class="flat">→</span>'};
+const HEALTH_RADAR_ORDER=['financial','growth','value','risk','technical','chip','news'];
+
+function healthStars(n){
+  n=Math.max(0,Math.min(5,Math.round(Number(n)||0)));
+  return '★'.repeat(n)+'☆'.repeat(5-n);
+}
+function riskLight(level){
+  if(!level)return '<span style="color:var(--muted)">風險等級:資料不足</span>';
+  return `<span style="color:${HEALTH_RISK_COLOR[level]||'var(--muted)'};font-weight:800">${HEALTH_RISK_DOT[level]||''} 風險等級:${esc(level)}</span>`;
+}
+function healthRadar(engines){
+  const map={};(engines||[]).forEach(e=>{map[e.key]=e;});
+  const n=HEALTH_RADAR_ORDER.length,R=68,CX=90,CY=90;
+  const pts=HEALTH_RADAR_ORDER.map((k,i)=>{
+    const e=map[k]||{};
+    const v=isNum(e.score)?Math.max(0,Math.min(100,Number(e.score)))/100:0;
+    const ang=-Math.PI/2+i*(2*Math.PI/n);
+    return {x:CX+R*v*Math.cos(ang),y:CY+R*v*Math.sin(ang),
+            lx:CX+(R+22)*Math.cos(ang),ly:CY+(R+22)*Math.sin(ang),
+            label:e.label||k,has:isNum(e.score)};
+  });
+  const poly=pts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const rings=[0.25,0.5,0.75,1].map(f=>{
+    const rp=HEALTH_RADAR_ORDER.map((_,i)=>{const ang=-Math.PI/2+i*(2*Math.PI/n);
+      return `${(CX+R*f*Math.cos(ang)).toFixed(1)},${(CY+R*f*Math.sin(ang)).toFixed(1)}`;}).join(' ');
+    return `<polygon points="${rp}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+  }).join('');
+  const spokes=HEALTH_RADAR_ORDER.map((_,i)=>{const ang=-Math.PI/2+i*(2*Math.PI/n);
+    return `<line x1="${CX}" y1="${CY}" x2="${(CX+R*Math.cos(ang)).toFixed(1)}" y2="${(CY+R*Math.sin(ang)).toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;}).join('');
+  const labels=pts.map(p=>`<text x="${p.lx.toFixed(1)}" y="${p.ly.toFixed(1)}" font-size="9" fill="var(--muted)" text-anchor="middle" dominant-baseline="middle">${esc(p.label)}${p.has?'':'(缺)'}</text>`).join('');
+  return `<div class="health-radar"><svg viewBox="0 0 180 180">${rings}${spokes}<polygon points="${poly}" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="1.5"/></svg>${labels?`<svg viewBox="0 0 180 180" style="margin-top:-180px">${labels}</svg>`:''}</div>`;
+}
+function swingBox(label,val,reason){
+  return `<div class="health-swing-box"><div class="hsb-l">${esc(label)}</div><div class="hsb-v">${isNum(val)?Math.round(Number(val)):'-'}</div><div class="hsb-r">${esc(reason||'')}</div></div>`;
+}
+function metricRow(m){
+  const has=m.value!==null&&m.value!==undefined;
+  const valStr=has?(typeof m.value==='number'?num(m.value,2):esc(String(m.value))):'資料不足';
+  const arrow=HEALTH_STATUS_ARROW[m.status]||'';
+  const ratingColor=m.rating==='good'?'var(--up)':m.rating==='bad'?'var(--down)':m.rating==='neutral'?'var(--warn)':null;
+  const ratingDot=ratingColor?`<span class="hm-dot" style="background:${ratingColor}"></span>`:'';
+  const indStr=isNum(m.industry_avg)?`同業約 ${num(m.industry_avg,2)}${esc(m.unit||'')}`:'';
+  const missingStr=(!has&&m.missing_reason)?`<span class="hm-missing">(${esc(HEALTH_MISSING_LABEL[m.missing_reason]||m.missing_reason)})</span>`:'';
+  const trendStr=(m.trend&&m.trend.length)?m.trend.map(t=>`${esc(t.period)}:${isNum(t.value)?num(t.value,2):'-'}`).join(' → '):'';
+  return `<details class="hm-row"><summary>
+      <span class="hm-label">${ratingDot}${esc(m.label)}</span>
+      <span class="hm-val">${esc(valStr)}${has?esc(m.unit||''):''} ${arrow}</span>
+      ${indStr?`<span class="hm-ind">${esc(indStr)}</span>`:''}${missingStr}
+    </summary>
+    <div class="hm-detail">
+      ${m.formula?`<div><b>算法:</b>${esc(m.formula)}</div>`:''}
+      <div><b>來源:</b>${esc(m.source||'-')}${m.asof?`(資料時點:${esc(m.asof)})`:''}</div>
+      <div><b>更新時間:</b>${esc(m.updated_at||'-')}</div>
+      ${trendStr?`<div><b>近期趨勢:</b>${trendStr}</div>`:''}
+    </div>
+  </details>`;
+}
+function engineCard(eng){
+  const has=isNum(eng.score);
+  const color=has?(eng.score>=70?'var(--up)':eng.score<=40?'var(--down)':'var(--warn)'):'var(--muted)';
+  const notes=(eng.notes||[]).map(n=>`<div class="hm-note">${esc(n)}</div>`).join('');
+  return `<details class="health-engine-card">
+    <summary><span>${esc(eng.label)}</span><span style="color:${color};font-weight:800">${has?num(eng.score,1):'資料不足'}</span></summary>
+    <div class="health-metric-list">${(eng.metrics||[]).map(metricRow).join('')}</div>
+    ${notes}
+  </details>`;
+}
+function healthEmptyState(sid){
+  return `<div class="empty"><span class="ei">🩺</span>「${esc(sid)}」目前沒有現成的健檢報告。<br>
+    本系統只對「核心精選 + 自選池」每日自動算健檢(控制 FinMind 免費 API 額度);
+    把這檔加進自選池,下一個交易日批次跑完就會出現在這裡。<br>
+    <span style="color:var(--muted-2);font-size:12px">${HEALTH_API_ENABLED?'即時查詢失敗,請稍後再試。':'(任意代號即時查詢需另外部署 Vercel API,目前未啟用)'}</span></div>`;
+}
+function renderHealthReport(d){
+  const out=$('#health-report');if(!out)return;
+  const scores=d.scores||{};
+  const styles=Object.keys(scores);
+  if(!styles.includes(HEALTH_STYLE))HEALTH_STYLE=d.default_style||styles[0]||'value_investing';
+  const cur=scores[HEALTH_STYLE]||{};
+  const diag=cur.diagnosis||{};
+  const scoreColor=(diag.stars||0)>=4?'var(--up)':(diag.stars||0)<=2?'var(--down)':'var(--warn)';
+  const engineLabelMap={};(d.engines||[]).forEach(e=>{engineLabelMap[e.key]=e.label;});
+  const styleTgls=styles.map(s=>`<button class="tgl hs-tgl${s===HEALTH_STYLE?' on':''}" data-style="${esc(s)}">${esc((scores[s]&&scores[s].label)||s)}</button>`).join('');
+
+  let html='';
+  html+=`<div class="health-top">
+    <div class="health-score-block">
+      ${donut(isNum(cur.total)?cur.total/100:0,scoreColor,isNum(cur.total)?num(cur.total,0):'-')}
+      <div class="health-stars">${healthStars(diag.stars)}</div>
+      <div class="health-label" style="color:${scoreColor}">${esc(diag.label||'-')}</div>
+      <div class="health-reason">${esc(diag.reason||'')}</div>
+    </div>
+    <div class="health-radar-block">${healthRadar(d.engines)}</div>
+    <div class="health-meta-block">
+      <div class="health-risk-line">${riskLight(d.risk_level)}</div>
+      <div class="health-style-row">${styleTgls}</div>
+      ${cur.capped?`<div class="health-cap-note">⚠ ${esc(cur.cap_reason||'')}</div>`:''}
+      ${(cur.missing_engines&&cur.missing_engines.length)?`<div class="health-missing-note">未涵蓋面向(資料不足):${cur.missing_engines.map(k=>esc(engineLabelMap[k]||k)).join('、')}(權重已按比例重分配給其餘面向,涵蓋權重 ${num(cur.covered_weight_pct,0)}%)</div>`:''}
+      <div style="font-size:11px;color:var(--muted-2)">${esc(d.updated_at||'')}${d.live?' · 即時查詢':' · 每日批次'}</div>
+    </div>
+  </div>`;
+
+  const sum=d.ai_summary||{};
+  html+=`<div class="panelcard health-summary-card">
+    <div class="pc-h"><span>AI 解讀</span>${sum.narrative_ai?'<span class="lk" id="health-ai-toggle">查看原始規則句</span>':''}</div>
+    <div id="health-narrative">${esc(sum.narrative_ai||sum.narrative||'目前可用資料不足以形成完整摘要。')}</div>
+    ${(sum.pros&&sum.pros.length)?`<div class="health-pc"><b style="color:var(--up-ink)">優點</b><ul>${sum.pros.map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`:''}
+    ${(sum.cons&&sum.cons.length)?`<div class="health-pc"><b style="color:var(--down-ink)">缺點</b><ul>${sum.cons.map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`:''}
+    ${(sum.risks&&sum.risks.length)?`<div class="health-pc"><b style="color:var(--warn-ink)">風險</b><ul>${sum.risks.map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`:''}
+    ${(sum.watch&&sum.watch.length)?`<div class="health-pc"><b style="color:var(--muted)">未來需要觀察</b><ul>${sum.watch.map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`:''}
+  </div>`;
+
+  const swing=d.swing||{};
+  const sr=swing.reasons||{};
+  html+=`<div class="panelcard" style="margin-top:14px">
+    <div class="pc-h"><span>短線評估(Swing Score)</span></div>
+    <div class="health-swing">
+      ${swingBox('當沖',swing.day_trade,sr.day_trade)}
+      ${swingBox('隔日沖',swing.overnight,sr.overnight)}
+      ${swingBox('波段',swing.swing,sr.swing)}
+      ${swingBox('中長線',swing.long_term,sr.long_term)}
+    </div>
+  </div>`;
+
+  if(d.dcf&&d.dcf.available){
+    const dcf=d.dcf,asu=dcf.assumptions||{};
+    const updown=isNum(dcf.upside_pct)?(dcf.upside_pct>=0?'低估':'高估')+' '+Math.abs(dcf.upside_pct).toFixed(1)+'%':'-';
+    html+=`<div class="panelcard" style="margin-top:14px">
+      <div class="pc-h"><span>DCF 估值(選配,假設攤開,不計入估值分數)</span></div>
+      <div class="health-dcf">
+        <div>估算合理價 <b class="num">${num(dcf.fair_value_per_share,1)}</b> 元(現價 ${num(dcf.current_price,1)},${esc(updown)})</div>
+        <div class="health-dcf-assump">假設:成長率 ${num(asu.growth_rate_pct,1)}% · 折現率 ${num(asu.discount_rate_pct,1)}% · 永續成長 ${num(asu.terminal_growth_pct,1)}%</div>
+        <div class="health-dcf-formula">${esc(dcf.formula||'')}</div>
+      </div>
+    </div>`;
+  } else if(d.dcf&&d.dcf.reason){
+    html+=`<div class="panelcard" style="margin-top:14px"><div class="pc-h"><span>DCF 估值</span></div><div class="health-dcf" style="color:var(--muted)">資料不足:${esc(d.dcf.reason)}</div></div>`;
+  }
+
+  html+=`<div class="health-engines">${(d.engines||[]).map(engineCard).join('')}</div>`;
+  html+=`<div class="health-foot">總分公式:Σ(面向分數 × 有效權重) ÷ 涵蓋權重(缺資料的面向已剔除、其餘權重等比例重分配);Risk 命中 Critical 規則時總分強制封頂,不被其他面向稀釋。本頁僅供研究參考,非投資建議。</div>`;
+
+  out.innerHTML=html;
+  out.querySelectorAll('.hs-tgl').forEach(b=>b.onclick=()=>{HEALTH_STYLE=b.dataset.style;renderHealthReport(d);});
+  const aiToggle=$('#health-ai-toggle');
+  if(aiToggle){
+    let showingAi=true;
+    aiToggle.onclick=()=>{
+      showingAi=!showingAi;
+      $('#health-narrative').textContent=showingAi?(sum.narrative_ai||sum.narrative):sum.narrative;
+      aiToggle.textContent=showingAi?'查看原始規則句':'查看 AI 潤飾版';
+    };
+  }
+}
+function loadHealthStock(sid){
+  sid=String(sid||'').trim();
+  if(!sid)return;
+  const out=$('#health-report');if(!out)return;
+  if(HEALTH_CACHE[sid]){renderHealthReport(HEALTH_CACHE[sid]);return;}
+  out.innerHTML='<div class="empty">載入中…</div>';
+  fetch('./health/'+encodeURIComponent(sid)+'.json?'+Date.now()).then(r=>{
+    if(!r.ok)throw new Error('static-404');
+    return r.json();
+  }).then(d=>{HEALTH_CACHE[sid]=d;renderHealthReport(d);})
+  .catch(()=>{
+    if(!HEALTH_API_ENABLED){out.innerHTML=healthEmptyState(sid);return;}
+    out.innerHTML='<div class="empty">本機快取沒有這檔,改即時查詢中(約需 5~10 秒,需即時打多支資料源)…</div>';
+    fetch(HEALTH_API_BASE+'/api/health?stock='+encodeURIComponent(sid)).then(r=>{
+      if(!r.ok)throw new Error('http '+r.status);
+      return r.json();
+    }).then(d=>{HEALTH_CACHE[sid]=d;renderHealthReport(d);})
+    .catch(e=>{out.innerHTML=healthEmptyState(sid)+`<div class="err" style="margin-top:10px">即時查詢失敗:${esc(e&&e.message||e)}</div>`;});
+  });
+}
+function renderHealthTab(){
+  const panel=$('#p-health');if(!panel)return;
+  panel.innerHTML=`
+    <div class="lead">個股健檢:財務體質 / 成長能力 / 估值分析 / 風險分析 / 技術面 / 籌碼分析 / 新聞分析,七個面向各自獨立計算,
+      總分依投資風格加權(可即時切換),<b>每個數字都能點開看計算公式、資料來源與更新時間</b>。
+      目前只對「核心精選 + 自選池」每日自動產生(控制 FinMind 免費額度,詳見系統說明)。</div>
+    <div class="health-search">
+      <input type="text" id="health-input" class="health-input" placeholder="輸入股票代號,例如 2330" autocomplete="off">
+      <button class="tgl" id="health-go">查詢</button>
+    </div>
+    <div id="health-quicklist" class="health-quicklist"></div>
+    <div id="health-report"></div>
+  `;
+  const input=$('#health-input'),go=$('#health-go');
+  const submit=()=>{if(input.value.trim())loadHealthStock(input.value.trim());};
+  go.onclick=submit;
+  input.onkeydown=e=>{if(e.key==='Enter')submit();};
+  fetch('./health/index.json?'+Date.now()).then(r=>{
+    if(!r.ok)throw new Error('no index');
+    return r.json();
+  }).then(idx=>{
+    const stocks=idx.stocks||[];
+    $('#health-quicklist').innerHTML=stocks.length
+      ? '<span class="hq-label">已有報告:</span>'+stocks.map(s=>`<button class="hq-chip" data-sid="${esc(s.stock_id)}">${esc(s.stock_id)} ${esc(s.name||'')}</button>`).join('')
+      : '';
+    $('#health-quicklist').querySelectorAll('.hq-chip').forEach(c=>c.onclick=()=>{input.value=c.dataset.sid;loadHealthStock(c.dataset.sid);});
+    if(stocks.length){input.value=stocks[0].stock_id;loadHealthStock(stocks[0].stock_id);}
+    else{$('#health-report').innerHTML='<div class="empty">尚無健檢資料,等下一次批次跑完(或先把股票加進自選池)。</div>';}
+  }).catch(()=>{$('#health-report').innerHTML='<div class="empty">尚無健檢資料,等下一次批次跑完(或先把股票加進自選池)。</div>';});
+}
+
+/* ============================================================
    tabs / 載入
    ============================================================ */
 function activateTab(p){
@@ -1030,6 +1331,7 @@ function activateTab(p){
   document.querySelectorAll('.panel').forEach(pl=>pl.classList.toggle('active',pl.id==='p-'+p));
   if(p==='live')startLivePoll();else stopLivePoll();
   if(p==='dash')loadDashLive();
+  if(p==='health'&&!HEALTH_TAB_INIT){HEALTH_TAB_INIT=true;renderHealthTab();}
 }
 (function wireTabs(){
   const tabs=[...document.querySelectorAll('.tab')];

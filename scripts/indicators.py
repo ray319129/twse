@@ -104,6 +104,25 @@ def compute_relative_strength(df: pd.DataFrame, index_close: pd.Series, n: int =
     return out
 
 
+def adx(high: pd.Series, low: pd.Series, close: pd.Series, n: int = 14):
+    """ADX / +DI / -DI(Wilder's smoothing,風格比照本檔其餘指標用 ewm(alpha=1/n) 近似)。
+    個股健檢 Technical Engine 用,既有 compute_all() 短線評分管線不需要這個,故不塞進
+    compute_all() 輸出欄位(避免影響既有呼叫端的欄位假設),呼叫端各自取用。
+    回傳 (plus_di, minus_di, adx) 三條 Series。"""
+    up = high.diff()
+    down = -low.diff()
+    plus_dm = pd.Series(np.where((up > down) & (up > 0), up, 0.0), index=high.index)
+    minus_dm = pd.Series(np.where((down > up) & (down > 0), down, 0.0), index=high.index)
+    prev_close = close.shift(1)
+    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(axis=1)
+    atr_n = tr.ewm(alpha=1 / n, adjust=False, min_periods=n).mean()
+    plus_di = 100 * plus_dm.ewm(alpha=1 / n, adjust=False, min_periods=n).mean() / atr_n.replace(0, np.nan)
+    minus_di = 100 * minus_dm.ewm(alpha=1 / n, adjust=False, min_periods=n).mean() / atr_n.replace(0, np.nan)
+    dx = (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan) * 100
+    adx_val = dx.ewm(alpha=1 / n, adjust=False, min_periods=n).mean()
+    return plus_di, minus_di, adx_val
+
+
 def reference_levels(df: pd.DataFrame, atr_mult: float = 2.0) -> dict:
     """Snapshot of technical reference levels for the latest bar.
     Returns a dict of value-or-None for each level. Distances ('% from close')

@@ -16,7 +16,7 @@
 
 > 設計理念見 [`specs/06_ranking.md`](specs/06_ranking.md):從「符合條件就全列出(動輒上百檔)」改成「排序後只給精選」。
 
-- GitHub Pages 顯示:選股清單、個股 K 線、公司資訊、近期新聞、自選池管理
+- GitHub Pages 顯示:選股清單、個股 K 線、公司資訊、近期新聞、自選池管理、**個股健檢**(財務/成長/估值/風險/技術/籌碼/新聞七面向可解釋分析,見 [specs/07_stock_health.md](specs/07_stock_health.md))
 
 ## 架構
 
@@ -50,6 +50,7 @@ GitHub Pages 前端 (階段二)
 - [03_data_sources.md](specs/03_data_sources.md) — 各資料源 API 與排程
 - [04_email_template.md](specs/04_email_template.md) — Email 內容範本
 - [05_leading_signals.md](specs/05_leading_signals.md) — 領先 / 醞釀型訊號(在發動前撈候選)
+- [07_stock_health.md](specs/07_stock_health.md) — 個股健檢:可解釋的七面向體質分析(財務/成長/估值/風險/技術/籌碼/新聞)
 
 ## 環境設定(初次啟用)
 
