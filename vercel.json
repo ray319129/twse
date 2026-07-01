@@ -1,4 +1,5 @@
 {
+  "framework": null,
   "outputDirectory": "docs",
   "functions": {
     "api/health.py": {
