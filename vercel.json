@@ -4,5 +4,9 @@
     "api/health.py": {
       "maxDuration": 60
     }
-  }
+  },
+  "routes": [
+    { "src": "/api/health", "dest": "/api/health.py" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }
