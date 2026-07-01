@@ -2,3 +2,18 @@
 name = "twse-main"
 version = "0.1.0"
 requires-python = ">=3.11"
+dependencies = [
+  "pandas>=2.0,<3.0",
+  "numpy>=1.24,<2.0",
+  "pyarrow>=14.0",
+  "requests>=2.31",
+  "feedparser>=6.0",
+  "beautifulsoup4>=4.12",
+  "lxml>=4.9",
+  "yfinance>=0.2.40",
+  "PyYAML>=6.0",
+  "Jinja2>=3.1",
+  "python-dateutil>=2.8",
+  "pytz>=2024.1",
+  "anthropic>=0.40",
+]
