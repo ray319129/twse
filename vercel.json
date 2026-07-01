@@ -1,7 +1,7 @@
 {
-  "outputDirectory": "docs",
   "functions": {
     "api/health.py": {
+      "runtime": "python3.12",
       "maxDuration": 60
     }
   }

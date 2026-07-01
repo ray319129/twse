@@ -34,3 +34,6 @@ tmp/
 # Frontend (階段二之後)
 docs/node_modules/
 docs/dist/
+
+.vercel
+.env*
