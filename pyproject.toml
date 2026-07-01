@@ -1,2 +1,7 @@
+[project]
+name = "twse-main"
+version = "0.1.0"
+requires-python = ">=3.11"
+
 [tool.vercel]
 entrypoint = "api.health:handler"
