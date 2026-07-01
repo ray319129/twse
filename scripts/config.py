@@ -14,8 +14,11 @@ SIGNALS_DIR = DATA_DIR / "signals"
 CONFIG_DIR = ROOT / "config"
 TEMPLATES_DIR = ROOT / "templates"
 
-for _d in (PRICES_DIR, META_DIR, SIGNALS_DIR):
-    _d.mkdir(parents=True, exist_ok=True)
+try:
+    for _d in (PRICES_DIR, META_DIR, SIGNALS_DIR):
+        _d.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass  # Vercel serverless: read-only filesystem, skip dir creation
 
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")   # 選用:新聞事件 AI 分類;沒設就自動略過
