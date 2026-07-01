@@ -1,0 +1,54 @@
+{
+  "updated_at": "2026-07-01",
+  "min_sample": 3,
+  "industries": {
+    "半導體業": {
+      "sample_size": 13,
+      "gross_margin": 42.53,
+      "operating_margin": 10.02,
+      "net_margin": 11.8,
+      "roe": 4.01,
+      "roa": 2.42,
+      "debt_ratio": 29.03,
+      "current_ratio": 250.73
+    },
+    "電子工業": {
+      "sample_size": 21,
+      "gross_margin": 24.85,
+      "operating_margin": 12.3,
+      "net_margin": 13.09,
+      "roe": 4.05,
+      "roa": 1.98,
+      "debt_ratio": 49.17,
+      "current_ratio": 192.55
+    },
+    "電子通路業": {
+      "sample_size": 3,
+      "gross_margin": 15.43,
+      "operating_margin": -18.74,
+      "net_margin": -4.08,
+      "roe": 4.96,
+      "roa": 1.0,
+      "debt_ratio": 53.56
+    },
+    "電子零組件業": {
+      "sample_size": 9,
+      "gross_margin": 23.89,
+      "operating_margin": 7.56,
+      "net_margin": 9.73,
+      "roe": 3.94,
+      "roa": 2.02,
+      "debt_ratio": 52.05,
+      "current_ratio": 158.88
+    },
+    "電腦及週邊設備業": {
+      "sample_size": 4,
+      "gross_margin": 26.07,
+      "operating_margin": 13.02,
+      "net_margin": 11.05,
+      "roe": 19.9,
+      "roa": 6.16,
+      "debt_ratio": 54.47
+    }
+  }
+}

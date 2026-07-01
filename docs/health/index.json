@@ -1,0 +1,80 @@
+{
+  "date": "2026-07-01",
+  "stocks": [
+    {
+      "stock_id": "6271",
+      "name": "同欣電",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "6127",
+      "name": "九豪",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "6257",
+      "name": "矽格",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "3141",
+      "name": "晶宏",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "6278",
+      "name": "台表科",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "4541",
+      "name": "晟田",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "2467",
+      "name": "志聖",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "8064",
+      "name": "東捷",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "5228",
+      "name": "鈺鎧",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "1727",
+      "name": "中華化",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "2330",
+      "name": "台積電",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "2454",
+      "name": "聯發科",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "2317",
+      "name": "鴻海",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "2308",
+      "name": "台達電",
+      "updated_at": "2026-07-01"
+    },
+    {
+      "stock_id": "3008",
+      "name": "大立光",
+      "updated_at": "2026-07-01"
+    }
+  ]
+}
