@@ -10,8 +10,11 @@ PER_DIR = DATA_DIR / "per"
 FINANCIALS_DIR = DATA_DIR / "financials"
 BALANCE_DIR = DATA_DIR / "balance"
 CASHFLOW_DIR = DATA_DIR / "cashflow"
-for _d in (CHIPS_DIR, REVENUE_DIR, EPS_DIR, PER_DIR, FINANCIALS_DIR, BALANCE_DIR, CASHFLOW_DIR):
-    _d.mkdir(parents=True, exist_ok=True)
+try:
+    for _d in (CHIPS_DIR, REVENUE_DIR, EPS_DIR, PER_DIR, FINANCIALS_DIR, BALANCE_DIR, CASHFLOW_DIR):
+        _d.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass  # Vercel serverless: read-only filesystem
 
 
 def _normalize_index(df: pd.DataFrame) -> pd.DataFrame:

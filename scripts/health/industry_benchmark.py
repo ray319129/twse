@@ -21,7 +21,10 @@ from ..config import DATA_DIR
 from . import quarterly as q
 
 HEALTH_DATA_DIR = DATA_DIR / "health"
-HEALTH_DATA_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    HEALTH_DATA_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass  # Vercel serverless: read-only filesystem
 BENCHMARK_PATH = HEALTH_DATA_DIR / "industry_benchmarks.json"
 
 MIN_SAMPLE = 3
