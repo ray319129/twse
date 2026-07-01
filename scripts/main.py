@@ -33,8 +33,6 @@ from .fundamentals import update_fundamentals, fundamental_summary, fundamental_
 from .catalyst import classify_catalysts, catalyst_score
 from .notify import render_email, send_email
 from .utils import log
-from .health import engine as health_engine
-from .health import industry_benchmark as health_benchmark
 
 HOT_INDUSTRY_TOP_N = 5
 
@@ -551,69 +549,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     with open(docs_dir / "dates.json", "w", encoding="utf-8") as f:
         json.dump(dates, f, ensure_ascii=False)
 
-    # ---------- 個股健檢(Stock Health,2026-06-30 新增)----------
-    # 只對核心+自選池(與上面 stage-2 enrichment 同一份名單)算,零額外 API 預算風險 ——
-    # 任意代號即時查由獨立的 Vercel serverless 處理(api/health.py),讀同一套
-    # scripts/health 引擎(單一事實來源),不在這支批次流程內。整段包 try/except:
-    # 健檢失敗絕不能拖垮既有選股/Email 主流程。
-    try:
-        health_cfg = cfg.get("health", {}) or {}
-        if health_cfg.get("enabled", True):
-            try:
-                bench = health_benchmark.build_benchmarks(
-                    min_count=int(health_cfg.get("industry_min_sample", 3)))
-                health_benchmark.save_benchmarks(bench, updated_at=today.isoformat())
-            except Exception as e:
-                log.warning(f"同業平均彙總失敗(不影響個股健檢繼續跑):{e}")
-
-            health_dir = docs_dir / "health"
-            health_dir.mkdir(parents=True, exist_ok=True)
-            bench_src = DATA_DIR / "health" / "industry_benchmarks.json"
-            if bench_src.exists():
-                (health_dir / "industry_benchmarks.json").write_text(
-                    bench_src.read_text(encoding="utf-8"), encoding="utf-8")
-
-            health_targets: dict[str, dict] = {s["stock_id"]: s for s in core}
-            for s in watchlist_results:
-                health_targets.setdefault(s["stock_id"], s)
-
-            health_index = []
-            for sid, pick in health_targets.items():
-                try:
-                    pdf = load_prices(sid)
-                    if historical:
-                        pdf = pdf[pdf.index.date <= today]
-                    if pdf.empty or len(pdf) < 60:
-                        continue
-                    pdf_ind = compute_all(pdf)
-                    if index_close is not None:
-                        pdf_ind = compute_relative_strength(pdf_ind, index_close, n=60)
-                    sname = pick.get("name") or name_map.get(sid, sid)
-                    last_close = pdf_ind["close"].iloc[-1]
-                    current_price = float(pick["close"]) if pick.get("close") else (
-                        float(last_close) if pd.notna(last_close) else None)
-                    hctx = health_engine.build_ctx_batch(
-                        stock_id=sid, name=sname,
-                        industry=pick.get("industry") or industry_map.get(sid, ""),
-                        today=today, price_df=pdf_ind,
-                        valuation_snapshot=pick.get("valuation") or valuation_snapshot.get(sid, {}),
-                        current_price=current_price,
-                        revenue_df=load_revenue(sid), chips_df=load_chips(sid),
-                        news_items=pick.get("news") or [], health_cfg=health_cfg,
-                    )
-                    result = health_engine.compute_stock_health(hctx, health_cfg=health_cfg)
-                    with open(health_dir / f"{sid}.json", "w", encoding="utf-8") as f:
-                        json.dump(_json_safe(result), f, ensure_ascii=False, indent=2, default=str)
-                    health_index.append({"stock_id": sid, "name": sname, "updated_at": today.isoformat()})
-                except Exception as e:
-                    log.warning(f"個股健檢 {sid} 計算失敗(跳過這檔,不影響其他檔):{e}")
-
-            with open(health_dir / "index.json", "w", encoding="utf-8") as f:
-                json.dump(_json_safe({"date": today.isoformat(), "stocks": health_index}),
-                          f, ensure_ascii=False, indent=2)
-            log.info(f"個股健檢:{len(health_index)} 檔已產出 docs/health/*.json")
-    except Exception as e:
-        log.warning(f"個股健檢整體流程失敗(不影響選股/Email 主流程):{e}")
+    # 個股健檢(Stock Health)改為純即時查詢(api/health.py),不在批次流程內跑。
 
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),
