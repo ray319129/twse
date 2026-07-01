@@ -521,7 +521,7 @@ const lbl=h=>LABEL[h]||h;
    不會有 CORS 問題);若 API 部署在不同網域,填那個網域(例如 'https://xxx.vercel.app',
    不要結尾斜線)。 */
 let HEALTH_TAB_INIT=false,HEALTH_CACHE={},HEALTH_STYLE='value_investing';
-const HEALTH_API_ENABLED=false;
+const HEALTH_API_ENABLED=true;
 const HEALTH_API_BASE='';
 
 /* ---------- shared premarket fetch (de-dupe dashboard live-strip vs live tab) ---------- */
@@ -1277,27 +1277,19 @@ function loadHealthStock(sid){
   if(!sid)return;
   const out=$('#health-report');if(!out)return;
   if(HEALTH_CACHE[sid]){renderHealthReport(HEALTH_CACHE[sid]);return;}
-  out.innerHTML='<div class="empty">載入中…</div>';
-  fetch('./health/'+encodeURIComponent(sid)+'.json?'+Date.now()).then(r=>{
-    if(!r.ok)throw new Error('static-404');
+  out.innerHTML='<div class="empty">即時查詢中,約需 10~20 秒…</div>';
+  fetch(HEALTH_API_BASE+'/api/health?stock='+encodeURIComponent(sid)).then(r=>{
+    if(!r.ok)throw new Error('http '+r.status);
     return r.json();
   }).then(d=>{HEALTH_CACHE[sid]=d;renderHealthReport(d);})
-  .catch(()=>{
-    if(!HEALTH_API_ENABLED){out.innerHTML=healthEmptyState(sid);return;}
-    out.innerHTML='<div class="empty">本機快取沒有這檔,改即時查詢中(約需 5~10 秒,需即時打多支資料源)…</div>';
-    fetch(HEALTH_API_BASE+'/api/health?stock='+encodeURIComponent(sid)).then(r=>{
-      if(!r.ok)throw new Error('http '+r.status);
-      return r.json();
-    }).then(d=>{HEALTH_CACHE[sid]=d;renderHealthReport(d);})
-    .catch(e=>{out.innerHTML=healthEmptyState(sid)+`<div class="err" style="margin-top:10px">即時查詢失敗:${esc(e&&e.message||e)}</div>`;});
-  });
+  .catch(e=>{out.innerHTML=healthEmptyState(sid)+`<div class="err" style="margin-top:10px">即時查詢失敗:${esc(e&&e.message||e)}</div>`;});
 }
 function renderHealthTab(){
   const panel=$('#p-health');if(!panel)return;
   panel.innerHTML=`
     <div class="lead">個股健檢:財務體質 / 成長能力 / 估值分析 / 風險分析 / 技術面 / 籌碼分析 / 新聞分析,七個面向各自獨立計算,
       總分依投資風格加權(可即時切換),<b>每個數字都能點開看計算公式、資料來源與更新時間</b>。
-      目前只對「核心精選 + 自選池」每日自動產生(控制 FinMind 免費額度,詳見系統說明)。</div>
+      輸入任意上市櫃代號即時查詢,約需 10~20 秒。</div>
     <div class="health-search">
       <input type="text" id="health-input" class="health-input" placeholder="輸入股票代號,例如 2330" autocomplete="off">
       <button class="tgl" id="health-go">查詢</button>
@@ -1309,18 +1301,12 @@ function renderHealthTab(){
   const submit=()=>{if(input.value.trim())loadHealthStock(input.value.trim());};
   go.onclick=submit;
   input.onkeydown=e=>{if(e.key==='Enter')submit();};
-  fetch('./health/index.json?'+Date.now()).then(r=>{
-    if(!r.ok)throw new Error('no index');
-    return r.json();
-  }).then(idx=>{
-    const stocks=idx.stocks||[];
-    $('#health-quicklist').innerHTML=stocks.length
-      ? '<span class="hq-label">已有報告:</span>'+stocks.map(s=>`<button class="hq-chip" data-sid="${esc(s.stock_id)}">${esc(s.stock_id)} ${esc(s.name||'')}</button>`).join('')
-      : '';
-    $('#health-quicklist').querySelectorAll('.hq-chip').forEach(c=>c.onclick=()=>{input.value=c.dataset.sid;loadHealthStock(c.dataset.sid);});
-    if(stocks.length){input.value=stocks[0].stock_id;loadHealthStock(stocks[0].stock_id);}
-    else{$('#health-report').innerHTML='<div class="empty">尚無健檢資料,等下一次批次跑完(或先把股票加進自選池)。</div>';}
-  }).catch(()=>{$('#health-report').innerHTML='<div class="empty">尚無健檢資料,等下一次批次跑完(或先把股票加進自選池)。</div>';});
+  $('#health-quicklist').innerHTML='<span class="hq-label">常用:</span>'+
+    ['2330 台積電','2454 聯發科','2317 鴻海','2881 富邦金','6669 緯穎'].map(s=>{
+      const [id,name]=s.split(' ');
+      return `<button class="hq-chip" data-sid="${id}">${id} ${name}</button>`;
+    }).join('');
+  $('#health-quicklist').querySelectorAll('.hq-chip').forEach(c=>c.onclick=()=>{input.value=c.dataset.sid;loadHealthStock(c.dataset.sid);});
 }
 
 /* ============================================================
