@@ -77,7 +77,11 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
 
     out["vol_ma5"] = sma(out["volume"], 5)
     out["vol_ma20"] = sma(out["volume"], 20)
-    out["vol_ratio"] = out["volume"] / out["vol_ma5"]
+    # 量比分母用「前 5 日均量」(shift(1),不含今日)。若含今日,爆量會稀釋自己的分母,
+    # 系統性低估爆量:真實 3 倍量只顯示 2.14、真實 2 倍顯示 1.67,且數學上限被壓到 5.0。
+    # vol_ma5 / vol_ma20 兩條均量本身維持含今日(coiling 量縮、setup vbias 用比值,對稱不受影響)。
+    out["vol_ma5_prev"] = out["vol_ma5"].shift(1)
+    out["vol_ratio"] = out["volume"] / out["vol_ma5_prev"]
 
     out["discount60"] = out["close"].shift(60)
 

@@ -14,14 +14,14 @@ from .config import (
 from .fetchers import (
     fetch_stock_info, filter_tradable_stocks, fetch_news,
     fetch_price_history, fetch_chips_history,
-    fetch_monthly_revenue, fetch_eps_quarterly, fetch_per_yield,
+    fetch_monthly_revenue, fetch_per_yield,
     fetch_valuation_snapshot, fetch_valuation_snapshot_tpex, fetch_index_history,
+    fetch_restricted_stocks,
 )
 from .storage import (
     load_prices, upsert_prices,
     load_chips, upsert_chips,
     load_revenue, upsert_revenue,
-    load_eps, upsert_eps,
     load_per, upsert_per,
 )
 from .indicators import compute_all, reference_levels, compute_relative_strength
@@ -80,7 +80,11 @@ def _update_chips(stock_id: str, today: date, history_days: int = 35) -> pd.Data
         last = existing.index.max().date()
         if last >= today:
             return existing
-        start = last + timedelta(days=1)
+        # 重疊回補:三大法人(~16:00)、融資券(~21:00)、外資持股(隔日)出表時間不同,
+        # 當天 16:30 跑時 last 那天的 margin/short/holding 還是 NaN。若從 last+1 起抓,那天的缺值
+        # 永遠補不回來。改從 last-4 天起重抓,配合 upsert_chips 的 combine_first(新 NaN 不覆蓋舊值)
+        # 讓後續 run 能把先前的缺格補上。
+        start = last - timedelta(days=4)
     else:
         start = today - timedelta(days=history_days * 2)
     new = fetch_chips_history(stock_id, start, today)
@@ -94,13 +98,6 @@ def _update_revenue(stock_id: str) -> pd.DataFrame:
     if new.empty:
         return load_revenue(stock_id)
     return upsert_revenue(stock_id, new)
-
-
-def _update_eps(stock_id: str) -> pd.DataFrame:
-    new = fetch_eps_quarterly(stock_id, quarters=8)
-    if new.empty:
-        return load_eps(stock_id)
-    return upsert_eps(stock_id, new)
 
 
 def _chip_summary(chips_df: pd.DataFrame | None) -> dict:
@@ -122,8 +119,12 @@ def _chip_summary(chips_df: pd.DataFrame | None) -> dict:
         s = chips_df["foreign_holding_pct"].dropna()
         if not s.empty:
             out["foreign_holding_pct"] = round(float(s.iloc[-1]), 2)
-            if len(s) >= 30:
-                out["foreign_holding_change_30d"] = round(float(s.iloc[-1] - s.iloc[-30]), 2)
+            # 用「日期差 30 天」而非「位置差 30 格」:外資持股序列常有缺洞,用 iloc[-30] 會讓
+            # 實際窗口飄移到 40~60 個日曆日,30 日變化失真。改取最近一筆日期 <= (最新-30天) 的值當基準。
+            target = s.index[-1] - pd.Timedelta(days=30)
+            base = s.loc[:target]
+            if not base.empty:
+                out["foreign_holding_change_30d"] = round(float(s.iloc[-1]) - float(base.iloc[-1]), 2)
     if "short_balance" in chips_df.columns:
         sb = chips_df["short_balance"].dropna()
         if len(sb) >= 2:
@@ -170,6 +171,32 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
         # 對齊基準日:正常跑時 today=當天、本機資料本就 <= today(無作用);
         # 歷史測試時把價格截到指定日,座標/決策卡才反映那天的收盤。
         df = df[df.index.date <= today]
+
+    # ---- 先抓籌碼/財報,再跑 screen_stock ----
+    # screen_stock 的 D 籌碼類(法人連買/外資加碼/融券回補)、E 基本面類(月營收/EPS+殖利率)
+    # 與所有 combos 都吃這些資料;若在 screen_stock 之後才抓,這幾類策略與全部 combos 永遠 False
+    # (Bug 1:11 天 355 檔 picks 命中 0 次)。故務必在此先備妥。
+    chips_df = _update_chips(sid, today)
+    if chips_df is not None and not chips_df.empty:
+        cs = _chip_summary(chips_df)
+        if cs:
+            pick["chips"] = cs
+
+    revenue_df = None
+    eps_df = None
+    if fundamentals:
+        revenue_df = _update_revenue(sid)
+        fin, bal, cf = update_fundamentals(sid)              # FinMind 季財報/資產負債/現金流(快取新鮮就不重抓)
+        summ = fundamental_summary(fin, bal, cf, revenue_df)
+        if summ:
+            pick["fundamentals"] = summ
+        # EPS 直接取自季財報 fin(已含 eps 欄,來源同 fetch_eps_quarterly 的 TaiwanStockFinancialStatements),
+        # 供 E2「EPS 正+高殖利率」判定,不必另打一支 FinMind API。
+        if fin is not None and not fin.empty and "eps" in fin.columns:
+            eps_series = fin["eps"].dropna()
+            if not eps_series.empty:
+                eps_df = eps_series.to_frame("eps")
+
     if not df.empty and len(df) >= 60:
         df_ind = compute_all(df)
         if index_close is not None:
@@ -180,7 +207,9 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
         pick["ohlc"] = [[round(float(o), 2), round(float(h), 2), round(float(l), 2), round(float(c), 2)]
                         for o, h, l, c in ohlc_tail.itertuples(index=False)]
         if screen_cfg is not None:
-            scr = screen_stock(df_ind, screen_cfg, valuation=pick.get("valuation"))
+            scr = screen_stock(df_ind, screen_cfg,
+                               chips_df=chips_df, revenue_df=revenue_df, eps_df=eps_df,
+                               valuation=pick.get("valuation"))
             pick["hits"] = [h for h, v in scr["hits"].items() if v]
             pick["combos"] = scr["combos"]
         if plan_cfg is not None and pick.get("close"):
@@ -191,17 +220,6 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
             position = compute_position_size(pick["plan"], account_cfg)
             if position:
                 pick["position"] = position
-    chips_df = _update_chips(sid, today)
-    if chips_df is not None and not chips_df.empty:
-        cs = _chip_summary(chips_df)
-        if cs:
-            pick["chips"] = cs
-    if fundamentals:
-        revenue_df = _update_revenue(sid)
-        fin, bal, cf = update_fundamentals(sid)              # FinMind 季財報/資產負債/現金流(快取新鮮就不重抓)
-        summ = fundamental_summary(fin, bal, cf, revenue_df)
-        if summ:
-            pick["fundamentals"] = summ
     if news:
         cat_cfg = ((screen_cfg or {}).get("scoring", {}) or {}).get("catalyst_bonus", {}) or {}
         pick["news"] = fetch_news(sid, sname, limit=int(cat_cfg.get("max_news", 25)))
@@ -340,6 +358,16 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     info = fetch_stock_info()
     universe = filter_tradable_stocks(info)
     log.info(f"Universe: {len(universe)} tradable stocks")
+
+    # 排除受限股(全額交割/處置分盤/管理/停止買賣)—— 這些採分盤撮合、流動性瞬間歸零,隔日沖大忌。
+    # 由 config global.exclude_full_cash 開關(預設 true);歷史測試不打網路故略過。任一來源失敗會回空集合 → 不過濾。
+    global_cfg = cfg.get("global", {}) or {}
+    if not historical and global_cfg.get("exclude_full_cash", True):
+        restricted = fetch_restricted_stocks(today)
+        if restricted:
+            before = len(universe)
+            universe = universe[~universe["stock_id"].isin(restricted)].reset_index(drop=True)
+            log.info(f"排除受限股後:{len(universe)} 檔(移除 {before - len(universe)})")
 
     valuation_snapshot = fetch_valuation_snapshot(today)
     n_twse = len(valuation_snapshot)

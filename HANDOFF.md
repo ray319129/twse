@@ -77,6 +77,9 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 - **NaN 收盤壞 K 棒**:yfinance 對剛收盤未定的最新棒偶爾回 NaN 收盤 → 均線全毀 → 評分全 None → 核心 0 檔。已三層 dropna(fetch 兩處 + load_prices)。
 - **sticky `<th>`**:`position:sticky` 在非捲動容器會讓表頭浮到資料中間錯位。已移除。
 - **merge conflict markers**:本專案歷史曾被 `<<<<<<<` 衝突標記汙染整段函式;改檔後務必 `python -m py_compile scripts/*.py` 驗證。
+- **enrich 資料抓取順序**(2026-07-07 修 Bug 1):`_enrich_pick` 必須「先抓籌碼/財報,再呼叫 `screen_stock`」。若 `screen_stock` 在前,D 籌碼類/E 基本面類與**全部 combos 永遠 False**(2026-07-06 審查:11 天 355 檔命中 0 次)。加策略時別把資料抓取搬回 screen 之後。
+- **量比分母別含今日**(2026-07-07 修 Bug 2):`vol_ratio` 分母用 `vol_ma5.shift(1)`(前 5 日均量)。含今日會稀釋自己的分母、數學上限被壓到 5.0,系統性低估爆量。`vol_ma5`/`vol_ma20`(兩均量比值)維持含今日不受影響。
+- **籌碼合併用 combine_first + 重疊回補**(2026-07-07 修 Bug 3):三大法人(~16:00)/融資券(~21:00)/外資持股(隔日)出表時間差 → 當天跑那列後兩者是 NaN。`upsert_chips` 用 `combine_first`(新 NaN 不覆蓋舊值)、`_update_chips` 從 `last-4d` 重疊回補,否則缺洞永久補不回。外資 30 日變化一律用「日期差」不用「位置差」(序列有洞位置差會飄到 40~60 天)。
 
 ## 4. 離線測試法(關鍵,無需網路/API)
 本機有 ~1976 個 `data/prices/*.parquet`(到約 6/18)。可 monkeypatch 網路函式跑完整 `daily_run`:
@@ -86,7 +89,11 @@ M.fetch_stock_info=lambda *a,**k: <cached info df>
 M.fetch_valuation_snapshot=lambda *a,**k: {}
 M.fetch_index_history=lambda *a,**k: <equal-weight proxy from closes>
 M.fetch_price_history=lambda *a,**k: pd.DataFrame()   # 不動 data 檔
-M.fetch_chips_history / fetch_monthly_revenue / fetch_eps_quarterly = lambda: pd.DataFrame()
+M.fetch_chips_history / fetch_monthly_revenue = lambda: pd.DataFrame()
+# ⚠️ 2026-07-07 起 EPS 不再由 main._update_eps 打 API,改由 update_fundamentals(fetch_financial_statements)
+#    的 fin["eps"] 取得;離線要壓 EPS 就 patch scripts.fundamentals.fetch_financial_statements。
+# ⚠️ 2026-07-07 起 daily_run 會呼叫 fetch_restricted_stocks(打 TWSE/TPEX 官方 API);離線需一併 patch:
+M.fetch_restricted_stocks = lambda *a, **k: set()
 M.fetch_news=lambda *a,**k: []
 M.send_email=lambda *a,**k: None
 M.daily_run(test_mode=True)
@@ -208,3 +215,17 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 2. 觀察 `docs/health/*.json` 實際內容,確認 Financial/Growth/Value 面向不是恆缺資料。
 3. 想要任意代號即時查再做 Vercel 部署(`VERCEL_SETUP.md`),非必要功能,路徑 A 已經可獨立運作。
 4. 累積一段時間後,比照 `STRATEGY.md` 對信心分的態度,回頭檢視三組投資風格權重與 Tier1 風險規則門檻是否合理。
+
+---
+
+## 11. 程式碼審查修正(2026-07-07)— Bug 1~4
+
+依 [twse_程式碼審查與修正清單.md](twse_程式碼審查與修正清單.md)(2026-07-06 審查)修掉四個確定性 bug。**已用本機快取資料離線驗證,尚未用真實 FinMind token 跑過完整一輪排程。**
+
+- **Bug 1 — combo/籌碼/基本面策略從未觸發**([main.py](scripts/main.py) `_enrich_pick`):`screen_stock` 原本在抓籌碼/財報**之前**被呼叫 → D 籌碼類/E 基本面類與全部 combos 恆 False(11 天 355 檔命中 0 次)。改為先抓 `chips_df`/`revenue_df`,並由 `update_fundamentals` 的 `fin["eps"]` 取 EPS(不再另打 API),三者一起傳入 `screen_stock`。移除死掉的 `_update_eps` 與 `fetch_eps_quarterly`/`load_eps`/`upsert_eps` import。
+  - 驗證:對 409 檔有籌碼快取的股票重跑 `screen_stock`,`monthly_revenue_growth` 160 / `inst_consecutive_buy` 111 / `foreign_holding_increase` 45 / `short_cover_with_buy` 31 次命中,combos「主升段啟動」「強勢續攻」開始觸發(修前全 0)。
+- **Bug 2 — 量比低估**([indicators.py](scripts/indicators.py) `compute_all`):`vol_ratio` 分母改 `vol_ma5.shift(1)`(新增 `vol_ma5_prev` 欄)。驗證:末日 3 倍量正確顯示 3.0000(修前為 300/140≈2.14)。
+- **Bug 3 — 籌碼永久缺洞 + 外資窗飄移**:`_update_chips` 起點改 `last-4d` 重疊回補;[storage.py](scripts/storage.py) `upsert_chips` 改 `combine_first`(新 NaN 不覆蓋舊值);外資 30 日變化改「日期差」([main.py](scripts/main.py) `_chip_summary` 與 [screener.py](scripts/screener.py) `_foreign_holding_up`)。新增一次性 backfill 工具 [scripts/backfill_chips.py](scripts/backfill_chips.py)(`python -m scripts.backfill_chips`,需 FINMIND_TOKEN)補既有快取的歷史缺洞。驗證:合成缺洞測試,回補後缺格被填、且未覆蓋 refetch 未涵蓋的舊值。
+- **Bug 4 — 受限股未排除**([fetchers.py](scripts/fetchers.py) 新增 `fetch_restricted_stocks`):抓 TWSE `TWT85U`(變更交易/全額交割)+ `announcement/punish`(處置,依處置期間迄日過濾)+ TPEX `tpex_cmode`(變更交易/分盤/管理/停止買賣),排除採分盤撮合的股票(隔日沖大忌)。[main.py](scripts/main.py) `daily_run` 建 universe 後依 `global.exclude_full_cash`(預設 true)過濾;歷史測試/來源全掛則不過濾(優雅降級)。config 同步註明 `min_market_cap`/`chip_accumulation.max_scan` 為未實作狀態。驗證:實測 TWSE 端點回 40 檔受限股,處置期間迄日過濾正確(已結束的 2 檔被排除);TPEX 本機因 SSL 憑證環境問題失敗但優雅降級(生產環境同 host 的估值 API 正常)。
+
+**待辦(接續)**:下次排程實跑或本機餵真 token 跑一次 `--date`,確認 email/網頁 hits 出現 D/E 標籤、combos 有值;跑一次 `scripts.backfill_chips` 補歷史缺洞。審查清單第二~五節(除權息尺度偏移、出場規則、大盤閘門、隔日沖偵測等)尚未做,依使用者指示「等 bug 修好後再做」。

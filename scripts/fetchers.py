@@ -607,6 +607,103 @@ def fetch_valuation_snapshot_tpex() -> dict[str, dict]:
     return out
 
 
+# ---------- 受限股名單(全額交割 / 處置 / 管理 / 停止買賣)----------
+# 全部免費、官方 OpenAPI。任一來源失敗只記錄、不影響其他來源;全掛掉回空集合 = 不過濾
+# (不會誤殺,只是少一層保護)。用途:把「採分盤撮合(約 5~20 分鐘一次)、流動性瞬間歸零」
+# 的股票排除出選股池 —— 對隔日沖是實務大忌(twse 審查 Bug 4)。
+
+_TWSE_ALTERED_URL = "https://openapi.twse.com.tw/v1/exchangeReport/TWT85U"       # 集中市場證券變更交易(全額交割)
+_TWSE_PUNISH_URL = "https://openapi.twse.com.tw/v1/announcement/punish"          # 集中市場處置股票
+_TPEX_CMODE_URL = "https://www.tpex.org.tw/openapi/v1/tpex_cmode"                # 上櫃變更交易/分盤/管理/停止買賣
+
+
+def _is_4digit_stock(code) -> bool:
+    """只認 4 位純數字股票代號(與 filter_tradable_stocks 的 universe 一致);
+    權證/可轉債(5~6 位)、ETF 皆非本系統選股標的,不需納入受限判定。"""
+    return isinstance(code, str) and code.isdigit() and len(code) == 4
+
+
+def _roc_period_end(period) -> "date | None":
+    """處置期間字串的『迄日』→ 西元 date。支援兩種官方格式:
+      TWSE '115/07/03～115/07/16'(民國年/月/日,全形波浪號)
+      TPEX '1150707~1150720'(民國 yyymmdd,半形波浪號)
+    解析失敗回 None(呼叫端對 None 採保守處理:視為仍在處置)。"""
+    import re
+    if not isinstance(period, str) or not period.strip():
+        return None
+    # 取分隔符後半段(迄日);涵蓋常見的波浪號/破折號/「至」「到」
+    tail = re.split(r"[~～〰〜\-–—－至到]", period)[-1].strip()
+    nums = re.findall(r"\d+", tail)
+    try:
+        if len(nums) >= 3:                       # '115','07','16'
+            roc_y, mo, d = int(nums[0]), int(nums[1]), int(nums[2])
+        elif len(nums) == 1 and len(nums[0]) >= 7:  # '1150720' → 民國115年07月20日
+            s = nums[0]
+            roc_y, mo, d = int(s[:-4]), int(s[-4:-2]), int(s[-2:])
+        else:
+            return None
+        return date(roc_y + 1911, mo, d)
+    except (ValueError, IndexError):
+        return None
+
+
+def fetch_restricted_stocks(today: "date | None" = None) -> set[str]:
+    """當前『不宜短線進場』的 4 位數股票代號集合:全額交割(變更交易)、處置(分盤撮合)、
+    管理股票、停止買賣。來源為 TWSE/TPEX 官方免費 OpenAPI。
+
+    處置類帶『處置期間』→ 迄日 < today(已結束)不排除,解析不出迄日則保守排除;
+    變更交易/管理/停止買賣為當日狀態快照 → 直接排除。任一來源失敗只記錄、續跑其他來源。
+    """
+    today = today or date.today()
+    out: set[str] = set()
+
+    # 1) TWSE 變更交易(全額交割)— 當日快照,全數排除
+    try:
+        rows = http_get_json(_TWSE_ALTERED_URL, retries=1, delay=2.0)
+        if isinstance(rows, list):
+            for r in rows:
+                c = str(r.get("Code", "")).strip()
+                if _is_4digit_stock(c):
+                    out.add(c)
+    except Exception as e:
+        log.warning(f"TWSE 變更交易名單抓取失敗(略過此來源):{e}")
+
+    # 2) TWSE 處置(分盤)— 依處置期間迄日過濾
+    try:
+        rows = http_get_json(_TWSE_PUNISH_URL, retries=1, delay=2.0)
+        if isinstance(rows, list):
+            for r in rows:
+                c = str(r.get("Code", "")).strip()
+                if not _is_4digit_stock(c):
+                    continue
+                end = _roc_period_end(r.get("DispositionPeriod", ""))
+                if end is None or end >= today:   # 解析不出迄日 → 保守排除
+                    out.add(c)
+    except Exception as e:
+        log.warning(f"TWSE 處置名單抓取失敗(略過此來源):{e}")
+
+    # 3) TPEX 變更交易/分盤/管理/停止買賣 — 當日狀態快照(欄位為 'Ｙ'/'' 旗標)
+    try:
+        rows = http_get_json(_TPEX_CMODE_URL, retries=1, delay=2.0)
+        if isinstance(rows, list):
+            for r in rows:
+                c = str(r.get("SecuritiesCompanyCode", "")).strip()
+                if not _is_4digit_stock(c):
+                    continue
+                flags = (r.get("AlteredTrading"), r.get("PeriodicTrading"),
+                         r.get("ManagedStock"), r.get("SuspensionOfTrading"))
+                if any(str(v).strip() in ("Y", "Ｙ") for v in flags):
+                    out.add(c)
+    except Exception as e:
+        log.warning(f"TPEX 變更交易/分盤名單抓取失敗(略過此來源):{e}")
+
+    if out:
+        log.info(f"受限股名單(全額交割/處置/管理/停止買賣):{len(out)} 檔")
+    else:
+        log.warning("受限股名單為空(來源皆不可用或今日確無);本次不過濾受限股")
+    return out
+
+
 # ---------- 盤前 / 即時(premarket)----------
 # 全部免費、非官方/盡力而為;任何失敗都回空(呼叫端降級不整包死)。
 

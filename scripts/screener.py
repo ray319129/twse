@@ -230,9 +230,15 @@ def _foreign_holding_up(chips_df, period: int, threshold_pct_points: float) -> b
     if chips_df is None or chips_df.empty or "foreign_holding_pct" not in chips_df.columns:
         return False
     s = chips_df["foreign_holding_pct"].dropna()
-    if len(s) < period:
+    if s.empty:
         return False
-    delta = float(s.iloc[-1]) - float(s.iloc[-period])
+    # period 為日曆天數(config 預設 30):用「日期差」而非「位置差」。外資持股序列常有缺洞,
+    # 用 iloc[-period] 會把窗口飄移到 40~60 個日曆日,判定不穩。取最近一筆日期 <= (最新-period天) 當基準。
+    target = s.index[-1] - pd.Timedelta(days=period)
+    base = s.loc[:target]
+    if base.empty:
+        return False
+    delta = float(s.iloc[-1]) - float(base.iloc[-1])
     return delta >= threshold_pct_points
 
 

@@ -91,7 +91,21 @@ def load_chips(stock_id: str) -> pd.DataFrame:
 
 
 def upsert_chips(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
-    return _upsert(chips_path(stock_id), new_df, _load_parquet)
+    """籌碼合併採 combine_first 語意:新值優先,但「新資料的 NaN 不覆蓋舊有值」。
+    三大法人(~16:00)/融資券(~21:00)/外資持股(隔日)出表時間不同,當天 16:30 跑時後兩者是 NaN。
+    若用一般 concat + duplicated(keep="last"),隔天重疊回補時新的那格若仍缺,會把先前抓到的值蓋成 NaN,
+    造成永久缺洞。combine_first 讓「有值優先、缺值退回舊值」,配合 _update_chips 的 last-4d 重疊回補補回缺格。"""
+    if new_df.empty:
+        return load_chips(stock_id)
+    cur = load_chips(stock_id)
+    new_df = _normalize_index(new_df.copy())
+    if cur.empty:
+        _try_write_parquet(new_df, chips_path(stock_id))
+        return new_df
+    # combine_first:對齊 index/columns 的聯集,每格取 new_df 的非 NaN 值,否則退回 cur。
+    combined = new_df.combine_first(cur).sort_index()
+    _try_write_parquet(combined, chips_path(stock_id))
+    return combined
 
 
 # Monthly revenue (index = "YYYY-MM" string)

@@ -3,10 +3,12 @@
 
 # 全域設定
 global:
-  min_market_cap: 1_000_000_000   # 最小市值 (元),濾掉雞蛋水餃股
-  exclude_etf: true                # 不選 ETF
-  exclude_warrant: true            # 不選權證
-  exclude_full_cash: true          # 不選全額交割股
+  min_market_cap: 1_000_000_000   # 最小市值 (元)。※ 未直接實作市值門檻;實務上由 ranking.min_dollar_volume
+                                   #   (日均成交額 3000 萬)間接濾掉雞蛋水餃股。留此僅為文件用途。
+  exclude_etf: true                # 不選 ETF(已實作:filter_tradable_stocks 濾掉 00xx 代號)
+  exclude_warrant: true            # 不選權證(已實作:只留 4 位純數字代號,權證/可轉債為 5~6 位)
+  exclude_full_cash: true          # 排除受限股(已實作:fetch_restricted_stocks 抓 TWSE/TPEX 官方名單,
+                                   #   涵蓋全額交割/變更交易 + 處置分盤 + 管理 + 停止買賣;來源全掛則不過濾)
 
 # A. 趨勢類
 trend:
@@ -260,7 +262,8 @@ leading:
     lookback: 10                   # 近 10 個交易日
     min_buy_days: 6                # 至少 6 天法人淨買超
     flat_ret20_max: 0.08           # 但近 20 日股價漲跌幅在 ±8% 內(還沒發動)
-    max_scan: 120                  # 每日最多為幾檔「安靜股」額外抓籌碼(控制 API 用量)
+    max_scan: 120                  # ※ 未實作:原意是每日對全市場「安靜股」額外掃描抓籌碼,目前並無此掃描;
+                                   #   chip_accumulation 僅在已 enrich 的核心候選(含籌碼)上判定。此值目前無作用。
 
 # ★ 盤前自動看盤(scripts/premarket.py)— 不影響盤後選股流程
 # phase=preopen(約 08:45):抓個股試撮價 + 美股隔夜閘門 → 把昨晚核心10分類 A/B/C、刷掉棄單/作廢
