@@ -63,6 +63,18 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
         return df
     out = df.sort_index().copy()
 
+    # ---------- 雙軌價格(P2-D):指標吃「還原價」(adj_close 去除息假跳空),raw OHLC 另存供漲停/停損/顯示 ----------
+    # close_raw 永遠保留原始成交價;若 adj_close 覆蓋率夠高,整段等比例縮放 OHLC 成還原價後再算指標,
+    # 除息旺季的自然下跳就不會污染均線/動能/RSI/KD/布林。覆蓋率不足(舊快取只有部分列有 adj_close)時
+    # 整體退回原始價,避免「一半還原一半原始」的接縫斷層(比不還原更糟)。
+    out["close_raw"] = out["close"]
+    if "adj_close" in out.columns and len(out) and out["adj_close"].notna().mean() >= 0.95:
+        factor = (out["adj_close"] / out["close"].replace(0, np.nan)).ffill().bfill().fillna(1.0)
+        out["open"] = out["open"] * factor
+        out["high"] = out["high"] * factor
+        out["low"] = out["low"] * factor
+        out["close"] = out["adj_close"]
+
     for n in (5, 10, 20, 60, 120, 240):
         out[f"ma{n}"] = sma(out["close"], n)
 

@@ -42,6 +42,9 @@
   <div style="background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px;">
     <div style="font-size: 16px; font-weight: bold;">
       🔔 {{ s.stock_id }} {{ s.name }}
+      {% if s.new_stock %}<span style="background:#e8eaf6;color:#3949ab;padding:1px 7px;border-radius:10px;font-size:11px;">🆕 新股</span>{% endif %}
+      {% if s.first_board %}<span style="background:#fff3cd;color:#8a6d00;padding:1px 7px;border-radius:10px;font-size:11px;">首板</span>{% endif %}
+      {% if s.day_trade_warn %}<span style="background:#fdecea;color:#c0392b;padding:1px 7px;border-radius:10px;font-size:11px;">當沖比高{% if s.day_trade_ratio is not none %} {{ '%.0f'|format(s.day_trade_ratio*100) }}%{% endif %}</span>{% endif %}
       {% if s.close %}<span style="color: #555; font-weight: normal;">收 {{ '%.2f'|format(s.close) }}</span>{% endif %}
       {% if s.change_pct is not none %}<span style="color: {% if s.change_pct >= 0 %}#27ae60{% else %}#c0392b{% endif %}; font-weight: normal;">({{ '%+.2f'|format(s.change_pct) }}%)</span>{% endif %}
       {% if s.score is defined %}<span style="float:right;font-size:14px;">信心 <strong style="color:#5e35b1;">{{ s.score }}</strong> {{ profile_badge(s.profile) }}</span>{% endif %}
@@ -112,8 +115,8 @@
   {% for s in core %}
   <div style="background:#fff; border:1px solid #e0b4b0; border-left:4px solid #c0392b; border-radius:6px; padding:10px 14px; margin-bottom:10px;">
     <div style="font-size:15px;font-weight:bold;">
-      #{{ loop.index }} {% if s.hot_industry %}🔥{% endif %}{{ s.stock_id }} {{ s.name }} {{ profile_badge(s.profile) }}
-      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}{% if s.catalyst_bonus and s.catalyst_bonus > 0 %} <span style="color:#5e35b1;font-size:12px;">題材 +{{ s.catalyst_bonus }}</span>{% endif %}{% if s.fund_bonus and s.fund_bonus > 0 %} <span style="color:#2471a3;font-size:12px;">基本面 +{{ s.fund_bonus }}</span>{% endif %}{% if s.industry_bonus and s.industry_bonus > 0 %} <span style="color:#d35400;font-size:12px;">產業 +{{ s.industry_bonus }}</span>{% endif %}</span>
+      #{{ loop.index }} {% if s.hot_industry %}🔥{% endif %}{{ s.stock_id }} {{ s.name }} {{ profile_badge(s.profile) }}{% if s.new_stock %} <span style="background:#e8eaf6;color:#3949ab;padding:1px 7px;border-radius:10px;font-size:11px;">🆕 新股</span>{% endif %}{% if s.first_board %} <span style="background:#fff3cd;color:#8a6d00;padding:1px 7px;border-radius:10px;font-size:11px;">首板</span>{% endif %}{% if s.day_trade_warn %} <span style="background:#fdecea;color:#c0392b;padding:1px 7px;border-radius:10px;font-size:11px;">當沖比高{% if s.day_trade_ratio is not none %} {{ '%.0f'|format(s.day_trade_ratio*100) }}%{% endif %}</span>{% endif %}
+      <span style="float:right;">信心 <strong style="color:#c0392b;font-size:17px;">{{ s.score }}</strong>{% if s.chip_bonus and s.chip_bonus > 0 %} <span style="color:#27ae60;font-size:12px;">籌碼 +{{ s.chip_bonus }}</span>{% endif %}{% if s.catalyst_bonus and s.catalyst_bonus > 0 %} <span style="color:#5e35b1;font-size:12px;">題材 +{{ s.catalyst_bonus }}</span>{% endif %}{% if s.fund_bonus and s.fund_bonus > 0 %} <span style="color:#2471a3;font-size:12px;">基本面 +{{ s.fund_bonus }}</span>{% endif %}{% if s.industry_bonus and s.industry_bonus > 0 %} <span style="color:#d35400;font-size:12px;">產業 +{{ s.industry_bonus }}</span>{% endif %}{% if s.combo_bonus and s.combo_bonus > 0 %} <span style="color:#155724;font-size:12px;">共振 +{{ s.combo_bonus }}</span>{% endif %}{% if s.day_trade_penalty and s.day_trade_penalty < 0 %} <span style="color:#c0392b;font-size:12px;">當沖 {{ s.day_trade_penalty }}</span>{% endif %}</span>
     </div>
     <div style="font-size:13px;color:#444;margin-top:3px;">
       收 {{ '%.2f'|format(s.close) }}
@@ -124,6 +127,7 @@
       {% if s.ret20_pct is not none %} · 20日 {{ '%+.1f'|format(s.ret20_pct) }}%{% endif %}
     </div>
     <div style="margin-top:3px;">{{ score_bar(s) }}</div>
+    {% if s.combos %}<div style="margin-top:3px;">{% for c in s.combos %}<span style="background:#d4edda;color:#155724;padding:1px 8px;border-radius:10px;font-size:11px;margin-right:4px;">🎯 {{ c }}</span>{% endfor %}</div>{% endif %}
     {% if s.chips and s.chips.inst_total_today is defined %}
       <div style="margin-top:3px;font-size:12px;color:#555;">籌碼:三大法人 {{ '{:+,}'.format(s.chips.inst_total_today // 1000) }} 張{% if s.chips.inst_buy_streak > 0 %} · 連買 {{ s.chips.inst_buy_streak }} 日{% endif %}{% if s.chips.foreign_holding_pct is defined %} · 外資持股 {{ s.chips.foreign_holding_pct }}%{% endif %}</div>
     {% endif %}

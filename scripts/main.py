@@ -14,7 +14,7 @@ from .config import (
 from .fetchers import (
     fetch_stock_info, filter_tradable_stocks, fetch_news,
     fetch_price_history, fetch_chips_history,
-    fetch_monthly_revenue, fetch_per_yield,
+    fetch_monthly_revenue, fetch_per_yield, fetch_day_trade_ratio,
     fetch_valuation_snapshot, fetch_valuation_snapshot_tpex, fetch_index_history,
     fetch_restricted_stocks,
 )
@@ -197,6 +197,14 @@ def _enrich_pick(pick: dict, today: date, index_close, *, fundamentals: bool,
             eps_series = fin["eps"].dropna()
             if not eps_series.empty:
                 eps_df = eps_series.to_frame("eps")
+        # 當沖比(3.4-2):只在 enrich 階段(核心候選/自選)抓,控 FinMind 額度;抓不到回 None → 不扣分。
+        dt_cfg = ((screen_cfg or {}).get("scoring", {}) or {}).get("day_trade_penalty", {}) or {}
+        if dt_cfg.get("enabled", False):
+            dtr = fetch_day_trade_ratio(sid)
+            if dtr is not None:
+                pick["day_trade_ratio"] = round(float(dtr), 3)
+                if dtr > float(dt_cfg.get("threshold", 0.40)):
+                    pick["day_trade_warn"] = True     # 供 email/網頁標記「當沖比偏高」
 
     if not df.empty and len(df) >= 60:
         df_ind = compute_all(df)
@@ -295,11 +303,15 @@ def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int,
     fund_cfg = scoring_cfg.get("fundamental_bonus", {}) or {}
     cat_cfg = scoring_cfg.get("catalyst_bonus", {}) or {}
     ind_cfg = scoring_cfg.get("industry_bonus", {}) or {}
+    combo_cfg = scoring_cfg.get("combo_bonus", {}) or {}
+    dt_cfg = scoring_cfg.get("day_trade_penalty", {}) or {}
     chip_w = float(chip_cfg.get("weight", 10))
     fund_w = float(fund_cfg.get("weight", 5))
     cat_w = float(cat_cfg.get("weight", 8))
     ind_w = float(ind_cfg.get("weight", 4))
     ind_top_n = int(ind_cfg.get("top_n", 5))
+    combo_w = float(combo_cfg.get("weight", 6))
+    combo_per = float(combo_cfg.get("per_combo", 3))
     for s in candidates:
         bonus = 0.0
         if chip_cfg.get("enabled", False):
@@ -323,6 +335,21 @@ def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int,
             s["industry_signal"] = round(ind_sig, 2) if rk is not None else None
             s["industry_bonus"] = round(ind_w * ind_sig, 1)
             bonus += s["industry_bonus"]
+        if combo_cfg.get("enabled", False):
+            # combo 共振加分:命中的多訊號交集組合越多,越有把握(每個 combo 加 per_combo,上限 weight)。
+            # combos 在 _enrich_pick 由 screen_stock 算出(Bug 1 修好後才真的會有值)。
+            n_combo = len(s.get("combos") or [])
+            s["combo_bonus"] = round(min(n_combo * combo_per, combo_w), 1) if n_combo else 0.0
+            bonus += s["combo_bonus"]
+        if dt_cfg.get("enabled", False):
+            # 當沖比過高扣分(3.4-2):當沖比 > thr → 隔日沖對手盤多、隔天賣壓重,線性扣到 penalty。
+            dtr = s.get("day_trade_ratio")
+            if dtr is not None:
+                thr = float(dt_cfg.get("threshold", 0.40))
+                pen_max = float(dt_cfg.get("penalty", 8))
+                over = max(0.0, (float(dtr) - thr) / max(1e-6, 1 - thr))
+                s["day_trade_penalty"] = round(-pen_max * min(1.0, over), 1)
+                bonus += s["day_trade_penalty"]
         s["rank_score"] = round(float(s["score"]) + bonus, 1)
     return sorted(candidates, key=lambda x: -x["rank_score"])[:core_count]
 
@@ -354,6 +381,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     # 信心分設定:scoring 區塊(權重/門檻)+ 沿用 ranking 的流動性門檻
     score_cfg = dict(cfg.get("scoring", {}) or {})
     score_cfg["min_dollar_volume"] = float(rank_cfg.get("min_dollar_volume", 30_000_000))
+    min_hist_new = int(score_cfg.get("min_history_new", 60))   # 新股軌道:第一遍評分的最低 K 棒數(< min_history 者標 new_stock)
 
     log.info("Loading stock universe...")
     info = fetch_stock_info()
@@ -437,7 +465,8 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         if historical:
             df = df[df.index.date <= today]
 
-        if len(df) < 120:
+        # 新股獨立軌道:不再一律要求 120 根 K 棒;新股(>= min_history_new)也評分,只是長均線/相對強度較弱。
+        if len(df) < min_hist_new:
             continue
 
         df_ind = compute_all(df)
@@ -445,12 +474,14 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             df_ind = compute_relative_strength(df_ind, index_close, n=60)
 
         last = df_ind.iloc[-1]
-        close_v = last.get("close"); ma5_v = last.get("ma5")
+        close_v = last.get("close"); ma5_v = last.get("ma5")   # close_v = 還原價(與均線同尺度,供 above_ma/bullish 判斷)
         ma20_v = last.get("ma20"); ma60_v = last.get("ma60"); ma120_v = last.get("ma120")
-        prev_c = df_ind["close"].iloc[-2] if len(df_ind) >= 2 else None
+        # 顯示 / 漲跌停家數(regime)用「原始成交價」raw,不用還原價 —— 使用者看到的收盤/漲跌幅要跟券商一致。
+        close_disp = last.get("close_raw", close_v)
+        prev_disp = df_ind["close_raw"].iloc[-2] if ("close_raw" in df_ind.columns and len(df_ind) >= 2) else None
         chg = None
-        if pd.notna(close_v) and prev_c is not None and pd.notna(prev_c) and prev_c:
-            chg = round((close_v / prev_c - 1) * 100, 2)
+        if pd.notna(close_disp) and prev_disp is not None and pd.notna(prev_disp) and prev_disp:
+            chg = round((float(close_disp) / float(prev_disp) - 1) * 100, 2)
         ret20 = 0.0
         if len(df_ind) >= 21:
             c0, c20 = df_ind["close"].iloc[-1], df_ind["close"].iloc[-21]
@@ -472,7 +503,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         if conv:
             conv.update({
                 "stock_id": sid, "name": sname, "industry": industry,
-                "close": float(close_v) if pd.notna(close_v) else None,
+                "close": float(close_disp) if pd.notna(close_disp) else None,   # 顯示用原始成交價
                 "change_pct": chg,
                 "valuation": valuation_snapshot.get(sid, {}),
             })
@@ -520,6 +551,13 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     )
     # 候選池:基礎信心分最高的觸發股(略多於 core_count,讓 stage-2 加成能改變誰進核心);受 enrich_top_n 上限保護 API
     core_candidates = trigger_sorted[:max(cand_n, core_count)][:enrich_top_n]
+    # 新股獨立軌道:確保候選池含最多 new_max 檔「觸發的新股」(否則低分新股會被老股擠出候選池、根本沒機會被 enrich)
+    new_cfg = scoring_cfg.get("new_stock", {}) or {}
+    new_max = int(new_cfg.get("max_core", 2)) if new_cfg.get("enabled", False) else 0
+    if new_max:
+        have_ids = {s["stock_id"] for s in core_candidates}
+        new_trig = [s for s in trigger_sorted if s.get("new_stock") and s["stock_id"] not in have_ids]
+        core_candidates = core_candidates + new_trig[:new_max]
 
     # 產業排行(用全市場第一遍資料就能算,不需等 enrich)→ 同時供 stage-2 產業加成 + 熱門產業🔥標記
     industry_trends = compute_industry_trends(industry_rows)
@@ -533,6 +571,21 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
 
     # stage-2 加成(籌碼/基本面/催化劑/產業相對強度)後重排取核心;無資料 → 該項 bonus 0(中性不扣分);信心分 score 不變
     core = _rank_core(core_candidates, scoring_cfg, core_count, industry_rank)
+    # 新股獨立軌道:保留最多 new_max 個核心名額給新股(_rank_core 已對所有候選寫好 rank_score)。
+    # 新股同樣須觸發+達門檻;若核心裡新股不足,用最佳新股替換核心中 rank_score 最低的老股(維持 core_count 不變)。
+    if new_max and core:
+        n_new = sum(1 for s in core if s.get("new_stock"))
+        if n_new < new_max:
+            in_core = {id(s) for s in core}
+            pool = sorted([s for s in core_candidates if s.get("new_stock") and id(s) not in in_core],
+                          key=lambda x: -x.get("rank_score", x["score"]))
+            need = min(new_max - n_new, len(pool))
+            if need > 0:
+                non_new = sorted([s for s in core if not s.get("new_stock")],
+                                 key=lambda x: -x.get("rank_score", x["score"]))
+                drop = {id(s) for s in non_new[-need:]}          # 移除末段 rank_score 最低的老股
+                core = [s for s in core if id(s) not in drop] + pool[:need]
+                core.sort(key=lambda x: -x.get("rank_score", x["score"]))
     core_ids = {s["stock_id"] for s in core}
     watch = sorted(
         [s for s in scored if s["brewing"] and not s["trigger"]

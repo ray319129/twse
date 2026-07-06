@@ -119,12 +119,19 @@ market:
 # ★ 信心分權重與門檻(scripts/scoring.py compute_conviction)
 # 全部可調;留空則用程式內預設(= 下列數值)。改這裡就能系統化調參、不必動 .py。
 scoring:
-  min_history: 120           # K 棒少於此直接跳過
+  min_history: 120           # 「成熟股」K 棒門檻(長均線/相對強度完整);少於此但 >= min_history_new 者列為新股
+  min_history_new: 60        # 新股獨立軌道:>= 此即可評分(長均線/相對強度會較弱,屬正常),標記 new_stock
+  new_stock:                 # 新股獨立軌道:保留核心名額,避免新股被滿歷史老股完全擠掉(新股仍須觸發+達門檻)
+    enabled: true
+    max_core: 2              # 最多保留幾個核心名額給新股(不足則以最佳新股替換核心中最弱的老股)
   weights:                   # 五面向加權(建議總和=1,但不強制)
-    trend: 0.25              # 趨勢健康
-    rs: 0.25                 # 相對強度
-    setup: 0.25             # 短線時機/量能
-    quality: 0.15            # 品質估值
+    # v2 調整(2026-07-07):品質估值對「短線」是落後指標,由 0.15 降到 0.05;釋出的 0.10 分給
+    # 趨勢/相對強度/短線時機(短線真正該重的三項)。籌碼 v2 原想進基礎分 25%,但全市場三大法人淨買
+    # 無免費 bulk 資料源(TWSE openapi 未提供 T86),故仍以 stage-2 chip_bonus 實現(見下,權重已調高)。
+    trend: 0.28              # 趨勢健康
+    rs: 0.28                 # 相對強度
+    setup: 0.29             # 短線時機/量能
+    quality: 0.05            # 品質估值(短線落後指標,降權)
     liquidity: 0.10          # 流動性
   liquidity:
     span: 50                 # 流動性分:日均額 = min×span 時得 1 分(對數)
@@ -193,7 +200,8 @@ scoring:
   chip_bonus:
     enabled: true
     candidate_count: 15      # 取基礎信心分前 N 的觸發股當候選,加籌碼分後重排取 core_count
-    weight: 10               # 籌碼滿分最多加此分到「排名分」(原信心分 score 顯示不變)
+    weight: 15               # 籌碼滿分最多加此分到「排名分」(v2 想把籌碼拉到基礎分 25% 級的重要性;
+                             #   但全市場三大法人無免費 bulk 源,故以「調高 stage-2 權重 10→15」逼近該意圖)
     streak_full: 5           # 法人連買達此天數 → 連買項滿分
     foreign_full: 2.0        # 30 日外資持股增加此百分點 → 外資項滿分
     short_cover_thr: 0.05    # 融券較前日減少 ≥ 此(5%)→ 回補項得分
@@ -222,9 +230,21 @@ scoring:
   # 概念對應 IBD 產業群組排名(Industry Group Rank)—— 個股表現之外,也看它所屬產業是否同步強勢。
   # 零額外 API,沿用全市場第一遍已算好的 industry_rows。
   industry_bonus:
-    enabled: false
-    weight: 4                # 產業滿分最多加此分(低於籌碼/催化劑,屬輔助加成)
+    enabled: true            # v2:產業相對強度升為一級因子(2026-07-07 打開)
+    weight: 8                # 產業滿分最多加此分(v2 由 4 調到 8,對應 IBD 產業群組排名的重要性)
     top_n: 5                  # 產業排行前 N 才有加分;第1名滿分,第N名接近0分,線性遞減
+  # stage-2 combo 共振加分(2026-07-07 加):命中的多訊號交集組合(combos)越多越有把握。
+  # Bug 1 修好後 combos 才真的會觸發;每個 combo 加 per_combo 分,上限 weight。
+  combo_bonus:
+    enabled: true
+    weight: 6                # combo 加分上限
+    per_combo: 3             # 每命中一個 combo 加此分(命中 2 個即達上限 6)
+  # stage-2 當沖比扣分(3.4-2,2026-07-07 加):當沖比過高 → 隔日沖對手盤多、隔天賣壓重。
+  # 需 FinMind TaiwanStockDayTrading(免費,只對核心候選抓);抓不到(無 token/失敗)→ 不扣分不報錯。
+  day_trade_penalty:
+    enabled: true
+    threshold: 0.40          # 當沖比 > 此(40%)開始扣分
+    penalty: 8               # 當沖比 100% 時扣到此分(threshold→0、100%→-penalty 線性)
 
 # ★ 進場(跳空保護)— 解決「盤後算的價,隔天跳空就失效」的痛點。
 # 系統假設「隔日開盤」進場(貼近實際),並用 max_chase 限制追價:開太高就棄單,不追。

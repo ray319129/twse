@@ -42,8 +42,11 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
     """
     cfg = cfg or {}
     min_len = int(_g(cfg, "min_history", 120))
-    if df is None or len(df) < min_len:
+    min_new = int(_g(cfg, "min_history_new", 60))          # 新股獨立軌道:>= 此即可評分(< min_len 標記 new_stock)
+    gate = min(min_len, min_new)
+    if df is None or len(df) < gate:
         return None
+    new_stock = len(df) < min_len                          # 上市未滿 min_len 個交易日 → 新股(長均線/相對強度會較弱,屬正常)
     last = df.iloc[-1]
     close = _v(last, "close")
     if pd.isna(close) or close <= 0:
@@ -217,8 +220,8 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
     )
 
     # ---------- 加總 ----------
-    w_trend = float(_g(cfg, "weights.trend", 0.25)); w_rs = float(_g(cfg, "weights.rs", 0.25))
-    w_setup = float(_g(cfg, "weights.setup", 0.25)); w_quality = float(_g(cfg, "weights.quality", 0.15))
+    w_trend = float(_g(cfg, "weights.trend", 0.28)); w_rs = float(_g(cfg, "weights.rs", 0.28))
+    w_setup = float(_g(cfg, "weights.setup", 0.29)); w_quality = float(_g(cfg, "weights.quality", 0.05))
     w_liq = float(_g(cfg, "weights.liquidity", 0.10))
     raw = 100.0 * (w_trend * trend + w_rs * rs + w_setup * setup + w_quality * quality + w_liq * liquidity)
     if exhausted:
@@ -260,7 +263,7 @@ def compute_conviction(df: pd.DataFrame, valuation: dict | None = None, *, cfg: 
         "score": round(raw, 1),
         "trend": round(trend, 2), "rs": round(rs, 2), "setup": round(setup, 2),
         "quality": round(quality, 2), "liquidity": round(liquidity, 2),
-        "exhausted": exhausted, "trigger": trigger, "brewing": brewing,
+        "exhausted": exhausted, "trigger": trigger, "brewing": brewing, "new_stock": new_stock,
         "breakout": breakout, "pullback_turn": pullback_turn, "limit_up_today": limit_up_today,
         "close_pos": round(float(close_pos), 2) if pd.notna(close_pos) else None,
         "consec_big_up": consec_big_up,

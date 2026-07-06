@@ -125,7 +125,9 @@ def fetch_price_history(stock_id: str, market: str, days: int = 400) -> pd.DataF
         "Open": "open", "High": "high", "Low": "low",
         "Close": "close", "Adj Close": "adj_close", "Volume": "volume",
     })
-    keep = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
+    # 雙軌價格:保留 adj_close(yfinance 已含除息+分割還原)供 compute_all 算指標去除除息假跳空;
+    # close 維持原始成交價供漲停判定 / 停損價 / 顯示。舊快取沒有 adj_close 欄,compute_all 會自動退回用 close。
+    keep = [c for c in ["open", "high", "low", "close", "adj_close", "volume"] if c in df.columns]
     df = df[keep].copy()
     # yfinance 有時對「剛收盤/未定」的最新一根回傳 NaN 收盤,丟掉(否則均線全毀、評分當掉)
     if "close" in df.columns:
@@ -473,6 +475,46 @@ def fetch_balance_sheet(stock_id: str, quarters: int = 8) -> pd.DataFrame:
 def fetch_cashflow(stock_id: str, quarters: int = 8) -> pd.DataFrame:
     """季現金流(營業/投資現金流、資本支出)。空 DataFrame on failure."""
     return _fetch_statement("TaiwanStockCashFlowsStatement", stock_id, _CF_TYPES, quarters)
+
+
+def fetch_day_trade_ratio(stock_id: str, days: int = 10) -> float | None:
+    """個股「當日沖銷比」= 當沖成交量 / 總成交量(取最近一個有值的交易日)。
+    來源 FinMind TaiwanStockDayTrading(當日沖銷交易標的及成交量值,免費)。當沖比過高 = 隔日沖對手盤多、
+    隔天賣壓重(3.4-2)。任一步失敗(無 token / dataset 失效 / 欄位對不上)回 None → 呼叫端當「無資料」不扣分不報錯。
+
+    FinMind 欄位名稱在不同期間略有差異,給幾個候選;抓不到就回 None(與全檔其餘 FinMind 存取一致的優雅降級)。"""
+    end = date.today()
+    start = end - timedelta(days=days * 2)
+    rows = fetch_finmind(
+        "TaiwanStockDayTrading",
+        data_id=stock_id, start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return None
+    df = pd.DataFrame(rows)
+    if "date" not in df.columns:
+        return None
+    # 當沖量欄位候選 / 總量欄位候選(FinMind 版本差異)
+    dt_col = next((c for c in ("DayTradingVolume", "Volume", "day_trading_volume") if c in df.columns), None)
+    tot_col = next((c for c in ("TotalVolume", "StockVolume", "total_volume", "TradeVolume") if c in df.columns), None)
+    # 有些版本直接給比率
+    ratio_col = next((c for c in ("DayTradingRatio", "day_trading_ratio", "Ratio") if c in df.columns), None)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df = df.dropna(subset=["date"]).sort_values("date")
+    if df.empty:
+        return None
+    last = df.iloc[-1]
+    try:
+        if ratio_col and pd.notna(last.get(ratio_col)):
+            r = float(last[ratio_col])
+            return r / 100.0 if r > 1.5 else r          # 若是百分比(>1.5 視為 %)換算成 0~1
+        if dt_col and tot_col:
+            dt = float(last[dt_col]); tot = float(last[tot_col])
+            if tot > 0:
+                return max(0.0, min(1.0, dt / tot))
+    except (ValueError, TypeError):
+        return None
+    return None
 
 
 def fetch_per_yield(stock_id: str, days: int = 10) -> pd.DataFrame:

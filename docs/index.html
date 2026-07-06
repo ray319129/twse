@@ -869,10 +869,12 @@ function coreCard(s,i){
   if(isNum(s.catalyst_bonus)&&s.catalyst_bonus>0)bonuses.push(`題材 +${iv(s.catalyst_bonus)}`);
   if(isNum(s.fund_bonus)&&s.fund_bonus>0)bonuses.push(`基本面 +${iv(s.fund_bonus)}`);
   if(isNum(s.industry_bonus)&&s.industry_bonus>0)bonuses.push(`產業 +${iv(s.industry_bonus)}`);
+  if(isNum(s.combo_bonus)&&s.combo_bonus>0)bonuses.push(`共振 +${iv(s.combo_bonus)}`);
+  if(isNum(s.day_trade_penalty)&&s.day_trade_penalty<0)bonuses.push(`當沖 ${iv(s.day_trade_penalty)}`);
   const bonusHtml=bonuses.map(b=>`<div class="chipb">${b}</div>`).join('');
   return `<div class="ccard">
     <div class="top">
-      <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}</div>
+      <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}${s.new_stock?'<span class="badge b-bal" style="background:#e8eaf6;color:#3949ab">🆕 新股</span>':''}${s.first_board?'<span class="badge b-bal" style="background:#fff3cd;color:#8a6d00">首板</span>':''}${s.day_trade_warn?`<span class="badge b-bal" style="background:#fdecea;color:#c0392b">當沖${isNum(s.day_trade_ratio)?Math.round(s.day_trade_ratio*100)+'%':'高'}</span>`:''}</div>
         <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}<span class="mdot"></span><span class="trig">${trig}</span>${isNum(s.ret5_pct)?`<span class="mdot"></span>5日 <span class="${cls(s.ret5_pct)} num">${fmt(s.ret5_pct,1)}%</span>`:''}${isNum(s.ret20_pct)?`<span class="mdot"></span>20日 <span class="${cls(s.ret20_pct)} num">${fmt(s.ret20_pct,1)}%</span>`:''}</div>
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
