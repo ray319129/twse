@@ -80,6 +80,32 @@ def upsert_prices(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
     return _upsert(price_path(stock_id), new_df, _load_parquet)
 
 
+def prices_scale_shift(cur: pd.DataFrame, new_df: pd.DataFrame, threshold: float = 0.03) -> bool:
+    """偵測增量價格與既有快取在『重疊日收盤』的尺度偏移。
+
+    yfinance 遇股票分割/減資會回溯調整整條序列,但每日只抓最近 10 天增量 → 快取是舊尺度、
+    增量是新尺度,直接 concat 合併後均線/動能/一切指標全毀,且不會自我修復(除非快取被刪)。
+    台股減資不罕見,除權息旺季尤甚。重疊日收盤差異 > threshold(預設 3%)即視為偏移,
+    呼叫端應整段重抓覆蓋,而非增量合併。
+
+    只抓分割/減資,不會被除息誤觸發:auto_adjust=False 的原始收盤不因『配息』回溯調整
+    (除息只造成序列內的自然跳空,是另一個坑,需雙軌 adj_close 解,不在本偵測範圍)。"""
+    if cur is None or new_df is None or cur.empty or new_df.empty:
+        return False
+    if "close" not in cur.columns or "close" not in new_df.columns:
+        return False
+    a = _normalize_index(cur.copy())
+    b = _normalize_index(new_df.copy())
+    overlap = a.index.intersection(b.index)
+    if len(overlap) == 0:
+        return False
+    denom = a.loc[overlap, "close"]
+    ratio = (b.loc[overlap, "close"] / denom.where(denom != 0)).dropna()
+    if ratio.empty:
+        return False
+    return bool(((ratio - 1).abs() > threshold).any())
+
+
 # Chips (institutional + margin + foreign holding history per stock)
 
 def chips_path(stock_id: str) -> Path:

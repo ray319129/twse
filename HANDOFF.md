@@ -228,4 +228,13 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **Bug 3 — 籌碼永久缺洞 + 外資窗飄移**:`_update_chips` 起點改 `last-4d` 重疊回補;[storage.py](scripts/storage.py) `upsert_chips` 改 `combine_first`(新 NaN 不覆蓋舊值);外資 30 日變化改「日期差」([main.py](scripts/main.py) `_chip_summary` 與 [screener.py](scripts/screener.py) `_foreign_holding_up`)。新增一次性 backfill 工具 [scripts/backfill_chips.py](scripts/backfill_chips.py)(`python -m scripts.backfill_chips`,需 FINMIND_TOKEN)補既有快取的歷史缺洞。驗證:合成缺洞測試,回補後缺格被填、且未覆蓋 refetch 未涵蓋的舊值。
 - **Bug 4 — 受限股未排除**([fetchers.py](scripts/fetchers.py) 新增 `fetch_restricted_stocks`):抓 TWSE `TWT85U`(變更交易/全額交割)+ `announcement/punish`(處置,依處置期間迄日過濾)+ TPEX `tpex_cmode`(變更交易/分盤/管理/停止買賣),排除採分盤撮合的股票(隔日沖大忌)。[main.py](scripts/main.py) `daily_run` 建 universe 後依 `global.exclude_full_cash`(預設 true)過濾;歷史測試/來源全掛則不過濾(優雅降級)。config 同步註明 `min_market_cap`/`chip_accumulation.max_scan` 為未實作狀態。驗證:實測 TWSE 端點回 40 檔受限股,處置期間迄日過濾正確(已結束的 2 檔被排除);TPEX 本機因 SSL 憑證環境問題失敗但優雅降級(生產環境同 host 的估值 API 正常)。
 
-**待辦(接續)**:下次排程實跑或本機餵真 token 跑一次 `--date`,確認 email/網頁 hits 出現 D/E 標籤、combos 有值;跑一次 `scripts.backfill_chips` 補歷史缺洞。審查清單第二~五節(除權息尺度偏移、出場規則、大盤閘門、隔日沖偵測等)尚未做,依使用者指示「等 bug 修好後再做」。
+**待辦(接續)**:下次排程實跑或本機餵真 token 跑一次 `--date`,確認 email/網頁 hits 出現 D/E 標籤、combos 有值;跑一次 `scripts.backfill_chips` 補歷史缺洞。
+
+### 11.1 P0 續作(2026-07-07)— Bug 5 + 出場規則 3.1
+接續把審查清單的 **P0** 做完(Bug 1~4 已完成,見上;第三~五節結構性項目仍待使用者決定是否開做)。
+
+- **Bug 5 最小版 — 價格尺度偏移偵測(除權息旺季必備)**:[storage.py](scripts/storage.py) 新增純函式 `prices_scale_shift(cur, new_df, threshold=0.03)`;[main.py](scripts/main.py) 增量價格路徑偵測到重疊日收盤差 >3%(疑減資/分割 yfinance 回溯調整)→ 整段重抓 400 天覆蓋,重抓失敗則**保留舊快取、不合併新尺度增量**(避免舊+新尺度混在一起毀掉所有指標)。只抓分割/減資,不會被除息誤觸發(auto_adjust=False 原始收盤不因配息回溯調整;除息雜訊要雙軌 adj_close 解,屬 P2)。驗證:合成減資序列正確偵測 True、正常增量 False。
+- **出場規則 3.1 — 均線停損寬限 + 報表拆分**([track.py](scripts/track.py)):
+  - `_simulate_exit` 新增 `ma_stop_grace_days`(config `exit.momentum: 2` / `exit.swing: 0`):進場後前 N 個交易日只用初始停損,第 N+1 日起才啟用均線停損 —— 突破股隔日進場常正常回測一天就破 5MA,太緊會被單日洗盤掃出(實測均線停損佔出場 53.7%、平均持有 1.2 天)。
+  - `build_report` 的 `exit_sim` 新增 `by_trigger`(突破/回測轉強/其他)與 `by_style`(動能/波段)拆分(`_exit_stats`/`_trigger_of` helper);console `_print_report`、email、網頁 SPA 皆已呈現,作為後續調參依據。
+  - ⚠️ **誠實觀察**:在既有小樣本(75~77 筆 closed)上,grace=2 確實把均線停損比例 53.2%→44.0%、止損 37.7%→46.7%、持有 1.2→1.4 日(符合「少被單日洗」的設計意圖),但**已實現勝率反而 13.0%→12.0%**(樣本小、集中在一段壞窗)。3.1 本就是「需回測驗證」的假設,預設 2 依審查清單建議;可在 config 設 0 關閉或依累積真實資料調。改 SPA 後已 `node --check` 通過;email 模板已試 render 通過。

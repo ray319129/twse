@@ -19,7 +19,7 @@ from .fetchers import (
     fetch_restricted_stocks,
 )
 from .storage import (
-    load_prices, upsert_prices,
+    load_prices, upsert_prices, save_prices, prices_scale_shift,
     load_chips, upsert_chips,
     load_revenue, upsert_revenue,
     load_per, upsert_per,
@@ -416,7 +416,20 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             last_date = existing.index.max().date()
             if not historical and (today - last_date).days >= 1:
                 inc = fetch_price_history(sid, market, days=10)
-                df = upsert_prices(sid, inc) if not inc.empty else existing
+                if not inc.empty and prices_scale_shift(existing, inc):
+                    # 減資/分割:yfinance 回溯調整了整條序列,快取(舊尺度)與增量(新尺度)不能 concat,
+                    # 否則均線/動能全毀且不自癒。整段重抓 400 天覆蓋(除權息旺季必備防線)。
+                    full = fetch_price_history(sid, market, days=400)
+                    if not full.empty:
+                        save_prices(sid, full)
+                        df = full
+                        log.warning(f"{sid} 價格尺度偏移(疑減資/分割),已整段重抓覆蓋快取")
+                    else:
+                        # 重抓失敗:保留舊尺度快取(頂多少幾天),別把新尺度增量合併進去(會毀指標)
+                        df = existing
+                        log.warning(f"{sid} 疑價格尺度偏移但重抓失敗,暫留舊快取、不合併增量")
+                else:
+                    df = upsert_prices(sid, inc) if not inc.empty else existing
             else:
                 df = existing
 

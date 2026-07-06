@@ -941,6 +941,13 @@ function renderPerf(){
     stats+=`<div class="stat"><div class="v">${isNum(es.win_rate)?es.win_rate+'%':'-'}</div><div class="l">已實現勝率 · 平均(已扣成本) <span class="${cls(es.avg_ret)}">${fmt(es.avg_ret)}%</span>${isNum(es.avg_ret_gross)?` <span style="color:var(--muted-2)">(扣前${fmt(es.avg_ret_gross)}%)</span>`:''} · 持有 ${isNum(es.avg_hold_days)?es.avg_hold_days+'日':'-'}<br><span style="color:var(--muted-2)">隔日開盤進場 · 開高&gt;${isNum(es.max_chase)?es.max_chase:'-'}%棄單 · 停損-${isNum(es.hard_stop)?es.hard_stop:'-'}%/TP1=${isNum(es.r_multiple)?es.r_multiple:'-'}R · 含手續費${isNum(es.fee_rate)?es.fee_rate:'-'}%×2+稅${isNum(es.tax_rate)?es.tax_rate:'-'}%(同日出場才用當沖${isNum(es.tax_rate_daytrade)?es.tax_rate_daytrade:'-'}%)+滑價${isNum(es.slippage_pct)?es.slippage_pct:'-'}%×2</span></div></div>`;
     const rs=Object.entries(es.reasons||{}).map(([k,v])=>`${esc(k)} ${isNum(v)?v:'-'}%`).join(' · ');
     stats+=`<div class="stat"><div class="v" style="font-size:15px;font-weight:700">${rs||'—'}</div><div class="l">出場原因 · 持有中 ${isNum(es.open)?es.open:0} · 跳空棄單 ${isNum(es.skipped_gap)?es.skipped_gap:0} · 待進場 ${isNum(es.pending)?es.pending:0}${es.chased_catalyst?` · <span style="color:#8e44ad">催化劑放寬進場 ${es.chased_catalyst}</span>`:''}</div></div>`;
+    /* 出場拆分:依進場型態(突破/回測轉強)與風格(動能/波段)—— 看哪種組合真有 edge,調參依據 */
+    const trigLbl={breakout:'突破',pullback_turn:'回測轉強',other:'其他'},styleLbl={momentum:'動能',swing:'波段'};
+    const brk=(grp,lbl)=>Object.entries(grp||{}).map(([k,s])=>`${lbl[k]||esc(k)} <span style="color:var(--muted-2)">n${s.n}</span>·勝${isNum(s.win_rate)?s.win_rate:'-'}%·<span class="${cls(s.avg_ret)}">${fmt(s.avg_ret)}%</span>·${isNum(s.avg_hold_days)?s.avg_hold_days:'-'}日`).join('　｜　');
+    if(es.by_trigger&&Object.keys(es.by_trigger).length)
+      stats+=`<div class="stat"><div class="v" style="font-size:13px;font-weight:600">${brk(es.by_trigger,trigLbl)}</div><div class="l">出場拆分 · 依進場型態</div></div>`;
+    if(es.by_style&&Object.keys(es.by_style).length)
+      stats+=`<div class="stat"><div class="v" style="font-size:13px;font-weight:600">${brk(es.by_style,styleLbl)}</div><div class="l">出場拆分 · 依風格</div></div>`;
   }
   stats+='</div>';
 

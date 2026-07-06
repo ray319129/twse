@@ -189,6 +189,10 @@ def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str
     sc = cfg.get(style, {}) or {}
     ma_stop_p = int(sc.get("ma_stop", 5 if style == "momentum" else 20))
     trail_ma_p = int(sc.get("trail_ma", 5 if style == "momentum" else 10))
+    # 均線停損寬限:進場後前 N 個交易日只用初始停損(結構低),第 N+1 日起才啟用均線停損。
+    # 動能突破股觸發日收盤常在 5MA 上方 5~10%,隔日進場後正常回測一天就跌破 5MA → 被單日洗盤掃出,
+    # 完全沒吃到後續噴出(實測:均線停損佔出場 53.7%、平均持有 1.2 天)。給前幾天洗盤空間。
+    ma_grace = int(sc.get("ma_stop_grace_days", 0))
     tcfg = cfg.get("trail", {}) or {}
     atr_mult = float(tcfg.get("atr_mult", 1.5))
     rmin = float(tcfg.get("min_pct", 0.03)); rmax = float(tcfg.get("max_pct", 0.07))
@@ -245,7 +249,8 @@ def _simulate_exit(df: pd.DataFrame, sig_date: str, sig_close: float, style: str
         if not trailing:
             if pd.notna(lo) and lo <= init_stop:
                 return res("止損", init_stop, i)
-            if pd.notna(cl) and pd.notna(ma_stop.iloc[d]) and cl < ma_stop.iloc[d]:
+            # 前 ma_grace 個交易日(i < ma_grace)略過均線停損,只靠初始停損 → 給洗盤空間
+            if i >= ma_grace and pd.notna(cl) and pd.notna(ma_stop.iloc[d]) and cl < ma_stop.iloc[d]:
                 return res("均線停損", cl, i)
             if pd.notna(hi) and hi >= tp1:
                 trailing = True; swing = max(entry, float(hi)); continue
@@ -295,6 +300,37 @@ def _forward_from_entry(df: pd.DataFrame, e: int, entry_price: float) -> dict | 
     hi_all = high.iloc[e:last + 1].max()
     out["peak_gain"] = float(hi_all / entry_price - 1) if pd.notna(hi_all) else None
     return out
+
+
+def _exit_stats(exits: list[dict]) -> dict | None:
+    """對一組 closed 出場結果算勝率/平均淨報酬/平均持有天數/出場原因分佈。
+    供 exit_sim 的 by_trigger(breakout vs pullback_turn)與 by_style(動能 vs 波段)拆分共用 ——
+    看得出「哪種進場型態配哪種出場規則真有 edge」,是調參的依據。"""
+    exits = [e for e in exits if e and e.get("status") == "closed" and e.get("exit_ret") is not None]
+    if not exits:
+        return None
+    n = len(exits)
+    reasons = {}
+    for rn in EXIT_REASONS:
+        c = sum(1 for e in exits if e["reason"] == rn)
+        if c:
+            reasons[rn] = round(c / n * 100, 1)
+    return {
+        "n": n,
+        "win_rate": round(sum(1 for e in exits if e["exit_ret"] > 0) / n * 100, 1),
+        "avg_ret": round(sum(e["exit_ret"] for e in exits) / n * 100, 2),
+        "avg_hold_days": round(sum(e["hold_days"] for e in exits) / n, 1),
+        "reasons": reasons,
+    }
+
+
+def _trigger_of(r: dict) -> str:
+    """進場型態分類(擇一):突破 > 回測轉強 > 其他。供 by_trigger 拆分。"""
+    if r.get("breakout"):
+        return "breakout"
+    if r.get("pullback_turn"):
+        return "pullback_turn"
+    return "other"
 
 
 def _avg_pct(vals: list[float]) -> float | None:
@@ -391,6 +427,23 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "avg_hold_days": round(sum(e["hold_days"] for e in closed) / len(closed), 1),
             "reasons": reasons,
         })
+        # by_trigger / by_style 拆分:看「哪種進場型態配哪種出場規則」有沒有 edge(調參依據)。
+        closed_rows = [r for r in rows if r.get("exit") and r["exit"].get("status") == "closed"
+                       and r["exit"].get("exit_ret") is not None]
+        by_trigger = {}
+        for key in ("breakout", "pullback_turn", "other"):
+            st = _exit_stats([r["exit"] for r in closed_rows if _trigger_of(r) == key])
+            if st:
+                by_trigger[key] = st
+        by_style = {}
+        for key in ("momentum", "swing"):
+            st = _exit_stats([r["exit"] for r in closed_rows if _style_of(r) == key])
+            if st:
+                by_style[key] = st
+        if by_trigger:
+            exit_sim["by_trigger"] = by_trigger
+        if by_style:
+            exit_sim["by_style"] = by_style
 
     # ---------- 逐檔追蹤台帳(仍追蹤的,依最新報酬排序) ----------
     active = [r for r in rows if r["trading_elapsed"] <= ACTIVE_TRADING_DAYS]
@@ -513,6 +566,16 @@ def _print_report(rep: dict) -> None:
         print(f"  已實現勝率 {es['win_rate']}% · 平均報酬(已扣成本) {es['avg_ret']:+.2f}%"
               f"(扣前 {es.get('avg_ret_gross', 0):+.2f}%,成本 {es.get('avg_cost_pct', 0):.2f}%) · 平均持有 {es['avg_hold_days']} 日"
               f"  ({rs} · 持有中 {es['open']} · 跳空棄單 {es.get('skipped_gap',0)} · 待進場 {es.get('pending',0)})")
+        _TRIG_LABEL = {"breakout": "突破", "pullback_turn": "回測轉強", "other": "其他"}
+        _STYLE_LABEL = {"momentum": "動能", "swing": "波段"}
+        for title, grp, labels in (("依進場型態", es.get("by_trigger", {}), _TRIG_LABEL),
+                                   ("依風格", es.get("by_style", {}), _STYLE_LABEL)):
+            if grp:
+                print(f"  {title}:")
+                for key, s in grp.items():
+                    rs2 = " / ".join(f"{k}{v}%" for k, v in s.get("reasons", {}).items())
+                    print(f"    {labels.get(key, key):>5}  n={s['n']:>3} 勝率{s['win_rate']:>5.1f}%"
+                          f" 平均{s['avg_ret']:>+7.2f}% 持有{s['avg_hold_days']:>4.1f}日  ({rs2})")
     print(f"\n台帳(仍追蹤 {rep['ledger_total']} 檔,依報酬排序):")
     for r in rep["ledger"][:20]:
         ex = f"{r['exit_reason']} {r['exit_ret_pct']:+.1f}%" if r.get("exit_ret_pct") is not None else (r.get("exit_reason") or "-")
