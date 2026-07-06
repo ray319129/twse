@@ -19,6 +19,10 @@
 <div style="font-size: 12px; color: #888; margin: 4px 0 16px;">
   全市場 {{ scored_count }} 檔通過流動性後評分排序。
   大盤目前{% if index_below_ma20 %}<span style="color:#c0392b;">在月線之下(偏弱,進場宜更保守)</span>{% else %}<span style="color:#27ae60;">站上月線(偏多)</span>{% endif %}。
+  {% if market_regime and market_regime.enabled %}{% set mr = market_regime %}{% set mrc = {'積極':'#27ae60','中性':'#7f8c8d','保守':'#e67e22','觀望':'#c0392b'} %}
+  <br>大盤閘門:<strong style="color:{{ mrc.get(mr.level_label, '#555') }};">{{ mr.level_label }}</strong>(積極度 {{ mr.votes }})
+  → 今日核心上限 <strong>{{ mr.core_count }}</strong> 檔、入榜門檻 <strong>{{ mr.min_score }}</strong> 分{% if mr.prefer_pullback %}、<span style="color:#e67e22;">弱盤偏好回測型(不追突破)</span>{% endif %}。
+  {% endif %}
 </div>
 
 {% macro profile_badge(p) -%}

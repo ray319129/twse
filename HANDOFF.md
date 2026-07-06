@@ -238,3 +238,12 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
   - `_simulate_exit` 新增 `ma_stop_grace_days`(config `exit.momentum: 2` / `exit.swing: 0`):進場後前 N 個交易日只用初始停損,第 N+1 日起才啟用均線停損 —— 突破股隔日進場常正常回測一天就破 5MA,太緊會被單日洗盤掃出(實測均線停損佔出場 53.7%、平均持有 1.2 天)。
   - `build_report` 的 `exit_sim` 新增 `by_trigger`(突破/回測轉強/其他)與 `by_style`(動能/波段)拆分(`_exit_stats`/`_trigger_of` helper);console `_print_report`、email、網頁 SPA 皆已呈現,作為後續調參依據。
   - ⚠️ **誠實觀察**:在既有小樣本(75~77 筆 closed)上,grace=2 確實把均線停損比例 53.2%→44.0%、止損 37.7%→46.7%、持有 1.2→1.4 日(符合「少被單日洗」的設計意圖),但**已實現勝率反而 13.0%→12.0%**(樣本小、集中在一段壞窗)。3.1 本就是「需回測驗證」的假設,預設 2 依審查清單建議;可在 config 設 0 關閉或依累積真實資料調。改 SPA 後已 `node --check` 通過;email 模板已試 render 通過。
+
+### 11.2 P1 完整版(2026-07-07)— 3.2 漲停複合 + 3.4-1 收盤位置 + 3.3 大盤閘門
+使用者指示「P1 直接上完整版,不要最小版」。
+
+- **3.2 漲停複合條件 + 首板/衝高未鎖**([scoring.py](scripts/scoring.py)):漲停(`limit_up_today`)**不再單獨**判過熱 —— 舊規則把「鎖死的第一根漲停」(惜售、隔天最易續攻)錯殺、卻放「衝到 9.4% 沒鎖」(尾盤被打開、隔天最易開低)進核心。新規則:`exhausted` 的漲停項改為 `limit_up_today AND 連續大漲 >= consec_big_up_days(3)`(連噴多日的漲停才算過熱),`ret5/乖離/RSI` 三項仍各自獨立判過熱;**首板** `first_board`(漲停+非連噴多日+`close_pos>=0.90`)總分 ×(1+`first_board_bonus`);**衝高未鎖** `spike_no_lock`(今日漲幅 ≥ `spike_watch_lo 0.07` 但 `close_pos < spike_close_pos 0.70`)總分 ×`spike_penalty 0.80` 且不進核心觸發。
+- **3.4-1 收盤相對位置**(`close_pos=(收-低)/(高-低)`):對「非首板、非衝高未鎖」的一般個股,收高(≥`close_pos_hi 0.80`)/收弱(≤`close_pos_lo 0.50`)做 ±`close_pos_adj 0.06` 調整。三者互斥不重複加減。新輸出欄位 `close_pos/consec_big_up/spike_no_lock/first_board`。config 見 `scoring.setup`、`scoring.exhausted`。
+- **3.3 大盤閘門完整版**(新檔 [scripts/market.py](scripts/market.py) `compute_market_regime`):三組免費訊號投票(指數 vs MA20/MA5/MA20斜率、市場廣度=站上MA20家數比+上漲家數比、漲跌停家數失衡)→ 依 config `market.tiers` 分「積極/中性/保守/觀望」四級,**動態決定 core_count(10/7/5/3)與 min_score(45/50/55/60)**,弱盤(保守/觀望)`prefer_pullback` 讓純追突破股排序分扣 `breakout_penalty_weak`(顯示分不變)。[main.py](scripts/main.py) 第一遍評分後算 breadth(零額外 API,吃 `industry_rows` 副產品)→ regime → 覆寫 core_count/min_score。`market.enabled=false` 回舊行為。regime 寫入 `data.json`/`history/*.json`/email ctx,email 表頭與網頁 subtitle 顯示閘門級別+核心上限+門檻(取代原本純裝飾的 `index_below_ma20`,該欄保留相容)。
+- **驗證**:離線 monkeypatch 跑完整 `daily_run(as_of=2026-07-06)` 通過 —— regime 正確(積極/votes=5,廣度:站上月線 64%、漲停 61/跌停 12、掃描 1938)並序列化進 data.json;一檔 `first_board=True` 鎖死首板突破股進核心(`trigger=True`),正是舊碼會「漲停即過熱」錯殺的型態。scoring 四情境 + regime 四級 + SPA `node --check` + email render 全通過。測試產生的 data/docs 檔已用精確路徑 `git checkout` 還原(未動原始碼,參見 [[twse-offline-test-cleanup-targeted-not-broad]])。
+- ⚠️ 權重/門檻(tier 投票對應、close_pos/spike/first_board 各係數)皆設計時合理猜測、未用真實績效驗證;累積資料後再回調,可在 config 個別關閉。

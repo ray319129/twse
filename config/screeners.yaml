@@ -94,6 +94,28 @@ ranking:
   min_dollar_volume: 30000000  # 日均成交金額門檻(3000 萬),太低直接淘汰
   enrich_top_n: 30           # 只對排名前 N 名補抓 FinMind 籌碼/財報(控制 API 額度)
 
+# ★ 大盤閘門(market regime,3.3)— 依大盤盤性動態調「今天選幾檔核心 / 入榜門檻」,弱盤偏好回測型。
+# 三組訊號投票(每項 ±1):指數 vs MA20/MA5/MA20斜率、市場廣度(站上MA20家數比+上漲家數比)、漲跌停家數。
+# 投票總和 → 依 tiers 由高到低選第一個 min_votes 符合的級別,套用其 core_count / min_score / prefer_pullback。
+# enabled:false → 完全沿用上面 ranking 的固定 core_count / min_score(回到舊行為)。零額外 API(廣度用第一遍評分副產品)。
+market:
+  enabled: true
+  ma_short: 5                # 指數短期均線
+  ma_long: 20                # 指數中期均線(月線)
+  slope_lookback: 20         # MA20 今日 vs 幾個交易日前(判斷月線上揚/下彎)
+  breadth_strong: 0.60       # 站上月線家數比 ≥ 此 → 偏多一票
+  breadth_weak: 0.40         # ≤ 此 → 偏空一票
+  adv_strong: 0.60           # 上漲家數比 ≥ 此 → 偏多一票
+  adv_weak: 0.40             # ≤ 此 → 偏空一票
+  limit_up_pct: 0.095        # 漲/跌停家數的認定門檻(當日漲跌幅 ≥/≤ 此)
+  limit_min_count: 3         # 漲停+跌停家數合計 ≥ 此才把「漲跌停失衡」計入投票(家數太少不具代表性)
+  breakout_penalty_weak: 8   # 弱盤(prefer_pullback)時,純追突破股的『排序分數』扣此(顯示分不變),讓觸發偏好回測型
+  tiers:                     # 依投票分數分級(min_votes 為「≥ 此門檻」;由 aggressive→defensive 取第一個符合)
+    aggressive: { min_votes: 3,   core_count: 10, min_score: 45, prefer_pullback: false }
+    neutral:    { min_votes: 1,   core_count: 7,  min_score: 50, prefer_pullback: false }
+    cautious:   { min_votes: -2,  core_count: 5,  min_score: 55, prefer_pullback: true }
+    defensive:  { min_votes: -99, core_count: 3,  min_score: 60, prefer_pullback: true }
+
 # ★ 信心分權重與門檻(scripts/scoring.py compute_conviction)
 # 全部可調;留空則用程式內預設(= 下列數值)。改這裡就能系統化調參、不必動 .py。
 scoring:
@@ -124,6 +146,11 @@ scoring:
     w_volx: 0.45             # setup 內三項權重(建議總和=1)
     w_vbias: 0.25
     w_mom: 0.30
+    # 收盤相對位置(3.4-1)= (收-低)/(高-低):收在高檔=買方掌控到尾盤;衝高收弱=尾盤有人倒貨。
+    # 對「非首板、非衝高未鎖」的一般個股做小幅總分調整(首板/衝高未鎖另有專屬加減,見 exhausted)。
+    close_pos_hi: 0.80       # 收盤位置 >= 此 → 收高,總分 ×(1+close_pos_adj)
+    close_pos_lo: 0.50       # 收盤位置 <= 此 → 收弱,總分 ×(1-close_pos_adj)
+    close_pos_adj: 0.06      # 一般收盤位置加/扣分幅度
   quality:
     default: 0.5             # 無估值資料時的中性分
     pe_good: 25              # PE ≤ good → 1;≤ ok → 0.5;> ok → 0.1
@@ -137,6 +164,17 @@ scoring:
     rsi_max: 88              # RSI14 超過 → 過熱
     limit_up: 0.095          # 今日漲幅 ≥ 此視為漲停
     penalty: 0.55            # 過熱時總分 × 此
+    # 3.2 漲停複合條件:漲停不再單獨判過熱(鎖死的第一根漲停續攻機率高,被舊規則錯殺)。
+    big_up_pct: 0.04         # 「大漲」日門檻(單日漲幅 ≥ 4%)
+    consec_big_up_days: 3    # 今日漲停 + 已連續大漲 ≥ 此天數 → 追高噴出,判過熱
+    # 衝高未鎖(真正該防的型態):今日漲幅大但尾盤被打開/賣壓出籠 → 隔天最易開低
+    spike_watch_lo: 0.07     # 今日漲幅 ≥ 此(7%,接近漲停區)
+    spike_close_pos: 0.70    # 且收盤位置 < 此 → 判「衝高未鎖」,罰分且不進核心觸發
+    spike_penalty: 0.80      # 衝高未鎖時總分 × 此
+    # 首板(惜售,可加分):今日漲停 + 非連噴多日 + 收盤鎖高檔 → 盤整帶量突破第一根
+    first_board_max_consec: 1   # 連續大漲 ≤ 此才算「首板」(不是連噴多日)
+    first_board_close_pos: 0.90 # 且收盤位置 ≥ 此(鎖死/惜售)
+    first_board_bonus: 0.05     # 首板時總分 ×(1+此)
   trigger:                   # 「今天新鮮觸發」(進核心的條件)
     breakout_lookback: 20    # 近 N 日收盤高
     breakout_vol_ratio: 1.5  # 突破需量比 ≥ 此

@@ -28,6 +28,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
+from .market import compute_market_regime
 from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
 from .catalyst import classify_catalysts, catalyst_score
@@ -477,15 +478,45 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             })
             scored.append(conv)
 
+    # ---------- 大盤閘門(regime,3.3):依 index + 市場廣度 + 漲跌停家數動態調 core_count / min_score ----------
+    market_cfg = cfg.get("market", {}) or {}
+    lu_thr = float(market_cfg.get("limit_up_pct", 0.095)) * 100     # change_pct 為百分比,門檻換算成 %
+    breadth = {
+        "n": len(industry_rows),
+        "above_ma20": sum(1 for r in industry_rows if r.get("above_ma20")),
+        "adv": sum(1 for r in industry_rows if (r.get("change_pct") or 0) > 0),
+        "dec": sum(1 for r in industry_rows if (r.get("change_pct") or 0) < 0),
+        "limit_up": sum(1 for r in industry_rows if (r.get("change_pct") or 0) >= lu_thr),
+        "limit_down": sum(1 for r in industry_rows if (r.get("change_pct") or 0) <= -lu_thr),
+    }
+    regime = compute_market_regime(index_close, breadth, market_cfg)
+    prefer_pb = False
+    if regime:
+        if regime.get("core_count") is not None:
+            core_count = regime["core_count"]
+        if regime.get("min_score") is not None:
+            min_score = regime["min_score"]
+        prefer_pb = bool(regime.get("prefer_pullback"))
+        log.info(f"大盤閘門:{regime['level_label']}(votes={regime['votes']})"
+                 f" → core_count={core_count}, min_score={min_score}, 弱盤偏好回測={prefer_pb}")
+
     # ---------- 排序 → 候選池 →(stage-2 重排:籌碼+基本面+催化劑)→ 核心 / 觀察 ----------
     scoring_cfg = (cfg.get("scoring", {}) or {})
     chip_cfg = scoring_cfg.get("chip_bonus", {}) or {}
     chip_on = bool(chip_cfg.get("enabled", False))
     cand_n = int(chip_cfg.get("candidate_count", core_count)) if chip_on else core_count
 
+    # 弱盤(prefer_pullback)時,把「純追突破」(breakout 但非 pullback_turn)的排序分數扣一截,
+    # 讓觸發偏好『回測轉強』而非追突破(顯示的 score 不變,只影響誰進候選/核心)。
+    bo_pen = float(market_cfg.get("breakout_penalty_weak", 8.0))
+    def _trig_key(s):
+        base = float(s["score"])
+        if prefer_pb and s.get("breakout") and not s.get("pullback_turn"):
+            base -= bo_pen
+        return -base
     trigger_sorted = sorted(
         [s for s in scored if s["trigger"] and s["score"] >= min_score],
-        key=lambda x: -x["score"],
+        key=_trig_key,
     )
     # 候選池:基礎信心分最高的觸發股(略多於 core_count,讓 stage-2 加成能改變誰進核心);受 enrich_top_n 上限保護 API
     core_candidates = trigger_sorted[:max(cand_n, core_count)][:enrich_top_n]
@@ -567,6 +598,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "date": today.isoformat(),
             "generated_at": now_tpe().strftime("%Y-%m-%d %H:%M"),
             "index_below_ma20": index_below_ma20,
+            "market_regime": regime,
             "scored_count": len(scored),
             "core": core_clean,
             "watch": watch_clean,
@@ -582,6 +614,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         json.dump(_json_safe({
             "date": today.isoformat(),
             "index_below_ma20": index_below_ma20,
+            "market_regime": regime,
             "scored_count": len(scored),
             "core": core_clean, "watch": watch_clean, "watchlist": watchlist_clean,
             "label": STRATEGY_LABEL,
@@ -604,6 +637,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         "industry_trends": industry_trends[:10],
         "hot_industries": hot_industries,
         "index_below_ma20": index_below_ma20,
+        "market_regime": regime,
         "no_data_count": len(no_data),
         "label": STRATEGY_LABEL,
         "test_mode": test_mode,

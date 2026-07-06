@@ -572,11 +572,19 @@ function setSub(){
   const mkt=d.index_below_ma20
     ? '<span class="pill-mkt mkt-dn"><span class="pdot"></span>大盤在月線下 · 偏弱</span>'
     : '<span class="pill-mkt mkt-up"><span class="pdot"></span>大盤站上月線 · 偏多</span>';
+  /* 大盤閘門(regime):積極度分級 + 今日核心上限/門檻。取代純裝飾的月線標籤(月線標籤保留) */
+  const mr=d.market_regime;
+  let gate='';
+  if(mr&&mr.enabled){
+    const cmap={'積極':'mkt-up','中性':'','保守':'mkt-dn','觀望':'mkt-dn'};
+    const pb=mr.prefer_pullback?' · 偏好回測':'';
+    gate=`<span class="dot"></span><span class="pill-mkt ${cmap[mr.level_label]||''}" title="積極度 ${isNum(mr.votes)?mr.votes:'-'};核心上限 ${mr.core_count} 檔、入榜門檻 ${mr.min_score} 分${pb}">閘門:${esc(mr.level_label||'')} · 核心≤${isNum(mr.core_count)?mr.core_count:'-'} · 門檻${isNum(mr.min_score)?mr.min_score:'-'}${pb}</span>`;
+  }
   const isHist=!!(LATEST&&d.date!==LATEST.date);
   const hist=isHist?'<span class="tag-hist">歷史</span>':'';
   /* generated_at only belongs to the latest snapshot; don't show it next to a historical date */
   const upd=(!isHist&&LATEST&&LATEST.generated_at)?`<span class="dot"></span>更新 ${esc(LATEST.generated_at)}`:'';
-  $('#sub').innerHTML=`<span>${esc(d.date)||''}</span>${hist}<span class="dot"></span>全市場 <b style="color:var(--ink-2)">${isNum(d.scored_count)?d.scored_count:0}</b> 檔評分<span class="dot"></span>${mkt}${upd}`;
+  $('#sub').innerHTML=`<span>${esc(d.date)||''}</span>${hist}<span class="dot"></span>全市場 <b style="color:var(--ink-2)">${isNum(d.scored_count)?d.scored_count:0}</b> 檔評分<span class="dot"></span>${mkt}${gate}${upd}`;
 }
 
 /* ============================================================
@@ -1357,6 +1365,7 @@ function loadDay(dt){
       watch:Array.isArray(h.watch)?h.watch:[],
       watchlist:Array.isArray(h.watchlist)?h.watchlist:[],
       index_below_ma20:!!h.index_below_ma20,
+      market_regime:h.market_regime||null,
       scored_count:isNum(h.scored_count)?h.scored_count:0,
       label:h.label||LATEST.label||{}
     });
