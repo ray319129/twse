@@ -1,0 +1,5094 @@
+{
+  "date": "2026-07-07",
+  "index_below_ma20": true,
+  "market_regime": {
+    "enabled": true,
+    "votes": -3,
+    "level": "defensive",
+    "level_label": "觀望",
+    "core_count": 3,
+    "min_score": 60.0,
+    "prefer_pullback": true,
+    "detail": {
+      "idx_above_ma_long": false,
+      "idx_above_ma_short": false,
+      "idx_ma_long_rising": true,
+      "above_ma20_ratio": 0.44,
+      "adv_ratio": 0.14,
+      "limit_up": 12,
+      "limit_down": 52,
+      "scanned": 1879
+    }
+  },
+  "scored_count": 895,
+  "core": [
+    {
+      "score": 91.1,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.77,
+      "quality": 0.73,
+      "liquidity": 0.91,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.61,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 6.0,
+      "ret20_pct": 23.5,
+      "dollar_vol_m": 1065.0,
+      "stock_id": "8016",
+      "name": "矽創",
+      "industry": "半導體業",
+      "close": 352.0,
+      "change_pct": 6.02,
+      "valuation": {
+        "pe": 20.85,
+        "yield_pct": 3.46,
+        "pb": 3.41
+      },
+      "chips": {
+        "inst_total_today": 2473844,
+        "inst_buy_streak": 3,
+        "foreign_holding_pct": 41.02,
+        "foreign_holding_change_30d": 4.84,
+        "short_change_pct": 155.56
+      },
+      "fundamentals": {
+        "eps_latest": 4.6,
+        "eps_yoy": 33.3,
+        "gross_margin": 31.3,
+        "operating_margin": 11.5,
+        "debt_ratio": 34.1,
+        "roe": 4.4,
+        "roa": 2.9,
+        "op_cashflow": 896358000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 39.8,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 352.0,
+        "ma5": 336.9,
+        "ma5_diff_pct": 4.29,
+        "ma20": 311.6,
+        "ma20_diff_pct": 11.48,
+        "ma60": 277.65833333333336,
+        "ma60_diff_pct": 21.12,
+        "ma120": 235.54583333333332,
+        "ma120_diff_pct": 33.08,
+        "ma240": 216.92083333333332,
+        "ma240_diff_pct": 38.37,
+        "high_60": 352.0,
+        "low_60": 201.5,
+        "high_20": 352.0,
+        "low_20": 274.0,
+        "bb_lower": 267.21342071016295,
+        "bb_upper": 355.9865792898371,
+        "atr14": 20.25,
+        "stop_2atr": 311.5,
+        "stop_2atr_pct": -11.51
+      },
+      "ohlc": [
+        [
+          270.5,
+          276.5,
+          268.5,
+          274.0
+        ],
+        [
+          271.5,
+          272.0,
+          262.0,
+          268.0
+        ],
+        [
+          270.5,
+          294.5,
+          270.5,
+          294.5
+        ],
+        [
+          293.5,
+          293.5,
+          270.5,
+          274.0
+        ],
+        [
+          270.0,
+          276.0,
+          268.0,
+          275.0
+        ],
+        [
+          275.0,
+          285.0,
+          271.5,
+          280.5
+        ],
+        [
+          280.5,
+          294.0,
+          276.0,
+          285.5
+        ],
+        [
+          292.5,
+          300.0,
+          287.5,
+          297.5
+        ],
+        [
+          297.0,
+          297.0,
+          287.0,
+          292.0
+        ],
+        [
+          293.5,
+          294.5,
+          288.5,
+          291.0
+        ],
+        [
+          292.5,
+          292.5,
+          286.5,
+          289.5
+        ],
+        [
+          292.0,
+          305.0,
+          290.0,
+          301.0
+        ],
+        [
+          303.5,
+          305.0,
+          297.0,
+          300.0
+        ],
+        [
+          304.0,
+          306.0,
+          298.0,
+          306.0
+        ],
+        [
+          306.0,
+          310.0,
+          298.0,
+          309.0
+        ],
+        [
+          309.0,
+          309.0,
+          296.5,
+          302.0
+        ],
+        [
+          307.0,
+          310.0,
+          303.5,
+          304.0
+        ],
+        [
+          302.5,
+          307.0,
+          302.5,
+          303.5
+        ],
+        [
+          301.5,
+          306.0,
+          298.0,
+          303.5
+        ],
+        [
+          274.5,
+          287.0,
+          274.0,
+          285.0
+        ],
+        [
+          289.0,
+          303.0,
+          289.0,
+          295.5
+        ],
+        [
+          295.0,
+          302.0,
+          286.0,
+          286.5
+        ],
+        [
+          288.0,
+          294.5,
+          283.0,
+          286.5
+        ],
+        [
+          293.0,
+          298.0,
+          287.0,
+          289.5
+        ],
+        [
+          278.5,
+          287.0,
+          274.0,
+          274.0
+        ],
+        [
+          278.0,
+          281.0,
+          270.0,
+          278.5
+        ],
+        [
+          277.5,
+          297.0,
+          277.5,
+          295.5
+        ],
+        [
+          301.0,
+          305.0,
+          298.0,
+          300.5
+        ],
+        [
+          300.5,
+          317.0,
+          300.5,
+          315.0
+        ],
+        [
+          316.5,
+          328.5,
+          313.5,
+          320.5
+        ],
+        [
+          310.0,
+          327.0,
+          308.0,
+          315.0
+        ],
+        [
+          318.0,
+          344.0,
+          318.0,
+          330.5
+        ],
+        [
+          326.0,
+          335.0,
+          310.5,
+          311.0
+        ],
+        [
+          313.0,
+          328.5,
+          306.5,
+          317.0
+        ],
+        [
+          321.0,
+          341.0,
+          313.0,
+          332.0
+        ],
+        [
+          338.0,
+          347.5,
+          334.5,
+          339.0
+        ],
+        [
+          330.5,
+          335.5,
+          320.5,
+          327.5
+        ],
+        [
+          320.5,
+          336.5,
+          320.0,
+          334.0
+        ],
+        [
+          338.0,
+          347.5,
+          330.5,
+          332.0
+        ],
+        [
+          332.0,
+          365.0,
+          332.0,
+          352.0
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "volume_price_surge",
+        "n_day_high",
+        "inst_consecutive_buy",
+        "foreign_holding_increase",
+        "monthly_revenue_growth",
+        "relative_strength_leader"
+      ],
+      "combos": [
+        "主升段啟動",
+        "強勢續攻"
+      ],
+      "plan": {
+        "ref": 352.0,
+        "max_entry": 362.56,
+        "init_stop": 330.5,
+        "tp1": 395.0,
+        "r_abs": 21.5,
+        "risk_pct": 6.11,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 348.48,
+        "flat_hi": 355.52,
+        "gap_up_line": 357.28,
+        "gap_dn_line": 348.48,
+        "trail_ma": 5
+      },
+      "news": [
+        {
+          "title": "零電容TDDI與車用雙引擎引爆 矽創(8016)強攻360 元創波段新高 - 理財周刊",
+          "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9Tc2V2YjgtYVpOSUZfZzk3bjBCSFc2TV9oV1hyeFBxaGhnRW9EdGw1ZWE3ZzhYSldVaVN5STVTZE9idHpUUVZJRUg1R1pobFhKb2xkQTBiUzYxWW9iLUdyNjV4aTF2Y19ZY2VzM0lGaw?oc=5",
+          "published": "Tue, 07 Jul 2026 02:47:37 GMT",
+          "published_date": "2026-07-07",
+          "source": "理財周刊"
+        },
+        {
+          "title": "矽創(8016) 個股概覽 | 個股 - 股市 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFAtbjVIbXA1ckNSTjVzODFlSko0d3loZGtOVk9IM01iR0ZiSWlvN3hVTEJyMmdUdmEwTUs3b0t3cExlQnFBbnhqOVNwc0NKZHl2b1Jj?oc=5",
+          "published": "Mon, 06 Jul 2026 09:35:49 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "【09:26 即時新聞】矽創(8016)股價勁揚至355元，上漲6.93%，受IC設計族群資金輪動與驅動IC成長題材帶動，搭配法人與主力籌碼偏多格局支撐續攻空間 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQNGtVM3pmVWhkQktLSGxYVEtkaGQ5eTJUb1VVbm50Nkc5N2F1QUthSTkxU015cTJBOVFKemlGZllRTC15THJ6c18tRU5IYnl4aFRfRFFzZjh0dTYxWGowOW9IV1hjb3QwSGV3WEZFMHl0bC0tRExvbVBTSXBLZl9ESV9renE3M2d1M1JJUGVn?oc=5",
+          "published": "Tue, 07 Jul 2026 01:26:23 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "業績撐腰 矽創逆勢盤中攻上漲停 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBIMVo4QlNHVWhUcjRMT1RZVmdVeUJ2ZW10c0N1d1JfcDZDblptT0VDcmtjTkRaNktSdU1fZlM5bUwtT1g1aFBKMEcwb09xT012NWVvd0Vn0gFWQVVfeXFMUEgxWjhCU0dVaFRyNExPVFlWZ1V5QnZlbXRzQ3V3Ul9wNkNuWm1PRUNya2NORFo2S1J1TV9mUzltTC1PWDVoUEowRzBvT3FPTXY1ZW93RWc?oc=5",
+          "published": "Tue, 07 Jul 2026 03:13:56 GMT",
+          "published_date": "2026-07-07",
+          "source": "UDN"
+        },
+        {
+          "title": "8016 矽創 - 等主力回補完,個人相信準備開快車了 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFAtaVdEcEhzVUtBSl9yTGpvQkpsbENJVktRMl9TeFJTOVlFLUtUQTV5dmwxR0FZWFFqVXpTdktlWUZrODZnTVo3aThKSUprS0NTZUtONWJKZ2I?oc=5",
+          "published": "Fri, 26 Jun 2026 03:13:19 GMT",
+          "published_date": "2026-06-26",
+          "source": "CMoney"
+        },
+        {
+          "title": "營收速報 - 矽創(8016)4月營收21.08億元年增率高達37.26％｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBmRnpZdERTYUZ3WWZtTzNHNFZGTHhTRURaZHNHZldkU0JSaUJLcHo0dVUzYi03eUZwaDU2UUhVVmg5Wnd4WHpidDlFLVUzTHB6Z0RtMHBjbHhxOGhXS1JqV0dPQWpaaU1SRUlubEt1b0ZLU0M1TEE?oc=5",
+          "published": "Thu, 07 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-07",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "矽創搶攻AI高階製程商機，測試探針迎量產潮 - 台視全球資訊網",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxONDM4Xzc4QVg0OThhd25EYmgwcm1teTgzeDI5T1c5MkNsZ3RJMGFwVDlJZFlQQmM0WEhRaTgxdHgwdS1WSmhqQmZRY2RLVU1Dc2dDcFlsSFYwWWNHemxLUWxCVE56YWZ5aW9fMzVfTGtaTDlaSVRVd2F3Nm13XzVPcm9JYWZHd0tFYkJRb1huN1VwZw?oc=5",
+          "published": "Tue, 09 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-09",
+          "source": "台視全球資訊網"
+        },
+        {
+          "title": "討論牆 | 盤後速報 - 矽創(8016)次交易(15)日除息11.5元，參考價278.0元 - LINE TODAY",
+          "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE53Y3pINGJUaE9ZWG9vTmtFMzV6VjNDcmVGMTVFcURlZnR1OEZwcEdlblpCUnJlaE40R2RZTHBOTWhKaDZKVzQ4YmZvLVZDUVp6YmZ0TkJUUHNNa1J2YkZNazdOYjM?oc=5",
+          "published": "Sun, 21 Jun 2026 03:29:42 GMT",
+          "published_date": "2026-06-21",
+          "source": "LINE TODAY"
+        },
+        {
+          "title": "8016 矽創- 🚨 主力加碼卡位？昨日主動式ETF 加碼這檔！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5RcnpwRGktcDhFVmN4akNQZHVQRHQ5bVlEdFd6NEFxcFZhQjJIMWI0MFhiVTdIRHlJRHBBTWMxWHZVa3lSU0RiUGdKOUlUdVZNOFpoa1NyRlg?oc=5",
+          "published": "Fri, 03 Jul 2026 11:17:19 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "矽創2026年拚績增雙位數 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9fX0lDdUxXTXRnbklFRGJWSEZBN2hERFVzSzJHOFdLV3ZaZ0hUZ2l3RXV5QVhmWk92aU5lY3hzLTFDS0NEbHd2Wkk2RnhzX0520gFWQVVfeXFMTTBwRmh4dTYtenVfTFhoS0JjN1J5LTZBNDZjd1VlZ3pyaFNnNklram5Ddk14V1VCOXdVZzdoQVM4X3YwcWdnLUxCZUVkZ0U3SS10dEFhdXc?oc=5",
+          "published": "Thu, 30 Apr 2026 07:00:00 GMT",
+          "published_date": "2026-04-30",
+          "source": "UDN"
+        },
+        {
+          "title": "8016 矽創 - 夜盤崩起來 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9uY0NFZ0tKTnNkQnNKV2V3TFJNMlVmN1RBZnpiUm9aNml4TmJRbVAzZG9VdkRhRXl3RDBHVzhhU2ZwMWtoMjVVRnByTlRNWFFUX2VOdWJLQ2k?oc=5",
+          "published": "Thu, 02 Jul 2026 16:43:46 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創 - 落後補漲“” - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBqTTF1WlNTZjhDS3pSeW5ONm82bjgyU0NSdGFTbm10NzRZM3QxdXBvZDJ4cXFpSEE0QWw3ZU1ua0FlM0NUNGVVMGhGcUFnMmNycUpQNXNPTmY?oc=5",
+          "published": "Tue, 30 Jun 2026 10:12:02 GMT",
+          "published_date": "2026-06-30",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創- 250矽創同學簽到會，有人記得這件事嗎？ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE02VmYxOWlPRHBzYWFBVWJLdWpjcjdqUTlMY0prOXZwcFJGeFZ2eUV6bTVEOTVXNl9tczI2ZVg3ZW9uVmlzdUNrNnQ2ejZDM05RTHFZejgxSGs?oc=5",
+          "published": "Sun, 10 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-10",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創- 明天看看是否有其他劵商也發布看法做參考- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1UVmFIWUlOWVpLLVFOQ0hSdWwxN2JtQ2RadkFoSjQ2ZWVJam5yWjdUeF9xQkYyUkYzMHpHd2l3S3QzZ3cydVlROGREeXRqZVlqSU9zQXJiRk0?oc=5",
+          "published": "Mon, 01 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創 - 加油啊跟著大盤走-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5IUm1POG1PY282MUZ5am9RSjQyVHBGQ285VGFLaWZKZnJCRVRlRS1qUE5qdkxMR0NjMFRRVkliR2JOOV95ZlgyMmFULWtzd0F1N1R2R3k4YkE?oc=5",
+          "published": "Sun, 24 May 2026 13:21:43 GMT",
+          "published_date": "2026-05-24",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創- 大牛股也會飛? - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5yaDNZbWREaXl4WFpNMDBzNGYxbS1ZamFvWGcyU1MyblNfbW1lcTJZUzlwZ0p1TlFoS01DQXg2M2hfc01QMlJYbDQ3TkM5R3J5ejloVUVsbkI?oc=5",
+          "published": "Wed, 17 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-17",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創- 矽創題材多,卻被很多投資人忽略- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBGdTJPWkdfRERoV3hndGt5b2oyZVg5V1ZIeFo1M3QxQTdtZS1TcDl5MEl0bFNXb0swYVpGMkN0aW5wSkFmUGdDbFZOVWVZanphcl8zaDZEa1M?oc=5",
+          "published": "Wed, 13 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-13",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創 - 整理完 準備怒衝一波 把握良機 上車吧 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5HY3BLWHBNUjJxdWR1MERXMlNCUUhlendxc3BNU0VBRWkxMFVuVFZBVktGdF9EUGpmOEcxVWlnSDdQS1ZfcThZdXhOcGpiOFpqejJOWjJUc1Q?oc=5",
+          "published": "Wed, 08 Apr 2026 01:48:59 GMT",
+          "published_date": "2026-04-08",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創- 人走股在，一股要傳幾代- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE55U2JRS3JUVE00UWhMWGFYd19UNTFmMXlCeHZsQzhQbDF2cWtwMHBCQTloZFhrVU5YY0h6bUFpdEFmaWdWNU5zczM5MzdkU2dUSnJMZmRJRmg?oc=5",
+          "published": "Mon, 30 Mar 2026 07:00:00 GMT",
+          "published_date": "2026-03-30",
+          "source": "CMoney"
+        },
+        {
+          "title": "新代刷歷史高3070元！機器人感知 矽創、新特本益比重估驚見50% 潛在漲幅 - 理財周刊",
+          "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE03U3k1Y1dUMG1LdFRWMFlGUTNOMnlOSU5sU3A2anlwNUs4VHZyVGUzR1pCcE9JTmdKajFnOV8tdC14azNRVDZfNDlkWnlBbDBrT2gyNnVNWXJkMkl6ZktjbUwySlZHRElzUnhPblZfYw?oc=5",
+          "published": "Tue, 12 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-12",
+          "source": "理財周刊"
+        },
+        {
+          "title": "8016 矽創- 再再小轉股一下- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9LYVBzNFBuNG1oZU00ZmdVZmVXbXRySVNPdUhoUlBUd2ZhU296VW1Jcjh5cTdDN25QVmtJTGhFQlVnZWdHeURXMF9HNFBTMnNidmg2MVBsOFc?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "CMoney"
+        },
+        {
+          "title": "8016 矽創 - 我被洗出去了！ 祝大家投資順心 一路發！-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1Yb2k0WVpTN2RTRG5kN2NZaThJNFBobGsyZjJRQTB4eFRvN3ZaOUNXRklUd2pRSm95UGhNNDZkX1lsby1oQTEwRUlmSnYyOFFHWTVtZTgyZFM?oc=5",
+          "published": "Thu, 09 Apr 2026 07:00:00 GMT",
+          "published_date": "2026-04-09",
+          "source": "CMoney"
+        },
+        {
+          "title": "矽創零電容TDDI市占擴大，Q2漲價效益漸發酵- 新聞 - MoneyDJ",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxQbGU5YXdKQ210WkgxcWlhajJ4S2ZCelk4LVE1V0hvLUZWcVF3N25aMmVlMzhxSElEZzh5NFppZFV2UFVjcTJJOE04VDV6ZkNfWnRTRXY4amhoOGdXTGc5UHdaMXFkV1ByNVh0Qmt5OXJ3V3l0N0pRcm9oVm5ueE02V1NlRmVWN3NvOUxhZTJTZ3V6QQ?oc=5",
+          "published": "Mon, 08 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-08",
+          "source": "MoneyDJ"
+        },
+        {
+          "title": "【11:53 即時新聞】矽創(8016)股價勁揚至335元，受TDDI與車用成長題材帶動＋多頭格局下主力與法人買盤同步偏多 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQeU5hbmhuYzlwdmNJTVRzMUxpb0tGUXowdFR5aFA0R2lhTVk5d1B2bm5jQ0U3TDA4UjB5S09FSDE5LVpUSllQd1JFUzFpanp6aE9SS1J4WHlibHdJbWQ5SmI5dGFjbENCc2lBRWRTaWRrWXpYT1ZxQWpXd3E2UGRNUWU4cDlCT3ZfRHcwdzN3?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "矽創 月出貨量大增 - 中時新聞網",
+          "link": "https://news.google.com/rss/articles/CBMia0FVX3lxTE5jbkhMUlB4Q1QxSHFxV01SQ1FQbmc1VmRxZGt2NVhQQzN1bUxzRGJLRFREcmNIQ0cxVDdzQk5DR2ZSeVJrb1BYZy1LekxYN2tNbGtPNWxYTTNCZThneGpOMGJOMDYyTWs4Z2J3?oc=5",
+          "published": "Sun, 14 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-14",
+          "source": "中時新聞網"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "AI概念",
+          "confidence": 0.75,
+          "evidence": "矽創搶攻AI高階製程商機，測試探針迎量產潮"
+        },
+        {
+          "type": "產業轉機",
+          "confidence": 0.85,
+          "evidence": "零電容TDDI與車用雙引擎引爆 矽創(8016)強攻360元創波段新高"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.72,
+          "evidence": "矽創零電容TDDI市占擴大，Q2漲價效益漸發酵"
+        },
+        {
+          "type": "新訂單",
+          "confidence": 0.68,
+          "evidence": "矽創 月出貨量大增"
+        }
+      ],
+      "catalyst_summary": "矽創受零電容TDDI與車用晶片雙引擎題材驅動，搭配AI高階製程商機與營收成長動能，股價創波段新高至360元。",
+      "risk_flags": [],
+      "target_prices": [
+        {
+          "broker": "理財周刊",
+          "price": 360.0,
+          "asof": "2026-07-07",
+          "evidence": "零電容TDDI與車用雙引擎引爆 矽創(8016)強攻360元創波段新高"
+        }
+      ],
+      "chip_signal": 0.65,
+      "chip_bonus": 9.8,
+      "fund_signal": 0.89,
+      "fund_bonus": 4.5,
+      "catalyst_signal": 1.0,
+      "catalyst_bonus": 8.0,
+      "industry_signal": 0.0,
+      "industry_bonus": 0.0,
+      "combo_bonus": 6.0,
+      "rank_score": 119.4,
+      "hot_industry": false
+    },
+    {
+      "score": 91.0,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.92,
+      "quality": 0.87,
+      "liquidity": 0.98,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.37,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 21.7,
+      "ret20_pct": 27.8,
+      "dollar_vol_m": 1389.0,
+      "stock_id": "1409",
+      "name": "新纖",
+      "industry": "紡織纖維",
+      "close": 31.700000762939453,
+      "change_pct": 4.79,
+      "valuation": {
+        "pe": 22.41,
+        "yield_pct": 2.98,
+        "pb": 1.16
+      },
+      "chips": {
+        "inst_total_today": 5950557,
+        "inst_buy_streak": 4,
+        "foreign_holding_pct": 13.84,
+        "foreign_holding_change_30d": -0.43,
+        "short_change_pct": -48.73
+      },
+      "fundamentals": {
+        "eps_latest": 0.39,
+        "eps_yoy": 56.0,
+        "debt_ratio": 69.4,
+        "roe": 1.7,
+        "roa": 0.4,
+        "op_cashflow": -1597451000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 35.1,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 31.700000762939453,
+        "ma5": 29.360000228881837,
+        "ma5_diff_pct": 7.38,
+        "ma20": 27.147500038146973,
+        "ma20_diff_pct": 14.36,
+        "ma60": 21.52666664123535,
+        "ma60_diff_pct": 32.09,
+        "ma120": 18.475416668256123,
+        "ma120_diff_pct": 41.72,
+        "ma240": 16.402500009536745,
+        "ma240_diff_pct": 48.26,
+        "high_60": 31.700000762939453,
+        "low_60": 16.5,
+        "high_20": 31.700000762939453,
+        "low_20": 24.649999618530273,
+        "bb_lower": 23.072095410817102,
+        "bb_upper": 31.222904665476843,
+        "atr14": 2.260714530944824,
+        "stop_2atr": 27.18,
+        "stop_2atr_pct": -14.26
+      },
+      "ohlc": [
+        [
+          17.3,
+          17.35,
+          16.7,
+          16.85
+        ],
+        [
+          16.8,
+          17.0,
+          16.65,
+          16.9
+        ],
+        [
+          16.9,
+          17.4,
+          16.9,
+          17.25
+        ],
+        [
+          17.4,
+          17.4,
+          16.85,
+          16.85
+        ],
+        [
+          16.8,
+          16.85,
+          16.65,
+          16.7
+        ],
+        [
+          16.7,
+          16.95,
+          16.65,
+          16.7
+        ],
+        [
+          16.85,
+          16.9,
+          16.6,
+          16.65
+        ],
+        [
+          16.7,
+          17.15,
+          16.7,
+          16.95
+        ],
+        [
+          17.0,
+          17.25,
+          16.9,
+          17.2
+        ],
+        [
+          17.35,
+          17.65,
+          17.25,
+          17.6
+        ],
+        [
+          17.65,
+          18.0,
+          17.4,
+          17.65
+        ],
+        [
+          18.2,
+          19.4,
+          18.2,
+          18.9
+        ],
+        [
+          19.35,
+          20.75,
+          19.2,
+          20.75
+        ],
+        [
+          22.8,
+          22.8,
+          22.8,
+          22.8
+        ],
+        [
+          25.05,
+          25.05,
+          25.05,
+          25.05
+        ],
+        [
+          27.55,
+          27.55,
+          27.55,
+          27.55
+        ],
+        [
+          30.3,
+          30.3,
+          30.3,
+          30.3
+        ],
+        [
+          29.95,
+          29.95,
+          27.3,
+          27.3
+        ],
+        [
+          26.1,
+          27.1,
+          24.6,
+          26.15
+        ],
+        [
+          24.35,
+          25.0,
+          23.55,
+          24.8
+        ],
+        [
+          26.0,
+          26.0,
+          24.5,
+          24.9
+        ],
+        [
+          25.45,
+          26.0,
+          25.0,
+          25.45
+        ],
+        [
+          25.45,
+          25.45,
+          23.25,
+          24.65
+        ],
+        [
+          25.45,
+          25.8,
+          25.1,
+          25.5
+        ],
+        [
+          26.4,
+          26.5,
+          25.0,
+          25.45
+        ],
+        [
+          25.8,
+          26.9,
+          25.75,
+          26.9
+        ],
+        [
+          27.1,
+          28.3,
+          27.1,
+          27.95
+        ],
+        [
+          25.95,
+          26.85,
+          25.4,
+          25.6
+        ],
+        [
+          25.6,
+          28.15,
+          25.0,
+          28.15
+        ],
+        [
+          28.5,
+          29.25,
+          27.55,
+          28.55
+        ],
+        [
+          27.6,
+          29.3,
+          27.1,
+          27.95
+        ],
+        [
+          28.0,
+          29.2,
+          27.05,
+          27.05
+        ],
+        [
+          26.9,
+          27.45,
+          26.05,
+          26.1
+        ],
+        [
+          26.05,
+          26.9,
+          25.4,
+          25.9
+        ],
+        [
+          26.5,
+          26.65,
+          25.9,
+          26.05
+        ],
+        [
+          26.45,
+          26.7,
+          25.5,
+          25.65
+        ],
+        [
+          25.3,
+          28.2,
+          25.25,
+          28.2
+        ],
+        [
+          28.2,
+          31.0,
+          27.9,
+          31.0
+        ],
+        [
+          34.1,
+          34.1,
+          29.5,
+          30.25
+        ],
+        [
+          31.35,
+          33.25,
+          30.8,
+          31.7
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "volume_price_surge",
+        "n_day_high",
+        "inst_consecutive_buy",
+        "short_cover_with_buy",
+        "monthly_revenue_growth",
+        "pullback_to_support",
+        "relative_strength_leader"
+      ],
+      "combos": [
+        "主升段啟動"
+      ],
+      "plan": {
+        "ref": 31.7,
+        "max_entry": 32.65,
+        "init_stop": 29.5,
+        "tp1": 36.1,
+        "r_abs": 2.200000762939453,
+        "risk_pct": 6.94,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 31.38,
+        "flat_hi": 32.02,
+        "gap_up_line": 32.18,
+        "gap_dn_line": 31.38,
+        "trail_ma": 5
+      },
+      "news": [
+        {
+          "title": "【09:12 即時新聞】新纖(1409)亮燈漲停33.25元，傳產資金輪動＋月營收連三月創高推升多方氣勢 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQb2xUd0lmdkY1Tnc1N09UWkswVHNyTzROekVSNzZWWVZlSVVYZF94TWw5QlNXTjd4MDR4UHhPMmZTNlRjeEhISlVsTVVuNkV2N2FxaXQyQWpHV243bG9Cd2dFMG84UklMQ0c3Qkg4cjA3OUQ2UkdRQUtlcVl3ckFabHUtZDVLTHZBQTZSb0xR?oc=5",
+          "published": "Tue, 07 Jul 2026 01:12:19 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "紡織股噴出！新纖飆漲停成交爆7萬張 逾2萬張排隊等買 分析師點名無人機題材 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi7ANBVV95cUxPR0xOMFpFeXhBYTBWV3JOZm1tTlNvZndiQ1I5S2VqUFkxM3VTWmk2UElGOUhpcldJcFVDRFhRMGpIdno1bUUzR3BCTUJOVHlrYW1YNlFVd2RXeXJsaFJHWUJ0S3Facm0zZFMwbFRoVG1ncWxIckVHcFFhaGN4UnNaQnZlWG9ycTlxSnpxZ3lwanFVMmk2d0RfMUFITy1ZYXhjbmU0UFVKWVdFa2ZKWEdxa3BaQTRqdjdDOC0td29jREs2Z3FhYVA1YjViOWVaVlBWcUFVVkdla1NPZEdIQ0g1VDBGd01fRTN1N3NFQmg2SkwtZHVQb0ttcEVvT0VEd212bFNaVGdXZ3E1dDNDSS1FblRhTG8zM3R6cXp5OTRhWWNhOHViWWk5aXZGT1BkS1lBcjdyaDJabWsxUFJCLVZER1A0SXE1R1VBOHNlOWlGRVVRWE5FUjNHWnNlMEZ5MG5XcFJCR1FpMm9FVDZrbjUtYUJjaDh2NWwwcnc3UEZfOHY5VUZ1Zzg2V0pTQmRSdlNwUGVvWnhkT2FlOFdBM0NvV0xoOEZBLVhjYW53b3ptc29CQnNwbURuQVBET3ZEY2RRODdmS0ZUUm9WVzR2Zy1naGpaMG5iVmlKcUR0RU9KZGplcDdYNUpTaEFMcEU?oc=5",
+          "published": "Fri, 03 Jul 2026 02:04:42 GMT",
+          "published_date": "2026-07-03",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "今日漲停股｜台股震盪下跌274.8點，台塑、台化、合晶、新纖等傳產與AI材料股強勢漲停0702｜豐雲學堂2026 年 07 月 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMihwRBVV95cUxQWWhKYUJlTUZDXzJPT3dKeEFrRGdxbWhLOWVsTnBUUTIwYmszUGI2RnF1ZjRkWWV1SEExajM1cnJQNUxKZi0zVnN3U3dqd25kMWNBSDJSZ294bzQzUHVFenJYX3BNaHJVSTBlZHV0Y1RncnV2dHZ1d0tQaXZoUjg4cmRCdHFBNWMtVFJUa0paUTRrYkxzNkZjNnlGMkY0SFdwdDNYQ1JaaEZwQ2E2NFNVQmttcDUybUpfOWF2UjJIMEIxUjIxREJTUjFQaWJUZUZlZ2pwOFBnbTlwSXV1aTVYUElHdFlac19zRmVXb2tkVF9rczlvN2lDVGk4YW16bUltVkVQTFl0YThvWVhpSDQzWWY4Zk84OEFFOWM5SS1SdWhmRWxSQjZYRDBrYkUxZk1aSFBtQUV6MDB6cExhS0xadXZ4dExrR3VLWGJBcmlfRkdOdzJLRTV1WkFXUnozWDV4UUk4T05NZ3E5WGlNTnl4ZHlTNTBvQ2ZsazBXU0c0NkM1ZG5PUGhEamJtSG9qS1F4MWtPZkk4T085MDNTbGpqNksydkhlMHNid2NERjZnWUNobEFVOGpheWUzZlBPMW9HWTNCTS1pd3BZNFozU0xnSUJpWEttN0pfNWVHSlBscGtXVDNYVzB1MGhGcFJ5a1NGT1RIX1RhaElnLVFOajBMNFp0RzkxZ0U?oc=5",
+          "published": "Thu, 02 Jul 2026 19:56:18 GMT",
+          "published_date": "2026-07-02",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "新纖狂飆漲停！高掛2.8萬張委買 網友抱2年吐：終還公道 - TVBS新聞網",
+          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE1IY3FfM1JTbUYtWGIxZ1gxVkZoN29ZTk1teDBaYXZnUEZOT2tMLU9nT3doUzE3aTFHYnJPLTRUNnFGNVp0bGRDOGRoUGhOb3M?oc=5",
+          "published": "Mon, 06 Jul 2026 02:32:00 GMT",
+          "published_date": "2026-07-06",
+          "source": "TVBS新聞網"
+        },
+        {
+          "title": "潛力無窮 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5uOHkzZU1WcnhWYTVtZ2swQVo4N2ZQV1dKelhfUllpRnBHMlAzMjgxOGtoRmFaTjBFcklyano4RVd5VE13Q1JSRnJ3U0RpRXhNS1UwOEs3c3I?oc=5",
+          "published": "Mon, 06 Jul 2026 02:42:25 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "新纖(1409)做什麼的？老牌傳產今年股價暴漲80％還能買？老手拆解4根漲停背後：是剛開始還是炒完了？ - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNbUNOT09ldUNMWVljYmM5STUxZThuekZfbHExa0VhRHNfTkFYbmFJVnM0WFJoVF84eEtoV3Nlb3Zkei1EeEltb044bTh5ZnhmRUlUdDNlekNPTWU2cTYzMnhJQzJZSHQ1cXVCNUEzbjVnbTdGZ09UYVl0SHREejhQMg?oc=5",
+          "published": "Tue, 09 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-09",
+          "source": "今周刊"
+        },
+        {
+          "title": "【即時新聞】新纖(1409)爆8萬張巨量！資金輪動，這「6檔概念股」走勢兩極化？ - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOTUswMWhPV3VjdDVMNkQtM01kLXlMTVRYRGhMZm04U3FhV2dsZzIxaEc0TGQ5U1pRMy1fb1gza0pkcnlfb05Gdjh0aGtXQlJDTm1sbGlsMkp4dFd0UGk5eHZIWF92cWVFd05FNDdoM0Y3RmprNmk1MlpxNVJJX01lMzFTanU3MkQwdHZaVktWdlg?oc=5",
+          "published": "Tue, 07 Jul 2026 03:10:12 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "均價25.5 55張續抱💪 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBzVzBoLU44T0dUQ05lNDhIVVRHWXdmMURzREE2NllxYkR0Z0dUXzZxa2Jyc0p2NDNpdEJqeldTOVZ2cXVLbGV4dnpWbFRLMkZtdXIzQi11Q2s?oc=5",
+          "published": "Mon, 06 Jul 2026 03:17:57 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "【09:17 即時新聞】新纖(1409)亮燈漲停34.1元，傳產資金轉進＋主力與三大法人買盤同步推升 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxPU0ZEblhzSTNOUlRsdjFqZ051Q2s2Wk9NUnV0SGxXZXNyeGpCSVVVVnV3SjJRLVFqOXE5b19vQUFHTWxzN09PdmZ0b3JYSHdxR0xNRVBua24tZ3Zmelg1Yk5XVEhnY01UUERVX2FOYWo4M0tjLU1uWHZBeTNON1V1MXJzd3RndVVnODZ3Ykd3?oc=5",
+          "published": "Mon, 06 Jul 2026 01:17:37 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "【即時新聞】新纖(1409)爆出7萬張鎖漲停，這「5檔概念股」買盤湧入接棒狂飆！ - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPenJENzNYckowZnBJQi1YQlhfT2pUamVjTEpWemtpMXRWblRZT0lhOVktVktrbDJFZHFoYzB0NW5vclVtanFBaHQxcGd6T2FmNVQ1RDdFVk1wZ3IyOS1td25XdURvMEFEZG5SSzFsYmMyZGVjRTFtX2piY3VheVBBWktMTjNBR3RXampXMkdfR0s?oc=5",
+          "published": "Fri, 03 Jul 2026 03:22:25 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "【即時新聞】新纖(1409)爆量衝新高遇震盪，這「4檔概念股」資金輪動現端倪！ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5tVjh3M2ZzeU41OEhpdE93Tk9PSk1MME1FRGhjWHFLQzhWbTN0cnpuMDdicmY0Y3VBOVVoTVRINDZ1NlA4ZXRyTHM4U1daWkRxX2pWejNvckhPRnNkZXVjZzc2NWxreFk?oc=5",
+          "published": "Mon, 06 Jul 2026 03:03:54 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "【12:45 即時新聞】新纖(1409)亮燈漲停至28.2元，半導體材料＋環保纖維成長題材推升，中長期技術多頭結構獲籌碼加持 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOQmdrNjB0Y3ptOWx6U3VVOHRzMk5Cei1tT21RdVB6bWx2M3RteVBKM2tpOVdNZHVuTXJTRVp4RG9FZXo3Q21UVHY3R25ubENtb3dRVWxvd0tuc3BteVRHNGlGS0JuRFpNT3I0cTBsdWhaS3dMMXpZcy03eGU0dmxtYlMzdEplQmZITVhNUTh3?oc=5",
+          "published": "Thu, 02 Jul 2026 04:46:00 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "1409 新纖 - 近日的大盤隱約感覺 資金有慢慢轉移到傳產 (除了台積電以外)... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5ERHdrTEdyTTJWQ3o3UTZRMUVVWVFLNThQRTNZeWo2VDhwNW9RdG9ZOXNUSmJkSGx2NUNRWkdaeXJzbFZoQTJESjU0SC1WT3lFVW04R0tGeGI?oc=5",
+          "published": "Sun, 05 Jul 2026 04:37:34 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "【12:40 即時新聞】新纖(1409)股價上攻逾4%，AI高階材料與電子級雙氧水題材發酵＋前波主力大舉進出後技術面轉為高檔震盪 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxObXhDRmNnTzZid0RlcUZkWkRoLUdmUXQ3OEQ5VU1HWGVJdm14cnFSUmhYQjlDSmlCQnlQcDQzODhxM3FCSEloSGcyaVVYRWYyYlZ2d1o0b1pzdl9nRUd6NkdvOVRyX2tVQVJ3VjYtSnA0Z0lhWjd0U1Q2LWxNckJMa3VxZVNkQWFZc3N1dlFB?oc=5",
+          "published": "Tue, 16 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-16",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "【09:43 即時新聞】新纖(1409)亮燈漲停31元，傳產紡織題材延燒＋法人與主力買盤共振推升動能 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOUEg4OUF4S01PVFZZS01DQUhpLW9kLWJpTDBrdWVsSGlMT0ZpeTRsdWp4WG8xbGt3cGQtcnZpMmFFQ2x5OUZVaXB0aGhvVGpwU0FTQUJ1czF4UWxkanJVenVNM0lxakdaZDdzUFg4SktlWmxDMFZtOEhVdEt3WERSZU4zU19sWmlsTzdCaFdB?oc=5",
+          "published": "Fri, 03 Jul 2026 01:44:00 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "新纖價量齊揚創新高- 日報 - 工商時報",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9SSzBnR05ROEtlM1g5MmpjSTB3R3pXM3dhU0ZvTkdwelo2dzVTWi01M3JSSGxrNTlac3JXNTBqZWxoNmNSSkE0MV96MUxsM01aWk5od2JKOEJfVUwwVzAw?oc=5",
+          "published": "Fri, 03 Jul 2026 19:00:00 GMT",
+          "published_date": "2026-07-03",
+          "source": "工商時報"
+        },
+        {
+          "title": "1409 新纖- 大家自行判斷吧，不作買賣建議- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1EVmJLdkJnTmx4c3NEOGdjamZ4elBpNExZNlJweUlCUWtFLW9fLVVudEwwSmtEaXVjcFp6SzI4NmpnREhYNzYyeEZkMy1lRERMbEstVThRamI?oc=5",
+          "published": "Thu, 02 Jul 2026 22:07:54 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "【10:26 即時新聞】新纖(1409)亮燈漲停至28.15元，半導體材料與AI高階工程塑膠題材發酵＋前波主力低檔佈局成支撐 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQdzMyb09xZG0zNVJ1cGU3amFNdTUzdlFxM0FZQlhhT1V2Y01FMlBveUR4RkRhQ3J0UmhSTjZCU1g0WHB0a015NFloRl9zXzhKdnRnQ2RPWlVaVFVzMmxKaVBzRW5UMnJHdXRCOW9jMnBJTnJ2ajVzeXNKSGQ5QWxWWmNQV1QwNDliSkEzZDV3?oc=5",
+          "published": "Mon, 22 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-22",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "新纖特化品 晶圓龍頭全包 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFA2RmNnZDlpVzNiSVR4SEVGbEZ2RFVxcHRZZTB5X3g2aUxvM3ZPdEZOa01YSUVEYldEekxvWFd0Xy1lTTY1eUlhb2RYTjFQVDFU0gFWQVVfeXFMTm9MQXdnUlFyNG9mYXJxbkl4Q21wU1dpZlpqbl9KbkdrR0thOWIxNEpmQUt1U1Z1ZVM3UmZldjI3MkxSdlV0UE5RdTdKblRKb0hWQVR2bFE?oc=5",
+          "published": "Thu, 30 Apr 2026 07:00:00 GMT",
+          "published_date": "2026-04-30",
+          "source": "UDN"
+        },
+        {
+          "title": "每股獲利年增七成！紡織股新纖再飆漲停 分析師：別急著追高 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMioANBVV95cUxOZVRxdjBzWmJ4VFp2cDZaOWk1a19TT3c3QnNoYjNWRkpVOVlBem1pVUd2Z2xjRVp1QmVSMlNPSEh6LXRPRl9laGhCbWFKaUJJMGNzRnJsWWp3MDV4TGdsc25ta0dfVVEwMUdYbmNZU0NocTdKS21hVnVTcTU2UTFIYnFIWUl2Z3ZFLUlDMFp5cXY5S0VMRTllTXVEYUVWTXVoX0g3SU5iVjNYQlJuLUtvOVVRWllOZU9ZazBQS096ODBkdlJiS2lzUVhrV1QyaGUyRUMwclI0dUFBLWNQRFp1OXNmRm5UYlpsYk91TFd2dHNSZjRaOWlQMHFoSG5NRklWa3NRZFc0Zkl0QU5qbVVlaThvTHhvSi1vOERsX1ZpVTdHc1N4eFRiNTMtcmk0dklGZENxMEdQdEREVjJYRUEwaTl0dW82eVZvNnJ3aDJkNUo0S0ZURUtmSzRGRjVDeEdfQng4Z01Fa2NNMkUybV9fajl4TlpDSU81aHFCcGROMXBpb19WeHNTdmVkLWtvZU9uTjNDRTY2MEtiMlk5TVJ2Mg?oc=5",
+          "published": "Tue, 02 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-02",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "晶圓大廠全包了！新纖股價再跳空漲停 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5PN3laQVZTdmVYYnUtR3lpdVVTdjJxV2hlbVpWOW9HZ3YyOU9ibzBZMHFpX1VsSkVOVnl0NGlEZVNyRUtpMmtmSGVteVAwVDNl0gFWQVVfeXFMTmYtZmxOb2x4el80ZVVGNkUzWVJPTzFGTnVwa2J1NTV1TUtZOXJUX2dLc1JaQlRnb0VRNVpyYmpxX0VYemp3eU5zQ3ZWdV9tem1EVGIwMnc?oc=5",
+          "published": "Fri, 29 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-29",
+          "source": "UDN"
+        },
+        {
+          "title": "營收速報 - 新纖(1409)5月營收43.74億元年增率高達35.13％｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1vQUlmOGJXeXE5X205NktTSHNNOGpaS1lQbFRITnZYWkNZWWpyejliV3dKQXFEZHYtSTh4R0x1TkNLV2pHNUR1djRUMk1JZzFGaHI1cGdxOHZhejNJck1jcjRESG5pTFd3SUxzdXdxOGRYZGpkT1E?oc=5",
+          "published": "Tue, 09 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-09",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "1409 新纖- 新纖題材豐沛法人力挺近日股價連日帶量上漲- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5xQldaUGhrS1pxbE1EZ1FwUWJiTW1jcDBQekEwY0Flc054X1JNQnBCYmF1aFBwWmtxRWk4cWdsNVdmeUhJTEMxeTNOZXc3YnduNGpaQkEzWHk?oc=5",
+          "published": "Sat, 30 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-30",
+          "source": "CMoney"
+        },
+        {
+          "title": "討論牆 | 盤中速報 - 新纖(1409)股價拉至漲停，漲停價28.2元，成交31,298張 - LINE TODAY",
+          "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE0zcF9IcTBOZFB3d0UyTEdBZjYxdU9MZXdDbTFkOFZWYnBNUHB4alVrUGVLY3pJc1QyaDJkSHhLenE5eWdrNU8weUl3bVRQNlZ6TjBrcnV0VHFnd1Nnb2R0bXY3S0s?oc=5",
+          "published": "Sat, 04 Jul 2026 07:20:43 GMT",
+          "published_date": "2026-07-04",
+          "source": "LINE TODAY"
+        },
+        {
+          "title": "1409 新纖- 新纖股東會／董事長吳東昇：美伊戰事「危機也是轉機」-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5DRWFQSExPUXRGUHBjQTZBY3Jycm9yWW1tbkw1bXpPLTFnd0xfdG5UZ2duYWJKeVNGeGk5UnNMWnZwNHRHLWVpS1ZCSGxnbWNwdDFDWWdVVS0?oc=5",
+          "published": "Sun, 31 May 2026 10:10:55 GMT",
+          "published_date": "2026-05-31",
+          "source": "CMoney"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "新訂單",
+          "confidence": 0.75,
+          "evidence": "晶圓大廠全包了！新纖股價再跳空漲停"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.65,
+          "evidence": "新纖特化品 晶圓龍頭全包"
+        },
+        {
+          "type": "AI概念",
+          "confidence": 0.85,
+          "evidence": "【12:40 即時新聞】新纖(1409)股價上攻逾4%，AI高階材料與電子級雙氧水題材發酵"
+        },
+        {
+          "type": "產業轉機",
+          "confidence": 0.7,
+          "evidence": "董事長吳東昇：美伊戰事「危機也是轉機」"
+        }
+      ],
+      "catalyst_summary": "新纖受惠於半導體材料、AI高階材料題材與晶圓廠訂單，加上月營收連創新高，帶動近期股價連日漲停",
+      "risk_flags": [
+        "分析師：別急著追高",
+        "高檔震盪風險"
+      ],
+      "target_prices": [],
+      "chip_signal": 0.7,
+      "chip_bonus": 10.5,
+      "fund_signal": 0.6,
+      "fund_bonus": 3.0,
+      "catalyst_signal": 1.0,
+      "catalyst_bonus": 8.0,
+      "industry_signal": 0.0,
+      "industry_bonus": 0.0,
+      "combo_bonus": 3.0,
+      "rank_score": 115.5,
+      "hot_industry": false
+    },
+    {
+      "score": 84.4,
+      "trend": 1.0,
+      "rs": 0.76,
+      "setup": 0.96,
+      "quality": 0.65,
+      "liquidity": 0.39,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.79,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 13.7,
+      "ret20_pct": 19.7,
+      "dollar_vol_m": 139.0,
+      "stock_id": "6579",
+      "name": "研揚",
+      "industry": "電子工業",
+      "close": 179.0,
+      "change_pct": 8.81,
+      "valuation": {
+        "pe": 30.18,
+        "yield_pct": 2.28,
+        "pb": 2.67
+      },
+      "chips": {
+        "inst_total_today": 867343,
+        "inst_buy_streak": 4,
+        "foreign_holding_pct": 3.55,
+        "foreign_holding_change_30d": 0.19
+      },
+      "fundamentals": {
+        "eps_latest": 3.81,
+        "eps_yoy": 84.1,
+        "gross_margin": 34.8,
+        "operating_margin": 8.7,
+        "debt_ratio": 22.9,
+        "roe": 4.2,
+        "roa": 3.2,
+        "op_cashflow": -251251000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 47.1,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 179.0,
+        "ma5": 165.4,
+        "ma5_diff_pct": 7.6,
+        "ma20": 162.275,
+        "ma20_diff_pct": 9.34,
+        "ma60": 147.825,
+        "ma60_diff_pct": 17.42,
+        "ma120": 130.60416666666666,
+        "ma120_diff_pct": 27.04,
+        "ma240": 125.14166666666667,
+        "ma240_diff_pct": 30.09,
+        "high_60": 179.0,
+        "low_60": 116.0,
+        "high_20": 179.0,
+        "low_20": 150.5,
+        "bb_lower": 150.09013017584667,
+        "bb_upper": 174.45986982415334,
+        "atr14": 6.428571428571429,
+        "stop_2atr": 166.14,
+        "stop_2atr_pct": -7.18
+      },
+      "ohlc": [
+        [
+          141.0,
+          141.5,
+          136.5,
+          141.0
+        ],
+        [
+          143.0,
+          151.5,
+          143.0,
+          150.5
+        ],
+        [
+          152.0,
+          152.0,
+          144.0,
+          147.5
+        ],
+        [
+          148.5,
+          153.5,
+          146.5,
+          150.5
+        ],
+        [
+          149.0,
+          150.5,
+          143.0,
+          144.0
+        ],
+        [
+          147.0,
+          155.0,
+          146.0,
+          149.0
+        ],
+        [
+          149.0,
+          151.5,
+          147.5,
+          149.0
+        ],
+        [
+          153.0,
+          156.5,
+          150.5,
+          152.5
+        ],
+        [
+          153.5,
+          156.5,
+          152.5,
+          154.5
+        ],
+        [
+          158.5,
+          160.5,
+          155.0,
+          159.0
+        ],
+        [
+          170.0,
+          174.5,
+          170.0,
+          174.5
+        ],
+        [
+          186.0,
+          189.5,
+          176.0,
+          177.0
+        ],
+        [
+          177.0,
+          177.0,
+          167.5,
+          169.5
+        ],
+        [
+          172.0,
+          175.5,
+          169.5,
+          170.0
+        ],
+        [
+          172.5,
+          174.0,
+          165.5,
+          167.5
+        ],
+        [
+          168.0,
+          170.5,
+          164.0,
+          169.5
+        ],
+        [
+          172.0,
+          172.0,
+          167.5,
+          167.5
+        ],
+        [
+          167.0,
+          167.0,
+          161.0,
+          163.5
+        ],
+        [
+          164.5,
+          165.0,
+          160.0,
+          162.5
+        ],
+        [
+          148.0,
+          151.5,
+          147.5,
+          149.5
+        ],
+        [
+          157.0,
+          164.0,
+          157.0,
+          164.0
+        ],
+        [
+          164.0,
+          171.0,
+          161.5,
+          162.5
+        ],
+        [
+          162.5,
+          163.5,
+          157.0,
+          163.0
+        ],
+        [
+          168.0,
+          168.0,
+          161.5,
+          163.0
+        ],
+        [
+          165.0,
+          167.5,
+          163.0,
+          166.5
+        ],
+        [
+          168.0,
+          168.0,
+          163.0,
+          165.0
+        ],
+        [
+          162.0,
+          166.0,
+          161.5,
+          163.0
+        ],
+        [
+          166.5,
+          169.5,
+          166.5,
+          168.0
+        ],
+        [
+          171.0,
+          171.0,
+          165.5,
+          167.5
+        ],
+        [
+          167.5,
+          167.5,
+          157.0,
+          158.5
+        ],
+        [
+          156.5,
+          159.5,
+          156.0,
+          158.5
+        ],
+        [
+          158.5,
+          160.0,
+          156.0,
+          157.0
+        ],
+        [
+          156.0,
+          156.0,
+          150.0,
+          150.5
+        ],
+        [
+          153.0,
+          155.5,
+          152.5,
+          154.0
+        ],
+        [
+          155.5,
+          157.5,
+          153.5,
+          157.5
+        ],
+        [
+          157.0,
+          158.5,
+          154.5,
+          156.5
+        ],
+        [
+          156.0,
+          162.0,
+          154.5,
+          161.5
+        ],
+        [
+          159.0,
+          165.5,
+          159.0,
+          165.5
+        ],
+        [
+          166.0,
+          169.5,
+          164.0,
+          164.5
+        ],
+        [
+          173.5,
+          180.5,
+          173.5,
+          179.0
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "macd_turn_red",
+        "volume_price_surge",
+        "n_day_high",
+        "inst_consecutive_buy",
+        "monthly_revenue_growth",
+        "relative_strength_leader"
+      ],
+      "combos": [
+        "主升段啟動"
+      ],
+      "plan": {
+        "ref": 179.0,
+        "max_entry": 184.37,
+        "init_stop": 166.47,
+        "tp1": 204.06,
+        "r_abs": 12.530000000000001,
+        "risk_pct": 7.0,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 177.21,
+        "flat_hi": 180.79,
+        "gap_up_line": 181.68,
+        "gap_dn_line": 177.21,
+        "trail_ma": 5
+      },
+      "news": [
+        {
+          "title": "逾50萬美元客戶去年增80個，研揚今年營收衝百億- 新聞 - MoneyDJ",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPdzE3b2FkSGtINkNRcUZERWJBdFI1WlBaSUFXdVA2a0N6SUlRTUVIN3dHalRYTlRBSklnZUFWMjBicHE3NGxhaVRoNjE3M0lnNl9lZlpobGN4RFItTE5jMHIyZ0JIVUY0QzN5MkdWRWZjZ19RTkl4S3J4eS1QYURfaGZjeTRWdmxDZmtqWXZOMzRzQQ?oc=5",
+          "published": "Tue, 07 Jul 2026 01:58:00 GMT",
+          "published_date": "2026-07-07",
+          "source": "MoneyDJ"
+        },
+        {
+          "title": "營收速報 - 研揚(6579)6月營收10.89億元年增率高達47.1％｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE50Q3lSMDJiR3NLYnZKb0pfQ1ZOQjFRcVpwUU9abVdhajY1WFBkZ01uS2w5c1k2eVQ0SVNFZ1VmYzBGMnd5U3Jld24zQzZYTHJ1X3RJX2cyMHJrRDJIak9aWjhEWVR0MlBlekJINko0cGdIbFJMYlE?oc=5",
+          "published": "Sun, 05 Jul 2026 18:50:00 GMT",
+          "published_date": "2026-07-05",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "研揚(6579) 個股概覽 | 個股 - 股市 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE0tTTU1Y2EwZ1BGRlpsMXZ2N05oVnlJc0ZZUW5KMEhxWWRuLTN4cE14cUZoYi0zRXdBeTZFM0JUelNKeGVpN3FNLXpIV1psNWJQbXhz?oc=5",
+          "published": "Fri, 26 Jun 2026 04:49:41 GMT",
+          "published_date": "2026-06-26",
+          "source": "CMoney"
+        },
+        {
+          "title": "營收：研揚(6579)6月營收10億8907萬元，月增率12.07%，年增率47.10% - 富聯網",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNUHYyRERxZDZkWDhkSUtvNVM0RjJrNWpzODMwTk5jT0I4RGtPOTJjQ1NyVlR3MUIwMXF3bHhocnNnUndfOEhUMHdhWG5mM3doZFhFcFowQVh4cEFfVWladlhvTGI2THVldXl5dmlYUlREcDdvQ3JtLUtzS1ozWXV0aVk2UkUxc29J?oc=5",
+          "published": "Mon, 06 Jul 2026 23:03:00 GMT",
+          "published_date": "2026-07-06",
+          "source": "富聯網"
+        },
+        {
+          "title": "焦點股》研揚：基本面助攻 漲停攻高 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE5rangyOVhSZXVFTDQ4OW9wUUMxTG4yeFl4aHExYTBoVWVPaEhRbmswZ0c1OXN3QnRHT21tbmlqM2hxMXB3SjhkYVE2Y2phXzRnNmx3M2FuRldwUms4NGw40gFkQVVfeXFMTk0xLXUxQW1zVHZpT21uNGFwTjVYQVVPVjJLSlJfYUtWdUQ5cVV5dGNiMEJrT18tUVlBb0hYWWxjMkJ6bXRyRUlmbXJjNWdfcENlYnhOazhOeVd6WHJmQ1NPdmhIcg?oc=5",
+          "published": "Tue, 26 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-26",
+          "source": "自由財經"
+        },
+        {
+          "title": "研揚2026年全年營收看增兩成 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE10ZXhxMzlhTWUxelZjdWZST3dKTVlCM3RkWkV6MnBKeldjc2Jfelc5czRLaFdvRGlqTWRyRTU1MVRqYUZjN1J1eHBmcFBka1dz0gFWQVVfeXFMTXkzaEJnbzFkY0d2VnYwUndFeEktNUQ5cTBJeXNoOVRVYmVlUDk4SnAxMDJYb1pZRFRuQWdJM2RLWk1ocElZZ1pTTlcwMW5xY2FncF84MkE?oc=5",
+          "published": "Thu, 14 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-14",
+          "source": "UDN"
+        },
+        {
+          "title": "【13:16 即時新聞】研揚(6579)股價走強漲逾3%，受惠邊緣AI訂單能見度高帶動，多空籌碼拉鋸下短線觀察法人與主力回補力道 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOY1FUbVhfNVJpNVd0aWtTTXR2UTFtZnlzZkYtX0JXckRVNmxxS2pOSV93QlpMbkVMNUYzd25FSTh2RUJXQzhaY0hGQ3NWT2FPaHFSaFd6YUpTS0pESnYtdElWQThTQkdwOUhYbVJ5RzRta1pVUWpydVhKTV9Yay10ek1TTWs1cS02bVp1YVN3?oc=5",
+          "published": "Tue, 19 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-19",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "研揚取得IEC 62443-4-1認證 強化邊緣AI及工業網路安全 - news.cnyes.com",
+          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBjX1NWaUpNX3plODJaNVBwNnlnLTdWS3hVczUwUm5SbGlOVDhhb1QyUUJ5MW1VSDRmWHppN2VHcUFPelpKWXd4Um9iRnpOZHM?oc=5",
+          "published": "Thu, 18 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-18",
+          "source": "news.cnyes.com"
+        },
+        {
+          "title": "6579 研揚- 今天早上是有吃威而鋼？ 這藥效就只有持續半小時而已⋯⋯ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBtUUwyZWhkeVF0TWVYY283X3JYVjNwQXRmakZwTnF4VnJ4VHFiWThZaGlWdnQ0MWJoM1pnWjNqcFpkWmRrejFRRURkc0FjTlNpV2xRQ2dENE8?oc=5",
+          "published": "Tue, 19 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-19",
+          "source": "CMoney"
+        },
+        {
+          "title": "研揚將擴大AI戰果，加強生態系合作共提解決方案- 新聞 - MoneyDJ",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNM29iWTM3aXRZVUtlbFBRMHlWMlBBMmI4aU42MXVadUU5aXZweks4VnNjbUF0V21fb2EtN1Y2UlY1dUdDMGtzV204Rk51M0w3X1VOaFZqWTM0Y3N4aHZVUFRCLXktRlBJUnFVc0tHTWJ3TmZ0S1EwYzBWNndIanFGS3B4YmE5dXVfejFTLUZER01aUQ?oc=5",
+          "published": "Tue, 26 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-26",
+          "source": "MoneyDJ"
+        },
+        {
+          "title": "研揚專案放量 業績看增 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5xSjYzY2YtamQ1OFQzSWNrTjVFWXJIb2NDekxIMEtYbVNoeS1lTHBId1FNa3FrcER1M1dMZTdUUmFmMWpKZkNDVlpzUldwdldN0gFWQVVfeXFMTlRxeWVDbmp1dVZFN25IdXE4cUkxZ2NvM2UwdThaQ29CR0FIZ3hNWXE0MkRiRG9oTktsWlhRSzlmbWY0VEY4Rl9CRVM1MWFUZzBZY0FtTFE?oc=5",
+          "published": "Mon, 02 Feb 2026 08:00:00 GMT",
+          "published_date": "2026-02-02",
+          "source": "UDN"
+        },
+        {
+          "title": "6579 研揚 - 漲漲漲每天漲不停就可以啦！-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBZN2k2TlNOYWJPcGNITXhLVEp0ZHhqTjQydkhhemwybF95WkhSVHl5TEp0RVE0NWdUQ1A5NVNKdzVzZ3pnZlZYMURGODhGTXdfQkNZOVlLOEM?oc=5",
+          "published": "Tue, 05 May 2026 23:10:14 GMT",
+          "published_date": "2026-05-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "【11:57 即時新聞】研揚(6579)股價勁揚近漲停，邊緣AI訂單能見度拉長＋均線多頭與法人買盤同步推升 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFAzenpZSExEdjZxSEZEZF9WTlNKd2t1TGtmOWduek5JVWxyMFd1ekVkTnlXX0hrQzRMaktIeXJyRDg0NS1qZmM4SXRXamwxbjRuOEFzbUVFY3lCcE5iRy16anhMZlE4N2c?oc=5",
+          "published": "Tue, 26 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-26",
+          "source": "CMoney"
+        },
+        {
+          "title": "6579 研揚 - 國票長城繼續出貨-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBnb1BWWTNfUGI4OG42VjNwQTVRbmZlQ3ZIYVlrNDl1T0h6OTMteEN4TTk3QzZIRXo0eVcwODllclZLV1J3S2IwTHRoWl9wOTJqeHlYNkczcGU?oc=5",
+          "published": "Wed, 27 May 2026 13:40:13 GMT",
+          "published_date": "2026-05-27",
+          "source": "CMoney"
+        },
+        {
+          "title": "6579 研揚- （研揚）：南韓IC科技廠簽MOU 加速邊緣AI布局-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9VUzM4YmFKb0I4MGpCeGI0U1F4WXlBcWJFU0RTT1NwTkEzMmExV1NTeXJZaTg4X1VwME5TUnh5YmJRVl94Wjh4R3FvRWNkZzNGQ2xGTEpRVXQ?oc=5",
+          "published": "Tue, 02 Jun 2026 13:35:28 GMT",
+          "published_date": "2026-06-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "【2026/05月營收公告】研揚(6579) 五月營收9.72億元，表現亮眼、呈現雙成長，創歷史新高，年增48.85% - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5tczM1ZEJ2X2gyZ1dHZ215LXpzamc1YkNyNjdqNzh0b2JsRkQweklBbHNZYklNLWdwbGhWQ25xNHEwLUwyemlJdWdyY1Bpc1RneXFmSnRFc2Z5TXplNk9RWkRlc0NwLWM?oc=5",
+          "published": "Mon, 08 Jun 2026 09:40:03 GMT",
+          "published_date": "2026-06-08",
+          "source": "CMoney"
+        },
+        {
+          "title": "6579 研揚- 台積電好朋友們訂單強！研華、研揚、凌華樂翻天👍 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBZaFZFX3ZkQlVLVER6blZTREdoQUJqdWRZd1JpczBaU2RPTlNCenYxYk9GRFJfNlNjREhlLUtLV0xLc181ODZ1S013ODl3bW8wWjFVWC1ndmE?oc=5",
+          "published": "Fri, 15 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-15",
+          "source": "CMoney"
+        },
+        {
+          "title": "6579 研揚- 擷發科COMPUTEX 2026 聚焦邊緣AI，首亮相AI 載具系統事業群-股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBrRUZJMHFQYm5Va3pzVzQ1OHJkSEgwSXVSeFVlb3I0VUdla1ZHMUprcjhJUjU4aTdiR2VDSkVqMmczY1I1bGRIM19wMElYYlBOLTVRWFNZSHM?oc=5",
+          "published": "Thu, 28 May 2026 18:14:09 GMT",
+          "published_date": "2026-05-28",
+          "source": "CMoney"
+        },
+        {
+          "title": "6579 研揚 - 6579研揚 收盤價,週籌碼變化6/26日止: 散戶微增持... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE44blpnRXBxbU50M0dSY25uODFsbG94Z3JmZ2RXa2RBcndmdVh0VGpnX3ZlUnBvRUs1S3FMRWdWXzRNQWctQmtRY1B6VkYxTkpfMUx2Q0gtRC0?oc=5",
+          "published": "Sun, 28 Jun 2026 03:35:10 GMT",
+          "published_date": "2026-06-28",
+          "source": "CMoney"
+        },
+        {
+          "title": "6579 研揚- 【即時新聞】研揚宣布邊緣AI專案放量，2025營收創新高年增20% - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5VaHlERWpsemN4cmxMZjVaN2YyYzFRalZraUE3VUJ3QnI0R2hQNVZTbkxkblJNbDNBNWJ3NXNIYmZJRHlBRE5vZTVacGdUc3ZWeXlyU1A4bkM?oc=5",
+          "published": "Sun, 01 Feb 2026 08:00:00 GMT",
+          "published_date": "2026-02-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "研揚(6579)營收創高後還能追嗎？先看成長品質，再看估值位置-黃勢明 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxQUmY2cXdHOGdBQ2VWWG1COVRrVlBPUDVvOTdETGV4NU92SVJwOTE4eHVfSEIwUlhhcndkb2pNUk1NYVQ5X2RvSDJHeHZsZ1BfYTBvVkFUaUF6T05ZZXFZTGN0bUFIQ0lQRmZfT1dkY1VaeTg0VmpoUWg4X3g4eEotZ3BMdU45Rmc?oc=5",
+          "published": "Mon, 18 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-18",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "6579 研揚- 研揚布局AI、機器人與智慧製造應用高階邊緣運算平台- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBDTGM2NVl0ZkZVTlBHNFFKUFN2WHo3ZEhGeGlNUTJIQzFIb1hjUDJjcXE3Um1xWEhmT0Y2RjVnTjFLT1QyTXZCWGYyQVlEZFQ0djA4RUl2Q1A?oc=5",
+          "published": "Thu, 23 Apr 2026 07:00:00 GMT",
+          "published_date": "2026-04-23",
+          "source": "CMoney"
+        },
+        {
+          "title": "台股焦點：研揚(6579.TW) - 台視全球資訊網",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOVjNxQkZpUjhGWFYyMDVHaURSOHRiM3QyT3BHa0xIejZYQkltZURnUmsycmlyODhHcFhFa0ZmdWVxcEpJb3NmMm9Bak9fcUpIeVhVMWlqa2RRRnI0YmU0VnVmQkx4Rmhtam80bU5MTldlb3JqZmRjd0NuakluSDM3OWRicFQ5TUFSX01LbzlDSXVjdw?oc=5",
+          "published": "Tue, 19 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-19",
+          "source": "台視全球資訊網"
+        },
+        {
+          "title": "研揚強攻邊緣AI，拼產品營收比重升至約3成 - 台視全球資訊網",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNdHpWaUZsaFI4bV9IYndqcTh0MVFnUE1rYi1yV1N2Y00xc09xdGNUVGNpV3ZDV0RQaldiWnVkZDBYSDdJblh6Zy1Mc3lDanRhNGFYbGZydE9BV3B1aUJzenhUbXBHRmpDYmVkVEkxdm5FQ0ZBSXJjY3RrdTYzZkN5MGIySkFVUmZmbklFd2Q0Y0QyZw?oc=5",
+          "published": "Wed, 10 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-10",
+          "source": "台視全球資訊網"
+        },
+        {
+          "title": "研揚：訂單能見度達6個月 全年營收估增2成 AI相關占比拚3成 - news.cnyes.com",
+          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE91QzJ2eGdlcGk2aW9XU2tWWnVXQzJnX2VyMTlCUDgzVkN2OFRaRWpXUUd3enJWMV9Tc29kbDdXazM5cGpXX3p5ZUdMS1d2bU0?oc=5",
+          "published": "Wed, 13 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-13",
+          "source": "news.cnyes.com"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "新訂單",
+          "confidence": 0.95,
+          "evidence": "逾50萬美元客戶去年增80個，研揚今年營收衝百億"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.85,
+          "evidence": "研揚將擴大AI戰果，加強生態系合作共提解決方案"
+        },
+        {
+          "type": "AI概念",
+          "confidence": 0.95,
+          "evidence": "受惠邊緣AI訂單能見度高帶動"
+        },
+        {
+          "type": "產業轉機",
+          "confidence": 0.9,
+          "evidence": "研揚強攻邊緣AI，拼產品營收比重升至約3成"
+        }
+      ],
+      "catalyst_summary": "研揚受惠邊緣AI訂單能見度高，營收持續成長，訂單能見度達6個月，全年營收估增2成。",
+      "risk_flags": [],
+      "target_prices": [],
+      "chip_signal": 0.63,
+      "chip_bonus": 9.5,
+      "fund_signal": 0.76,
+      "fund_bonus": 3.8,
+      "catalyst_signal": 1.0,
+      "catalyst_bonus": 8.0,
+      "industry_signal": 0.0,
+      "industry_bonus": 0.0,
+      "combo_bonus": 3.0,
+      "rank_score": 108.7,
+      "hot_industry": false
+    }
+  ],
+  "watch": [
+    {
+      "score": 92.7,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.81,
+      "quality": 0.5,
+      "liquidity": 0.54,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.83,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 7.2,
+      "ret20_pct": 70.2,
+      "dollar_vol_m": 250.0,
+      "stock_id": "8071",
+      "name": "能率網通",
+      "industry": "電子零組件業",
+      "close": 33.349998474121094,
+      "change_pct": 7.75,
+      "valuation": {
+        "yield_pct": 0.0,
+        "pb": 2.48
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 80.9,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.67,
+      "quality": 0.14,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.17,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 12.2,
+      "ret20_pct": 33.7,
+      "dollar_vol_m": 5484.0,
+      "stock_id": "2059",
+      "name": "川湖",
+      "industry": "電子工業",
+      "close": 8260.0,
+      "change_pct": 6.1,
+      "valuation": {
+        "pe": 68.62,
+        "yield_pct": 0.66,
+        "pb": 23.53
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 80.0,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.66,
+      "quality": 0.4,
+      "liquidity": 0.8,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.13,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 8.4,
+      "ret20_pct": 30.4,
+      "dollar_vol_m": 698.0,
+      "stock_id": "3317",
+      "name": "尼克森",
+      "industry": "半導體業",
+      "close": 96.9000015258789,
+      "change_pct": -8.15,
+      "valuation": {
+        "pe": 57.34,
+        "yield_pct": 0.47,
+        "pb": 2.94
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 79.2,
+      "trend": 1.0,
+      "rs": 0.59,
+      "setup": 0.89,
+      "quality": 0.76,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.47,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": -0.5,
+      "ret20_pct": 20.1,
+      "dollar_vol_m": 1615.0,
+      "stock_id": "2458",
+      "name": "義隆",
+      "industry": "半導體業",
+      "close": 188.0,
+      "change_pct": 5.03,
+      "valuation": {
+        "pe": 19.71,
+        "yield_pct": 3.95,
+        "pb": 5.3
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 79.1,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.8,
+      "quality": 0.14,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 19.9,
+      "ret20_pct": 56.9,
+      "dollar_vol_m": 6684.0,
+      "stock_id": "6488",
+      "name": "環球晶",
+      "industry": "半導體業",
+      "close": 1205.0,
+      "change_pct": -9.74,
+      "valuation": {
+        "pe": 82.36,
+        "yield_pct": 0.58,
+        "pb": 6.83
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 77.5,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.83,
+      "quality": 0.25,
+      "liquidity": 0.11,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.34,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 16.1,
+      "ret20_pct": 84.3,
+      "dollar_vol_m": 46.0,
+      "stock_id": "4556",
+      "name": "旭然",
+      "industry": "其他",
+      "close": 84.30000305175781,
+      "change_pct": 2.06,
+      "valuation": {
+        "pe": 80.19,
+        "yield_pct": 0.73,
+        "pb": 4.15
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 77.3,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.73,
+      "quality": 0.12,
+      "liquidity": 0.99,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.13,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 5.2,
+      "ret20_pct": 46.7,
+      "dollar_vol_m": 1449.0,
+      "stock_id": "3532",
+      "name": "台勝科",
+      "industry": "電子工業",
+      "close": 383.0,
+      "change_pct": -5.67,
+      "valuation": {
+        "pe": 513.92,
+        "yield_pct": 0.25,
+        "pb": 6.49
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 76.7,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.69,
+      "quality": 0.56,
+      "liquidity": 0.84,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": -4.1,
+      "ret20_pct": 49.0,
+      "dollar_vol_m": 801.0,
+      "stock_id": "1714",
+      "name": "和桐",
+      "industry": "化學工業",
+      "close": 18.850000381469727,
+      "change_pct": -9.81,
+      "valuation": {
+        "pe": 32.66,
+        "yield_pct": 0.86,
+        "pb": 1.61
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 76.6,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.7,
+      "quality": 0.14,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 3.0,
+      "ret20_pct": 44.3,
+      "dollar_vol_m": 4875.0,
+      "stock_id": "3026",
+      "name": "禾伸堂",
+      "industry": "電子工業",
+      "close": 867.0,
+      "change_pct": -9.97,
+      "valuation": {
+        "pe": 124.1,
+        "yield_pct": 0.6,
+        "pb": 16.49
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 76.0,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.67,
+      "quality": 0.23,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.09,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 0.5,
+      "ret20_pct": 16.7,
+      "dollar_vol_m": 1833.0,
+      "stock_id": "2351",
+      "name": "順德",
+      "industry": "半導體業",
+      "close": 213.5,
+      "change_pct": -6.36,
+      "valuation": {
+        "pe": 100.88,
+        "yield_pct": 0.48,
+        "pb": 5.73
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 73.9,
+      "trend": 0.8,
+      "rs": 0.99,
+      "setup": 0.54,
+      "quality": 0.61,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.15,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 10.3,
+      "ret20_pct": 40.8,
+      "dollar_vol_m": 5386.0,
+      "stock_id": "5483",
+      "name": "中美晶",
+      "industry": "半導體業",
+      "close": 198.5,
+      "change_pct": -5.25,
+      "valuation": {
+        "pe": 29.76,
+        "yield_pct": 1.67,
+        "pb": 2.6
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 73.6,
+      "trend": 1.0,
+      "rs": 0.63,
+      "setup": 1.0,
+      "quality": 0.5,
+      "liquidity": 0.11,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.33,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 16.6,
+      "ret20_pct": 15.6,
+      "dollar_vol_m": 46.0,
+      "stock_id": "3511",
+      "name": "矽瑪",
+      "industry": "電子零組件業",
+      "close": 28.149999618530273,
+      "change_pct": 0.36,
+      "valuation": {
+        "yield_pct": 0.0,
+        "pb": 1.73
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 72.4,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.51,
+      "quality": 0.36,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.09,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 2.9,
+      "ret20_pct": 10.1,
+      "dollar_vol_m": 1585.0,
+      "stock_id": "6197",
+      "name": "佳必琪",
+      "industry": "電子工業",
+      "close": 360.0,
+      "change_pct": -3.36,
+      "valuation": {
+        "pe": 36.34,
+        "yield_pct": 1.86,
+        "pb": 9.96
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 72.3,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.39,
+      "quality": 0.19,
+      "liquidity": 0.96,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.6,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": -4.1,
+      "ret20_pct": 71.0,
+      "dollar_vol_m": 1278.0,
+      "stock_id": "2493",
+      "name": "揚博",
+      "industry": "電子工業",
+      "close": 280.5,
+      "change_pct": -0.88,
+      "valuation": {
+        "pe": 66.9,
+        "yield_pct": 1.41,
+        "pb": 12.36
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 71.9,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.51,
+      "quality": 0.27,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.14,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 0.0,
+      "ret20_pct": 38.2,
+      "dollar_vol_m": 1976.0,
+      "stock_id": "6672",
+      "name": "騰輝電子-KY",
+      "industry": "電子工業",
+      "close": 300.0,
+      "change_pct": -2.6,
+      "valuation": {
+        "pe": 55.7,
+        "yield_pct": 1.09,
+        "pb": 5.92
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 71.7,
+      "trend": 1.0,
+      "rs": 0.58,
+      "setup": 0.74,
+      "quality": 0.55,
+      "liquidity": 0.8,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.16,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 1.0,
+      "ret20_pct": 14.5,
+      "dollar_vol_m": 677.0,
+      "stock_id": "2352",
+      "name": "佳世達",
+      "industry": "電子工業",
+      "close": 34.45000076293945,
+      "change_pct": -2.68,
+      "valuation": {
+        "pe": 57.1,
+        "yield_pct": 2.82,
+        "pb": 1.91
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 71.3,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.47,
+      "quality": 0.66,
+      "liquidity": 0.3,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.14,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 5.2,
+      "ret20_pct": 22.3,
+      "dollar_vol_m": 97.0,
+      "stock_id": "6651",
+      "name": "全宇昕",
+      "industry": "半導體業",
+      "close": 161.5,
+      "change_pct": -4.44,
+      "valuation": {
+        "pe": 24.96,
+        "yield_pct": 2.37,
+        "pb": 4.79
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 71.1,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.61,
+      "quality": 0.24,
+      "liquidity": 0.63,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.09,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 16.3,
+      "ret20_pct": 30.1,
+      "dollar_vol_m": 352.0,
+      "stock_id": "6174",
+      "name": "安碁",
+      "industry": "電子零組件業",
+      "close": 57.900001525878906,
+      "change_pct": -8.1,
+      "valuation": {
+        "pe": 87.5,
+        "yield_pct": 0.54,
+        "pb": 4.75
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 70.3,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.46,
+      "quality": 0.4,
+      "liquidity": 0.89,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 7.6,
+      "ret20_pct": 31.6,
+      "dollar_vol_m": 981.0,
+      "stock_id": "6138",
+      "name": "茂達",
+      "industry": "半導體業",
+      "close": 396.0,
+      "change_pct": -10.0,
+      "valuation": {
+        "pe": 32.28,
+        "yield_pct": 2.5,
+        "pb": 9.57
+      },
+      "hot_industry": false
+    },
+    {
+      "score": 70.2,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.45,
+      "quality": 0.33,
+      "liquidity": 0.97,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.33,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 8.1,
+      "ret20_pct": 32.9,
+      "dollar_vol_m": 1332.0,
+      "stock_id": "5536",
+      "name": "聖暉*",
+      "industry": "其他電子類",
+      "close": 1395.0,
+      "change_pct": -2.79,
+      "valuation": {
+        "pe": 39.86,
+        "yield_pct": 1.39,
+        "pb": 13.59
+      },
+      "hot_industry": false
+    }
+  ],
+  "watchlist": [
+    {
+      "score": 39.5,
+      "trend": 0.8,
+      "rs": 0.2,
+      "setup": 0.09,
+      "quality": 0.29,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": true,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 1.2,
+      "ret20_pct": 6.3,
+      "dollar_vol_m": 82066.0,
+      "stock_id": "2330",
+      "name": "台積電",
+      "industry": "半導體業",
+      "close": 2440.0,
+      "change_pct": -0.81,
+      "valuation": {
+        "pe": 33.07,
+        "yield_pct": 0.89,
+        "pb": 10.83
+      },
+      "note": "台積電",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": 404046,
+        "inst_buy_streak": 2,
+        "foreign_holding_pct": 69.66,
+        "foreign_holding_change_30d": -0.56,
+        "short_change_pct": 96.77
+      },
+      "fundamentals": {
+        "eps_latest": 22.08,
+        "eps_yoy": 58.3,
+        "gross_margin": 66.2,
+        "operating_margin": 58.1,
+        "debt_ratio": 31.5,
+        "roe": 9.7,
+        "roa": 6.6,
+        "op_cashflow": 698976265000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 30.1,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 2440.0,
+        "ma5": 2463.0,
+        "ma5_diff_pct": -0.94,
+        "ma20": 2395.25,
+        "ma20_diff_pct": 1.83,
+        "ma60": 2280.0,
+        "ma60_diff_pct": 6.56,
+        "ma120": 2051.625,
+        "ma120_diff_pct": 15.92,
+        "ma240": 1690.0833333333333,
+        "ma240_diff_pct": 30.73,
+        "high_60": 2510.0,
+        "low_60": 1990.0,
+        "high_20": 2510.0,
+        "low_20": 2250.0,
+        "bb_lower": 2244.0277863714077,
+        "bb_upper": 2546.4722136285923,
+        "atr14": 65.0,
+        "stop_2atr": 2310.0,
+        "stop_2atr_pct": -5.33
+      },
+      "ohlc": [
+        [
+          2235.0,
+          2280.0,
+          2210.0,
+          2255.0
+        ],
+        [
+          2205.0,
+          2240.0,
+          2205.0,
+          2220.0
+        ],
+        [
+          2250.0,
+          2270.0,
+          2230.0,
+          2270.0
+        ],
+        [
+          2310.0,
+          2325.0,
+          2250.0,
+          2265.0
+        ],
+        [
+          2225.0,
+          2260.0,
+          2215.0,
+          2240.0
+        ],
+        [
+          2220.0,
+          2230.0,
+          2205.0,
+          2205.0
+        ],
+        [
+          2205.0,
+          2210.0,
+          2185.0,
+          2185.0
+        ],
+        [
+          2240.0,
+          2255.0,
+          2230.0,
+          2230.0
+        ],
+        [
+          2245.0,
+          2260.0,
+          2225.0,
+          2255.0
+        ],
+        [
+          2275.0,
+          2310.0,
+          2275.0,
+          2310.0
+        ],
+        [
+          2320.0,
+          2325.0,
+          2270.0,
+          2270.0
+        ],
+        [
+          2310.0,
+          2330.0,
+          2290.0,
+          2300.0
+        ],
+        [
+          2350.0,
+          2360.0,
+          2270.0,
+          2295.0
+        ],
+        [
+          2340.0,
+          2375.0,
+          2330.0,
+          2355.0
+        ],
+        [
+          2355.0,
+          2415.0,
+          2350.0,
+          2355.0
+        ],
+        [
+          2390.0,
+          2400.0,
+          2360.0,
+          2380.0
+        ],
+        [
+          2425.0,
+          2440.0,
+          2410.0,
+          2425.0
+        ],
+        [
+          2385.0,
+          2415.0,
+          2385.0,
+          2385.0
+        ],
+        [
+          2395.0,
+          2405.0,
+          2350.0,
+          2365.0
+        ],
+        [
+          2230.0,
+          2320.0,
+          2230.0,
+          2295.0
+        ],
+        [
+          2305.0,
+          2320.0,
+          2295.0,
+          2305.0
+        ],
+        [
+          2285.0,
+          2300.0,
+          2255.0,
+          2255.0
+        ],
+        [
+          2240.0,
+          2260.0,
+          2210.0,
+          2250.0
+        ],
+        [
+          2325.0,
+          2325.0,
+          2290.0,
+          2310.0
+        ],
+        [
+          2360.0,
+          2375.0,
+          2345.0,
+          2375.0
+        ],
+        [
+          2375.0,
+          2400.0,
+          2350.0,
+          2400.0
+        ],
+        [
+          2355.0,
+          2385.0,
+          2350.0,
+          2385.0
+        ],
+        [
+          2395.0,
+          2415.0,
+          2385.0,
+          2410.0
+        ],
+        [
+          2455.0,
+          2510.0,
+          2455.0,
+          2510.0
+        ],
+        [
+          2510.0,
+          2535.0,
+          2490.0,
+          2490.0
+        ],
+        [
+          2435.0,
+          2445.0,
+          2390.0,
+          2390.0
+        ],
+        [
+          2410.0,
+          2420.0,
+          2390.0,
+          2390.0
+        ],
+        [
+          2360.0,
+          2370.0,
+          2325.0,
+          2340.0
+        ],
+        [
+          2330.0,
+          2395.0,
+          2330.0,
+          2370.0
+        ],
+        [
+          2440.0,
+          2475.0,
+          2410.0,
+          2410.0
+        ],
+        [
+          2495.0,
+          2505.0,
+          2475.0,
+          2505.0
+        ],
+        [
+          2450.0,
+          2480.0,
+          2445.0,
+          2465.0
+        ],
+        [
+          2415.0,
+          2465.0,
+          2415.0,
+          2445.0
+        ],
+        [
+          2465.0,
+          2500.0,
+          2455.0,
+          2460.0
+        ],
+        [
+          2480.0,
+          2500.0,
+          2440.0,
+          2440.0
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "台積電目標價飆上3800元！花旗喊AI紅利還沒到頂 最樂觀直指4000元大關 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiowNBVV95cUxQVjQtQzRJdkx6anpQMmZRNWREYWJiUUFvMVBJWmNPWWU2b19jbDVmZGkwbGF4VUJzc043cHpITkRaTVlIeExhc0FxeWd6VVJFNXpkYkE5V1llTldTV2dURjl1YzE1QnpJdHExcUJCRFc0X3JFZG5RZElLLVM5dXpRaVVkMzdyNGl0R0x5LWNrT1YxRXpyc1VpdVljSnFPdk5ia3ROVVVfTWZDeV9hLUNHcXYyQTNzOElBZG9PZjFQckk1MnE1TWl4aXFYUTdveGJhcDdqTlFBUGRfOVJjYUZVZEdSWjZZOTliNXRGUHAxOG1UdWZwOEE3cnNKOHNpT0llSlRKY045Uk90N080MXpCc21vRDBUUUtBdHMyblY1NmVyRDlYYWpSYnotdldmbThCdEN5eEMtSVpuYWk4SElacnNPNjh4Q3ByOTdjcC1ZcWtyclFXY0hyNDJ3bTFGcVU5dGFoTldESVlkUnJURl92aVliaVNTVmtuNkh2NTNPV0lGa1NVOFFtUDRBcDZTbGw4OHNkaEFUMzQ3NzlNMkVqNGRvMA?oc=5",
+          "published": "Tue, 07 Jul 2026 01:21:38 GMT",
+          "published_date": "2026-07-07",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2330 台積電 - [新聞] 台股重挫1077點史上第8大跌點高價電子- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBjeW5CQWk0X0JtUWRCWWQ5RjFqLWloZi16eEtRMzZwdjVvaVRvTW5VVkFjNnl6WU5XeWNWNzQweXpyYkRzZklacF93TmVRNDJTLVh3OWNjRzU?oc=5",
+          "published": "Tue, 07 Jul 2026 07:48:20 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2303)聯電、(2383)台光電，投信買超(3026)禾伸堂、(2330)台積電，法人合計賣超734.46億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMi2gRBVV95cUxQQ3k3TXhoRUFuLTNORDVqdWpqY01Od3FSRjFTTUpvMk1sZk5WejZ6dVhuSC03VWdKZWVxVFhhRHlJSk9aOVlLOWZyWjMwTlo2ZWR1VHRZVkNTcGhKUC16RWJqTVFDYUgwQ2pGdEJaUTh3T3FRaFBfR1lmWFZUSEdlMjBkWEpEX2lpdjUtdTQzZFJMRmRBTFhpMjdtdllELV9abklzN1I2R2xtX0diR1RGZWRPSU1qaXZmWVlpelF1VUhBajJsUU5JcHJpeVVHUUtNcnFzQ3RpcVhGeVJad0l6cHhSX0hHbDJKNVlFOFBBZ3NmV2RCcG42TlV3MHJ1LVJReGQxSVNYTHFqSUtVX2U5YzlmakY4bE9oN1Q0MEc5ejRMcC1lUkhBMW1XUWE1OC04T1BhVWc2eTBSbHg4VHZMeUdGUEkzNGV3a1dtS182QlpCZkhSa2xQSC03TElkLXJ4TDN3dFVDc3pudGNieUhPTWx6alhnbFgwX0RXY2NhOURqci1qbFhaMTA3cUVLRGd1RUc1dVF2TWNlZnF2dEE1U2xQSG1vd1B0ZE41T3NRVHl0Wm5DNi1UZXhEdDlFWnN0Tmd4SklET2pYRlUtTU5QS19PVzNYaUd5ZUhrOGJGSlFjRzRDZ2ktUGxJZTk5eTlUZHBYNEswS2ZEQkhVV2pWNzlOcGk4X2c3TUp6YkZ1bi1kdzllWFFhcE1XSkJ6dXgtWnJUOEJZbTBsaER4aDk3dkpDU3psY21UU0JaQnU0Mkk5emJSejRpdUF5aUZOS0RtaXV6bUNKOGRrdw?oc=5",
+          "published": "Sun, 05 Jul 2026 05:23:09 GMT",
+          "published_date": "2026-07-05",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "台積電(2330)先穩盤面，AI 資金回到製造端後，真正接住買盤的是誰？-林彥廷 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOUHFpdTJyUnNPb3VIZ3p2bFdGUjhfSzBqTlo4eS1Tci1xbENmUHpDTGdUNjF3b3d2Z0ZjSUVuaE5sUEpCT2FQMHdQbmV1V2dfbGRQamJvQTZHY1IxTUl4WkVtcmg4a3FzakxwSEI5UHpod3pxcHRITEMwOGphZTl6OGRnTQ?oc=5",
+          "published": "Tue, 07 Jul 2026 04:24:32 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "台積電法說前夕外資掀底牌！雙重護城河發威 目標價狂飆天價3,800元 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9LNUhuZVRlcDhnVVUtOGF6bzJrb1lXV29UbEY2Szk0OTV1RkJ4QThMSC1YN0ZPQ1AteHctYmI5TVRUNXhhZ2NPTHkxZV84aDZ20gFWQVVfeXFMTkY1WlYwLWJja003c00tc2Z0ZTVjSldhYkhjbC1XX2FYbF9tRGg2Tkpnell4NDRIRkpJZG1SZHlIQnkxYTdEbXYzbnJGZF9lLUIycVlTOFE?oc=5",
+          "published": "Mon, 06 Jul 2026 10:00:27 GMT",
+          "published_date": "2026-07-06",
+          "source": "UDN"
+        },
+        {
+          "title": "2330 台積電 - 台股大震盪 公股進場護盤 法人：後市看台幣臉色 台股昨（... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE83WjVfZ0RHeWFIU1UtcVlwc0ZuZmFaeVVxd2NOUkRuel9zUUdLb3Y3R3lWWDV5ZWNoeHllQ3FuSGFZY2M1Mll2d0NTS0xsZE5fR1lMQjViZWs?oc=5",
+          "published": "Mon, 06 Jul 2026 22:32:48 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2330)台積電、(2327)國巨*，投信買超(2330)台積電、(3702)大聯大，法人合計買超529.36億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMi2wRBVV95cUxOQUZfek1XdURIQ0pMN0twc1JFRUJfWUdHdUlBbWJkYjNPbTJTUmpESzEybXhwbG1KZFRUMEdRdWJUUktvWGhsTERSaS1xdE1Dck5Qci1rYVBiaWo5WjFDUXRaOW1LWlFOSDhvUV9NdlVNdnB6RkdzSUM3bGpLYzRWV29XdFNNYUFWNGxzczZ4bzc5MlFXTlljMFlLOW9na3IydEVHTnhqWDRSZE5yWFJ3OThESGNmNVBCNDZ5c2prMmE3NE9qQ1l6ZzhvNGIwZVNlSC1RQUwyM1EzamQwOUFKMld6S0FncGFpRHYzZlJySEV4WENiRkUzZkhXS2dJbXhrTGVCZ2xMQzRWZ0ZOMkRQaEo1RE15VHRSSGNkTUtQMlNxVE5zbjRsZExFM1JiVkNjUWhjc28zY3JqQmdzSXR0V0pPN0ZDYjk5a2xUTV9mbGQ5cHVVX0xrWnNSeUYxa0UxenhSTUZ1c2YtSEpDVnV5WGpMNkdvZ2tWSm5OY2RheVZvWXg4dnhzdkRuZDZZOWRtcWFKQWVGVDdNSTdUMDloN1ZXWGYtUWdxUjlhMktILVZmdzlEQ28tOGxMMzJjc3B2LWZnd1gwRDhva0FUS2otdG1va2FXTjZobFlRVnZ6ZmxFU0pVekJQWjdiTVJnbHo2bmlneGRfN3Y4d3lrU3M2MFUybjlWNjV2ZFdXM3ZpcUJDMHNqaUJKTWIyVDJ1Y25SNTlzU0FJLTVNOGluUW5HTVhYeFFTamdtODhycDRhSUJPX0NWSDhMT3R2M1c3WmdiLXFaM180ZFpoVjQ?oc=5",
+          "published": "Wed, 01 Jul 2026 09:15:45 GMT",
+          "published_date": "2026-07-01",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "07/07 台股盤前：台積電 ADR 大漲 4.06% 帶動台指期夜盤強彈，今日台股能靠 AI 伺服器與 ASIC 族群續攻嗎？ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5wQW1qV3dsbkg2cl9PZmZyMFExZUl2SU9MUXJDU1VXSlg0U1N3RDlRXzhoN0dCaE1fNWJoX0UyaE5DMGpINmFYdTRkd1FPcEdFOTNvVDlSZVA?oc=5",
+          "published": "Tue, 07 Jul 2026 00:18:27 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 【美股巨頭】摩根士丹利喊漲目標價，科林研發盤前噴4%——設備股在等哪個缺口打開？ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9ESnBwcEJveWRfSXBCOUNzLUdmQ2Myenh6dTc5d1Nhcy1SVktPbnF6QjFWXzJFbDUwdU9UcGlnMk5SUWdGNWVmTENBckxGdUM5eTlCeW5sZ2k?oc=5",
+          "published": "Mon, 06 Jul 2026 22:43:46 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 【美股巨頭】雲端資本支出1.5兆美元撐住AI週期，邁威爾被點名了- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFB3NGs3SmVNSzRudkY1RU92YlNvaXNOeFp6eXlxMUoxeUMzRXctcDlIMmxOWW9FdzRzZ2l4SHlvaGtsVHpXUHV3VWJzR0wwMjdTZE1NTlV0cnc?oc=5",
+          "published": "Mon, 06 Jul 2026 22:49:44 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 009804今年報酬率七成- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBETGxibTV3ZlA4N2ZwU3FyVVFSVl9PNnoyazk5akF4MzgyMEhkRms0cF9MUXZwekFUang5UEZUUVdYcjZTSWF2a3R5ajFDakdRa29Ya3o1MkE?oc=5",
+          "published": "Mon, 06 Jul 2026 15:52:44 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "「矽電光熱」成AI展主要瓶頸！法人點名台積電、穎崴等10檔受惠股 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE4yckFUbzdCZEp5S21mTnZzOHBzU250bVVrMjBJMC1jYWZTbUNMZ0dXUmNsNkZGSzhKUkJkS3g1c0JzTS0yWGFrVkpXVThUWTk0clZjcTdmX0I?oc=5",
+          "published": "Mon, 06 Jul 2026 09:57:16 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 台積電法說會前，摩根賣超2萬9千張——現在到底該不該進場？ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBCQzRsdmVfNHYzaXVfb0pKSFQyaElPeWlYUkc2SV9pNTFQWG03YXRkOEFpeGRRWEY1U0I2dW0zT256ZGtZMDZYRGhaeXBZa0NENTF4OUVoemU?oc=5",
+          "published": "Mon, 06 Jul 2026 08:35:49 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 7/6 電子盤吉拉： 來看一下今天的強弱題材- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBTZU1uMnFQOWQ1SlRKVEJsNFpFWlUzNHlWNTJaZ1FGS05NUjBPNlByMi1wdzV5eGhtd0kwenB1eTlxRFhGcTYwaHRCQVBCT2o1OE1tMXhRdFU?oc=5",
+          "published": "Mon, 06 Jul 2026 14:21:27 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - AI 需求延燒外資看好台積前景高含「積」ETF 有戲- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE10UEZoMlh4VC1GX1Btc1hxRTFGSHlQQWJ1MDNGX1lZbXNqLUlWaDlKcnR4ZzFRampJVUFFZGFMcDY2WnlTUUZjdmRuWUdMdU5CQ2Z1b1pacUk?oc=5",
+          "published": "Mon, 06 Jul 2026 01:05:54 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 受惠台積先進製程需求半導體特化族群下半年熱- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9raW1vSmQ3UGxZSFM4MEFtckFzaXJfSDhuTnh5b0E5cWpCaHVtYUFPdWZmS0RQeF9NdmJFQ1R1SzYyalY1dXNkTTBPbVcxZXNPdDB2VDQxci0?oc=5",
+          "published": "Sat, 04 Jul 2026 19:21:32 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 央行放手！台幣貶破32元探三個月低價匯銀：下波看32.2元 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE83bXZNWVE0c2hxbTZPa0Zaem1nYU8zTHdRUTNxYkh3U19UVDFYZ1lXSnFvUUoxY010ZjhxNEFWemxUdVkzWnZoakFtSFA2NlNEbm9aU2QwMVY?oc=5",
+          "published": "Mon, 06 Jul 2026 17:09:24 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 輝達、華為AI對決！全球科技賽局，誰更具競爭力- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBVemsxeWx2Sk8wUXROTlp1V3d3MlQydzh3M1YyZXJKSjZZOG1hTUN0TUJSdDZCOFl1ejQzYVFrNXc2cU5IZGV1ZGM5bWpXRUt6R0xZd3Zzdy0?oc=5",
+          "published": "Mon, 06 Jul 2026 10:39:14 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 摩根大通示警AI灰犀牛！2027年算力支出恐「斷崖式放緩」 ... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5uRDB3MUt5RXJkUnJWVU96aXNXRFhLN0lETV9Xb2NVZ0J2azVoOGlsYzQ3ak5ZWkx3THlONHVsNmlzbkhhc0l0MkNFSERLSU1xeXdHaVBaRHo?oc=5",
+          "published": "Sun, 05 Jul 2026 08:56:30 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 期交所4項新制7/6上線助交易人精準管理風險- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9rZWpDNzVrN1prV0hOWExPZGRGWGUxTVZtdWVWa1pNYXEwcWxSNW1RMUpBaXo4MThyZVVNZnp4N21DaF9BczZSal8wUE03eGt5Wkp6QTV6UXA?oc=5",
+          "published": "Mon, 06 Jul 2026 03:31:54 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "【0706台股盤前】外資狂砍台積電305 億，軍工與石英掀漲停潮熱門強勢概念股: 禾伸堂3026 ｜ 台光電2383 ｜ 聯電 2303 ｜ 台塑1301｜豐雲學堂2026 年 07 月 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMi_gRBVV95cUxNa1B5Mklzakd6dDZxVHlFaFpURTQ1LXNGRHVRcFQ4MV9GRExkTkNoLURtWnV2dHRIRk5sbFpKNTFTM0RXZzJUbFN3SEpUTENXRmdHMGxmcjZ6bzRFaFNrWUhXQTRXb2lCOXlpcVFiX1dORWNraVJKdWx2WHNnZXc3aHZsXzhDcWlQX2dYLVFuRnlSbUxiOUlfaTVNVUM0LTFzRHFxd0llLVM2UXNxYlF2WGJON2pKc0w0bnhvZ1kwM2dCMTQ3VTJYZG5rRy0zY2haeFh5X1JsdjZzYnhfUXRsbThscy1KeEFEVW9xWUZQNmU3TkR1eGdYS2t0SVg1ZVVSdF9mZDlrNUpHVWlmV01GcC11TXg0QTk2TUxUSmZ6QTNCcjV6UzVPd2Y5bVlkZHdGQzR5cTBYLVdvUmhYdlBQZWpXcEloS21kaW9vMlF4T0RmMGlHWE9VS0MwT0Y3RTg2dkgtQmU3R1RrYkQ2Z2pEZzZJY294RGh6dnFKWmxQN3dRazZmWUVCSHVpOE9ZWS1uRERoYURLQUVjdjN0dWJ4YnM3Mk05UzhzWF9Ma1ZCbUNNLUQycFdmOWNDREFxRDdhZV9UbXBOd1A1U2poLTY4VzlMd2RNM2ZrckRObE5lX2VTelpKNjBPVDF0cjdWbjVwOHhmZDZucGlUTDVDcmVPb2s4YWpyNW5mMDRUeDZUR21pc3JiWGMxS1BtY1ZVdVFoc0JNb1UtRUMyVGRjSVhQSmIzbWtTY1M4REFPYUxKeTRGeE1HbTJpSjY3eGRrcE1RdjhFeDZZZnkxTF9KdHBzOEFTVzhyNTlrNTRaa0tZaE5tdlhwaC15QVdxT2puQQ?oc=5",
+          "published": "Mon, 06 Jul 2026 03:54:53 GMT",
+          "published_date": "2026-07-06",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "2330 台積電 - 指數只是障眼法：台積電跌，中小型在開派對- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5nc09feGZ0bXYtMk1GSkp3SWVIQVVmbTNtNXZjT2xjakVsX1FfeGoxVlFPSm1wTlR2WFNmVlJIcHQ0WU96aUIwN0FmNmhDc20yczRkb3RuOTA?oc=5",
+          "published": "Fri, 03 Jul 2026 14:17:42 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 抗跌過濾網！大盤崩盤時「不跌的股票」，就是明天的飆股！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9GMnNQSUliSW5rcGctYVJ4bXBTUlUzSXlRUnA0bElVUHk3bzZxM1dhZ2xrczVoQ09UVi16bnJJLWpHRGdXRFd1aUpmM2hFUzVRZVJMMENUUnk?oc=5",
+          "published": "Mon, 06 Jul 2026 01:16:44 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 全球缺電警戒!美國PJM管轄創20年來的最高電力負載紀錄! - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE8ycjVSaEtFaXdHaDNXWjlHdTJ2aXNfQUtYVkJrZE1ZREdxQ1hfdUo5ZDk0MGtJSEtYaGE2RUFOdEhrT1l5Z3lJakVfNHVoNTVZamdOOEdDVUs?oc=5",
+          "published": "Sun, 05 Jul 2026 05:13:04 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "股市要聞：週二(7日)股票市場鉅額交易概況 - 富聯網",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOeUlmUXFnSTVzekpoMHpwdi1rWUFxaURjaTM4eGdZM24yckkzaGlUYXZxRWF4dWJJeTFWbUp4dzBKa0ViVlNqanB3OXRVdU94cnRNclZaSEpHVktpYjlGdzg5OC1kNVFBYkR5RkdBSEVjZE5sbGtnS0hzS2dxbFJET3VpNWVqWmZu?oc=5",
+          "published": "Tue, 07 Jul 2026 08:00:00 GMT",
+          "published_date": "2026-07-07",
+          "source": "富聯網"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "AI概念",
+          "confidence": 0.95,
+          "evidence": "台積電法說前夕外資掀底牌！雙重護城河發威 目標價狂飆天價3,800元"
+        },
+        {
+          "type": "NVIDIA供應鏈",
+          "confidence": 0.85,
+          "evidence": "雲端資本支出1.5兆美元撐住AI週期，邁威爾被點名了"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.75,
+          "evidence": "受惠台積先進製程需求半導體特化族群下半年熱"
+        }
+      ],
+      "catalyst_summary": "台積電受惠AI需求推升，外資目標價上調至3800-4000元，但短期面臨外資調節壓力及匯率風險。",
+      "risk_flags": [
+        "台股重挫1077點史上第8大跌點",
+        "摩根賣超2萬9千張",
+        "外資狂砍台積電305億",
+        "摩根大通示警2027年算力支出恐斷崖式放緩"
+      ],
+      "target_prices": [
+        {
+          "broker": "花旗",
+          "price": 3800.0,
+          "asof": "Tue, 07 Jul 2026",
+          "evidence": "台積電目標價飆上3800元！花旗喊AI紅利還沒到頂 最樂觀直指4000元大關"
+        },
+        {
+          "broker": "花旗",
+          "price": 4000.0,
+          "asof": "Tue, 07 Jul 2026",
+          "evidence": "台積電目標價飆上3800元！花旗喊AI紅利還沒到頂 最樂觀直指4000元大關"
+        }
+      ]
+    },
+    {
+      "score": 59.4,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.06,
+      "quality": 0.19,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.25,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -5.1,
+      "ret20_pct": -1.0,
+      "dollar_vol_m": 46353.0,
+      "stock_id": "2454",
+      "name": "聯發科",
+      "industry": "半導體業",
+      "close": 4030.0,
+      "change_pct": -2.3,
+      "valuation": {
+        "pe": 65.74,
+        "yield_pct": 1.3,
+        "pb": 16.87
+      },
+      "note": "聯發科",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -489797,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 55.79,
+        "foreign_holding_change_30d": -0.49
+      },
+      "fundamentals": {
+        "eps_latest": 15.17,
+        "eps_yoy": -17.7,
+        "gross_margin": 46.3,
+        "operating_margin": 15.3,
+        "debt_ratio": 46.1,
+        "roe": 6.1,
+        "roa": 3.3,
+        "op_cashflow": -17656664000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 5.0,
+        "revenue_growth_months": 2
+      },
+      "levels": {
+        "close": 4030.0,
+        "ma5": 4206.0,
+        "ma5_diff_pct": -4.37,
+        "ma20": 4271.75,
+        "ma20_diff_pct": -6.0,
+        "ma60": 3588.1666666666665,
+        "ma60_diff_pct": 10.96,
+        "ma120": 2621.4583333333335,
+        "ma120_diff_pct": 34.95,
+        "ma240": 1992.6875,
+        "ma240_diff_pct": 50.55,
+        "high_60": 4640.0,
+        "low_60": 1620.0,
+        "high_20": 4560.0,
+        "low_20": 3880.0,
+        "bb_lower": 3872.114969134664,
+        "bb_upper": 4671.385030865336,
+        "atr14": 253.92857142857142,
+        "stop_2atr": 3522.14,
+        "stop_2atr_pct": -12.6
+      },
+      "ohlc": [
+        [
+          3835.0,
+          3910.0,
+          3700.0,
+          3700.0
+        ],
+        [
+          3625.0,
+          3680.0,
+          3400.0,
+          3495.0
+        ],
+        [
+          3585.0,
+          3590.0,
+          3385.0,
+          3405.0
+        ],
+        [
+          3425.0,
+          3555.0,
+          3200.0,
+          3260.0
+        ],
+        [
+          3240.0,
+          3550.0,
+          3150.0,
+          3400.0
+        ],
+        [
+          3475.0,
+          3495.0,
+          3100.0,
+          3155.0
+        ],
+        [
+          3195.0,
+          3350.0,
+          3155.0,
+          3230.0
+        ],
+        [
+          3415.0,
+          3550.0,
+          3405.0,
+          3550.0
+        ],
+        [
+          3765.0,
+          3880.0,
+          3675.0,
+          3860.0
+        ],
+        [
+          4245.0,
+          4245.0,
+          4245.0,
+          4245.0
+        ],
+        [
+          4375.0,
+          4440.0,
+          4180.0,
+          4265.0
+        ],
+        [
+          4475.0,
+          4690.0,
+          4450.0,
+          4640.0
+        ],
+        [
+          4620.0,
+          4685.0,
+          4270.0,
+          4410.0
+        ],
+        [
+          4460.0,
+          4485.0,
+          4235.0,
+          4310.0
+        ],
+        [
+          4440.0,
+          4710.0,
+          4440.0,
+          4555.0
+        ],
+        [
+          4970.0,
+          4970.0,
+          4380.0,
+          4525.0
+        ],
+        [
+          4540.0,
+          4650.0,
+          4420.0,
+          4545.0
+        ],
+        [
+          4600.0,
+          4685.0,
+          4430.0,
+          4430.0
+        ],
+        [
+          4360.0,
+          4430.0,
+          4130.0,
+          4300.0
+        ],
+        [
+          3935.0,
+          4090.0,
+          3935.0,
+          4070.0
+        ],
+        [
+          4180.0,
+          4475.0,
+          4130.0,
+          4475.0
+        ],
+        [
+          4315.0,
+          4520.0,
+          4120.0,
+          4155.0
+        ],
+        [
+          4085.0,
+          4150.0,
+          3880.0,
+          4085.0
+        ],
+        [
+          4410.0,
+          4415.0,
+          4165.0,
+          4180.0
+        ],
+        [
+          4355.0,
+          4545.0,
+          4350.0,
+          4470.0
+        ],
+        [
+          4550.0,
+          4565.0,
+          4415.0,
+          4560.0
+        ],
+        [
+          4495.0,
+          4535.0,
+          4380.0,
+          4460.0
+        ],
+        [
+          4535.0,
+          4590.0,
+          4375.0,
+          4390.0
+        ],
+        [
+          4385.0,
+          4565.0,
+          4380.0,
+          4465.0
+        ],
+        [
+          4720.0,
+          4785.0,
+          4515.0,
+          4535.0
+        ],
+        [
+          4480.0,
+          4515.0,
+          4225.0,
+          4285.0
+        ],
+        [
+          4400.0,
+          4445.0,
+          4215.0,
+          4310.0
+        ],
+        [
+          4150.0,
+          4185.0,
+          3880.0,
+          3880.0
+        ],
+        [
+          3870.0,
+          4000.0,
+          3825.0,
+          3910.0
+        ],
+        [
+          4145.0,
+          4300.0,
+          4060.0,
+          4245.0
+        ],
+        [
+          4315.0,
+          4380.0,
+          4225.0,
+          4335.0
+        ],
+        [
+          4200.0,
+          4380.0,
+          4150.0,
+          4345.0
+        ],
+        [
+          4160.0,
+          4230.0,
+          4120.0,
+          4195.0
+        ],
+        [
+          4250.0,
+          4325.0,
+          4110.0,
+          4125.0
+        ],
+        [
+          4200.0,
+          4250.0,
+          3955.0,
+          4030.0
+        ]
+      ],
+      "hits": [
+        "above_240ma"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "〈焦點股〉聯發科開盤大漲百元 秒填息好戲只撐上半場後翻黑 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiigNBVV95cUxPOFVBZmtTOU0wTTVIUENoeWx3SktMeWpONEdmVzVOXzZEclZHelFrY3JON2xNNXRxeTRCYk9zRUFQOEg0dVBtRlBzNlpUVUd4RUswdEVENFZNamhUSi1vdVpQT0RLc2NfeUhvOU5yczQ3YXBVU3gwQU01NlB2WnNCeWNJVUZpdHdZOFRYd0hyQ3poNjlQcEpmeUM2T3RuZUt1VF8yTXVuY1ZsSkdvMm5OU3ljSUpfTldYN0N6VzVkbVV5cnJZejdTTXlzSWxmdE03MWdjM29fcmN0N3J2dmd2OXpIOW9OX01HZlRGTVhJUW5wWVl1bjJVR0FBdXNHczNwX0hPaTFlLXRsOEpfdzh2WDJ3WXhiT1FfRndXb2lXaVhGa0lZMHlLQkFpYTVuNUNlWXlucjBFd29vRkQzUXMwbWVTb2tPMFhaUHRwU2J0QTU0UkE1WFl6eXRZUU9Pd1pVenBsSmpXemt6T2s1U2k5WVB5MU91MU15TmJWcXROcHZyYVVrX2xSMF93?oc=5",
+          "published": "Tue, 07 Jul 2026 04:32:52 GMT",
+          "published_date": "2026-07-07",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2409)友達、(2454)聯發科，投信買超(3189)景碩、(2344)華邦電，法人合計買超31.5億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBRSWJyVWxpSl9MZkN1VVN1Y3k5U2tvRmtpQkJMelNVRDhnVkhFczdYODJpUFVZN0JCYS1kRXBLWXpIN2R1WTJ2VHVhSWFzc1dDVk8xd2FPbGFOR0lnM1RNQ0ZxOWFuMDZnYjNvTkxqQzZBWEJCT2JZSGhPUWY?oc=5",
+          "published": "Mon, 06 Jul 2026 12:48:10 GMT",
+          "published_date": "2026-07-06",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "焦點股》聯發科：除息行情亮眼 開盤秒填息 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTFBoZFFBX0FWQzBKZlpMUk1JdjFBS3NHSVQzSDJRQVJ5Y2duTTVlaThLSFYzQ0RwT3VMSUgzRTRmemdWMjNCMHdBd3F6TWsxT012THVWVmlXakJmUFQzWEhz0gFkQVVfeXFMUFY3enBtTUllTVVELUMtTjNGZ21Bb1NfaUVGb3ZRaXdWZnhJSGc0VXduLVAxQ0xDSGlYU2FTS2V1MmowcmlER1Riei10QnRsQU5UM0JhQjR0T1ZyV256RFk3b1hoQg?oc=5",
+          "published": "Tue, 07 Jul 2026 01:30:40 GMT",
+          "published_date": "2026-07-07",
+          "source": "自由財經"
+        },
+        {
+          "title": "聯發科(2454)不在出貨量，AI 會把高階產品滲透率推多遠？-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPT3UtNFYxZVhJMkxFbnE0ZmVJSTJVeGJOU0NrUlpycU52S2xkZXRLMmFhc0FObnlKdmJhbElwQk13V1FJR09rSW45Y0JSWUxObUQ1MUtMMUREeVJoWEE3eWE4S1FrWU4yQUlhSjJsaWxMX1ZjdmJVYUtPMFA5Nm9NYQ?oc=5",
+          "published": "Tue, 07 Jul 2026 02:18:34 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "聯發科秒填息！史上第4次當日達陣 股價勁揚逾3% - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMizwJBVV95cUxNNGt1VVotNng2bnVpbl9iSE91RnVYV21qQXhZa3pyTmtta2VidkYzLUFxeDR0SlFld01NdHJ5VGZKaHQtc1E0Vk5FQUZRbVF3bHk4NkFySGhGaVp0dV8tUWptbGtxLUJuZFBQTEpNZ0hHMk9TLW0ySTZ1WEcwNkdGOXV5ODF1X0o5VWYzZGNab1JBVU9aZDU3enFnX3Vlb3FhaUlNT1lrZW9vYkNkUFVTY1lOcTZSZTkwS05aUE5ULXhEU2lwTzlGM0VSRVZiSDJrN3pJcWtUaG9PR3dFbWF5SkZsMUl5UFpJZkwwQXZKUHpJR1hTOF96WXVYZEhNU3ljUWI1eTdxUG1hb0hfd1VQRjJzUzZwQmdUS3llUEpPU1NuWWF2aDlOMFN5dDBIRGZPRjVISmVwRi04bTl6aVA1bXVmSEdYdFRSYTJVSVhZQQ?oc=5",
+          "published": "Tue, 07 Jul 2026 02:26:39 GMT",
+          "published_date": "2026-07-07",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "三王除權息秀今日齊爭鋒南亞科、聯發科秒填息信驊填權率亦飆六成- 證券 - 工商時報",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTFBCNTZKZkVWUG9fdHhkMHpwSWU2RmY2ZXZOYTY3ZTdXZkYzSkZQUkRUNlhYOU9aY1lfVGx1MkNhczdnU3ExX19uUmxPSkhJTHpxZ0F6REFhOUk4c1ZpRzhz?oc=5",
+          "published": "Tue, 07 Jul 2026 02:17:00 GMT",
+          "published_date": "2026-07-07",
+          "source": "工商時報"
+        },
+        {
+          "title": "2454 聯發科 - 禮拜一不解釋 漲停！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFA0VVlPeS1WSTRYVmdyVVBsa2N4NDl4NmJXYzNUSUdldVdfWU4xd2NGa196X2M4ZWtoUWhESWNIRHlaUWF4SThmZVFNcmxCN3NES2RKMDluMHQ?oc=5",
+          "published": "Sun, 05 Jul 2026 07:36:16 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "開盤／聯發科飆漲105元！AI巨頭瘋狂大反攻 台股漲375點 - 三立新聞網SETN.com",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE1QMDlMckU4Q2c1Mnd0WHlmcjBYWVFfaUZQcElkT0pWUGkydVpNV2psdjRDQmtnS3RiOWY1WHpVTTkyMXE4WGJoQ3lHNA?oc=5",
+          "published": "Tue, 07 Jul 2026 01:12:46 GMT",
+          "published_date": "2026-07-07",
+          "source": "三立新聞網SETN.com"
+        },
+        {
+          "title": "台積電ADR勁揚點火、聯發科秒填息！台股開低走高續戰47K - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE9oOTVzVHk4YUlSZmlaX1oxaDVaeVc1RjlYS2lFWExrWkZLRzQtWU1VNk9meF9ZVEJqem1kZk9IZzRfSlY5YW9lNFJnU2U4ZFZOQlJmUlFIZGZ4bU5JNElvSS1lQXbSAVZBVV95cUxNX3JEc3lxMHJsWHNxa1pjLWc5Z1R6LUpHUm9Gd0NVWmNELUtlM3I5LURYUWItQ2RHLVVvNkxwQ182NXB2Z1BLNF9YVl9UNjhkNHNDN1djUQ?oc=5",
+          "published": "Tue, 07 Jul 2026 01:19:57 GMT",
+          "published_date": "2026-07-07",
+          "source": "UDN"
+        },
+        {
+          "title": "聯發科、聯電、南亞科…台股除息秀接力登場，資金活水來了！還有記憶體股法說會，目標價3成空間可以追？ - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQVUsxR3VQY0hOSUVlcF8wOFFscFN0U0NncEVvb1BlMjY0dUFsZi00UWVWQmNTZFBNQXpuZ1ZnNFVtMGdxNVljOWhaWWZZQW9IVW1UVnVkamJaZWZfREhrY3FONHdPTm83MmFXbEtUYmVZcklDT3h6aDRjeGotVWdPZQ?oc=5",
+          "published": "Sun, 05 Jul 2026 10:27:32 GMT",
+          "published_date": "2026-07-05",
+          "source": "今周刊"
+        },
+        {
+          "title": "AI ASIC 業務爆發，聯發科（2454）獲外資上調目標價至1 萬元｜股市話題｜豐雲學堂2026 年 07 月 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMingNBVV95cUxNX19YbXVySG1iREUyWU54dG5ZY1lwOHBuckJKRTd5TTRKR2hsa21yczZONkJ5d1UwQ3lDRDVDR0daVXdfeDlxRnF6T1cyNXJvMXpHYWw0bE5wV1dVTXZaQ09BdC1KMlk2NVR2eHhXekY0VDB1ZmQtUHNEekVValk1R1laSjdKM29DSzhpS21fVEtIZVpjWGhqYk1pbjQ5cV9YLU1mdnNGN2xQRjRiYzM2MVpzSXRaNDBTeE1YN2pMMlZFM0ltOVZYTXRCRVVHcXR4d2dzekMzSU1VUU9qVzNhS25mbGFYeUhWcXpfaEdMbTJwSHBCSUdMV1ZSU185SUdGc0xNb2dGa0ZXM0tRWmVFT3AwbzZBdFhEMVM2a1M5aW1sMFltOTFwVDBjS1YwLW5RaGNkOHFFbkthdElONjZMbnNBS2pmOU5uc0FidnYwd3NzdWpJVmZ0alZtRXRQbGpHTnVvVno3YWZoczVnbEVuM2FVZVp1d293QTRIZkFLclVpSjZnNzZQOVhKODc4cDdTdk9lZUxMdTh0UEZ4V0E?oc=5",
+          "published": "Tue, 30 Jun 2026 05:47:17 GMT",
+          "published_date": "2026-06-30",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "聯發科(2454)不只看出貨量，AI 會把高階產品占比推到哪裡？-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPd0w3Z19FLU1ucHBla19RMHJIMGVaUDUxdl96blE1TmZCWUo0UXNjMmxaMVhGd2dmSGY2S3psQllEYlY2d3BLS1NMOUlPMXNlbUFydFpDeHlFV2NOa3dFakRodi1OVDZVd3B2cGE5UFA3ZVM0YUFDaW51OVVPYkQ1aQ?oc=5",
+          "published": "Sat, 04 Jul 2026 08:55:11 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "聯發科挑戰成為第2座護國神山？謝金河揭「轉大人」最重要一役 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9WbG52RVFEQ2NvMlozdlF3ejFBdm9sQjVzS3NQdjlWenBFMW1aRnZGeElrdk1INy15NkM5ZE5LM3l5ZnYwMEFWU1RydHhWS05RX05ST0hIMmlTdnc0cjJN0gFkQVVfeXFMTk56QkZtWDJrenFXNW1yRklaaGtuaENhUUtrSXh1Q1hKRFFGX2IxMDlxZVFPdWRHa2FsdC12R1lzMXBBeTd2Yk1XeFBrZ3NGaFJYaFNiblVVX1dCYVdTdmQwOWJUSg?oc=5",
+          "published": "Tue, 30 Jun 2026 22:47:02 GMT",
+          "published_date": "2026-06-30",
+          "source": "自由財經"
+        },
+        {
+          "title": "聯發科（2454）外資目標價喊到1萬元！估2028年EPS達285.6元…股添樂：貴的只會更貴| 台股雜談| 股市 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE0zWE8weFc4eGFQNWtSSWExYkJNdDZlV2NMcURhSVpxVUN0NFlOS2kxNFdya05NaU4xYnFMa2I3ZHYyMmdTTnh6aXBWZzBlQlN1bkE?oc=5",
+          "published": "Tue, 30 Jun 2026 03:36:37 GMT",
+          "published_date": "2026-06-30",
+          "source": "UDN"
+        },
+        {
+          "title": "2454 聯發科 - 龍要抬頭了 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9NUUhCZ1ZMeXBrXzlTODF3cFlQX0s3Qk1jVnZ6cVhNUVUwbGltZnlKVGFwaUpIVlZLMXZteFlDMEVERm8tcjZKX1F5ZTctd25fU1JMYjRlU0Y?oc=5",
+          "published": "Thu, 02 Jul 2026 05:06:14 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "科技大咖除息秀開演！ 聯發科、南亞科、聯電接力登場 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi2wJBVV95cUxONXdaS1N1VHdOc2UtcndJeWFKcExZR3FYQmZvZXlPRUd3TTk4TXQ0UnBtMVJ4bGFadGxUUVpyRm40aDJZbDJid3BJdzFjaVJYWFFnTG53a2FzSkNxUHhsSWRwUzVyZ0QwYnlnZGJ6dllyQkEyQUVHem1OTXc4SnlPZ1FQRUVwaVByQ051Zk00SWpLbFMzVWUtZGZZbE9YbEtVV3FRRXRTcU5lV25TNzBXZEEtQnBoWTk3N0tnQUtLOHhVemp4aVBKbmFMancwZ1U2c24xZDBJZHJVeFp0cTdENXQ0OWJJakhRLUJObVpDY2hDLU5xTzZUX25ab3JzWko3QU83dV96T094MGZLMmxRUWhnUzNrYXNhNU1OeHU3Sm4zZ2h6WWVQNmhtalNsa1FJbk5oQmlDeU5lYlcwdUVfdXkwc3dwbTVyQ3VkcW5oaE1hOEtrMmdjeGJuTQ?oc=5",
+          "published": "Sun, 05 Jul 2026 06:14:00 GMT",
+          "published_date": "2026-07-05",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "聯發科(2454)不看出貨數字，AI 會不會推升高階產品滲透率？-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPdW52RGlqVEtQQnd4SjBwTThGZnVuRE01S0VMSzF6TGo0bVJfTnVnRzNtajdtWTJaaEczSVE2a3hOeXdLQzNnMFMyZlFRWUlqYlZadnZieE43eGRleW94V2R5YzV0RHZwTzdUQ0pCNFh6SE1VSUh2UzdsUUZBTWpMcA?oc=5",
+          "published": "Mon, 06 Jul 2026 00:06:37 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "2454 聯發科 - 早安！7/2 外電綜合整理- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFAtUVM1d2Z0VVVKTDh0UTFJc20zQ3pvbTZhbmZUMFZUeDVlX09PSTYzc0FNdFE3T1UwMURRTkZKSVJlYVdkT0hzZXZrWlR4MUozWXpLNW5Wbkc?oc=5",
+          "published": "Thu, 02 Jul 2026 02:19:05 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "聯發科(2454)看AI終端升級，關鍵是高階產品滲透率會不會往上走-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPeVdzNGJndGZBNUlvNXlXWmlzNlFaMThNVDJTWFU4T0FqOVlHRXZ6U2ZiWWZiMXZ6TDhaWTM2enh1c2JlYl9MaDNtSzdxMFdLaHRiVzlpMktVSUZmaU1mNUEtTGpseXFUQ2lfVEg1RjJreDg1S1JJRERKQWZjRTN1Yg?oc=5",
+          "published": "Mon, 06 Jul 2026 06:43:13 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "2454 聯發科 - 據DIGITIMES最新消息，聯發科已確定將拿下谷歌以外的第... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1kQV9fdlg0eEFPYXZkY01ZOURIbTlTMnVzMDBXU3ZBMEswbjNwVmdYTzdxdTZULTNzYWZkek41bk9iRGd5OXUyWVlsczkteWc3ZFJ0MW42dVU?oc=5",
+          "published": "Thu, 02 Jul 2026 07:45:45 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "聯發科(2454)卡進AI裝置升級鏈，關鍵是高階滲透率能否往上走-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQRFNnU1NOc1AyWXNRQXpwZURGQWdDWHlUY2NHQURwNjU1cUpHeXM0bkEtLXhwUmhpMnh1ZnNzY21TX3ZWWVhMMkY4Y1pISjQ4YU1pMDgydHdSXzZBb2ZPZks5ZUlHS1FRQTVxZ0J6T01sSXVvdnRBSkRWYld2dTZ3VA?oc=5",
+          "published": "Mon, 06 Jul 2026 02:18:31 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "無懼高通！ 聯發科左攻TPU、右拓ASIC「第二家客戶」 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE8wWHI4Y1Nnd0RUakRHbWNpRUxpNVk4dmNJUlJ5Vi03eWRRRjhFYkh4RVhsdExLOFdPOThoZUVGdDdKQmItWElHWUZGakVjNG41OXpveGpHWk0?oc=5",
+          "published": "Wed, 01 Jul 2026 20:53:14 GMT",
+          "published_date": "2026-07-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(3037)欣興、(2454)聯發科，投信買超(2344)華邦電、(2408)南亞科，法人合計賣超313.7億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMi2ARBVV95cUxQV0lVMlpXLTROQXdWNEF6Q0l1alY2c0VXYm5wUjRMYm84S2VoOXUwY2s4dVhLMm5WSW5wTGlia2NQUDdxMjlyREVNbWNVUGJVWEM1cnFVNWFDc2lkNVpyb1gxYW9BNGdkUUtMYVRpSWlRVEtvYXppWlhubWNpbGtid2xKZlZFMWZSTDdvM1ZZQ1praVhzQkRrNGpRek1sWWt6ZGRKb3ctb2UzSkgzcnpka1Y2QmJPaDRobDl4SmtCR0I3djhPRXM5dENSa0V5THFXUjlfclhwRFFFTGdGb1RDcDVHSFhTNXJhWkRUUUMxcm9kQ1dOYlV0ajA2ZlphcFZxYVdhNHJUSUQyYnZLaVA0OEIzX05pNXZnYW5OUDItRGZmQVpzMU03M205Mlc4Z1BZQ09QVmhucFlOanF0Z3BWVUUxZDZQbTRSSTZwd19NRkhGTFptQzVERU5KX2NZVDhPVXcyYkdNemZCMVEzekZtNUVTUC1hd0dkMVh1T3RQRWN3c0FPQ0ZyaHhQVWlCT2hLcUp6T1huOVkyVDlLYzJMZ1dKODdUWmVjU3dQbTUxR25UNDA3MlM5WGxtbXdORmdfWUljaUMwb0NUWEZkaXNmQ3dKamZZTUxDRnFncWxncmw4bV82Z1JGT1YtNDhrWUVaYkZIS1NfaHRjWm1GRThOZUZnTlRFa2NCSUlOWVZtMlpBRzVzMTZIa3hEWU5RV1puUUVNSVN2RWhETE9CTXIwWWxVR3JGSUVWNlNqWnZCUkg4UmNacmVBY3BFQjM0ampZZFBCaUg1TUc?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "聯發科(2454)真正的觀察重點，不是手機出貨，而是高階產品組合會不會被 AI 拉上去-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPWVpPanVOV2Vsb0I0TlhYQ09HYXI2YkV6VC1pWkZXbDhSTFlvNVJseE9sMlZlWjhsTWdBV3RnSW5QSlJ1WXFlYjZGRVJqR1lMNnV1eWtKOS04cHNGQUc1S1pFWU1Xejh6dEVIY05QNTduSWVqY0JtdWVrc3VaNjZrUQ?oc=5",
+          "published": "Sat, 04 Jul 2026 06:43:09 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "聯發科(2454)不是在比出貨，而是看 AI 能否推升產品組合-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPTUktQnRScHotVTd3bEJvMWRYVExUUkliQzQ4QVJMeDMzQ0dPbG8ya3B5VzN3X1BTdmN4Mkhqa2ltSjhPaEhyR3I3SWZUY0dOVVgxUThZOXY1QWR5ZERORTIyQ0hMNEhoUHNxcnVqRkFYWHJNbXF3eHdTRjlwSGkzNQ?oc=5",
+          "published": "Sun, 05 Jul 2026 08:55:11 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney投資網誌"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "AI概念",
+          "confidence": 0.95,
+          "evidence": "AI ASIC 業務爆發，聯發科（2454）獲外資上調目標價至1 萬元"
+        },
+        {
+          "type": "Google供應鏈",
+          "confidence": 0.85,
+          "evidence": "據DIGITIMES最新消息，聯發科已確定將拿下谷歌以外的第..."
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.75,
+          "evidence": "無懼高通！ 聯發科左攻TPU、右拓ASIC「第二家客戶」"
+        }
+      ],
+      "catalyst_summary": "聯發科因AI ASIC業務爆發及供應鏈拓展獲外資看好，秒填息並創歷史佳績。",
+      "risk_flags": [],
+      "target_prices": [
+        {
+          "broker": "外資",
+          "price": 10000.0,
+          "asof": "2026-06-30",
+          "evidence": "AI ASIC 業務爆發，聯發科（2454）獲外資上調目標價至1 萬元"
+        },
+        {
+          "broker": "外資",
+          "price": 10000.0,
+          "asof": "2026-06-30",
+          "evidence": "聯發科（2454）外資目標價喊到1萬元！估2028年EPS達285.6元"
+        }
+      ]
+    },
+    {
+      "score": 31.6,
+      "trend": 0.6,
+      "rs": 0.0,
+      "setup": 0.09,
+      "quality": 0.86,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.14,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": -5.6,
+      "ret20_pct": -12.1,
+      "dollar_vol_m": 14403.0,
+      "stock_id": "2317",
+      "name": "鴻海",
+      "industry": "其他電子業",
+      "close": 237.0,
+      "change_pct": -2.07,
+      "valuation": {
+        "pe": 17.19,
+        "yield_pct": 2.96,
+        "pb": 1.9
+      },
+      "note": "鴻海",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -16596486,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 39.91,
+        "foreign_holding_change_30d": -1.63,
+        "short_change_pct": 165.0
+      },
+      "fundamentals": {
+        "eps_latest": 3.56,
+        "eps_yoy": 17.5,
+        "gross_margin": 6.2,
+        "operating_margin": 3.6,
+        "debt_ratio": 62.0,
+        "roe": 2.9,
+        "roa": 1.1,
+        "op_cashflow": 3217154000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 52.1,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 237.0,
+        "ma5": 241.3,
+        "ma5_diff_pct": -1.81,
+        "ma20": 256.525,
+        "ma20_diff_pct": -8.24,
+        "ma60": 248.81666666666666,
+        "ma60_diff_pct": -4.99,
+        "ma120": 233.26666666666668,
+        "ma120_diff_pct": 1.58,
+        "ma240": 223.88333333333333,
+        "ma240_diff_pct": 5.53,
+        "high_60": 309.0,
+        "low_60": 200.0,
+        "high_20": 277.5,
+        "low_20": 237.0,
+        "bb_lower": 232.51518840907934,
+        "bb_upper": 280.5348115909206,
+        "atr14": 7.392857142857143,
+        "stop_2atr": 222.21,
+        "stop_2atr_pct": -6.24
+      },
+      "ohlc": [
+        [
+          254.0,
+          254.0,
+          246.0,
+          250.0
+        ],
+        [
+          246.5,
+          251.0,
+          242.5,
+          251.0
+        ],
+        [
+          255.0,
+          255.0,
+          244.0,
+          244.5
+        ],
+        [
+          249.0,
+          260.0,
+          247.0,
+          248.5
+        ],
+        [
+          251.0,
+          251.0,
+          241.0,
+          248.5
+        ],
+        [
+          251.0,
+          254.0,
+          244.0,
+          245.0
+        ],
+        [
+          246.5,
+          246.5,
+          239.5,
+          240.0
+        ],
+        [
+          245.0,
+          249.0,
+          244.0,
+          247.5
+        ],
+        [
+          249.0,
+          251.5,
+          245.0,
+          250.0
+        ],
+        [
+          255.0,
+          263.5,
+          255.0,
+          261.0
+        ],
+        [
+          262.5,
+          263.5,
+          257.0,
+          259.0
+        ],
+        [
+          263.0,
+          269.0,
+          261.0,
+          264.0
+        ],
+        [
+          265.0,
+          269.5,
+          259.5,
+          263.0
+        ],
+        [
+          269.0,
+          289.0,
+          268.0,
+          289.0
+        ],
+        [
+          302.0,
+          304.5,
+          293.0,
+          293.5
+        ],
+        [
+          297.5,
+          302.0,
+          293.0,
+          301.5
+        ],
+        [
+          306.0,
+          314.0,
+          299.0,
+          309.0
+        ],
+        [
+          309.0,
+          309.0,
+          293.0,
+          293.0
+        ],
+        [
+          290.5,
+          292.5,
+          278.0,
+          284.5
+        ],
+        [
+          257.5,
+          272.0,
+          257.5,
+          269.5
+        ],
+        [
+          270.5,
+          277.5,
+          268.5,
+          277.5
+        ],
+        [
+          271.0,
+          274.0,
+          262.5,
+          263.0
+        ],
+        [
+          260.0,
+          262.5,
+          251.5,
+          258.5
+        ],
+        [
+          266.5,
+          269.0,
+          260.0,
+          260.5
+        ],
+        [
+          271.0,
+          272.5,
+          265.0,
+          267.5
+        ],
+        [
+          270.0,
+          271.0,
+          265.5,
+          269.0
+        ],
+        [
+          266.0,
+          272.0,
+          264.0,
+          272.0
+        ],
+        [
+          270.5,
+          271.5,
+          268.5,
+          268.5
+        ],
+        [
+          270.0,
+          275.5,
+          268.5,
+          268.5
+        ],
+        [
+          270.0,
+          270.5,
+          259.0,
+          259.5
+        ],
+        [
+          255.0,
+          261.0,
+          255.0,
+          256.0
+        ],
+        [
+          260.5,
+          262.5,
+          257.5,
+          257.5
+        ],
+        [
+          255.5,
+          255.5,
+          248.0,
+          248.5
+        ],
+        [
+          250.0,
+          252.0,
+          246.0,
+          246.5
+        ],
+        [
+          251.5,
+          255.5,
+          249.0,
+          251.0
+        ],
+        [
+          255.0,
+          255.5,
+          248.0,
+          248.0
+        ],
+        [
+          239.0,
+          243.0,
+          238.0,
+          239.0
+        ],
+        [
+          237.0,
+          241.0,
+          236.0,
+          240.5
+        ],
+        [
+          243.5,
+          247.5,
+          240.5,
+          242.0
+        ],
+        [
+          243.0,
+          243.0,
+          236.0,
+          237.0
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "鴻海(2317)6月營收年增52％卻月減可以買？最新目標價曝光！杜金龍大膽賣一半：群創、聯電...這3檔便當股更有肉 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNYjdxdlRFYzFwbHZYTTVZZDVYX0JVU0NOTUdrV05UYkVHVld6cWtRQUxNZkJkNWdkS3Nfc1Y2ZVdSNGFyd3dDc3REcTNIOXFlR0Y5YlRRNmxkU3Q5SFVNbTc1LTBQb2N2VUVOdjhwc2ZGLTN4M19wZGlfZEpQNWZTbA?oc=5",
+          "published": "Mon, 06 Jul 2026 03:25:00 GMT",
+          "published_date": "2026-07-06",
+          "source": "今周刊"
+        },
+        {
+          "title": "鴻海（2317）6月營收年增52％卻月減 網吵翻：到底是要噴還是回200？ - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE03NGJMR3F0dFpBWExiemdCeml3UW9IVmxpOG5SMFpIQzZzWkRBWVh1aFltbkNIZ3N1Z3ZPalQxT0V0bTdsaGJWQVBzZ1JUZURvRXfSAVdBVV95cUxNTUdRWWlFSHZFdkdJVmVscTdUZmlHeDRJQ2o5SHFPejdwUG5Dak1oNVlDS0hVd2w3UjdkX2EzSWlNbTN5Wjg3Mk91c2JKNV90ZWl5T3RxclU?oc=5",
+          "published": "Mon, 06 Jul 2026 00:24:31 GMT",
+          "published_date": "2026-07-06",
+          "source": "UDN"
+        },
+        {
+          "title": "營收創高行情發酵？鴻海今漲逾2%挑戰重返250元大關 專家這樣看 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMimgNBVV95cUxOZWRPVlJPRlcyVFZrVWlDcWUxUVRJYTQ5cVdYX0VrSElJck9pOWZpVWVMOHZCZDh3aGN3VktGSGl1UTZYeUpSclZIR1VwMm5mTC0xdDRpMklSakFiSEhqaHdJWTQ3LTdTdGs3YmxGN3RGdVl0M1F0aDZDcTRaaXlVTklzOVVnNkp0R3ViRG92ZHR3RXdycjk5R0dFME5RSFRRT2RCT2c1S2N4WUM5RUFOTG5MaEEwTXFBeXNUblJNR0xpRDZZY09fekZQaHVMRnV4YU03OU12TmhtcXNXblI1T09lUk1HNjJFblZad1NMVkdnckYyWjM0ZElGVjN4bWQtNkJQUWVCMXl0MUhQWExxRmJQUVdValZ1VFJSa3YtMUZENFhjNXZPazc4TW1FZ2E2V215ekFfTUQyLXhuQ2VHcXRSMlhHZkxIUG9YckJJUmhyX1AxQy1nT1ZHUTFZbWQ0VWQwczhUSjVySWdJNnFOdFVlQWZjbzZZeFFJUXNnMG11MkJkYnhnOG0tU1A3aU51c1cwWGE4UVF2UQ?oc=5",
+          "published": "Mon, 06 Jul 2026 02:24:04 GMT",
+          "published_date": "2026-07-06",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2317 鴻海 - 參考~鴻海會到300嗎?台股鴻海會漲到多少? - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE8wQVBOQWdSTjZ6TS16V21XZEpvdUJwLWtUSEw4czJvVzB5aVFUdlQ1bEZBRm95dzRUQzQyeHB4bGVGRFk5aXo1R0NPLWNqUXhrd0szdHQzSmg?oc=5",
+          "published": "Mon, 06 Jul 2026 09:03:20 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "營收速報 - 鴻海(2317)6月營收8,217.63億元年增率高達52.11％｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1SVExWRmNESkxXaW43cE1tYmFnc3MxR1JRRWZ5anRaeFVGU2N1VWlMSHM5RkY4YldleGZaQ3pUZjhWQzZldml3c1pneUZoYnNqdW45U1RILWYxMW5UdHllTzV1WVh3bEpiT3h5SFFxVElSYlBET1E?oc=5",
+          "published": "Sun, 05 Jul 2026 09:20:00 GMT",
+          "published_date": "2026-07-05",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "個股：鴻海(2317)7/7-7/8參與投資人說明會 - 富聯網",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQdzMwaTRxMHN4WWtOVGM5VUYwdGRhZmszSDN3TlRZWWpCQndrdEdlX1JsTVhfY2JYN3R0cVY3aXFJcm1qaGt0TE11U1lkbFVHcU9HakIwS1ZDaEdBa0hqMGh0ZHlGMElpMWFvdFhhdGlSWkdJZFR4bnJYMFdsemxjejZleVQ2cU1q?oc=5",
+          "published": "Mon, 06 Jul 2026 23:20:00 GMT",
+          "published_date": "2026-07-06",
+          "source": "富聯網"
+        },
+        {
+          "title": "鴻海6月營收8218億元與Q2及上半年齊創同期最佳 Q3旺季營運續升溫 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMilANBVV95cUxQb0IzQ1B6Y0xXZGgyd1FHbmJNOFRLQWViNUxUVW1mQUdmdjNpcHpURjlFTGdsalUxZ3VtTi1ndjdvVXNuV2tIVW13eHY1dnZzMmxYc3hYVmtLaUw2a1diN1NUUjhUV2x4M3B3N0hwRTZTVTF0TmxTMkM0RjJXSGNpT0pmNzB0dzdVRmFaNTZCdjFRVUhJY3gyRUc4Y0FObmdMTzJCeThiVFI2S0RNY2xYQV9FOEpPaUFBSkZ6SERTMDBGWW1JVDdWdjFjM0EwLXFZTjRTazhKZ0hkdU9Wak05Uk00dmdYYkdwb1NxVVZMaWp5XzkxQnh0M0lEUWI4RlFVVGNGN0ljNk1iWHRsVEFiTVBQMlpJZ3dpWm1oVkpjNG1ZVFBMNTFuTnNSS0Z0bmp2WDllYmJBU2NjVkJoX2lRUE9VNnR1VllJSmFMRWZOT0dCS1BScEthSGxnXzQ3ZTRTVS1xZFAteTNYWTY5MjRzRUNqSGZMaVhKQlFJVDZqS3dCSG9jVmxxZUpOSVZrc2owWlU2VQ?oc=5",
+          "published": "Sun, 05 Jul 2026 08:52:24 GMT",
+          "published_date": "2026-07-05",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海2026年6月及第2季度營收- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9FemprTDRiMjd3SzdwQWdzbTlyMG9XUHJPODRPS292VTYxdDNZaHNhZXRuVmRGRV9kaEhqdXd2RlotNW9zSmI0cHB5c3hqN3Q4aXByckVQc04?oc=5",
+          "published": "Sun, 05 Jul 2026 07:13:25 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "鴻海營收／6月8,218億元 單月、第2季、上半年均創同期新高 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBhSjhHWkFIelZ2SmxraU9MWUVtS2ZfV1h3ZXkyZ3lhYW5KYUw2UzBKQWhuSGpIOTgzVHJQYXVtcU1RTHE0UVVhOWN1WnhYTzYt0gFWQVVfeXFMTW40TVdsYWZabG5XVGpVaEZaS0hKT1ZNbzQyTE9ZNm11d2VBQkEwaTQyS3NaVERmRUNKd3lDUTc0NzdhNWUtVTFqaFNHQklVdmg2Q3VneVE?oc=5",
+          "published": "Sun, 05 Jul 2026 07:49:00 GMT",
+          "published_date": "2026-07-05",
+          "source": "UDN"
+        },
+        {
+          "title": "2317 鴻海 - 看來外資不買單鴻海的營收利多！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE01bzlMLUlheG5sY2tNMXVjM08yU3RvZHVkSXFubEZfNUN1VkkyZ3hyOThTTWxxNXg1eTNaVmM2czVvcHBoT0t1T2NLR0pWb1NMMGNRamxfbUE?oc=5",
+          "published": "Mon, 06 Jul 2026 07:24:44 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "輝達＋鴻海無腦多？目標價喊出400元！他「120元進場一路抱」：這次真的不一樣 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMitAJBVV95cUxOZmxXU1R2aXl1ZEJxOE5zYVhsSFBCd25lNV9Rb1RjaXpjS09tTllhbDFDem53U3ZMTlhKOGJJa240X05vUjAxUGpoR2h6Wk1iVGRoY0lhWEFHRVZZSmUxeXhhbmVzMDhhb0ZjQWlrTTFZNDBGMFBrTTFoTnJxWkhDM01JNWdQT1daMXU4cWVMMEhYUTdmUXppcGt1UU1Pa05tSkJMcUhHTDJ2aXRvZ2RxUGQzUk9GQTdPWktkQXdkc3ZnWm55Wmk2ZWc5T2JtZURSUk1TeFFTdENxN0gtTVJKNGNwZ3dzMWZ1MXdVMzFhUEZYQ0Jkb3FwSGNEMUw5U1duRTdtc1dFU2JWdk9SUW03YVZhdDQwQ2Q1WTVHOEY5U1B6N3ZxVGxjLURTNGd1a2Ryd3g3Wg?oc=5",
+          "published": "Mon, 22 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-22",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2317 鴻海 - Q2營收YoY成長4成，絕對值增加1.2兆元的鴻海你看不起？ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFAxc1JLRXd1NWhoZ1ZhX2Z5b0xpRU5neXFiY3RTVlZBd1E3Q0s5YmFzMFU5RUxBUnJQX2NYMzJEN1ozUldEZC1rLWlqOFFjMDNIdkdjOHgxVjA?oc=5",
+          "published": "Mon, 06 Jul 2026 09:19:04 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海開出史上最強六月營收下檔空間封死- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBvMTdvajR3UG11SkNqUnlLZUNZN25WeVJjTGN1NDV2U19lRWFaVWRNX3I3VUc2UFVaVWFnTUFNczBYbVR1MjdFSVh5TlZuU0E1dGdETXNiaVI?oc=5",
+          "published": "Mon, 06 Jul 2026 11:38:27 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海6月營收快報，年成長52.11% - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFAyenY4bFFYRGhRZ0kxTDcyOTBnc1J4NlA5SHlQWWFMblRZVk9zRTdHTlZKUFh2c0R4SE9POTJLMUdDTlYxVGhyRF9na2pzV01yM2RYdUpuajA?oc=5",
+          "published": "Sun, 05 Jul 2026 07:32:49 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海2026年6月營收完整資料及說明- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1JQnRUS3M5c0NlODFIdXR3Y0d4dzJlUk5LLUhmeFN2QmxNUmRVTG1SM2E3c0dKcHlzQmlQS1JMVG1IQ3RlYWZvZXFrcm0xUDRpSEhIdkExQ2Y?oc=5",
+          "published": "Sun, 05 Jul 2026 08:51:41 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 不建議買賣--7月3日外資主力在鴻海買賣超情況- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBUVktKNll4WWJZcW43ajdjYm9WcE9sZ2tYYVRQeno5dExoUDcxWkEwUmZWb1lfRWhnWGNmS21aTVFsd3kzRjBQWDBqd2FzZ1VLem5pWnVNcUQ?oc=5",
+          "published": "Fri, 03 Jul 2026 15:20:21 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海本週股東人數變化及外資籌碼均價分析2026.7.4 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBjQ2tLN0xTSjMySXc5RUtvUFlsWlpOSWJ6VUg2bGphZlVkYnEwLWRXME1CQklrX3A4Vm80VU5iaVJicmxTdVlxMl9FMnZJNVNEWFIteWpScHo?oc=5",
+          "published": "Sat, 04 Jul 2026 09:19:44 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 鴻海6月營收其實蠻不妙的！！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5kNFBGVlg4YUIwQmItelE3R1pkQWw1NWpYN3RHMlZOa3pPcUZnczFLMXdtY19MVEtzQ2htbmZyMTZlUmxJc2pDd3lVUGRVdzM4OUIyQWNOVng?oc=5",
+          "published": "Sun, 05 Jul 2026 07:58:03 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "我認為中信讓元大超越只是偶然非常態 未來中信超越元大卻是必然 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE4xU1ZXYk9MZ0RaMDFqdElON0QtaFE1ZjhDRXlDaXd4NUNtbUxNTHpTVGdXc0drNUliWGZCbUxyY3c2ZFpmRllxaXR0MnJUY2pDNmFvaU93cFM?oc=5",
+          "published": "Mon, 06 Jul 2026 04:19:55 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "鴻海(2317)營收創高靠AI伺服器，但供應吃緊卡在哪裡？-王澤明 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOYVU1Q2t5Z3Q5MlA1SkJVc2NxQXBIZ2tENUZEcXNGWVVUVTRZZWtOcUlnVUVZSm94dlNQRWZIdk45dTI2XzExZHBEWlBCUUk1V3V2OUdoY2xBS1dtQ1hYZnI4NHFseUd0LWwtV25YZW5WWGlTMWlfZjMyZVpZSXNWUVUxZw?oc=5",
+          "published": "Mon, 06 Jul 2026 11:36:41 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "2317 鴻海 - 南港破百之路''未來必須滿足那些條件呢? - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1hckdJM1RqUjNkZU9YVjlNNEdmSkJFSHVyNEFhSFRzWXZxRmYwZjBjOGpPMUtBYzRCM1M2U3lDUm9FTkhlUWxjX19wY0d0ZGZsdFR0cEl0SU4?oc=5",
+          "published": "Sun, 05 Jul 2026 01:49:41 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 老AI三雄緯創籌碼最不穩定，但線型未破- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9UOC15OUhBZDNiNF9hVkxNYTdfSTR2bVp5MHZJODJYbllnR1BCc253ZFRYbTA0SmM2UlY1c0tqa2M5Q1RHRUR3SU1OUmR4OHl6dDRWS2h1dDk?oc=5",
+          "published": "Sun, 05 Jul 2026 07:03:21 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 長期股價由企業獲利決定 短期股價由主力籌碼決定 鴻海獲利M... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9rM04wSkZFbXNYZ2pFUVZJR2xfaldpd3djZlpuYkhCazlxNVpLUXA1MkphOFlvcFl6cVc5TEVoVVdXQW8xdGttZVl1STNqNGVMRWpUZG5qTkM?oc=5",
+          "published": "Thu, 25 Jun 2026 12:52:47 GMT",
+          "published_date": "2026-06-25",
+          "source": "CMoney"
+        },
+        {
+          "title": "錩新6月份營收非常好，希望明天漲停的請按讚👍 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBuTXMyX3RqRFowZnFCWkZnRm9sMVJmTEp6WS0talZEX01hbEE0bGxkV3hOT0RkR29vN0MzTlJXX05YRzV3ZmZBaWpvVG5qdjA0Nmw1d3Y1WWQ?oc=5",
+          "published": "Sat, 04 Jul 2026 07:42:58 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney"
+        },
+        {
+          "title": "2317 鴻海 - 借券賣出大減23,359👍👍👍👍👍，融資-720👍 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9iaGd6ak1WRUFMeHBqVG1hTVNqcjR2THB3WmtOdzByNmFLMXJMV2JCYVo5eWZ5eTRJVl9KY1cxQ0VESV9LNG5MZjROQmd3QmVXN0JJUDdRZU8?oc=5",
+          "published": "Sun, 05 Jul 2026 21:43:37 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "新訂單",
+          "confidence": 0.75,
+          "evidence": "鴻海營收創高行情發酵？鴻海今漲逾2%挑戰重返250元大關"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.65,
+          "evidence": "鴻海(2317)營收創高靠AI伺服器，但供應吃緊卡在哪裡？"
+        },
+        {
+          "type": "AI概念",
+          "confidence": 0.85,
+          "evidence": "輝達＋鴻海無腦多？目標價喊出400元！"
+        }
+      ],
+      "catalyst_summary": "鴻海6月營收創同期新高年增52%，AI伺服器需求帶動，惟供應吃緊及外資籌碼動向引發市場分歧看法。",
+      "risk_flags": [
+        "月營收環比下滑",
+        "外資買氣不足",
+        "供應鏈吃緊"
+      ],
+      "target_prices": [
+        {
+          "broker": "分析師",
+          "price": 400.0,
+          "asof": "Mon, 22 Jun 2026",
+          "evidence": "輝達＋鴻海無腦多？目標價喊出400元！"
+        }
+      ]
+    },
+    {
+      "score": 21.8,
+      "trend": 0.4,
+      "rs": 0.0,
+      "setup": 0.04,
+      "quality": 0.14,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -3.1,
+      "ret20_pct": -16.2,
+      "dollar_vol_m": 23391.0,
+      "stock_id": "2308",
+      "name": "台達電",
+      "industry": "電子工業",
+      "close": 1890.0,
+      "change_pct": -5.26,
+      "valuation": {
+        "pe": 73.56,
+        "yield_pct": 0.58,
+        "pb": 17.3
+      },
+      "note": "台達電",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -1131145,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 63.43,
+        "foreign_holding_change_30d": -0.86,
+        "short_change_pct": -13.33
+      },
+      "fundamentals": {
+        "eps_latest": 7.91,
+        "eps_yoy": 100.8,
+        "gross_margin": 37.0,
+        "operating_margin": 17.8,
+        "debt_ratio": 47.8,
+        "roe": 6.7,
+        "roa": 3.5,
+        "op_cashflow": 19931192000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 43.7,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 1890.0,
+        "ma5": 1984.0,
+        "ma5_diff_pct": -4.97,
+        "ma20": 2076.5,
+        "ma20_diff_pct": -9.87,
+        "ma60": 2117.4166666666665,
+        "ma60_diff_pct": -12.03,
+        "ma120": 1707.9583333333333,
+        "ma120_diff_pct": 9.63,
+        "ma240": 1267.41875,
+        "ma240_diff_pct": 32.94,
+        "high_60": 2520.0,
+        "low_60": 1740.0,
+        "high_20": 2415.0,
+        "low_20": 1810.0,
+        "bb_lower": 1784.0673716814986,
+        "bb_upper": 2368.9326283185014,
+        "atr14": 115.0,
+        "stop_2atr": 1660.0,
+        "stop_2atr_pct": -12.17
+      },
+      "ohlc": [
+        [
+          2225.0,
+          2260.0,
+          2190.0,
+          2195.0
+        ],
+        [
+          2160.0,
+          2185.0,
+          2140.0,
+          2165.0
+        ],
+        [
+          2210.0,
+          2250.0,
+          2155.0,
+          2155.0
+        ],
+        [
+          2185.0,
+          2195.0,
+          2075.0,
+          2075.0
+        ],
+        [
+          1985.0,
+          2040.0,
+          1985.0,
+          2020.0
+        ],
+        [
+          2020.0,
+          2025.0,
+          1910.0,
+          1915.0
+        ],
+        [
+          1880.0,
+          1960.0,
+          1880.0,
+          1915.0
+        ],
+        [
+          2015.0,
+          2060.0,
+          1990.0,
+          2030.0
+        ],
+        [
+          2125.0,
+          2125.0,
+          2050.0,
+          2095.0
+        ],
+        [
+          2205.0,
+          2300.0,
+          2185.0,
+          2290.0
+        ],
+        [
+          2350.0,
+          2410.0,
+          2290.0,
+          2350.0
+        ],
+        [
+          2490.0,
+          2585.0,
+          2490.0,
+          2520.0
+        ],
+        [
+          2485.0,
+          2520.0,
+          2370.0,
+          2390.0
+        ],
+        [
+          2470.0,
+          2525.0,
+          2445.0,
+          2445.0
+        ],
+        [
+          2450.0,
+          2520.0,
+          2410.0,
+          2420.0
+        ],
+        [
+          2430.0,
+          2455.0,
+          2330.0,
+          2360.0
+        ],
+        [
+          2420.0,
+          2460.0,
+          2410.0,
+          2455.0
+        ],
+        [
+          2440.0,
+          2465.0,
+          2405.0,
+          2425.0
+        ],
+        [
+          2380.0,
+          2380.0,
+          2275.0,
+          2300.0
+        ],
+        [
+          2090.0,
+          2260.0,
+          2090.0,
+          2255.0
+        ],
+        [
+          2265.0,
+          2435.0,
+          2215.0,
+          2415.0
+        ],
+        [
+          2370.0,
+          2410.0,
+          2190.0,
+          2200.0
+        ],
+        [
+          2170.0,
+          2230.0,
+          2080.0,
+          2160.0
+        ],
+        [
+          2260.0,
+          2280.0,
+          2170.0,
+          2215.0
+        ],
+        [
+          2310.0,
+          2320.0,
+          2200.0,
+          2210.0
+        ],
+        [
+          2265.0,
+          2270.0,
+          2220.0,
+          2230.0
+        ],
+        [
+          2220.0,
+          2220.0,
+          2140.0,
+          2155.0
+        ],
+        [
+          2190.0,
+          2210.0,
+          2150.0,
+          2150.0
+        ],
+        [
+          2170.0,
+          2195.0,
+          2135.0,
+          2150.0
+        ],
+        [
+          2170.0,
+          2170.0,
+          2080.0,
+          2080.0
+        ],
+        [
+          2030.0,
+          2050.0,
+          1970.0,
+          2000.0
+        ],
+        [
+          2060.0,
+          2060.0,
+          1960.0,
+          1980.0
+        ],
+        [
+          1925.0,
+          1935.0,
+          1790.0,
+          1810.0
+        ],
+        [
+          1860.0,
+          1970.0,
+          1850.0,
+          1905.0
+        ],
+        [
+          2010.0,
+          2030.0,
+          1950.0,
+          1950.0
+        ],
+        [
+          2020.0,
+          2020.0,
+          1965.0,
+          1990.0
+        ],
+        [
+          1955.0,
+          2010.0,
+          1920.0,
+          1970.0
+        ],
+        [
+          1920.0,
+          2075.0,
+          1885.0,
+          2075.0
+        ],
+        [
+          2120.0,
+          2135.0,
+          1995.0,
+          1995.0
+        ],
+        [
+          2015.0,
+          2025.0,
+          1890.0,
+          1890.0
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "台達電驚傳「掉單鬼故事」暴跌3成？專家曝關鍵進場點：基本面沒壞- 上市櫃 - 旺得富理財網",
+          "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE82MmdJMHh3V2xrZVVjTlQ1RW1YUnFycFBKNGtvb0xVNVYxZUt3Zmd5WFMtUU11U2RjWXBVTUxBeG0zeG9TczBqUTY1YmctNkpWdW9IWWpjMkVQMWQ0Z3FmNFcxUi1Ea3NIbFE?oc=5",
+          "published": "Sat, 04 Jul 2026 01:34:31 GMT",
+          "published_date": "2026-07-04",
+          "source": "旺得富理財網"
+        },
+        {
+          "title": "台達電（2308）狂跌三成該怎辦？陳重銘曝關鍵隱憂：股價比台積電貴合理嗎| 台股雜談| 股市 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBrbGc5N2RBbmNpTVV4WmxFMGhvTDdRSVNaSlFjVGlEZmd4SG5QVXFscHl6amNZT2JYZVVRQVJlOHFvYTVSRGxhUFU1b0RmRWxFTmc?oc=5",
+          "published": "Mon, 29 Jun 2026 02:02:04 GMT",
+          "published_date": "2026-06-29",
+          "source": "UDN"
+        },
+        {
+          "title": "台達電攻模組化機房/液冷，訂單能見度至2027年 - 台視全球資訊網",
+          "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPV3V6N1RXRHVSYVk1SElvNGRRU25aVnpZTGJseGNMR2dYdHpGS1FyYTd5WVpXQVlSN2N6NVlUWkYwLWtSV0FfTkt5cGZIejdqaFpQV2pVbldXUjFfZmlwalk4bm9nY3BBQ19Tc0U0TUJiNEZHTW9yT19XSmNrY0ZNUTl5M1RweFkzWi0xN2F4M25kZw?oc=5",
+          "published": "Fri, 03 Jul 2026 03:51:03 GMT",
+          "published_date": "2026-07-03",
+          "source": "台視全球資訊網"
+        },
+        {
+          "title": "一個月內股價打7折...台達電股價跌破1800元大關 專家勸先逃 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi9wJBVV95cUxNYjlFWFNKXzlodU1iTlN3UUJ4aV9JWDFpLXdTMXM3Z3pBWFVOZTRTQTdoUmc3TmdGY0h6QU9RZVpoVW5oaWd6MTRWbDE1NGRPN1pkZFo1MXRXM3hUdEI2T21YMlIySHJpcXBNX3RsdFRoU2ZkRmhRaDZyaUkxOFB4TmVORmhra0VKdFdWZFpiLWhoekRsdTQ0NlFRSXdkcGM2TklUcmlYVEJSXzJYU0lRZzFwcGhaS3pwZy1UYzBPTGZucWREeE90Ry1wdVRZc3lzVGR3VGFndWdkRE0tOTJvWjN5MXRPRTZTVnFTTWdjbHdaMnVXdFBJREUxYklURUpDQm9Ha2JoYWlGZEZISV9ZbmF4VHROOTk0QjdFRm5MMDBxbTZHa2h6ZHNpYUVfMXI4WVVFdHRrOVFWNldvdHJiVVlYLTlyZ2Nvek5lRmZjdDNWaWkyZVhTdDF6VFRRQ2RUdnpkU3A1MUI0WDJ0ZkY2anVpSlhGdmM?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2308 台達電 - 營收若不錯,個人覺得準備漲起來了😀 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBJUTFLLTFSb2hfck5KSXpLU2hKUmZOcG9ZNHNpMVplWXRwOF9NZGhxS05ua1BNV1p3VDBvVlNScG5kUktkaVdwRjNsa2JVODhUSzB5UzRFYkU?oc=5",
+          "published": "Mon, 06 Jul 2026 15:54:08 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "台達電、鴻海又被點名！AI股拉回 法人喊逢低布局15檔 - 工商時報",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE0zU1hJQWJxa3ZpSmRBaXBubTVfMkFLSFFkWGRqME1LTDVpZzhNRU9kY0VDUEJSZ2x6ckdJMjBCNEo1TWVhVTZDSE1XMVRrdFdTSy1aODlzYmZ3MTFlU0U4?oc=5",
+          "published": "Fri, 03 Jul 2026 19:00:00 GMT",
+          "published_date": "2026-07-03",
+          "source": "工商時報"
+        },
+        {
+          "title": "【即時新聞】台達電(2308)爆量重挫逾4%，這「3檔概念股」還能逢低卡位嗎？ - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPMHJxQlhibXNzd1pweHpGWjBYdFJIY1Y2TTBNZUZfc01fMjBVUEh4c2ZndnZZczFKVTVwdmt2aFJuWHp5LWNxQWltVFowTVg2S2ZtQzI5dlhhS3VBSGp4UThXc25wUFBzSVgwWVJWZU9KWHQxbDlCMzVRMWxZdy1tVmpHdlJESzQwOWdNNDYxMzI?oc=5",
+          "published": "Wed, 24 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-24",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "台達電（2308）做什麼、法說會重點有哪些？Q1 EPS 7.91元改寫單季紀錄，±400V今年出貨、800V蓄勢2027年放量｜股市話題｜豐雲學堂2026 年 07 月 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiygRBVV95cUxPYzdzR1g2bkxoSTl6U1V5VE9Sc1k3T0lNcnE4UENTdzZaUVRVOTllMUZ0X0EwTkhhMEhvSXBoWnR0bTlfblhqaXZnMUNhVU9KQ1NMNWl3LTdyOW9JNnhGYkx1aEpIZ1lZanAzX1RlNVpKa18xWE9yS0s2Q3pJMzg2VkhwR2FIYjZoSU5sV0drVnFSck5lS3MxMFhLeVMtTGZLZ0dwc0x0aFBkc05OYUNWbXZvRjc2NDM3WmJHUGc5WXRZYzltbXY0cjAyc1pDMTl4R3QteVdKU29rM1BGMWdVLXBMMkhGYWFYMHNUR3FJWE1mUW9fLU9WeXA1LWVvbkE4eFNJOFJ4MEwyV2FXSnJWWXlKcldkYnFLaHIxb3A0SXdqSFE3UVdLZ01pYjBTaHhlSm1adlF0SmJGVm9ydEZsXzFJZFA4WUJLbUp6WjZsa3lHZWU4SGVmTGp1TExzNUNGdUVLRFRsQ3FURkYxSUtNQkh0Z0FWUElqTFpQekYwZkdYLTFKZnVTRzlSODRza1FFaFJFWDBQUGJpdFYtSVQ4WFF5OVFCLV9rZXdhY1pJRWgteklnX3c1Y21raFpsSE9SMkVCbmdLQlNyZElJVktqOUNlaHl5eTNiOHRZUjc2S2lETE4xWDFITkM3dDBHeWFqRVJjSjc4WU0wSTVySjREdFJOb2JOTmhuLXM1Y0U5V1JFaHhLZlpMY0tHNGZZTmF1azZSeWJOOEVaZkV0UXE3dTRNbTM4TmRFaENGV2dOeVRrYVRLdGE4NmhB?oc=5",
+          "published": "Wed, 06 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-06",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "6月以來挫逾18%...台達電再吞半根跌停 摜破2000元大關 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiygJBVV95cUxOSnB0STUzdVJqaGdySE1oOFhDLVViSVpyeVZuMXJrdW5nRDhXTFlDX3BlU1pMZ1B1V3RRS0k4NUhrQ2xQVXhwaDA1ZTl3WXhGcjg3VmNiUEJnN0NqYkJYMGswVzZHSkduVlZSUV82cG0yNUtiMkMwX0FCYTFINU1LT2ZIV1MwOVhDazMzd1kwdVdUZWVzbjVlOVBFcHpieFdSWTU2Vlh4TDZaakRUcFh0UVlOaGdKbGhaZEFjemptTHRPMEU2UUw5d2FUT1JsaGZURzVuR2xnY3BfeFlCUFFCRzVfb1V3OTVpNTlsUEVyTUc1WWpMOExIenJsR0RIc0NxZklvS0YyeWs3SGNCeExEcVpnVTFiRXR5TW9oU202bmpndXBJN1BEUVBuTGVXVC1VVTc3SFprTXZQRTNBVmVRa0xYS25kYWV5cVE?oc=5",
+          "published": "Tue, 23 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-23",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "「台達電一直跌」？ 創天價後反轉下跌 不到1個月跌幅24% - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1KbkQ1RkRMWnFOTGpqQW1zOGlTQ2JvNzVtdDNyNUpKTWRXUWhWZlc1d0ZBenkzZTE1cU83N1loMXhiSGM0RUx1aUpSWS1LalhVejJHTDFtOXpfd9IBX0FVX3lxTE1lSUEtN1JLMG1wN2VrUG0yRjhQckdiM3ZXY21ncFVmeDFfbjV5Uy1ZbmxnLXlOb0F1WTVtcUtYNnlIY250SUpNSWdMVWZTRzA1ejlnVlJTaHBFV25lYzR3?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "經濟日報"
+        },
+        {
+          "title": "2308 台達電- 台達電法說會後,券商更新目標價- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE80NW4xbVpvMG84dVB4YjBJMGdFWVBqcUcwMHRDMGQ5eHdXb3lORnppcHRKN1U1aWRNaWZ6b2dVWnVtM1JzcTd1X0VuNGVOeFAzcEh4QmozUnY?oc=5",
+          "published": "Fri, 12 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-12",
+          "source": "CMoney"
+        },
+        {
+          "title": "台達電(2308)目標價上修到2440元後，該追還是等回檔？基本面與籌碼一起看-陳柏宇 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOaUFXRUcxMW5iRjFFS2xuQjBtSVIweC12QzBoak9ZWkVfeXF0TDducE1Bem5WOWZsWjlVX2VKZ3hFUXFhY2FzWWhsX0YtdnNaNXBNdGVZNWV5THpoN2dWcUg4RHo5SHlWbDAtS0pJbXdhVkotTkFpNkVhV0tuS1hjNg?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "【Hot台股】大盤創新高它卻掉隊...網哭「誰來救救台達電」 分析師：還沒看到轉強訊號 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMikARBVV95cUxPV3d0VnJiY1FYc1BKQ3FvUUNNM2VadEs0NE5iQUxHTldnaWZHaFJwOXljbmVEN1doMkFuWV9mZlZkSnhQR09QZWlrZllRRy1HMkdSUnZBRUx0LWtNZkN2UllMT2Jzc000ZDd5dEk5M1Q5X3JoV3llekxaem9fQUV5Ymh0NE5zTVFaV25NUmp4bTlLTENPeWZNQlJCMzVsQi1uQzhwUWFIT3hXS2ZEN01KNlhDRHVQMG91WVZXLVFCUmxJNWJCM3ZHNFBkQnU3S2UyUHV0V3F6TTdQMkxoMk1fU21YY1FLSTJVNmx4ZGw3dS1rMms2ZWhnRDlKX1k1c0RjUTRfMlY0ZzBkRGJ0OEV1UUVRMFlsbGFWN19XcVktM0FsZ1lnNXZJZzJGcWdaaFY2Z3FpZGx3YXBZcVpGajJkbUIxN0J2UEpOUS02eldHblYxN21NeE1mamdVQ3FyVUgxTENfWFFUREk5a0J0S0lNMTQ0MzRKeHZMVjcyTDcwNUlPTE42Y0tsbUF4WDF2TGFPWXVqWHpmam8xc0NxQVVkSklyR1VtZi1CalhucXl6ZmJKUXh0M1RLTnc0aTNOWlFyRVhRQXAxVkZPTnJpUmNYdlhEUVBLcmtrOU5xdEhvdGZnVjdDUElOQWV2RmJPREo3TTBQWVVLeW5kVkswclkxQkZqdC1jaEZGanl0cHJXQVk?oc=5",
+          "published": "Sun, 21 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-21",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "台達電獲調升目標價！00896狂押8%直接吃補…今為最後買進日明除息| 存股族愛ETF | 股市 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5Qbktldm9DYW1DZjhlN1NZRVBrcldjcDlFTHBKODY0NTRYeDRmV0x4SW9hVXVyczNXdXR3WjdiV2FDYzhPTnpJcnZvYUVNTy1ndklz?oc=5",
+          "published": "Mon, 15 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-15",
+          "source": "UDN"
+        },
+        {
+          "title": "【即時新聞】台達電(2308)最新獲利翻倍，外資狂砍七千張小心拉回！ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBtbGdBc2xhT0ZwS2k1Um9idDBteEpmbjNIUDlHSm1YR0dGZlF4aG0zd1Q3NktKUGF1YnY0NnhGeVNJcjFnbnNuMWhXQWVTOGYyUkZhWjVzM0huY01QUFVJcXk3UFZ5cFU?oc=5",
+          "published": "Thu, 11 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-11",
+          "source": "CMoney"
+        },
+        {
+          "title": "近44萬股東臉綠...台達電除息秀陷貼息 不漲反跌3%失守2200元 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi7gJBVV95cUxPb3luRXBMOE1Sa2NpUTRUejhKc3B4R1BVbnBZakEtMHV0LVB1engxX3VmT1hWS1F4MUIzcy1KZVFJMzNvbE9VMmswNWRJeXdweXRGWlNjUU00NU5WQmtnOGhTVWktSENPTnhHX1VPWk1WMWpCc3RTWHhDVlE1MnpLMVJPdkVvOThvQVZ3a2thSi1lbDRSZjJlZ1V5Mk1QbTdBcXlvLTl1M0N0VTlPXzNhY0x1ZkxsTWpoVDlyUnMyNGd5azAwUkp0R1JaQmFPM1pYOHpCSTh4SFVYTl8taWpWX0E2U1hidEQ3Rzl3OU9SWDA0S29yVV9RUnVlSV9rUDNuTGJmRGxaYUZWUTZhdi1leU9WOHU0QmE1OGo3ZnR5TFlsTTJqTTJ0OTQ2R3FoWVJsdUsxbHd3Y1hkWVR2cXpyYTVNdF9YTkRGU3hHZ3RyOW1wYjhPV2x2SFhnYnRNaVctdDV3YjNZM3FHRUpXcUE?oc=5",
+          "published": "Tue, 16 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-16",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "台達電、日月光 四檔亮 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9NN3RYMkdUb2VSeWo0Q255azNhdWpNaUNxOFF6ck1haEtHRWp1ei1lUGVrWnpMYnRsTHFvTDNJVnlIelkxLXVzcTZwUHZ6WUVR0gFWQVVfeXFMTmllU3V6VWJtM0RfZzZyS0NJVGpXdzJQVmtldWpvVVg4TEpGZXFBWnA4QzRFUmpvTlMzQVdNVFFiUUh4YWtFOWFGV1ktWU9mWHZ2eHJmZlE?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "UDN"
+        },
+        {
+          "title": "2308 台達電- 金母持續減碼，連兩天都沒任何買入- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1LNzhMSkR5SHpuTGhSZGk5cVNJeWxqLW0taUd2NFFwblFrak16T1BUQ3pLMkJydmowZEZGczNBYU1CMG40TVExN3JiUTF5Z0p3YkxWMlRwdHk?oc=5",
+          "published": "Fri, 03 Jul 2026 12:35:04 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "43萬股民怨嘆！台達電「開平走低崩2.7%」慘陷貼息窘境 11.6元現金股利這天入帳 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiygJBVV95cUxQQ1AyOEFUUUZKUEMwZkFYcVFib0FkRlVVUGF2SHBGbnU3ZHdQc1lwaHVWQl83SEhDLThQTk1mU24zYTgwVmJYV3FITVV3aW1tZThTblJBRUtxaFBQX1BQN3h4RHAxdktuVDZQTTVrZWpOZTZJN1FYMU9say1pUy13bkpXbEl3SWZ6b3pBcTNvaWllVjcwallkSkFXbUN1U3NCbUFXYmhXNG5YNkd5QWM0WnMteGxkdXdmVEVobnFUa3pIb2xDOEtpWDNsOFBKbEtRRjlTQndXejdLdl80TUxFQjlBdDkxRmZiU19ORkpUdXlJTlJaQmVzbkVyeFI0S1R4dlJ3RXVjMEVCYk9wbFBnLWNKVVg1ZG1DdG03TXR1U0JTRWVTYjh2TmxXQlg1ckJvVUVwZ0NXOXBBXzVUVEJaYjFVN3lOTTlUb1E?oc=5",
+          "published": "Tue, 16 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-16",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "台達電4天狂漲25%...今寫2410元新天價 專家看法出爐 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMivgJBVV95cUxQbEVXbE1FRWtXdUl2V2J2UEI0anVtQW1PcmlCVHFHVkpzczlBVnZXanlidUpkWTB5UGJMNkhSTkxid0hHSHRPTzBPcjdUNGxhdnU1bEVsNDgweTRYOENObFZObHF6YmhuRW5HZmhBS2VPRlk4MWROQkdxTmJRUnBhOFVVRF9pVFI2Z0FPVnl5dnpqNjFQSVJpV19weFVyUnpPSE5mcnp1QUhMOWlIamRHWTJudmhzUl90TVlST09WNGNfRVY2MWJqVGhRaW5UUHRNWVFIWm93bGh6STVlRzA1cFJ2RHhucEkwb0puQk1vMC1HMldOS3VpSFdsdFRyNkNQUk45QWQ2RUcwYkRLX3hWN3BlQmdlNVNZV1k2cHFGdEFaNzRJVTVNdUZqOXRSc3FsaDJQeEtKTTJhSV9UdHc?oc=5",
+          "published": "Mon, 25 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-25",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "「台達電一直跌」引熱議！創天價反轉跌3成　股民搶進人數飆天高 - ETtoday財經雲",
+          "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBjU3Btbks5WU9PUGRKZEoybW1reEpBUnVQRDM0ZW9pYTZaOW5MZEM5Qk9ZNHMyZ1F3WThkekVSWnVDTktFTEtKMDJwLWNIOWpEakHSAW5BVV95cUxNTTk1aEVuaHQtdUMxTnhHemJkLUgzZFJDcFh5SFRrR20zSHBmQXFzTEppcWdqM1NTczlPcWZlMG9WN3YyX1o2VFJmMklKQzdUaW9lemJaUUhnM0lpY184cDRpb3JULWRsbk9CSWdSQQ?oc=5",
+          "published": "Sat, 27 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-27",
+          "source": "ETtoday財經雲"
+        },
+        {
+          "title": "股價緊逼台積電！台達電強漲近9%挑戰2300元大關 分析師曝「創高關鍵」 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMivwNBVV95cUxPbjE4a0FKSXRiQ2hibW85REVlNmt2cTFfV3JoZG92UkZPeTU4NHpyT09FV24zX2h4cXJWN2tHZHM5TWg0THhjWkRDNG9TX1hZTUtJcDJwVHZXLUJscHAzVk9HWDR0ekZzWjd4VXZBSkRqNmg2bHVEa3B1Q3JwcU9DTUZlUVZWN01YVlpsekF6T1lETG1nbFJtN095WElITG9RLWZKUVpuQXQtcFBfeTZmSnd1RkxhWGVITTRXVlB6ZGpXV21ESnNMQk5jU1MwV2tBZ0gzeEY1Q0RpS01rWkE3MFIyd1FRWnN1WUd2Yi02dGszeHhZTEUydXd0NTBscTBVU1pZQ0FlOUNNLWtuUDUxVHJiZzJPc1RuUE94b2lPWE1DZ0QwRDFOMUZYaWtJRWFwcDZicHczM2xPbU1DbTVsWWR6N1VuZEV5Z0N0X2JIdDlJZjJ6ZFBkclp6NFFIQmluZ0JsaVFxU0UtZ0MzQkNEQWlfaF9hXzNxbmlkN25RZnR4N0JsOHFiYlBOYTU5N0VFTVFLdjhLRWM5dE8yV1NvVmhjdklWcUJVVkZjaDZpLVNPMlR3Uk1LZGozZWlDUmc?oc=5",
+          "published": "Sun, 24 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-24",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "樂迎~台達下週衝鋒行情 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5USmNUVk9xZEZPQjk5UVVxTWl3SEJkRDBvaGNDYWM1UnRYSTNUeDJVLXlRTEVDZHhMN2xuZ0hvbzJOczRHdGVDOFhQeXJlVmFpOVdBdjVHUjI?oc=5",
+          "published": "Fri, 03 Jul 2026 05:46:22 GMT",
+          "published_date": "2026-07-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "營收速報 - 台達電(2308)5月營收589.62億元年增率高達43.65％｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5NY0pteGczZUh6THVFRXNfWjNWY2h5MTcyQzRaLV9iQW1HcHl4ZlRZMUpmNXB6a3VzdGlPU29QY1NJTXR2ZVJVUXNFT3lmd1FaV2M1OERoZzVHcUludTF6eElGM0VwRmM4Z2hvYmI2Y3pXMk1mTGc?oc=5",
+          "published": "Tue, 09 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-09",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "台達電股東會》不只看好AI！電車事業虧損董座鄭平仍看好：市場持續成長 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi3gNBVV95cUxPUVVicTBsN0J6dnM4bHZCWHhwUkYyVGphTXBfNjZNZFNuanJCRzd0ZG91blJOV0xQZHVRSXhXRXVtckZYaVhFUG0wUk1jVW1nUmlYV2VxcGRJaDF4QVVaQzZPcFFJMm9tb2g3alN0bXhUVzJudERuc3JMVnNvWDBmMzU4Z3FYZ0RxajVRMERYZkxlbVEzaWx1dXg5OWlYWjN6SUtaQm1JUmdIRDhkTEVIRFR0eEFiMTUwTEJKbkFqdHlVNmdMUER5X1RMalpXc3E2cDNkN0JYRDBJMW1MeEExN2NHeW9HYmRRN1FLc01QNVdEdGFiTEhvdlFkeTlqZzVnMnZiR0ZudEk5bHpQOHZfdDFtM0NDWGpKanhzY2hmdEt3V3hSaFVnM1RvUjE5cEdDcGxvdHdHcG5XWDF2NjlJRFBQVjZUWjVPV3pfYU0xeDhyenJhbnJiZUd2UklFTXZNTWtmSWdlbFJQWU9reXNoR2dYSlB3bnliLWFnS2U0VnF1WDRjSVFkNlZpQkVjQkhJY3dFa0ZqQWFjWEFVUURNZGZ3M01UMDJMLTBfRFFiNWU3aWs4TFpFMkV6UTVKZjdtMDB3REJmdGw3SUViZ3hlUmFhX0N1b1A0QWhBUVd3?oc=5",
+          "published": "Wed, 27 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-27",
+          "source": "Yahoo股市"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "新訂單",
+          "confidence": 0.85,
+          "evidence": "台達電攻模組化機房/液冷，訂單能見度至2027年"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.75,
+          "evidence": "台達電攻模組化機房/液冷，訂單能見度至2027年"
+        },
+        {
+          "type": "AI概念",
+          "confidence": 0.8,
+          "evidence": "台達電、鴻海又被點名！AI股拉回 法人喊逢低布局15檔"
+        },
+        {
+          "type": "產業轉機",
+          "confidence": 0.7,
+          "evidence": "800V蓄勢2027年放量"
+        }
+      ],
+      "catalyst_summary": "台達電因股價大幅回檔(創高後跌逾3成)引發市場關注，惟訂單能見度至2027年、電動車及AI模組化機房業務成長動能支撐基本面。",
+      "risk_flags": [
+        "股價創高後暴跌3成",
+        "外資狂砍七千張",
+        "金母連兩天無買入",
+        "除息貼息3%",
+        "法說後股價未能持續上揚"
+      ],
+      "target_prices": [
+        {
+          "broker": "券商",
+          "price": 2440.0,
+          "asof": "",
+          "evidence": "台達電(2308)目標價上修到2440元後，該追還是等回檔？"
+        },
+        {
+          "broker": "券商",
+          "price": 2410.0,
+          "asof": "",
+          "evidence": "台達電4天狂漲25%...今寫2410元新天價"
+        }
+      ]
+    },
+    {
+      "score": 63.2,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 0.13,
+      "quality": 0.63,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.07,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -9.3,
+      "ret20_pct": 10.0,
+      "dollar_vol_m": 11225.0,
+      "stock_id": "3008",
+      "name": "大立光",
+      "industry": "光電業",
+      "close": 3890.0,
+      "change_pct": -5.93,
+      "valuation": {
+        "pe": 25.81,
+        "yield_pct": 1.93,
+        "pb": 2.93
+      },
+      "note": "大立光",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -25990,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 31.8,
+        "foreign_holding_change_30d": -1.84,
+        "short_change_pct": -16.67
+      },
+      "fundamentals": {
+        "eps_latest": 46.63,
+        "eps_yoy": -3.4,
+        "gross_margin": 49.4,
+        "operating_margin": 37.4,
+        "debt_ratio": 17.6,
+        "roe": 3.3,
+        "roa": 2.7,
+        "op_cashflow": 9316789000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": -10.5,
+        "revenue_growth_months": 2
+      },
+      "levels": {
+        "close": 3890.0,
+        "ma5": 4176.0,
+        "ma5_diff_pct": -7.35,
+        "ma20": 4517.0,
+        "ma20_diff_pct": -16.12,
+        "ma60": 3533.5,
+        "ma60_diff_pct": 9.16,
+        "ma120": 2948.7083333333335,
+        "ma120_diff_pct": 24.2,
+        "ma240": 2618.5625,
+        "ma240_diff_pct": 32.68,
+        "high_60": 5195.0,
+        "low_60": 2430.0,
+        "high_20": 5195.0,
+        "low_20": 3885.0,
+        "bb_lower": 3603.4159647445213,
+        "bb_upper": 5430.584035255479,
+        "atr14": 273.92857142857144,
+        "stop_2atr": 3342.14,
+        "stop_2atr_pct": -14.08
+      },
+      "ohlc": [
+        [
+          2600.0,
+          2795.0,
+          2580.0,
+          2795.0
+        ],
+        [
+          2870.0,
+          2870.0,
+          2735.0,
+          2850.0
+        ],
+        [
+          2930.0,
+          3135.0,
+          2895.0,
+          3135.0
+        ],
+        [
+          3290.0,
+          3445.0,
+          3290.0,
+          3445.0
+        ],
+        [
+          3400.0,
+          3400.0,
+          3125.0,
+          3290.0
+        ],
+        [
+          3445.0,
+          3615.0,
+          3325.0,
+          3365.0
+        ],
+        [
+          3330.0,
+          3410.0,
+          3200.0,
+          3200.0
+        ],
+        [
+          3285.0,
+          3520.0,
+          3280.0,
+          3460.0
+        ],
+        [
+          3450.0,
+          3595.0,
+          3450.0,
+          3540.0
+        ],
+        [
+          3635.0,
+          3845.0,
+          3635.0,
+          3845.0
+        ],
+        [
+          3875.0,
+          3875.0,
+          3665.0,
+          3665.0
+        ],
+        [
+          3690.0,
+          3720.0,
+          3500.0,
+          3505.0
+        ],
+        [
+          3505.0,
+          3630.0,
+          3420.0,
+          3425.0
+        ],
+        [
+          3515.0,
+          3600.0,
+          3450.0,
+          3515.0
+        ],
+        [
+          3630.0,
+          3835.0,
+          3630.0,
+          3835.0
+        ],
+        [
+          3780.0,
+          3850.0,
+          3705.0,
+          3850.0
+        ],
+        [
+          3920.0,
+          4225.0,
+          3820.0,
+          3985.0
+        ],
+        [
+          3940.0,
+          3995.0,
+          3785.0,
+          3825.0
+        ],
+        [
+          3750.0,
+          3750.0,
+          3570.0,
+          3680.0
+        ],
+        [
+          3330.0,
+          3550.0,
+          3325.0,
+          3535.0
+        ],
+        [
+          3800.0,
+          3885.0,
+          3755.0,
+          3885.0
+        ],
+        [
+          4180.0,
+          4270.0,
+          4100.0,
+          4130.0
+        ],
+        [
+          4000.0,
+          4310.0,
+          4000.0,
+          4165.0
+        ],
+        [
+          4300.0,
+          4355.0,
+          4020.0,
+          4020.0
+        ],
+        [
+          4080.0,
+          4420.0,
+          4035.0,
+          4420.0
+        ],
+        [
+          4480.0,
+          4860.0,
+          4450.0,
+          4860.0
+        ],
+        [
+          5065.0,
+          5310.0,
+          4960.0,
+          5145.0
+        ],
+        [
+          5115.0,
+          5295.0,
+          5090.0,
+          5195.0
+        ],
+        [
+          5275.0,
+          5360.0,
+          5125.0,
+          5185.0
+        ],
+        [
+          5165.0,
+          5185.0,
+          4965.0,
+          5000.0
+        ],
+        [
+          4870.0,
+          4985.0,
+          4825.0,
+          4900.0
+        ],
+        [
+          5040.0,
+          5235.0,
+          4875.0,
+          5165.0
+        ],
+        [
+          5020.0,
+          5050.0,
+          4710.0,
+          4720.0
+        ],
+        [
+          4640.0,
+          4730.0,
+          4315.0,
+          4380.0
+        ],
+        [
+          4250.0,
+          4430.0,
+          4210.0,
+          4290.0
+        ],
+        [
+          4490.0,
+          4560.0,
+          4250.0,
+          4330.0
+        ],
+        [
+          4260.0,
+          4395.0,
+          4250.0,
+          4295.0
+        ],
+        [
+          4300.0,
+          4320.0,
+          4225.0,
+          4230.0
+        ],
+        [
+          4210.0,
+          4280.0,
+          4010.0,
+          4135.0
+        ],
+        [
+          4150.0,
+          4150.0,
+          3870.0,
+          3890.0
+        ]
+      ],
+      "hits": [
+        "above_240ma"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "大立光跌了快撿？ 經濟部「這」數據支撐動能 - 三立新聞網SETN.com",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE55NVV3Nk1fdTFMS1FYakI2WWhOVVVfV1BuVjJzTUtCZHhTSHNnSHEtY3hadEJDaEs5Ry1oaWlqYUhPRnlMRHoydjB1TQ?oc=5",
+          "published": "Mon, 06 Jul 2026 08:35:49 GMT",
+          "published_date": "2026-07-06",
+          "source": "三立新聞網SETN.com"
+        },
+        {
+          "title": "王者再起 遙指歷史新高 前高勢必再挑戰一次 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5JdmhyMlVUQ01CVTZHQ3FRbk9VSmVWb0pGS0JTLWhnellMYnZMQVNtVzRwSVdINWFvbWM1bThMQUo1VS1vcVZvSnQzNldSWVpFQWc0eEpjQ18?oc=5",
+          "published": "Mon, 06 Jul 2026 09:47:28 GMT",
+          "published_date": "2026-07-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "大立光(3008)最新目標價曝光！股價5310元月漲110%，為何飆成這樣？原來背後有這「兩助力」 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOeUNGZ2dscmh1VnhvMHl4SXdZVzFhWXpmeGhoUDl0cGR5cTFmTU1rdlphdXFRcWp2bW1UXzJoYjRuVDlhRVNkNXhZNXpNdUFSSUQ1VGxtcDlhSUpoRkJuQ3cxTS1qc3dVX25BN01YNFhLdXRqeTZLSF9FRHlHUjdZNA?oc=5",
+          "published": "Sat, 20 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-20",
+          "source": "今周刊"
+        },
+        {
+          "title": "大立光9日法說 展望聚焦 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE1SNlA1V3lMS2xKWG5KTlU5QmszeUF1TzZHV1Zjb3VBVlNBaEVhUFNrWHFVN2lWT0tLYTVXLWJLOXQtTDRod0x2Q0N0TnZQaUFU0gFWQVVfeXFMUGVFZWM5YTM4LWpYLW5lN21kdVB3MkZBSmVQcDctUmNUVUlsSnZCWGpJbnhBbFJWUUpKUmp6dFBoUVhWT3h3WkFUa0NuSDBMS0N5dXUyS0E?oc=5",
+          "published": "Sat, 04 Jul 2026 17:44:46 GMT",
+          "published_date": "2026-07-04",
+          "source": "UDN"
+        },
+        {
+          "title": "大立光6月營收37.12億元 7月動能勝6月 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1WTmRCd2ktb1Z5UzB1WE1yZlV3Z3o2aFBjVHRGOUJZa0k0eV80UUttcGh6MC1kVGRfTTZvTlJFVW5ib1NTQ2dFelZSenNidWhIWTBiTDJfTWhHbTB0VmlB0gFkQVVfeXFMT1lqOG1Qak1kSjdfTHZUOG9GOTVib2s4aUdpY3lvVnVzZEdmYW9Ob3A4Sml2TTRjMVBZTVBpeE9NUXd4clhMMU55c0R6QWowZXJmb0wzdmE2OWVCbktPNHdvNlc3Tg?oc=5",
+          "published": "Sun, 05 Jul 2026 03:45:46 GMT",
+          "published_date": "2026-07-05",
+          "source": "自由財經"
+        },
+        {
+          "title": "【即時新聞】大立光(3008)大跌7%外資退場，這「5檔概念股」逆勢吸金接棒上攻！ - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQWmtqSHh5VEk5T2pKSGZYWS1HdC0yOEg5M24yN3J0ek1RR1R4bW1PakpSZ2VuVmpxZWxBZ0JPOWRGUzczWEROcHhWejlqYi16cXVWS3ZRdVdKV0NNVnJNSTZDOWh6VWZ3UXA5NnRGeHZjUGpiOWg5UWFjR1ZfZ0dzT3llbUtJQ29HYllXZjBHYU4?oc=5",
+          "published": "Tue, 30 Jun 2026 03:38:38 GMT",
+          "published_date": "2026-06-30",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "從設備到不動產 大立光買不停 CPO箭在弦上！ - 工商時報",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE5ocXAwZjlBYkV1bGZ2TWc4S1RzYWE4Y2Z0TlNYaGZZSkd2RDJRQTBRRGJNZ0tmbGNvMlNUREVuTDRsREtEQU5pUUpVS25YbEt0OGZ3b1VUVGQtYXdpUEVF?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "工商時報"
+        },
+        {
+          "title": "Q2財報底牌全掀開！台達電、大立光、南亞科法說三連發「法人驚爆這檔爆發力最強」 - 上市櫃 - 旺得富理財網",
+          "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE11Umg2UWNsaHlScmc4aHNicmZ5TV9VRnRGcnNUMnBPazJmY0NxZDhKdi1GSVB0X2xfZjlsQU1mZThubDRGSVVnTjlEdXJBckduZGE2bG1zTGJqdTJvYndDS2U5dVJLTXBaaXc?oc=5",
+          "published": "Mon, 06 Jul 2026 05:10:01 GMT",
+          "published_date": "2026-07-06",
+          "source": "旺得富理財網"
+        },
+        {
+          "title": "大立光法說會登場，林恩平將進一步說明CPO進展？本週投資人得留意這3件事 - 財訊",
+          "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE9MblB2WGtrWUxBRVR2a193Qkktd09MMnZDZG9ncml5X3RvaGRucHVaT1NRN1FBWFpyWWI4dkhmR2gzZmNnZExsd3VEb1lCbmN4aUVkYUppMkxOVFR4S0k5azBBN3JvY21Zbl9QbmhlYlhXVXVzdUV3dzEtTQ?oc=5",
+          "published": "Sun, 05 Jul 2026 09:00:00 GMT",
+          "published_date": "2026-07-05",
+          "source": "財訊"
+        },
+        {
+          "title": "大立光2個月翻倍漲重返5千元大關 分析師：股價委屈很久 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi_wJBVV95cUxPTmpqaHZFMjBfWEdhdzlLMVZmYzM2RDc0d0IxOTdsbHVJY3VmLU1yVjRqanNJLWFCS3FodG1kRDBYdVhtcVN3MEVQcG9ldzlubGdCdzkta1ZjbWdoR2hXMzNsNDltR0F0YVhFbXo4UllFNHlsWTNkZGxJLTlDMUVLaEItbVMyMEJJVGdWaEg3bU9RVmhzQWlYMVRSclBEbmJyMnQzejM1WFF0X2NlMC1hZUVHUUJBNEpvOWxMVm9MRXU0S245YnMtM0pIRkxYTHpwVmhPSWNELWd5b3FmdzljaXF3SWRoeWMwak9KSmRNMFZ3UmNVWFNScWpiNkJQSVhfZEl0RGV5UXJoM2s3ZjNfWnJvQWtscnFtSWdsRXloRzRndGNZUkxhaWR0bnM2OUx2SUJtblM4ZWpyV3dIYlRXNnJ4aVdnRFd1bXRqTURIM3FGTXp5MEhLS1B3X0ZlXzU0TXdhUlViU3RNNnRFbHk3bnU3bXBPcHF0QWlZbUVEYw?oc=5",
+          "published": "Tue, 16 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-16",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "大立光今年資本支出估百億元 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9zczNXSUc1bzBNZm05S3NQbmF3WHFYLUZ1SktJTm1OVWFaR0pSdG9HQmlIbUxTSVFuNlk4dGktVkRLdGVjdWdodWtKTDY2X0NpckN4S3ZsLUl6d9IBX0FVX3lxTE1CM3BXaHNPVUZRblUwV3FhM2dvbF8yUXFFckgzcWVJRWYzdHJkZVVBRFRGaENVMC1Ud3FSaGpNZmJCekZXUFBMRWQzUzlnSUJKNkRnck9reWhpMmgyazE0?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "經濟日報"
+        },
+        {
+          "title": "大立光6月營收驚見雙降！創1年新低 7月回升動能藏在這 - 三立新聞網SETN.com",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE44MGhzNTdodU4tMU90V0VndXh1Mk90dVN6NmZDWmhPa2dPemFsTlE1WHkyeF85Qk8tLV96R3A0M2JUdVdXQ29kdkZ6VQ?oc=5",
+          "published": "Sun, 05 Jul 2026 10:19:11 GMT",
+          "published_date": "2026-07-05",
+          "source": "三立新聞網SETN.com"
+        },
+        {
+          "title": "大立光6月營收37.12億元創1年來新低月減19%年減10% - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9Vck9HbWZoS2lUT2JGUmZPVGpUWDd6NnNFTmpodnpMSWdRQ2FCV0czRDgxQjJteTNnUlJkeURFTE1oMjZ0R1lIQmRMQzZLcWNEeHRtUW92UnQ?oc=5",
+          "published": "Sun, 05 Jul 2026 02:52:17 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "大立光營收／6月37.12億元、年月雙減 7月拉貨預期會更好 - UDN",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5FSHc3Q3lIM3RIUnE5TkRCeHBOYzZuRUJ2cW5GWEJTUW1EUTNlQkJPNEY1MVJaQ2hoLThvYVpBR1RlX1B5Sk1ISEUzbExlQ2Vr0gFWQVVfeXFMT3VibUpqVWIwNEN2QVhBS0ZDN3pSNEJxNFdFSVVBamJTY3ZJNzVzV3Fxal9mV0ozQVM2VDRKZXBDRnI3Y3ctbHNWMjJIdkYwQ00wbkZqR0E?oc=5",
+          "published": "Sun, 05 Jul 2026 02:46:57 GMT",
+          "published_date": "2026-07-05",
+          "source": "UDN"
+        },
+        {
+          "title": "大立光買地攻 CPO 起手式 將斥資逾6億元購入台中千坪土地 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5nRXBMQnFITkhfZ2VBOHVBZndtX3A5T2NlU1U0WnlublVMZjNBYzJfbGM2M21QUVFEc21JNTZpcEd6VHBpQnhDQ0U3VGdROFdLekRWOERQU1NkQdIBX0FVX3lxTE5YRlduZTR0dkY1ZGV1amZjQWJxSlBCT3lqQmd2LU1xaDhoajZGMXZNQm0wQWh6a0p2Wk5pbkFEeUhqbm9kVXlvRVdkem9FbDNQNG9vVTVVNWFsLUVqemdR?oc=5",
+          "published": "Thu, 25 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-25",
+          "source": "經濟日報"
+        },
+        {
+          "title": "大立光6月後營運趨勢向上 法人估今年 EPS 189.3元 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1qZWpGcGhuZmdWMThQWDhYRXJwNzR3Q0x3TnRCbGU5MDlzeVJHWmFyS0R3SWY5emlhYjN2VF9xRkc5LWZCUnBRUDVDVmZNWGJSZVdlZ0NDbHM5d9IBX0FVX3lxTE1rVU8wWXctaVRJOEphczhuNF9QLWpMcHpwUU5Qc090WUdqdGllSjZQaE9zWjIta3BiX0NYa2VSTE96Vnd4cUp6MkFxWjJKX1hKa0JOY21XTnhtelNpMXY0?oc=5",
+          "published": "Sun, 28 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-28",
+          "source": "經濟日報"
+        },
+        {
+          "title": "3008 大立光- 如果結局早已註定哪又何必朝朝暮暮- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5PRjJsQVphRG5GNWMzeVhsZldNRlA4anNxbVYwNGs2WWhBajJfUVBJazdNOXVraUZGSHdlSGhib2V1UU94RWRFcmw3XzhkS2tQZUphV1pmUTA?oc=5",
+          "published": "Sat, 04 Jul 2026 10:41:24 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney"
+        },
+        {
+          "title": "TWA00 加權指數 - 7/5 財經新聞 1.大立光（3008）將於9日召開線上法... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5fUmQ4cldrS0NzSVFZUUJELUNvTDdDTWhmMEpMUEhIR2JZWkhlYUUzaWtHcFdGanpXZzFlUzVqMlZKdkd0UVk5dDhrVVVWcHRnalotcU5mOVg?oc=5",
+          "published": "Sat, 04 Jul 2026 22:02:11 GMT",
+          "published_date": "2026-07-04",
+          "source": "CMoney"
+        },
+        {
+          "title": "大立光六月營收年減10％ 7/9日將舉行法說、市場緊盯CPO進展 | Newtalk - LINE TODAY",
+          "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPUUw0LV9hLWRfcGRMM1hvazdYVlUxWERFOEhHelJHZnhvOFdkYXNwcUpsUm05ZGlCV3lwZVE4QWtmM1F0dURReXQ4ajd4YkVFWXphZTFlVllPdlNxY2swLTcxZHpwai16UGZMR29uSm5TRE4ybkNTUW54c3pGTTBmTTl5cw?oc=5",
+          "published": "Sun, 05 Jul 2026 05:36:13 GMT",
+          "published_date": "2026-07-05",
+          "source": "LINE TODAY"
+        },
+        {
+          "title": "大立光6月營收雙減，7月較優、Q3迎旺季 | MoneyDJ理財網 - LINE TODAY",
+          "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1DdWJhQWFoODFBWTJPZkkzZkpMbnR1X1hiQlBrc0NNSDRqUGM5LV9FbEUwYzZudTdTNE9HQnB1Ul9OSkhhMHhiTzNIWnhIM0hsOXc0LWtR?oc=5",
+          "published": "Mon, 06 Jul 2026 02:56:06 GMT",
+          "published_date": "2026-07-06",
+          "source": "LINE TODAY"
+        },
+        {
+          "title": "大立光布局 義隆抬轎 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5KLXBFSzZseEhtMTBwclVTN1B5Qm1CZTlTQTZuRkZUc1psSGZWNno3R0ZGQnJJT0FnT05fZ01Walh3a0FPSUhNR1VvOWpuRzYwSW13R2NTdGNEd9IBX0FVX3lxTE1ySmN3b0VkMW1KZm82ekVMMmxQSkR6ejl6d3NoQWwxLUZDX0lDbXVPZ0c3Z3J3dFIzajNCZFNWNGxKX3NRYnlFOUhKUzlDR3p5MXMwUWVDV0xKXzdKNWFr?oc=5",
+          "published": "Mon, 22 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-22",
+          "source": "經濟日報"
+        },
+        {
+          "title": "【2026/06月營收公告】大立光(3008) 六月營收37.12億元，營收雙減，年減10.46%-CMoney 小編 - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPSW1mQWs1WlpQajFHYVpvMTNOa2p2UUx1T0xzVktNZTdnd0tDNkV0blJZME5UMmNVaGpibHRkeHpuRVdjUHhfSVBnUXZqdDFRR3VEcE9TNkI5U3MyUFloQklscTJyWkkxLUdiS3A3SUp4Y0JCVXJPWGtZTW5fZWRWcEZBTW8tZUZlb3c?oc=5",
+          "published": "Sun, 05 Jul 2026 01:20:10 GMT",
+          "published_date": "2026-07-05",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "大立光6月營收37.12 億元 - TechNews 科技新報",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQb1pBblBGcXZfdkpQRkNpUWt0SjdVeE42a0hHeUlrVnNOTjZISmFEMXJ0VnBOQXhUMnBfeUdnMzFGbU9nZmJMc1JCZnRTcDN6SHVxbkFYNWlyNC0wUk1zY1RvajVSc0hpRndyMUFsd0h2QWgxTGQ3VUlmYUJyNnRYWQ?oc=5",
+          "published": "Sun, 05 Jul 2026 01:10:51 GMT",
+          "published_date": "2026-07-05",
+          "source": "TechNews 科技新報"
+        },
+        {
+          "title": "3008 大立光- 抱的很安心- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9ybTR0WmNRWXFCZFNJMDZXNjRYUWpqT2NSdzlQeHpybnA2REVacE5pdXNTdFlOdUpXNGcxb1ZHVjZkYk9HaW1FRnFVZ25INjV4UWVPZ0VyT24?oc=5",
+          "published": "Thu, 02 Jul 2026 00:06:07 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "台幣貶值大立光本季獲利有撐| 經濟日報 - LINE TODAY",
+          "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9NcVVmWVlWcERUSzgyUFd2anJJcW5kbHNreXEzeGJ0cDFacEpwNFVudEFpN2dvcmVBV0dFN1czWVlLSzIzYWdHYzdmWUVjSm1IUC1Tb2Jn?oc=5",
+          "published": "Sun, 05 Jul 2026 19:00:22 GMT",
+          "published_date": "2026-07-05",
+          "source": "LINE TODAY"
+        }
+      ],
+      "catalysts": [
+        {
+          "type": "新訂單",
+          "confidence": 0.7,
+          "evidence": "經濟部「這」數據支撐動能"
+        },
+        {
+          "type": "擴產",
+          "confidence": 0.85,
+          "evidence": "從設備到不動產 大立光買不停 CPO箭在弦上！"
+        },
+        {
+          "type": "法說會利多",
+          "confidence": 0.9,
+          "evidence": "大立光9日法說 展望聚焦"
+        },
+        {
+          "type": "AI概念",
+          "confidence": 0.75,
+          "evidence": "大立光法說會登場，林恩平將進一步說明CPO進展？本週投資人得留意這3件事"
+        },
+        {
+          "type": "產業轉機",
+          "confidence": 0.8,
+          "evidence": "大立光6月後營運趨勢向上 法人估今年 EPS 189.3元"
+        }
+      ],
+      "catalyst_summary": "大立光6月營收創1年新低但7月動能轉強，CPO新事業成焦點，法說會即將召開，資本支出百億元持續擴產。",
+      "risk_flags": [
+        "6月營收年減10.46%",
+        "6月營收月減19%",
+        "外資退場",
+        "股價波動劇烈"
+      ],
+      "target_prices": []
+    }
+  ],
+  "label": {
+    "bullish_ma_alignment": "多頭排列",
+    "golden_cross": "黃金交叉",
+    "break_60ma": "突破季線",
+    "above_240ma": "站上年線",
+    "kd_golden_cross_low": "KD 低檔黃金交叉",
+    "macd_turn_red": "MACD 翻紅",
+    "rsi_break_50": "RSI 突破 50",
+    "volume_price_surge": "量價齊揚",
+    "n_day_high": "N 日新高",
+    "inst_consecutive_buy": "法人連買",
+    "foreign_holding_increase": "外資加碼",
+    "short_cover_with_buy": "融券回補+主力買超",
+    "monthly_revenue_growth": "月營收連續成長",
+    "eps_positive_high_yield": "EPS+高殖利率",
+    "coiling_squeeze": "盤底蓄勢",
+    "pullback_to_support": "回測支撐",
+    "relative_strength_leader": "相對強勢",
+    "chip_accumulation": "籌碼吸籌"
+  }
+}
