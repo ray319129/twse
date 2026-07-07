@@ -260,7 +260,7 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 
 ---
 
-## 12. 個股詳情頁(2026-07-07 新增)— 仿 FinMind 官方 dashboard,MVP 已上線
+## 12. 個股詳情頁(2026-07-07 新增)— 仿 FinMind 官方 dashboard,完整版已上線
 起因:使用者看 FinMind repo 的 Plotting/dashboard,想要「網站內每個個股點進去都有價量/籌碼圖」。可行性研究結論:FinMind 官方 dashboard(Flask+PyEcharts)就 4 張圖(K線+法人+融資券疊圖 / 月營收長條 / 外資持股折線 / 股權分散圓餅),**資料 fetchers.py 全都在抓**;還原股價/分K 這兩個 FinMind 要付費的,我們靠 yfinance 早就免費在用。決策:不照抄它 Flask 後端出圖(本站純靜態),後端只回 JSON、前端用 **ECharts**(=PyEcharts 的 JS 本體)畫;**即時查詢不預算全市場**(免費 300 次/hr、帶 token 600/hr,全市場會撞牆)。完整規劃見記憶 `twse-stock-detail-page`。
 
 **本次已做 = MVP(K線+量+MA + 三大法人):**
@@ -268,4 +268,10 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **前端** [docs/index.html](docs/index.html):加 ECharts CDN(`echarts@5.5.1`,只點開個股才用到)+ `.detail-overlay` 全螢幕 modal + `openDetail/renderDetail/drawKChart/drawInstChart`。K線用西式配色(漲綠 `--up`/跌紅 `--down`,與既有迷你K棒一致);雙 grid(價+量)、MA5/20/60 疊線、dataZoom 可拖;法人堆疊長條(外資=accent/投信橘/自營青)。`sessionStorage` 概念用 `DETAIL_CACHE` 記憶體快取(同 session 同代號不重抓)。**進入點**:`slink(id)` 改成點代號開站內詳情頁(`#stock=2330` 深連結,ESC/點背景關閉),CMoney 外連移到 modal 內。逾時/無資料優雅降級。
 - **驗證**:`node --check`(抽 inline script)過;preview 餵合成 120 根 K 棒 + 40 日法人 → 兩張圖 canvas 皆 init、overlay 開、hash 設、無 console error、截圖確認外觀正確。
 - ⚠️ **需 Vercel 部署才實際生效**(同 health API,靜態 GitHub Pages 上 `/api/detail` 會 404,前端已對失敗降級)。bundle size 與 health 共用 yfinance 相依,部署時一併確認未超上限。
-- **待辦(完整版,承規劃 `twse-stock-detail-page`)**:補 ①融資券疊在K線 ②月營收長條 ③外資持股折線 ④股權分散圓餅,並與健檢面向卡整合成單一詳情頁;`fetch_monthly_revenue`/`_fetch_holding`/`fetch_holder_distribution`/`_fetch_margin` 都現成。
+
+**完整版(2026-07-07 同日補齊四面向):**
+- **後端** [api/detail.py](api/detail.py):`ThreadPoolExecutor` workers 2→6,並行多抓 `_fetch_margin`(融資券)/`_fetch_holding`(外資持股)/`fetch_monthly_revenue`(月營收 18 期)/`fetch_holder_distribution_latest`(集保股權分散最近一更新日)。回傳新增 `margin:[[date,融資餘額,融券餘額]張]`、`holding:[[date,外資持股%]]`、`revenue:[[YYYY-MM,營收元,YoY%]]`、`holder:{date,pie:[[桶名,%]]}`。每面向失敗各自回空(fetcher 自帶降級),互不影響主圖。
+  - 新增 fetcher [fetch_holder_distribution_latest](scripts/fetchers.py):集保 `TaiwanStockHoldingSharesPer` 取最近日原始級距(只留能解析下界的列 → 自動排除『差異數/合計』彙總列,避免圓餅重複計數)。detail.py 內 `_bucket_holder_pie` 依股數下界聚合成 5 桶(散戶<10張/小戶10–50/中實戶50–100/大戶100–400/400張以上,1張=1000股)。
+- **前端** [docs/index.html](docs/index.html):`renderDetail` 在法人圖後多 4 面板 + `drawRevChart`(營收長條億元＋YoY 雙軸折線)/`drawMarginChart`(融資融券雙折線＋dataZoom)/`drawHoldingChart`(外資持股面積折線)/`drawPieChart`(集保分散環形圖,標題帶更新日)。`_disposeDetailCharts`/resize/instance 變數皆納入 6 張圖。空資料各面板獨立顯示「無…資料」。
+- **驗證**:`ast.parse` 過 + `_bucket_holder_pie` 單測(5 桶加總=100);preview 餵合成完整 payload → 6 張圖各 init 出 canvas、無 console error、截圖確認(K線/法人/月營收雙軸/融資券 tooltip/外資持股/分散環形圖)外觀正確。**未用真實 Vercel 端點驗證**(同 MVP,靜態 preview 無 serverless)。
+- **仍待辦**:與健檢面向卡整合成單一詳情頁(目前詳情頁與健檢分頁各自獨立)。

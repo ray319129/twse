@@ -1425,7 +1425,7 @@ fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
    個股詳情頁(MVP:K線+量+MA + 三大法人)— [[twse-stock-detail-page]]
    資料來自 /api/detail?stock=xxxx(serverless 即時查詢);ECharts 畫圖。
    ============================================================ */
-let DETAIL_CACHE={},_detailK=null,_detailInst=null;
+let DETAIL_CACHE={},_detailK=null,_detailInst=null,_detailRev=null,_detailMargin=null,_detailHolding=null,_detailPie=null;
 const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function ensureDetailOverlay(){
   let ov=$('#detail-overlay');
@@ -1442,8 +1442,8 @@ function ensureDetailOverlay(){
   return ov;
 }
 function _disposeDetailCharts(){
-  if(_detailK){_detailK.dispose();_detailK=null;}
-  if(_detailInst){_detailInst.dispose();_detailInst=null;}
+  [_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie].forEach(c=>{if(c)c.dispose();});
+  _detailK=_detailInst=_detailRev=_detailMargin=_detailHolding=_detailPie=null;
 }
 function closeDetail(){
   const ov=$('#detail-overlay');if(ov)ov.classList.remove('open');
@@ -1473,8 +1473,16 @@ function renderDetail(d){
     <div class="detail-chart-title">日K線 · 量 · 均線(MA5/20/60)</div>
     <div id="detail-kchart" class="detail-chart"></div>
     <div class="detail-chart-title">三大法人買賣超(張)</div>
-    <div id="detail-instchart" class="detail-chart detail-chart-sm"></div>`;
-  drawKChart(d);drawInstChart(d);
+    <div id="detail-instchart" class="detail-chart detail-chart-sm"></div>
+    <div class="detail-chart-title">月營收(億)· 年增率 YoY(%)</div>
+    <div id="detail-revchart" class="detail-chart detail-chart-sm"></div>
+    <div class="detail-chart-title">融資 / 融券餘額(張)</div>
+    <div id="detail-marginchart" class="detail-chart detail-chart-sm"></div>
+    <div class="detail-chart-title">外資持股比率(%)</div>
+    <div id="detail-holdingchart" class="detail-chart detail-chart-sm"></div>
+    <div class="detail-chart-title">集保股權分散<span id="detail-pie-date" class="detail-ind"></span></div>
+    <div id="detail-piechart" class="detail-chart detail-chart-sm"></div>`;
+  drawKChart(d);drawInstChart(d);drawRevChart(d);drawMarginChart(d);drawHoldingChart(d);drawPieChart(d);
 }
 function drawKChart(d){
   const el=$('#detail-kchart');if(!el||!window.echarts)return;
@@ -1545,7 +1553,92 @@ function drawInstChart(d){
     series:[ser('外資',1,cssVar('--accent')),ser('投信',2,'#e8912d'),ser('自營商',3,'#3aa0a0')]
   });
 }
-window.addEventListener('resize',()=>{if(_detailK)_detailK.resize();if(_detailInst)_detailInst.resize();});
+function _emptyPanel(el,msg){el.innerHTML='<div class="empty" style="font-size:12px">'+msg+'</div>';}
+function drawRevChart(d){
+  const el=$('#detail-revchart');if(!el||!window.echarts)return;
+  const rows=d.revenue||[];
+  if(!rows.length){_emptyPanel(el,'無月營收資料(免費 dataset 當下不可用或該股無)');return;}
+  const ym=rows.map(r=>r[0]);
+  const rev=rows.map(r=>r[1]==null?null:+(r[1]/1e8).toFixed(2));   // 元 → 億元
+  const yoy=rows.map(r=>r[2]);
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface'),acc=cssVar('--accent');
+  _detailRev=echarts.init(el,null,{renderer:'canvas'});
+  _detailRev.setOption({
+    animation:false,
+    legend:{data:['月營收(億)','YoY(%)'],top:0,textStyle:{color:muted,fontSize:11}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:surf,borderColor:line,textStyle:{color:ink,fontSize:12}},
+    grid:{left:52,right:46,top:26,bottom:24},
+    xAxis:{type:'category',data:ym,axisLine:{lineStyle:{color:line}},axisLabel:{color:muted,fontSize:10}},
+    yAxis:[
+      {type:'value',axisLine:{show:false},axisLabel:{color:muted,fontSize:10},splitLine:{lineStyle:{color:line,opacity:.5}}},
+      {type:'value',position:'right',axisLine:{show:false},axisLabel:{color:muted,fontSize:10,formatter:'{value}%'},splitLine:{show:false}}
+    ],
+    series:[
+      {name:'月營收(億)',type:'bar',data:rev,itemStyle:{color:acc,opacity:.7},barMaxWidth:16},
+      {name:'YoY(%)',type:'line',yAxisIndex:1,data:yoy,smooth:true,showSymbol:false,
+        connectNulls:true,lineStyle:{width:1.6,color:'#e8912d'}}
+    ]
+  });
+}
+function drawMarginChart(d){
+  const el=$('#detail-marginchart');if(!el||!window.echarts)return;
+  const rows=d.margin||[];
+  if(!rows.length){_emptyPanel(el,'無融資券資料(免費 dataset 當下不可用或該股無)');return;}
+  const dates=rows.map(r=>r[0]);
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  const mline=(name,idx,color)=>({name,type:'line',data:rows.map(r=>r[idx]),smooth:true,showSymbol:false,
+    connectNulls:true,lineStyle:{width:1.5,color}});
+  _detailMargin=echarts.init(el,null,{renderer:'canvas'});
+  _detailMargin.setOption({
+    animation:false,
+    legend:{data:['融資餘額','融券餘額'],top:0,textStyle:{color:muted,fontSize:11}},
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'},backgroundColor:surf,borderColor:line,textStyle:{color:ink,fontSize:12}},
+    grid:{left:58,right:16,top:26,bottom:24},
+    xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:line}},axisLabel:{color:muted,fontSize:10}},
+    yAxis:{type:'value',scale:true,axisLine:{show:false},axisLabel:{color:muted,fontSize:10},splitLine:{lineStyle:{color:line,opacity:.5}}},
+    dataZoom:[{type:'inside',start:50,end:100},{type:'slider',bottom:2,height:14,start:50,end:100,borderColor:line,textStyle:{color:muted,fontSize:10}}],
+    series:[mline('融資餘額',1,cssVar('--accent')),mline('融券餘額',2,'#e8912d')]
+  });
+}
+function drawHoldingChart(d){
+  const el=$('#detail-holdingchart');if(!el||!window.echarts)return;
+  const rows=d.holding||[];
+  if(!rows.length){_emptyPanel(el,'無外資持股資料(免費 dataset 當下不可用或該股無)');return;}
+  const dates=rows.map(r=>r[0]);
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface'),acc=cssVar('--accent');
+  _detailHolding=echarts.init(el,null,{renderer:'canvas'});
+  _detailHolding.setOption({
+    animation:false,
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'},backgroundColor:surf,borderColor:line,textStyle:{color:ink,fontSize:12},
+      valueFormatter:v=>v==null?'-':v+'%'},
+    grid:{left:48,right:16,top:16,bottom:24},
+    xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:line}},axisLabel:{color:muted,fontSize:10}},
+    yAxis:{type:'value',scale:true,axisLine:{show:false},axisLabel:{color:muted,fontSize:10,formatter:'{value}%'},splitLine:{lineStyle:{color:line,opacity:.5}}},
+    dataZoom:[{type:'inside',start:50,end:100},{type:'slider',bottom:2,height:14,start:50,end:100,borderColor:line,textStyle:{color:muted,fontSize:10}}],
+    series:[{name:'外資持股',type:'line',data:rows.map(r=>r[1]),smooth:true,showSymbol:false,connectNulls:true,
+      lineStyle:{width:1.8,color:acc},areaStyle:{color:acc,opacity:.12}}]
+  });
+}
+function drawPieChart(d){
+  const el=$('#detail-piechart');if(!el||!window.echarts)return;
+  const h=d.holder||{},pie=h.pie||[];
+  const dl=$('#detail-pie-date');if(dl)dl.textContent=h.date?('· '+h.date):'';
+  if(!pie.length){_emptyPanel(el,'無股權分散資料(集保 dataset 當下不可用或該股無)');return;}
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  _detailPie=echarts.init(el,null,{renderer:'canvas'});
+  _detailPie.setOption({
+    animation:false,
+    color:[cssVar('--accent'),'#e8912d','#3aa0a0','#c05b8c','#7a6ff0'],
+    tooltip:{trigger:'item',backgroundColor:surf,borderColor:line,textStyle:{color:ink,fontSize:12},
+      formatter:p=>`${p.name}<br/>持股佔比 ${p.value}%`},
+    legend:{orient:'vertical',right:6,top:'middle',textStyle:{color:muted,fontSize:11},itemWidth:12,itemHeight:12},
+    series:[{name:'股權分散',type:'pie',radius:['42%','70%'],center:['34%','52%'],avoidLabelOverlap:true,
+      data:pie.map(p=>({name:p[0],value:p[1]})),
+      itemStyle:{borderColor:surf,borderWidth:2},
+      label:{color:ink,fontSize:10,formatter:'{d}%'},labelLine:{length:6,length2:6}}]
+  });
+}
+window.addEventListener('resize',()=>{[_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie].forEach(c=>{if(c)c.resize();});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#detail-overlay')&&$('#detail-overlay').classList.contains('open'))closeDetail();});
 /* 深連結:網址帶 #stock=2330 時自動開啟 */
 (function initDetailHash(){

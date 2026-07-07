@@ -346,6 +346,52 @@ def fetch_holder_distribution(stock_id: str, start: date, end: date,
     return out.sort_index()
 
 
+def fetch_holder_distribution_latest(stock_id: str, start: date, end: date) -> dict:
+    """集保股權分散表(TaiwanStockHoldingSharesPer)最近一個更新日的原始持股級距,
+    供個股詳情頁畫「股權分散圓餅」。集保週更(通常週五),故呼叫端給近一個月窗即可。
+
+    回傳 {"date": "YYYY-MM-DD",
+          "levels": [{"lower": 下界股數, "label": 級距字串, "pct": 佔比%, "people": 股東人數|None}, ...]}
+    只保留能解析出級距下界的列 → 自動排除『差異數』『合計』彙總列(避免圓餅重複計數)。
+    欄位名稱同 fetch_holder_distribution 未經本機實測驗證;任一步失敗回 {}(呼叫端當缺資料)。"""
+    rows = fetch_finmind(
+        "TaiwanStockHoldingSharesPer", data_id=stock_id,
+        start_date=start.isoformat(), end_date=end.isoformat(),
+    )
+    if not rows:
+        return {}
+    df = pd.DataFrame(rows)
+    level_col = next((c for c in ("HoldingSharesLevel", "holding_shares_level") if c in df.columns), None)
+    pct_col = next((c for c in ("percent", "Percent", "HoldingSharesPercent") if c in df.columns), None)
+    people_col = next((c for c in ("people", "People", "HoldingSharesPeople") if c in df.columns), None)
+    if not level_col or not pct_col:
+        return {}
+    df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.tz_localize(None).dt.normalize()
+    df = df.dropna(subset=["date"])
+    if df.empty:
+        return {}
+    latest = df["date"].max()
+    sub = df[df["date"] == latest]
+    levels = []
+    for _, r in sub.iterrows():
+        lower = _parse_level_lower_bound(r[level_col])
+        pct = pd.to_numeric(r[pct_col], errors="coerce")
+        if lower is None or pd.isna(pct):
+            continue   # 『差異數/合計』等無級距下界的彙總列
+        people = None
+        if people_col and pd.notna(r.get(people_col)):
+            try:
+                people = int(float(r[people_col]))
+            except (ValueError, TypeError):
+                people = None
+        levels.append({"lower": float(lower), "label": str(r[level_col]),
+                       "pct": float(pct), "people": people})
+    if not levels:
+        return {}
+    levels.sort(key=lambda x: x["lower"])
+    return {"date": latest.strftime("%Y-%m-%d"), "levels": levels}
+
+
 # ---------- FinMind fundamentals (monthly revenue, EPS, PER/yield) ----------
 
 def fetch_monthly_revenue(stock_id: str, months: int = 18) -> pd.DataFrame:
