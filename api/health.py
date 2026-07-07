@@ -63,9 +63,13 @@ def _resolve_stock(stock_id: str):
         from scripts.fetchers import fetch_stock_info
         info = fetch_stock_info()
         if info is not None and not info.empty:
-            row = info[info["stock_id"] == stock_id]
-            if not row.empty:
-                r = row.iloc[0]
+            rows = info[info["stock_id"] == stock_id]
+            if not rows.empty:
+                # FinMind 對部分代號同時有 emerging(興櫃,舊)+ twse/tpex 兩列(例:1563)。
+                # 只有 twse/tpex 能對到 yfinance ticker(.TW/.TWO),優先取,否則 iloc[0] 可能
+                # 拿到 emerging → yf_ticker 誤判成 .TWO → 抓不到價 → 誤報「資料不足」。
+                tradable = rows[rows["type"].isin(["twse", "tpex"])]
+                r = tradable.iloc[0] if not tradable.empty else rows.iloc[0]
                 return (
                     str(r.get("type") or "twse"),
                     str(r.get("stock_name") or stock_id),

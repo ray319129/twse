@@ -1457,9 +1457,11 @@ function openDetail(sid){
   if(location.hash!=='#stock='+sid)history.replaceState(null,'','#stock='+sid);
   if(DETAIL_CACHE[sid]){renderDetail(DETAIL_CACHE[sid]);return;}
   $('#detail-body').innerHTML='<div class="empty">載入圖表中,約需 5~15 秒…</div>';
-  fetch(HEALTH_API_BASE+'/api/detail?stock='+encodeURIComponent(sid)).then(r=>{
-    if(!r.ok)throw new Error('http '+r.status);return r.json();
-  }).then(d=>{if(d&&d.error)throw new Error(d.error);DETAIL_CACHE[sid]=d;renderDetail(d);})
+  // 後端「資料不足/代號錯誤」等會回 404 但帶 JSON error 訊息;先讀 body 拿真正原因,
+  // 讀不到(真的路由 404 = HTML,代表 API 未部署)才退回顯示 http 狀態碼。
+  fetch(HEALTH_API_BASE+'/api/detail?stock='+encodeURIComponent(sid)).then(r=>
+    r.json().catch(()=>{throw new Error('http '+r.status+'(API 未部署或無回應)');})
+  ).then(d=>{if(d&&d.error)throw new Error(d.error);DETAIL_CACHE[sid]=d;renderDetail(d);})
   .catch(e=>{const b=$('#detail-body');if(b)b.innerHTML=`<div class="err">載入失敗:${esc(e&&e.message||e)}</div>`;});
 }
 function renderDetail(d){
