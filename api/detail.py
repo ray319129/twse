@@ -166,8 +166,12 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Access-Control-Allow-Origin", "*")
-        # 詳情圖表變動慢(收盤後才更新),給短 CDN 快取降 FinMind 額度壓力。
-        self.send_header("Cache-Control", "public, max-age=1800")
+        # 只快取成功回應(圖表變動慢,收盤後才更新,30 分 CDN 快取降 FinMind 額度壓力);
+        # 錯誤(資料不足/暫時失敗)絕不快取,否則使用者會被卡在舊 404 直到 TTL 過期。
+        if status == 200:
+            self.send_header("Cache-Control", "public, max-age=1800")
+        else:
+            self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
