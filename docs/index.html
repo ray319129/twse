@@ -500,6 +500,32 @@
   <div class="foot-note">資料每個交易日由 GitHub Actions 自動更新 · 本頁為條件排序結果,非投資建議</div>
 </div>
 
+<!-- 個股詳情頁 overlay 樣式 -->
+<style>
+  .detail-overlay{position:fixed;inset:0;background:rgba(8,12,20,.55);z-index:1000;display:none;
+    padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .detail-overlay.open{display:flex;align-items:flex-start;justify-content:center;}
+  .detail-modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    width:100%;max-width:960px;box-shadow:0 24px 70px rgba(0,0,0,.35);margin:auto;}
+  .detail-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);
+    border-radius:14px 14px 0 0;z-index:1;}
+  .detail-title{font-weight:800;font-size:16px;color:var(--ink);min-width:0;}
+  .detail-ind{font-weight:600;font-size:12px;color:var(--muted);margin-left:6px;}
+  .detail-close{background:none;border:1px solid var(--line);border-radius:8px;width:30px;height:30px;
+    font-size:15px;cursor:pointer;color:var(--muted);flex:0 0 auto;}
+  .detail-close:hover{color:var(--ink);border-color:var(--line-strong);}
+  .detail-body{padding:12px 16px 20px;}
+  .detail-actions{font-size:12px;margin-bottom:6px;}
+  .detail-actions a{color:var(--accent-ink);text-decoration:none;}
+  .detail-actions a:hover{text-decoration:underline;}
+  .detail-chart-title{font-size:12.5px;font-weight:700;color:var(--ink-2);margin:10px 2px 2px;}
+  .detail-chart{width:100%;height:420px;}
+  .detail-chart-sm{height:240px;}
+  @media(max-width:640px){.detail-chart{height:340px;}.detail-chart-sm{height:200px;}.detail-body{padding:10px 10px 16px;}}
+</style>
+<!-- 個股詳情頁圖表用 ECharts(PyEcharts 的 JS 本體);只在使用者點開個股時才需要 -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script>
 const $=(s,el=document)=>el.querySelector(s);
 const isNum=v=>v!==null&&v!==undefined&&v!==''&&!isNaN(v)&&isFinite(Number(v));
@@ -511,8 +537,8 @@ const cls=v=>!isNum(v)?'flat':(v>0?'up':v<0?'down':'flat');
 const iv=(v,suffix='')=>!isNum(v)?'-':String(Number(v))+suffix;
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const badge=p=>p==='動能'?'<span class="badge b-mom">動能</span>':p==='品質'?'<span class="badge b-qual">品質</span>':p?`<span class="badge b-bal">${esc(p)}</span>`:'<span class="badge b-bal">—</span>';
-// 股票代號 → 連到 CMoney 個股頁(新分頁)。只把代號做成連結,其餘排版不變。
-const slink=id=>`<a class="slink" href="https://www.cmoney.tw/forum/stock/${encodeURIComponent(String(id==null?'':id))}" target="_blank" rel="noopener" title="在 CMoney 看 ${esc(id)} 走勢/技術線圖">${esc(id)}↗</a>`;
+// 股票代號 → 點開站內個股詳情頁(K線/量/均線/三大法人)。CMoney 外連移到詳情頁內。
+const slink=id=>{const s=String(id==null?'':id);return `<a class="slink" href="#stock=${encodeURIComponent(s)}" onclick="openDetail('${esc(s)}');return false;" title="點看 ${esc(s)} 技術圖 / 三大法人">${esc(s)}📈</a>`;};
 let DATA=null,LATEST=null,LABEL={};
 const lbl=h=>LABEL[h]||h;
 /* 個股健檢狀態(2026-06-30 新增)。HEALTH_API_ENABLED=false(預設):只用每日批次的
@@ -1394,6 +1420,136 @@ fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
     bar.insertAdjacentHTML('beforeend','<span style="color:var(--muted-2)">(績效分頁可在台帳內依選股日篩選)</span>');
   }).catch(()=>{});
 }).catch(e=>{$('#sub').innerHTML='';$('#p-dash').innerHTML=`<div class="err">讀取 data.json 失敗:${e}。請先讓 GitHub Actions 跑一次產生 docs/data.json。</div>`;});
+
+/* ============================================================
+   個股詳情頁(MVP:K線+量+MA + 三大法人)— [[twse-stock-detail-page]]
+   資料來自 /api/detail?stock=xxxx(serverless 即時查詢);ECharts 畫圖。
+   ============================================================ */
+let DETAIL_CACHE={},_detailK=null,_detailInst=null;
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function ensureDetailOverlay(){
+  let ov=$('#detail-overlay');
+  if(ov)return ov;
+  ov=document.createElement('div');
+  ov.id='detail-overlay';ov.className='detail-overlay';
+  ov.innerHTML=`<div class="detail-modal">
+    <div class="detail-head"><div id="detail-title" class="detail-title"></div>
+      <button id="detail-close" class="detail-close" aria-label="關閉">✕</button></div>
+    <div id="detail-body" class="detail-body"></div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeDetail();});
+  $('#detail-close').onclick=closeDetail;
+  return ov;
+}
+function _disposeDetailCharts(){
+  if(_detailK){_detailK.dispose();_detailK=null;}
+  if(_detailInst){_detailInst.dispose();_detailInst=null;}
+}
+function closeDetail(){
+  const ov=$('#detail-overlay');if(ov)ov.classList.remove('open');
+  _disposeDetailCharts();
+  if(location.hash.indexOf('stock=')>=0)history.replaceState(null,'',location.pathname+location.search);
+}
+function openDetail(sid){
+  sid=String(sid||'').trim();if(!sid)return;
+  const ov=ensureDetailOverlay();ov.classList.add('open');
+  $('#detail-title').textContent=sid;
+  if(location.hash!=='#stock='+sid)history.replaceState(null,'','#stock='+sid);
+  if(DETAIL_CACHE[sid]){renderDetail(DETAIL_CACHE[sid]);return;}
+  $('#detail-body').innerHTML='<div class="empty">載入圖表中,約需 5~15 秒…</div>';
+  fetch(HEALTH_API_BASE+'/api/detail?stock='+encodeURIComponent(sid)).then(r=>{
+    if(!r.ok)throw new Error('http '+r.status);return r.json();
+  }).then(d=>{if(d&&d.error)throw new Error(d.error);DETAIL_CACHE[sid]=d;renderDetail(d);})
+  .catch(e=>{const b=$('#detail-body');if(b)b.innerHTML=`<div class="err">載入失敗:${esc(e&&e.message||e)}</div>`;});
+}
+function renderDetail(d){
+  const body=$('#detail-body');if(!body)return;
+  _disposeDetailCharts();
+  $('#detail-title').innerHTML=`${esc(d.stock_id)} ${esc(d.name||'')}<span class="detail-ind">${esc(d.industry||'')}</span>`;
+  body.innerHTML=`
+    <div class="detail-actions"><a href="https://www.cmoney.tw/forum/stock/${esc(d.stock_id)}" target="_blank" rel="noopener">在 CMoney 看更多走勢/討論 ↗</a></div>
+    <div class="detail-chart-title">日K線 · 量 · 均線(MA5/20/60)</div>
+    <div id="detail-kchart" class="detail-chart"></div>
+    <div class="detail-chart-title">三大法人買賣超(張)</div>
+    <div id="detail-instchart" class="detail-chart detail-chart-sm"></div>`;
+  drawKChart(d);drawInstChart(d);
+}
+function drawKChart(d){
+  const el=$('#detail-kchart');if(!el||!window.echarts)return;
+  const k=d.kline||[],ma=d.ma||{};
+  if(!k.length){el.innerHTML='<div class="empty">無價格資料</div>';return;}
+  const dates=k.map(r=>r[0]);
+  const ohlc=k.map(r=>[r[1],r[4],r[3],r[2]]);          // ECharts 蠟燭順序:open,close,low,high
+  const up=cssVar('--up'),down=cssVar('--down'),ink=cssVar('--ink-2'),
+        line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  const vols=k.map(r=>({value:r[5],itemStyle:{color:(r[4]>=r[1]?up:down),opacity:.55}}));
+  const maLine=(name,arr,color)=>({name,type:'line',data:arr||[],smooth:true,showSymbol:false,
+    lineStyle:{width:1.2,color},z:3});
+  _detailK=echarts.init(el,null,{renderer:'canvas'});
+  _detailK.setOption({
+    animation:false,
+    legend:{data:['MA5','MA20','MA60'],top:0,textStyle:{color:muted,fontSize:11},itemWidth:16,itemHeight:2},
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'},backgroundColor:surf,borderColor:line,
+      textStyle:{color:ink,fontSize:12}},
+    axisPointer:{link:[{xAxisIndex:'all'}]},
+    grid:[{left:52,right:16,top:26,height:'62%'},{left:52,right:16,top:'74%',height:'16%'}],
+    xAxis:[
+      {type:'category',data:dates,boundaryGap:true,axisLine:{lineStyle:{color:line}},
+        axisLabel:{color:muted,fontSize:10},splitLine:{show:false}},
+      {type:'category',gridIndex:1,data:dates,boundaryGap:true,axisLine:{lineStyle:{color:line}},
+        axisLabel:{show:false},axisTick:{show:false}}
+    ],
+    yAxis:[
+      {scale:true,position:'right',axisLine:{show:false},axisLabel:{color:muted,fontSize:10},
+        splitLine:{lineStyle:{color:line,opacity:.5}}},
+      {scale:true,gridIndex:1,axisLine:{show:false},axisLabel:{show:false},splitLine:{show:false}}
+    ],
+    dataZoom:[
+      {type:'inside',xAxisIndex:[0,1],start:60,end:100},
+      {type:'slider',xAxisIndex:[0,1],bottom:6,height:16,start:60,end:100,
+        borderColor:line,textStyle:{color:muted,fontSize:10}}
+    ],
+    series:[
+      {name:'K',type:'candlestick',data:ohlc,
+        itemStyle:{color:up,color0:down,borderColor:up,borderColor0:down},z:2},
+      maLine('MA5',ma.ma5,cssVar('--accent')),
+      maLine('MA20',ma.ma20,'#e8912d'),
+      maLine('MA60',ma.ma60,'#3aa0a0'),
+      {name:'量',type:'bar',xAxisIndex:1,yAxisIndex:1,data:vols}
+    ]
+  });
+}
+function drawInstChart(d){
+  const el=$('#detail-instchart');if(!el||!window.echarts)return;
+  const rows=d.inst||[];
+  if(!rows.length){el.innerHTML='<div class="empty" style="font-size:12px">無三大法人資料(免費 dataset 當下不可用或該股無)</div>';return;}
+  const dates=rows.map(r=>r[0]);
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  const ser=(name,idx,color)=>({name,type:'bar',stack:'inst',data:rows.map(r=>r[idx]),
+    itemStyle:{color},barMaxWidth:14});
+  _detailInst=echarts.init(el,null,{renderer:'canvas'});
+  _detailInst.setOption({
+    animation:false,
+    legend:{data:['外資','投信','自營商'],top:0,textStyle:{color:muted,fontSize:11}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:surf,borderColor:line,
+      textStyle:{color:ink,fontSize:12}},
+    grid:{left:52,right:16,top:26,bottom:24},
+    xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:line}},
+      axisLabel:{color:muted,fontSize:10}},
+    yAxis:{type:'value',axisLine:{show:false},axisLabel:{color:muted,fontSize:10},
+      splitLine:{lineStyle:{color:line,opacity:.5}}},
+    dataZoom:[{type:'inside',start:60,end:100},{type:'slider',bottom:2,height:14,start:60,end:100,
+      borderColor:line,textStyle:{color:muted,fontSize:10}}],
+    series:[ser('外資',1,cssVar('--accent')),ser('投信',2,'#e8912d'),ser('自營商',3,'#3aa0a0')]
+  });
+}
+window.addEventListener('resize',()=>{if(_detailK)_detailK.resize();if(_detailInst)_detailInst.resize();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#detail-overlay')&&$('#detail-overlay').classList.contains('open'))closeDetail();});
+/* 深連結:網址帶 #stock=2330 時自動開啟 */
+(function initDetailHash(){
+  const m=/[#&]stock=(\d{4})/.exec(location.hash||'');
+  if(m)setTimeout(()=>openDetail(m[1]),300);
+})();
 </script>
 </body>
 </html>

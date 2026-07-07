@@ -257,3 +257,15 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **P2-D 雙軌價格**([fetchers.py](scripts/fetchers.py) 保留 `adj_close` + [indicators.py](scripts/indicators.py) `compute_all`):指標(均線/KD/MACD/RSI/布林/ATR)改吃**還原價**(adj_close 去除息假跳空),`close_raw` 保留原始成交價供漲停/停損/顯示。`compute_all` 內 `adj_close` 覆蓋率 ≥95% 才整段等比例縮放 OHLC,否則退回原始價(避免「一半還原一半原始」的接縫斷層)。[main.py](scripts/main.py) 顯示/漲跌停家數用 `close_raw`,均線比較用還原價。**漸進生效**:舊快取無 adj_close→退回原始;新股/被尺度偏移重抓(Bug 5)/自然汰換的股票會逐步取得 adj_close 後啟用還原。track.py 出場模擬讀原始 parquet 不受影響。
 - **驗證**:離線完整 `daily_run(2026-07-06)` 跑通(scored 929、core 10、regime 積極、`industry_bonus`/`combo_bonus`/`chip_bonus`/`fund_bonus` 皆流入、`first_board` 3 檔進核心、render_email 產出 10 萬字無例外);`compute_all` 雙軌單元測試(還原啟用/覆蓋率不足退回/無欄不報錯)、new_stock 旗標(80→True、full→False、50→None)、新股保留替換邏輯、SPA `node --check`、email render(核心卡新股/首板/當沖/共振/combo 名稱皆顯示)全通過。測試檔已精確路徑還原。
 - ⚠️ 一樣是「先能跑能解釋、待真實績效回調」:新權重/combo/當沖/新股各係數未經真實績效驗證;雙軌價格對既有快取需等 adj_close 覆蓋率補齊才生效(可另寫價格 backfill 加速,類似 [scripts/backfill_chips.py](scripts/backfill_chips.py))。**「籌碼進基礎分 25%」全市場版受免費資料限制未做**(見本節開頭)。至此審查清單 P0~P2 全部完成。
+
+---
+
+## 12. 個股詳情頁(2026-07-07 新增)— 仿 FinMind 官方 dashboard,MVP 已上線
+起因:使用者看 FinMind repo 的 Plotting/dashboard,想要「網站內每個個股點進去都有價量/籌碼圖」。可行性研究結論:FinMind 官方 dashboard(Flask+PyEcharts)就 4 張圖(K線+法人+融資券疊圖 / 月營收長條 / 外資持股折線 / 股權分散圓餅),**資料 fetchers.py 全都在抓**;還原股價/分K 這兩個 FinMind 要付費的,我們靠 yfinance 早就免費在用。決策:不照抄它 Flask 後端出圖(本站純靜態),後端只回 JSON、前端用 **ECharts**(=PyEcharts 的 JS 本體)畫;**即時查詢不預算全市場**(免費 300 次/hr、帶 token 600/hr,全市場會撞牆)。完整規劃見記憶 `twse-stock-detail-page`。
+
+**本次已做 = MVP(K線+量+MA + 三大法人):**
+- **後端** [api/detail.py](api/detail.py):Vercel serverless `GET /api/detail?stock=2330[&days=250]`,獨立於 [api/health.py](api/health.py)(關注點/payload 不同,不塞進 health)。`ThreadPoolExecutor` 平行抓 `fetch_price_history`(yfinance)+ `_fetch_institutional`(FinMind 三大法人),`compute_all` 補 ma5/20/60,全過 `_json_safe`(NaN→null)。回傳 `{stock_id,name,industry,market, kline:[[date,o,h,l,c,vol]], ma:{ma5,ma20,ma60}, inst:[[date,外資,投信,自營]淨張數]}`。CDN 快取 30 分。**離線實測 2330 通**(yfinance 給價、FinMind 免 token 也回法人)。
+- **前端** [docs/index.html](docs/index.html):加 ECharts CDN(`echarts@5.5.1`,只點開個股才用到)+ `.detail-overlay` 全螢幕 modal + `openDetail/renderDetail/drawKChart/drawInstChart`。K線用西式配色(漲綠 `--up`/跌紅 `--down`,與既有迷你K棒一致);雙 grid(價+量)、MA5/20/60 疊線、dataZoom 可拖;法人堆疊長條(外資=accent/投信橘/自營青)。`sessionStorage` 概念用 `DETAIL_CACHE` 記憶體快取(同 session 同代號不重抓)。**進入點**:`slink(id)` 改成點代號開站內詳情頁(`#stock=2330` 深連結,ESC/點背景關閉),CMoney 外連移到 modal 內。逾時/無資料優雅降級。
+- **驗證**:`node --check`(抽 inline script)過;preview 餵合成 120 根 K 棒 + 40 日法人 → 兩張圖 canvas 皆 init、overlay 開、hash 設、無 console error、截圖確認外觀正確。
+- ⚠️ **需 Vercel 部署才實際生效**(同 health API,靜態 GitHub Pages 上 `/api/detail` 會 404,前端已對失敗降級)。bundle size 與 health 共用 yfinance 相依,部署時一併確認未超上限。
+- **待辦(完整版,承規劃 `twse-stock-detail-page`)**:補 ①融資券疊在K線 ②月營收長條 ③外資持股折線 ④股權分散圓餅,並與健檢面向卡整合成單一詳情頁;`fetch_monthly_revenue`/`_fetch_holding`/`fetch_holder_distribution`/`_fetch_margin` 都現成。
