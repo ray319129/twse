@@ -4,6 +4,9 @@
   "functions": {
     "api/health.py": {
       "maxDuration": 60
+    },
+    "api/detail.py": {
+      "maxDuration": 60
     }
   }
 }
