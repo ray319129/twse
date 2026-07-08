@@ -335,3 +335,8 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 4. 部位感知的 **email/盤前信推播**(把成本停損帶進信件)使用者這次**明確不要**(只在網頁);要做需把持倉放 GitHub Secret 給批次讀,屬下一階段。
 5. β 集中度未做(β 分級在伺服器端 premarket,前端沒有);目前只有產業/權重集中度。
 6. **撞事件個股層級目前只有台積法說→2330**;要「每檔持股撞自己的除權息/法說/財報日」需擴充 `scripts/events.py` 產個股事件表(除權息/法說排程 TWSE/MOPS 有免費源),再把個股事件寫進 data.json(僅選股榜/自選池內的股批次認得;任意持股需 detail API)。**新版 data.json 尚未實跑產生**(下次排程或本機真 token 跑 `--date` 後,`data.json` 才會帶 `events`;在那之前線上 data.json 無 events,撞事件提醒不顯示,優雅降級)。
+
+**截圖辨識匯入(2026-07-09 同日,選配,需 Vercel)**:使用者要「上傳截圖自動辨識」。因本站是 public 靜態頁、API key 不能進前端,走 serverless 代理。
+- **後端** [api/portfolio_ocr.py](api/portfolio_ocr.py):`POST /api/portfolio_ocr {image(base64), media_type}` → Claude **Haiku 4.5 vision**(`claude-haiku-4-5`,與 catalyst.py 同顆)抽持股 → 回 `{positions:[{id,name,shares,cost,price}]}`(與前端 portParse 同形)。system prompt 強調「即時庫存=股數不是張、成本取均價非付出成本、代號從括號抽、忽略合計列、讀不到填 null」;防禦式 JSON 解析(容忍圍欄)。讀 `os.environ["ANTHROPIC_API_KEY"]`,沒設回 error。`vercel.json` 已註冊。一張約 US$0.003。
+- **前端** [docs/index.html](docs/index.html):`portShowOcr`(檔案選擇)→ `portOcrPicked`(canvas 縮到 ≤1600px 寬 → jpeg base64,壓 token/體積)→ POST → 結果進**共用預覽表** `portStageTable(rows)`(貼上與截圖共用;`portStage` 也改用它)→ commit。dedup 沿用 `portUpsert`(依代號)。`portCommit` 改查 `#p-port .port-stage-table tbody tr`(涵蓋貼上與截圖兩處)。**順手移除**檔案裡一顆 dead 的 `portShowImage()` 按鈕(函式不存在)。
+- **驗證**:`py_compile` + `node --check` 過;preview 實跑:OCR 鈕開表單、canvas 縮圖+base64+POST 全跑、`/api/portfolio_ocr` 本機 501 → **優雅降級顯示「需部署 Vercel」**、模擬 OCR 結果進共用預覽表 → commit → localStorage 正確、貼上流程重構後仍正常。**⚠️ 真實 Claude 辨識未驗**(api/* 從沒真的 deploy 過;要部署+設 ANTHROPIC_API_KEY 才會動,見 VERCEL_SETUP.md)。**隱私**:截圖(含成本)會一次性經 Anthropic 辨識(貼上/手動則 100% 不出瀏覽器)——已在 UI/文件標明。

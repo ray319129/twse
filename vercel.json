@@ -7,6 +7,9 @@
     },
     "api/detail.py": {
       "maxDuration": 60
+    },
+    "api/portfolio_ocr.py": {
+      "maxDuration": 60
     }
   }
 }

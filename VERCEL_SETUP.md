@@ -24,7 +24,10 @@ GitHub Pages 是純靜態,沒有地方執行「使用者剛打的代號 → 即�
 
 `vercel.json` 已設定 `outputDirectory: "docs"`,所以同一個部署**同時**會：
 - 把 `docs/` 整包當靜態網站服務(等於 GitHub Pages 的替代品,網頁本身也能直接用這個網址開)
-- 自動把 `api/health.py` 變成 `/api/health` 端點(Vercel 對 `/api` 目錄的零設定慣例)
+- 自動把 `api/health.py` / `api/detail.py` / `api/portfolio_ocr.py` 變成對應端點(Vercel 對 `/api` 目錄的零設定慣例)
+
+### 另一個用到 API key 的端點:`/api/portfolio_ocr`(我的持倉 → 截圖辨識)
+`api/portfolio_ocr.py` 讓網頁「我的持倉」分頁上傳券商庫存截圖 → Claude(Haiku 4.5 vision)辨識成持股清單。**需要 `ANTHROPIC_API_KEY`**(同上面 env 步驟;對這個功能是必需,不是選用)。沒設或未部署時,前端會顯示「辨識失敗…需部署 Vercel」並請使用者改用「貼上/手動」——不影響其餘功能。前端呼叫走同源相對路徑 `/api/portfolio_ocr`(沿用 `HEALTH_API_BASE`),不需另設旗標。**誠實邊界**:截圖(含成本數字)會一次性經此函式 → Anthropic 辨識,不留存;成本最終仍只由前端存 localStorage。一張截圖約 Haiku US$0.003(不到 1 美分)。
 
 ## 啟用前端的即時查詢
 

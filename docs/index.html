@@ -1025,7 +1025,7 @@ function renderWatchlist(){
 const PORT_KEY='twse-portfolio';
 const PORT_STOP=0.07;              /* 硬停損 %,對應 config exit.hard_stop 預設 */
 let PORT={v:1,positions:[],updated:null};
-let PORT_PRICE={},_portFetching={},_portFormOpen=false;
+let PORT_PRICE={},_portFetching={},_portFormOpen=false,_portPasteHandler=null,_tessLoading=null;
 function portLoad(){try{const r=localStorage.getItem(PORT_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.positions)){
   o.positions.forEach(p=>{if(p&&p.shares==null&&p.lots!=null)p.shares=Number(p.lots)*1000;});   /* 舊版張數→股數遷移 */
   PORT={v:2,positions:o.positions,updated:o.updated||null};}}}catch(e){}}
@@ -1064,7 +1064,7 @@ function portResolveMissing(){
 }
 
 /* ---- 輸入表單:貼上 / 手動 ---- */
-function portCloseForm(){_portFormOpen=false;const f=$('#port-form');if(f)f.innerHTML='';}
+function portCloseForm(){_portFormOpen=false;if(_portPasteHandler){document.removeEventListener('paste',_portPasteHandler);_portPasteHandler=null;}const f=$('#port-form');if(f)f.innerHTML='';}
 function portShowPaste(){
   _portFormOpen=true;const f=$('#port-form');if(!f)return;
   f.innerHTML=`<div class="port-card"><div class="pi-title">貼上券商庫存(把含表頭那幾列一起複製最準)</div>
@@ -1109,13 +1109,11 @@ function portParse(text){
   });
   return out;
 }
-function portStage(){
-  const ta=$('#port-paste'),box=$('#port-stage');if(!ta||!box)return;
-  const rows=portParse(ta.value);
-  if(!rows.length){box.innerHTML='<div class="port-warn">沒解析到任何股票代碼。確認有把『代碼/股票名稱』那欄一起複製,或改用「手動新增」。</div>';return;}
+/* 預覽表 HTML(貼上與截圖辨識共用)。rows: [{id,name,shares,cost,price}] */
+function portStageTable(rows,srcNote){
   const auto=rows.some(r=>isNum(r.shares)&&isNum(r.cost));
-  box.innerHTML=`<div style="margin-top:12px"><div class="pi-title">解析到 ${rows.length} 檔${auto?' · 已自動帶入股數/均價,確認後匯入':' · 補上股數/均價後匯入'}</div>
-    <div class="port-table-wrap"><table class="port-table"><thead><tr><th>代碼</th><th>名稱</th><th class="r">現價</th><th class="r">股數 *</th><th class="r">均價 *</th><th></th></tr></thead><tbody>
+  return `<div style="margin-top:12px"><div class="pi-title">${esc(srcNote||'解析到')} ${rows.length} 檔${auto?' · 已自動帶入股數/均價,確認後匯入':' · 補上股數/均價後匯入'}</div>
+    <div class="port-table-wrap"><table class="port-table port-stage-table"><thead><tr><th>代碼</th><th>名稱</th><th class="r">現價</th><th class="r">股數 *</th><th class="r">均價 *</th><th></th></tr></thead><tbody>
     ${rows.map(r=>`<tr>
       <td class="mono pcode">${esc(r.id)}</td>
       <td><input class="pin pin-name" value="${esc(r.name||'')}" placeholder="名稱"></td>
@@ -1128,9 +1126,49 @@ function portStage(){
     <div class="pi-actions"><button class="pbtn" onclick="portCommit()">✓ 匯入 / 更新持倉</button></div>
     <div class="pi-hint">股數為<b>股</b>(非張;1 張=1000 股,零股照填實際股數)。空白或 0 的列會略過;已存在的代碼會被覆蓋更新。</div></div>`;
 }
+function portStage(){
+  const ta=$('#port-paste'),box=$('#port-stage');if(!ta||!box)return;
+  const rows=portParse(ta.value);
+  if(!rows.length){box.innerHTML='<div class="port-warn">沒解析到任何股票代碼。確認有把『代碼/股票名稱』那欄一起複製,或改用「手動新增」。</div>';return;}
+  box.innerHTML=portStageTable(rows,'解析到');
+}
+/* 截圖辨識(選配,需 Vercel /api/portfolio_ocr)。圖片縮到 ≤1600px 寬再上傳,壓 token 與體積 */
+function portShowOcr(){
+  _portFormOpen=true;const f=$('#port-form');if(!f)return;
+  f.innerHTML=`<div class="port-card"><div class="pi-title">上傳券商庫存截圖(Claude 自動辨識)</div>
+    <input type="file" id="port-ocr-file" accept="image/*" class="pin" style="max-width:none;padding:8px">
+    <div class="pi-actions"><button class="pbtn ghost" onclick="portCloseForm()">取消</button></div>
+    <div class="pi-hint">建議用『即時未實現損益』畫面(含股數+成本均價)。圖片會傳到伺服器由 Claude 辨識(<b>需部署 Vercel</b>);成本仍只存你這台瀏覽器,辨識後可逐列修正再匯入。</div>
+    <div id="port-ocr-status"></div><div id="port-stage"></div></div>`;
+  const inp=$('#port-ocr-file');if(inp)inp.onchange=portOcrPicked;
+}
+function portOcrPicked(e){
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  const status=$('#port-ocr-status');if(status)status.innerHTML='<div class="port-note">讀取圖片中…</div>';
+  const rd=new FileReader();
+  rd.onload=()=>{const img=new Image();img.onload=()=>{
+    const maxW=1600;let w=img.width,h=img.height;
+    if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    let b64='';try{b64=c.toDataURL('image/jpeg',0.85).split(',')[1];}catch(_){if(status)status.innerHTML='<div class="port-warn">圖片讀取失敗,請換一張。</div>';return;}
+    if(status)status.innerHTML='<div class="port-note">🔍 Claude 辨識中,約 5~15 秒…</div>';
+    fetch(HEALTH_API_BASE+'/api/portfolio_ocr',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:b64,media_type:'image/jpeg'})})
+      .then(r=>r.json().catch(()=>{throw new Error('http '+r.status+'(API 未部署或無回應)');}))
+      .then(d=>{if(d&&d.error)throw new Error(d.error);
+        const rows=(d.positions||[]).map(p=>({id:portCode(p.id),name:portCleanName(p.name||''),shares:portCleanNum(p.shares),cost:portCleanNum(p.cost),price:portCleanNum(p.price)})).filter(r=>r.id);
+        if(!rows.length){if(status)status.innerHTML='<div class="port-warn">沒辨識到持股。換一張更清楚的截圖,或改用「貼上券商庫存」／「手動新增」。</div>';return;}
+        if(status)status.innerHTML='';
+        $('#port-stage').innerHTML=portStageTable(rows,'✅ 辨識到');
+      })
+      .catch(err=>{if(status)status.innerHTML=`<div class="port-warn">辨識失敗:${esc(err&&err.message||err)}<br>截圖辨識需部署 Vercel(見 VERCEL_SETUP.md);可改用「貼上券商庫存」或「手動新增」。</div>`;});
+  };img.src=rd.result;};
+  rd.readAsDataURL(file);
+}
 function portCommit(){
-  const box=$('#port-stage');if(!box)return;let n=0;
-  box.querySelectorAll('tbody tr').forEach(tr=>{
+  const box=$('#p-port');if(!box)return;let n=0;
+  box.querySelectorAll('.port-stage-table tbody tr').forEach(tr=>{
     const id=portCode(tr.querySelector('.pcode')?.textContent);if(!id)return;
     const name=(tr.querySelector('.pin-name')?.value||'').trim();
     const shares=portCleanNum(tr.querySelector('.pin-shares')?.value);
@@ -1213,6 +1251,7 @@ function renderPortfolio(){
   const el=$('#p-port');if(!el)return;
   const pos=PORT.positions;
   const tools=`<div class="port-tools">
+    <button class="pbtn" onclick="portShowOcr()">📷 截圖辨識匯入</button>
     <button class="pbtn" onclick="portShowPaste()">📋 貼上券商庫存匯入</button>
     <button class="pbtn" onclick="portShowManual()">＋ 手動新增</button>
     <button class="pbtn ghost" onclick="portExport()">⬇ 匯出備份</button>
