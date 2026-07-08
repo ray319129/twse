@@ -49,6 +49,25 @@
   {% elif gl == 'risk-on' %}<div style="font-size:12px;color:#16a34a;margin-top:5px;">→ 偏多:可照決策卡正常執行。</div>{% endif %}
 </div>
 
+{% if events and events.events %}
+{% set ebg = '#fef2f2' if events.has_high else '#eff6ff' %}
+{% set ebd = '#fecaca' if events.has_high else '#dbeafe' %}
+{% set etx = '#b91c1c' if events.has_high else '#1d4ed8' %}
+<div style="background:{{ ebg }};border:1px solid {{ ebd }};border-radius:8px;padding:10px 14px;margin-bottom:14px;">
+  <strong style="color:{{ etx }};font-size:13px;">📅 未來 {{ events.horizon_days }} 日事件</strong>
+  <div style="font-size:12px;color:#334155;margin-top:5px;">
+    {% for e in events.events %}
+    <div style="margin:2px 0;">
+      {{ e.date }}（{{ e.weekday }}）{% if e.days_ahead == 0 %}<span style="color:#dc2626;">今天</span>{% elif e.days_ahead == 1 %}明天{% else %}{{ e.days_ahead }}天後{% endif %} ·
+      {% if e.impact == 'high' %}<span style="background:#dc2626;color:#fff;padding:0 5px;border-radius:7px;font-size:10px;">重</span>{% endif %}
+      <strong>{{ e.title }}</strong>
+    </div>
+    {% endfor %}
+  </div>
+  {% if events.caution %}<div style="font-size:11px;color:{{ etx }};margin-top:5px;">⚠ 事件前後波動/跳空風險升高,留倉部位與進場量宜保守。</div>{% endif %}
+</div>
+{% endif %}
+
 <div style="background:#fffbeb;border:1px solid #fde68a;padding:9px 13px;border-radius:6px;font-size:12px;color:#92400e;margin-bottom:14px;">
   ⚠️ 試撮價在 08:30–09:00 會跳動,僅供分類;<strong>掛限價單、別市價追</strong>。最終扣板機請看盤(A 交給 ORB 報告)。
 </div>

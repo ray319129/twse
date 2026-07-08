@@ -326,6 +326,13 @@ leading:
     max_scan: 120                  # ※ 未實作:原意是每日對全市場「安靜股」額外掃描抓籌碼,目前並無此掃描;
                                    #   chip_accumulation 僅在已 enrich 的核心候選(含籌碼)上判定。此值目前無作用。
 
+# ★ 事件行事曆(scripts/events.py)— 選股當晚 & 盤前預告未來幾天的宏觀/重大事件。
+# 確定性:台指結算(每月第三週三)、非農(每月第一週五)用公式;FOMC/CPI/台積法說讀 config/events.yaml。
+# 不爬任何即時網頁。enabled:false → 選股信/盤前都不顯示事件段。
+events:
+  enabled: true
+  horizon_days: 7        # 預告未來幾個日曆天內的事件(選股當晚留倉視窗)
+
 # ★ 盤前自動看盤(scripts/premarket.py)— 不影響盤後選股流程
 # phase=preopen(約 08:45):抓個股試撮價 + 美股隔夜閘門 → 把昨晚核心10分類 A/B/C、刷掉棄單/作廢
 # phase=orb(約 09:25):對 A(平盤)股抓開盤 15 分 1分K → 判斷帶量突破開盤區間高 → 通知可進

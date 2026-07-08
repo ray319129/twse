@@ -176,7 +176,7 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 ### 下一步(承第 6 節 #3)
 盤前 MVP 已涵蓋 A 的自動觸發;真正的盤中逐筆執行層(富邦 API 即時報價、B/C 的回測/吞噬自動判、半自動下單)仍是獨立大專案。
 - ~~台指夜盤接進閘門~~ **已完成(2026-07-08,見上)**。待驗:08:45 夜盤發布新鮮度。
-- 未做的第 4 項:**選股當晚的排程事件預警**(FOMC/CPI/非農/台積電法說/台股結算日 → daily 選股信掛警語 + 軟性減碼)。確定性行事曆(FOMC日期、非農=每月首週五、結算=每月第三週三),不需爬 Investing.com。
+- ~~第 4 項:選股當晚的事件預警~~ **已完成(2026-07-09,見第 13 節)**。
 - 閘門門檻(`riskon/riskoff_score`、β 係數、VIX 門檻)目前為經驗值,**待用回測校準**(隔夜跳空 vs 隔日實際損益)。
 
 ---
@@ -282,3 +282,22 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **前端** [docs/index.html](docs/index.html):`renderDetail` 在法人圖後多 4 面板 + `drawRevChart`(營收長條億元＋YoY 雙軸折線)/`drawMarginChart`(融資融券雙折線＋dataZoom)/`drawHoldingChart`(外資持股面積折線)/`drawPieChart`(集保分散環形圖,標題帶更新日)。`_disposeDetailCharts`/resize/instance 變數皆納入 6 張圖。空資料各面板獨立顯示「無…資料」。
 - **驗證**:`ast.parse` 過 + `_bucket_holder_pie` 單測(5 桶加總=100);preview 餵合成完整 payload → 6 張圖各 init 出 canvas、無 console error、截圖確認(K線/法人/月營收雙軸/融資券 tooltip/外資持股/分散環形圖)外觀正確。**未用真實 Vercel 端點驗證**(同 MVP,靜態 preview 無 serverless)。
 - **仍待辦**:與健檢面向卡整合成單一詳情頁(目前詳情頁與健檢分頁各自獨立)。
+
+---
+
+## 13. 事件行事曆(2026-07-09 新增)— 盤前第 4 項,選股當晚 + 盤前雙掛
+起因:選股當晚下的單會留倉,若撞上 FOMC/CPI/非農/台積法說/台指結算,波動與開盤跳空風險陡升卻無提示。做法照記憶要求:**確定性行事曆(公式 + 固定清單),完全不爬 Investing.com/即時網頁**。
+
+**架構(兩類來源合併,把手動維護量壓到最低):**
+- **A 公式推算(永不過期、零維護)** — [scripts/events.py](scripts/events.py):`settlement_day()` 台指結算=每月第三個週三、`nfp_day()` 非農=每月第一個週五,底層共用 `_nth_weekday(year,month,weekday,n)`。
+- **B 固定行事曆(一年補一次)** — [config/events.yaml](config/events.yaml):FOMC(Fed 官方 2026 八次)/ 美國 CPI(BLS 排程)/ 台積電法說(季度)。每筆只填 `date + type`,title/impact/note 走 `events.py` 的 `_TYPE_META` 預設(yaml 可覆寫)。⚠ **CPI 與台積法說日期為預估/約略,務必每年初依官方公告核對**(yaml 註解已附三個官方來源 URL);FOMC 較確定。
+
+**對外介面**:`upcoming_events(today, horizon_days=7, calendar=None)` → `{horizon_days, events:[{date,weekday,days_ahead,type,title,impact,region,note}], has_high, calendar_exhausted, caution}`。純函式、不打網;`calendar` 參數供離線測覆寫。`impact=high`(FOMC/CPI/台積)才觸發整體 `caution` 風控句;`med`(結算/非農)只列出。**`calendar_exhausted`**:B 類名單已無 ≥ 今天的未來項 → 信裡提醒補下年度(公式事件不會過期,故只看 B)。
+
+**接線**:
+- 選股當晚 [main.py](scripts/main.py) `daily_run`:讀 `cfg["events"]` → `ctx["events"]` → [daily_email.html](templates/daily_email.html) 大盤閘門下方一段「📅 未來 N 日重大事件」(高風險紅底、附 caution)。
+- 盤前 [premarket.py](scripts/premarket.py) `run_preopen`:同樣算好塞 `ctx["events"]` + 寫進 `docs/premarket.json`(payload 含 `events` 欄位) → [premarket_email.html](templates/premarket_email.html) 閘門框下方精簡版事件列。
+- **網頁盤中即時分頁** [docs/index.html](docs/index.html):新增 `eventsBox(ev)` 函式,從 `po.events`(即 `premarket.json` 的 `preopen.events`)渲染事件欄,插在閘門框與「盤前分類」段之間。高風險事件紅底、caution 句、行事曆到期提示皆有。
+- config [screeners.yaml](config/screeners.yaml) 新增 `events: {enabled, horizon_days}`;`enabled:false` → 三處(選股信/盤前信/網頁)都不顯示。
+
+**驗證**:離線純函式 + 兩模板 render 全過(同上);`docs/index.html` JS `node --check` 通過;瀏覽器 preview 餵合成 `premarket.json` → 盤中即時分頁確認三筆事件(CPI 重/結算中/台積法說重)、caution 正確渲染、無 console error。**尚未在真正排程或完整 `daily_run` 跑過**(events 段獨立、與選股邏輯無耦合,風險低);CPI/台積日期正確性依賴人工核對 yaml。

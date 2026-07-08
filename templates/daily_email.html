@@ -25,6 +25,27 @@
   {% endif %}
 </div>
 
+{% if events and events.events %}
+{% set ebg = '#fdecea' if events.has_high else '#eef6ff' %}
+{% set ebd = '#f5c6cb' if events.has_high else '#cfe2ff' %}
+{% set etx = '#8a1c1c' if events.has_high else '#1a4d80' %}
+<div style="background:{{ ebg }};border:1px solid {{ ebd }};padding:11px 15px;border-radius:6px;margin-bottom:16px;">
+  <strong style="color:{{ etx }};">📅 未來 {{ events.horizon_days }} 日重大事件</strong>
+  <div style="margin-top:7px;">
+    {% for e in events.events %}
+    <div style="font-size:13px;color:#333;margin:3px 0;">
+      <span style="display:inline-block;min-width:118px;color:#555;">{{ e.date }}（{{ e.weekday }}）{% if e.days_ahead == 0 %}<span style="color:#c0392b;">今天</span>{% elif e.days_ahead == 1 %}明天{% else %}{{ e.days_ahead }} 天後{% endif %}</span>
+      {% if e.impact == 'high' %}<span style="background:#c0392b;color:#fff;padding:0 6px;border-radius:8px;font-size:11px;">重</span>{% else %}<span style="background:#e0e0e0;color:#555;padding:0 6px;border-radius:8px;font-size:11px;">中</span>{% endif %}
+      <strong style="color:#222;">{{ e.title }}</strong>
+      <span style="color:#777;font-size:12px;">— {{ e.note }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% if events.caution %}<div style="font-size:12px;color:{{ etx }};margin-top:7px;font-weight:bold;">⚠ {{ events.caution }}</div>{% endif %}
+  {% if events.calendar_exhausted %}<div style="font-size:11px;color:#999;margin-top:5px;">（事件行事曆 config/events.yaml 已到期,FOMC/CPI/台積法說需補下年度日期）</div>{% endif %}
+</div>
+{% endif %}
+
 {% macro profile_badge(p) -%}
 {% if p == '動能' %}<span style="background:#fdecea;color:#c0392b;padding:1px 7px;border-radius:10px;font-size:11px;">動能</span>
 {%- elif p == '品質' %}<span style="background:#e8f1fb;color:#2471a3;padding:1px 7px;border-radius:10px;font-size:11px;">品質</span>

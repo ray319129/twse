@@ -19,6 +19,7 @@ import math
 import pandas as pd
 
 from .config import load_screeners, SIGNALS_DIR, DATA_DIR, now_tpe, assert_env
+from .events import upcoming_events
 from .fetchers import (
     fetch_stock_info, fetch_mis_quotes, fetch_intraday_1m,
     fetch_market_gate, fetch_adr_changes, fetch_tx_night,
@@ -336,16 +337,20 @@ def run_preopen(test_mode: bool = False) -> None:
     valid = [r for r in rows if r["valid"]]
 
     today = now_tpe()
+    events_cfg = cfg.get("events", {}) or {}
+    events = (upcoming_events(today, events_cfg.get("horizon_days", 7))
+              if events_cfg.get("enabled", True) else None)
     ctx = {
         "phase": "preopen", "test_mode": test_mode,
         "date_str": today.strftime("%Y-%m-%d (%a) %H:%M"),
         "pick_date": snap.get("date", ""),
-        "gate": gate, "rows": rows,
+        "gate": gate, "rows": rows, "events": events,
         "valid_count": len(valid), "total": len(rows),
     }
     _write_web_snapshot("preopen", {
         "generated_at": today.strftime("%Y-%m-%d %H:%M"),
-        "gate": gate, "rows": rows, "valid_count": len(valid), "total": len(rows),
+        "gate": gate, "rows": rows, "events": events,
+        "valid_count": len(valid), "total": len(rows),
     }, snap.get("date", ""))
     html = render_email("premarket_email.html", ctx)
     prefix = "[測試] " if test_mode else ""

@@ -32,6 +32,7 @@ from .market import compute_market_regime
 from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
 from .catalyst import classify_catalysts, catalyst_score
+from .events import upcoming_events
 from .notify import render_email, send_email
 from .utils import log
 
@@ -678,6 +679,11 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
 
     # 個股健檢(Stock Health)改為純即時查詢(api/health.py),不在批次流程內跑。
 
+    # 事件行事曆:選股當晚預告未來幾天的宏觀/重大事件(留倉風險提示),確定性、不爬網。
+    events_cfg = cfg.get("events", {}) or {}
+    events = (upcoming_events(today, events_cfg.get("horizon_days", 7))
+              if events_cfg.get("enabled", True) else None)
+
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),
         "core": core,
@@ -693,6 +699,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         "market_regime": regime,
         "no_data_count": len(no_data),
         "label": STRATEGY_LABEL,
+        "events": events,
         "test_mode": test_mode,
     }
 

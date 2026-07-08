@@ -1,0 +1,47 @@
+# 固定事件行事曆(scripts/events.py B 類)—— 官方年初公布、無公式可推者才列在這。
+#
+# ⚠ 一年補一次:跑到最後一筆之後的日期,程式會在信裡加「行事曆已到期,需補下年度」提醒。
+# ⚠ 每筆只需 date + type;title/impact/note 走 events.py 的 _TYPE_META 預設,可在此覆寫。
+#
+# type:
+#   fomc  — FOMC 利率決議(Fed 公布,決議日 = 兩天會議的第二天;impact 預設 high)
+#   cpi   — 美國 CPI 發布(BLS 公布,美東 08:30;impact 預設 high)
+#   tsmc  — 台積電法說會(公司公告,季度;impact 預設 high)
+#
+# 台指期結算(每月第三個週三)、美國非農(每月第一個週五)是公式推算,不必列在這裡。
+#
+# 資料來源(請每年初核對官方公告後更新):
+#   FOMC : https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+#   CPI  : https://www.bls.gov/schedule/news_release/cpi.htm
+#   台積電: https://investor.tsmc.com/ (法人說明會 / Investor Conference)
+
+events:
+  # ---- 2026 FOMC 利率決議(Fed 官方 2026 會議行事曆,取第二天)----
+  - { date: 2026-01-28, type: fomc }
+  - { date: 2026-03-18, type: fomc }
+  - { date: 2026-04-29, type: fomc }
+  - { date: 2026-06-17, type: fomc }
+  - { date: 2026-07-29, type: fomc }
+  - { date: 2026-09-16, type: fomc }
+  - { date: 2026-10-28, type: fomc }
+  - { date: 2026-12-09, type: fomc }
+
+  # ---- 2026 美國 CPI 發布(BLS 排程;※ 下列為預估,務必依 BLS 官方年度排程逐月核對)----
+  - { date: 2026-01-13, type: cpi }
+  - { date: 2026-02-11, type: cpi }
+  - { date: 2026-03-11, type: cpi }
+  - { date: 2026-04-10, type: cpi }
+  - { date: 2026-05-13, type: cpi }
+  - { date: 2026-06-10, type: cpi }
+  - { date: 2026-07-14, type: cpi }
+  - { date: 2026-08-12, type: cpi }
+  - { date: 2026-09-11, type: cpi }
+  - { date: 2026-10-14, type: cpi }
+  - { date: 2026-11-13, type: cpi }
+  - { date: 2026-12-10, type: cpi }
+
+  # ---- 2026 台積電法說會(季度;※ 為約略日期,公司通常於 ~2 週前公告正式日期,屆時請更新)----
+  - { date: 2026-01-15, type: tsmc }   # Q4 2025 業績
+  - { date: 2026-04-16, type: tsmc }   # Q1 2026 業績
+  - { date: 2026-07-16, type: tsmc }   # Q2 2026 業績
+  - { date: 2026-10-15, type: tsmc }   # Q3 2026 業績

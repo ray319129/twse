@@ -1096,6 +1096,30 @@ function gateBox(g){
   if(g.vix)seg.push(`VIX <span class="num">${num(g.vix.last,1)}</span>`);
   return `<div class="gate ${klass}"><div class="gt" style="color:${col}">大盤盤前閘門:${esc(lab)}</div><div class="mx">${seg.join('')||'<span style="color:var(--muted-2)">無外圍指標資料</span>'}</div></div>`;
 }
+function eventsBox(ev){
+  if(!ev||!ev.events||!ev.events.length)return'';
+  const high=ev.has_high;
+  const bg=high?'var(--down-bg)':'var(--surface-3)';
+  const bd=high?'var(--down-line)':'var(--line)';
+  const tc=high?'var(--down)':'var(--muted)';
+  const rows=ev.events.map(e=>{
+    const imp=e.impact==='high'
+      ?`<span style="background:var(--down);color:#fff;padding:0 5px;border-radius:7px;font-size:10px;margin-right:5px;vertical-align:middle">重</span>`
+      :'';
+    const ahead=e.days_ahead===0?'<span style="color:var(--down)">今天</span>':e.days_ahead===1?'明天':`${e.days_ahead}天後`;
+    return `<div style="font-size:12.5px;color:var(--ink-2);padding:3px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;">
+      <span style="white-space:nowrap;color:var(--muted);min-width:130px">${esc(e.date||'')}（${esc(e.weekday||'')}）${ahead}</span>
+      <span>${imp}<b style="color:var(--ink)">${esc(e.title||'')}</b></span>
+    </div>`;
+  }).join('');
+  const caution=ev.caution?`<div style="font-size:11.5px;color:${tc};margin-top:8px;font-weight:700">⚠ ${esc(ev.caution)}</div>`:'';
+  const expired=ev.calendar_exhausted?`<div style="font-size:11px;color:var(--muted-2);margin-top:5px">（事件行事曆已到期，FOMC/CPI/台積法說需補下年度日期）</div>`:'';
+  return `<div style="background:${bg};border:1px solid ${bd};border-radius:var(--radius-sm);padding:13px 16px;margin-bottom:16px;">
+    <div style="font-size:13px;font-weight:800;color:${tc};margin-bottom:8px">📅 未來 ${ev.horizon_days||7} 日重大事件</div>
+    <div style="display:flex;flex-direction:column">${rows}</div>
+    ${caution}${expired}
+  </div>`;
+}
 function liveCard(r){
   const sc=r.scenario, k=(sc==='A'||sc==='B'||sc==='C')?sc:'skip';
   const col=sc==='A'?'var(--up)':sc==='B'?'var(--warn)':sc==='C'?'var(--down)':'var(--muted)';
@@ -1134,7 +1158,7 @@ function renderLive(force){
     const stamp=new Date().toLocaleTimeString('zh-Hant',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     let h=`<div class="live-head"><div class="live-upd"><span class="ld"></span>選股基準日 ${esc(d.date)||'—'} · 資料時間 ${esc(upd)||'—'} · 檢查於 ${stamp} · 每 60 秒自動更新</div><button class="refresh" id="lrefresh" aria-label="重新整理盤中資料"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>重新整理</button></div>`;
     h+=`<div class="note-box">盤前 08:45 自動分類、開盤後 09:25 自動判突破。掛<b>限價單</b>、別市價追。本頁非逐秒即時,於上述時點(與你手動觸發)更新。</div>`;
-    if(po){h+=gateBox(po.gate);h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>盤前分類 — 有效 ${isNum(po.valid_count)?po.valid_count:0}/${isNum(po.total)?po.total:0} 檔</div>`;
+    if(po){h+=gateBox(po.gate);h+=eventsBox(po.events);h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>盤前分類 — 有效 ${isNum(po.valid_count)?po.valid_count:0}/${isNum(po.total)?po.total:0} 檔</div>`;
       h+=(po.rows||[]).map(liveCard).join('')||'<div class="empty">盤前無分類資料</div>';}
     if(orb){h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>開盤 15 分 ORB — 已突破 ${isNum(orb.fired_count)?orb.fired_count:0} 檔</div>`;
       h+=(orb.rows||[]).map(orbCard).join('')||'<div class="empty">開盤後無 ORB 資料</div>';}
