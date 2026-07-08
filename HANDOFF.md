@@ -318,9 +318,15 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 
 **驗證(preview 實跑,非只靠 node --check)**:`node --check` 過;preview 用**使用者真實庫存截圖格式**測 `portParse` → 正確抽出 id(去 `>>`、6 碼 ETF 009816 OK)/名/成交價、cost 留空;完整 UI 路徑 貼上→stage(2列)→填張數均價→commit→localStorage 正確持久化;總成本/P&L/停損距離數字正確;缺價檔(不在 data.json)404 後顯示「—」不崩;集中度基準一致(修過一次 per-row market/cost 混用 bug);held 徽章跨頁出現;詳情頁 banner P&L 正確;無 console error。測完已清 localStorage 測試資料。
 
+**持股撞事件提醒(2026-07-09 同日 v1)**:事件行事曆 × 持倉的 **client-side join**(成本仍不出瀏覽器)。
+- **資料源**:`scripts/main.py daily_run` 把 `upcoming_events()` 結果(市場級公開資訊,非個資)**移到 data.json 寫入前算好,並寫進 `data.json` + `history/*.json` 的 `events` 欄**(原本只給 email ctx;premarket.json 的 events 只有跑過 preopen 才有,不可靠)。email ctx 沿用同一份 `events`。**唯一 Python 改動**。
+- **前端**([docs/index.html](docs/index.html)):`portEventInfo()`(`EVENT_STOCK={tsmc:['2330']}` 個股事件對照,目前僅台積法說→2330)+ `portEventAlertHtml()`。兩層:①**個股點名**(持有 2330 且有台積法說 → 「你持有的 2330 台積電 — 台積電法說會(日期/N天後)」)②**市場級高風險 × 曝險**(FOMC/CPI 等 high 事件 → 「未來 N 日高風險:CPI…。你留倉 X 檔·市值/成本 YYY·最集中 半導體 ZZ%」)。持股明細代碼欄對有個股事件者掛 ⚠ chip。只在有 high 或個股 hit 時才顯示(med-only/無事件 → 不顯示,避免雜訊)。
+- **驗證**:node --check;preview 餵合成 `DATA.events`(CPI/台積法說/結算)+ 持 2330/2454/8299 → 個股點名 + 市場摘要(半導體 59% 集中度正確算出)+ ⚠ 僅 2330;無事件/med-only 皆正確不顯示;`upcoming_events(2026-07-09)` 純函式 + `scripts.main` import 皆過。
+
 **誠實邊界 / 待辦**:
 1. **使用者券商庫存畫面(截圖)目前欄位全是報價欄,沒有『庫存量/成本』欄** → 貼上只能自動帶代碼/名/成交價,張數與均價需自己填(那兩個數字只有他知道)。若他日後在看盤軟體「欄位」加入庫存量/成本欄,`portParse` 的 cost 表頭偵測會自動帶入(lots 目前刻意不自動帶,避免『股 vs 張』1000 倍陷阱,一律手填)。
 2. 現價要準需 Vercel 部署 `/api/detail`(同 health/detail);GitHub Pages 靜態上非 data.json 內的持股會顯示「—」。
 3. 損益**未計手續費/證交稅**(單純市值差);要精算可日後接 track.py 的 `_net_return` 概念。
 4. 部位感知的 **email/盤前信推播**(把成本停損帶進信件)使用者這次**明確不要**(只在網頁);要做需把持倉放 GitHub Secret 給批次讀,屬下一階段。
 5. β 集中度未做(β 分級在伺服器端 premarket,前端沒有);目前只有產業/權重集中度。
+6. **撞事件個股層級目前只有台積法說→2330**;要「每檔持股撞自己的除權息/法說/財報日」需擴充 `scripts/events.py` 產個股事件表(除權息/法說排程 TWSE/MOPS 有免費源),再把個股事件寫進 data.json(僅選股榜/自選池內的股批次認得;任意持股需 detail API)。**新版 data.json 尚未實跑產生**(下次排程或本機真 token 跑 `--date` 後,`data.json` 才會帶 `events`;在那之前線上 data.json 無 events,撞事件提醒不顯示,優雅降級)。

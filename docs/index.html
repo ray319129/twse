@@ -570,6 +570,11 @@
   .port-wrow .pw-bar{flex:1;height:9px;background:var(--surface-3);border-radius:5px;overflow:hidden;}
   .port-wrow .pw-bar span{display:block;height:100%;background:var(--accent);border-radius:5px;}
   .port-wrow .pw-p{flex:0 0 46px;text-align:right;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+  .port-event-alert{background:var(--down-bg);border:1px solid var(--down-line);border-radius:var(--radius-sm);
+    padding:12px 15px;margin:12px 0 4px;}
+  .port-event-alert .pe-title{font-size:13px;font-weight:800;color:var(--down-ink);margin-bottom:7px;}
+  .port-event-alert .pe-line{font-size:12.5px;color:var(--ink-2);line-height:1.6;padding:2px 0;}
+  .pe-chip{color:var(--down);font-size:12px;margin-left:2px;cursor:help;}
   .held-badge{background:var(--accent-bg);color:var(--accent-ink);border:1px solid var(--accent-line);}
   .port-held-banner{background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:var(--radius-xs);
     padding:9px 12px;margin:0 0 12px;font-size:13px;color:var(--accent-ink);line-height:1.6;}
@@ -1164,6 +1169,32 @@ function portImportFile(){
   inp.click();
 }
 
+/* 持股撞事件:事件行事曆(DATA.events,市場級公開資訊)× 本地持倉的 client-side join。
+   個股層級目前僅台積法說→2330(未來可擴充個股事件表);其餘為市場級高風險事件 × 你的曝險。 */
+const EVENT_STOCK={tsmc:['2330']};
+function portEventInfo(){
+  const ev=(DATA&&DATA.events)||null,byStock={};
+  if(!ev||!Array.isArray(ev.events)||!ev.events.length||!PORT.positions.length)return {ev:null,byStock,stockHits:[],marketHigh:[]};
+  const held=new Set(PORT.positions.map(p=>String(p.id))),stockHits=[];
+  ev.events.forEach(e=>{(EVENT_STOCK[e.type]||[]).forEach(id=>{if(held.has(id)){stockHits.push({e,id});(byStock[id]=byStock[id]||[]).push(e);}});});
+  return {ev,byStock,stockHits,marketHigh:ev.events.filter(e=>e.impact==='high')};
+}
+function portEventAlertHtml(info,expCount,expBase,expBaseLabel,topInd){
+  const {ev,stockHits,marketHigh}=info;
+  if(!ev||(!stockHits.length&&!marketHigh.length))return'';
+  const ahead=e=>e.days_ahead===0?'今天':e.days_ahead===1?'明天':e.days_ahead+'天後';
+  const nameOf=id=>{const p=portGet(id);return p&&p.name?p.name:'';};
+  let lines='';
+  stockHits.forEach(({e,id})=>{lines+=`<div class="pe-line">⚠️ 你持有的 <b>${esc(id)} ${esc(nameOf(id))}</b> — ${esc(e.title)}（${esc(e.date||'')} ${ahead(e)}）</div>`;});
+  if(marketHigh.length){
+    const titles=[...new Set(marketHigh.map(e=>e.title))].join('、');
+    const soonest=marketHigh.slice().sort((a,b)=>a.days_ahead-b.days_ahead)[0];
+    const indTxt=topInd&&expBase?` · 最集中 ${esc(topInd[0])} ${Math.round(topInd[1]/expBase*100)}%`:'';
+    lines+=`<div class="pe-line">📅 未來 ${ev.horizon_days||7} 日高風險事件:<b>${esc(titles)}</b>（最近 ${ahead(soonest)}）。你留倉 <b>${expCount}</b> 檔 · ${expBaseLabel} ${fmtInt(expBase)}${indTxt} — 隔夜跳空風險偏高,控管留倉部位、嚴設停損,別在事件前一天重押。</div>`;
+  }
+  return `<div class="port-event-alert"><div class="pe-title">🚨 留倉撞事件提醒</div>${lines}</div>`;
+}
+
 function renderPortfolio(){
   const el=$('#p-port');if(!el)return;
   const pos=PORT.positions;
@@ -1186,18 +1217,24 @@ function renderPortfolio(){
   const rows=pos.map(p=>{
     const lots=Number(p.lots)||0,sh=lots*1000,cost=Number(p.cost)||0;
     const pr=portPriceOf(p.id),price=pr?pr.close:null;
-    const name=p.name||(pr&&pr.name)||'';
+    const name=p.name||(pr&&pr.name)||'',ind=(pr&&pr.industry)||'';
     const costTot=sh*cost,mkt=isNum(price)?sh*price:null;
     const pnl=isNum(mkt)?mkt-costTot:null,pnlPct=isNum(price)&&cost>0?(price-cost)/cost*100:null;
     const stop=cost>0?cost*(1-PORT_STOP):null;
     const distStop=isNum(price)&&isNum(stop)&&stop>0?(price-stop)/stop*100:null;
     totCost+=costTot;if(isNum(mkt))totMkt+=mkt;else haveMkt=false;
-    return {p,lots,cost,price,name,costTot,mkt,pnl,pnlPct,stop,distStop};
+    return {p,lots,cost,price,name,ind,costTot,mkt,pnl,pnlPct,stop,distStop};
   });
   const totPnl=haveMkt?totMkt-totCost:null,totPnlPct=haveMkt&&totCost>0?(totMkt-totCost)/totCost*100:null;
   const wBase=r=>haveMkt&&isNum(r.mkt)?r.mkt:r.costTot,wTot=rows.reduce((a,r)=>a+wBase(r),0)||1;
   rows.forEach(r=>r.w=wBase(r)/wTot*100);
   const byW=[...rows].sort((a,b)=>b.w-a.w);
+  /* 撞事件提醒(事件行事曆 × 持倉)+ 曝險摘要 */
+  const einfo=portEventInfo();
+  const expBase=haveMkt?totMkt:totCost,expBaseLabel=haveMkt?'市值':'成本',indAgg={};
+  rows.forEach(r=>{if(r.ind)indAgg[r.ind]=(indAgg[r.ind]||0)+(haveMkt&&isNum(r.mkt)?r.mkt:r.costTot);});
+  const topInd=Object.entries(indAgg).sort((a,b)=>b[1]-a[1])[0]||null;
+  const alertHtml=portEventAlertHtml(einfo,rows.length,expBase,expBaseLabel,topInd);
   const stats=`<div class="stats">
     <div class="stat"><div class="v">${fmtInt(totCost)}</div><div class="l">總成本(元)</div></div>
     <div class="stat"><div class="v">${haveMkt?fmtInt(totMkt):'—'}</div><div class="l">總市值(元)${haveMkt?'':' · 部分缺價'}</div></div>
@@ -1213,7 +1250,7 @@ function renderPortfolio(){
     <div class="port-table-wrap"><table class="port-table hold"><thead><tr>
       <th>代碼</th><th class="r">張</th><th class="r">均價</th><th class="r">現價</th><th class="r">市值</th><th class="r">未實現</th><th class="r">停損(-7%)</th><th></th></tr></thead><tbody>
     ${rows.map(r=>`<tr>
-      <td><div class="ht">${slink(r.p.id)}<span class="nm2">${esc(r.name||'')}</span></div>${r.p.note?`<div class="hn">${esc(r.p.note)}</div>`:''}</td>
+      <td><div class="ht">${slink(r.p.id)}${einfo.byStock[String(r.p.id)]?`<span class="pe-chip" title="${esc(einfo.byStock[String(r.p.id)].map(e=>e.title).join('、'))}">⚠</span>`:''}<span class="nm2">${esc(r.name||'')}</span></div>${r.p.note?`<div class="hn">${esc(r.p.note)}</div>`:''}</td>
       <td class="r mono">${num(r.lots,r.lots%1?2:0)}</td>
       <td class="r mono">${num(r.cost)}</td>
       <td class="r mono ${cls(r.pnlPct)}">${isNum(r.price)?num(r.price):'—'}</td>
@@ -1225,7 +1262,7 @@ function renderPortfolio(){
     </tbody></table></div>
     <div class="pi-hint">停損價 = 均價 ×(1−7%),對應系統預設硬停損;「距 x%」= 現價還要跌多少才觸及。損益未計手續費/證交稅。現價來自每日批次或即時查詢,非逐秒即時。</div>
   </div>`;
-  el.innerHTML=`<div class="lead">你的實際持倉損益與風險(共 <b>${rows.length}</b> 檔)。</div>`+tools+stats+conc+table;
+  el.innerHTML=`<div class="lead">你的實際持倉損益與風險(共 <b>${rows.length}</b> 檔)。</div>`+alertHtml+tools+stats+conc+table;
 }
 
 /* ============================================================

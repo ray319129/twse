@@ -647,6 +647,11 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     core_clean = [_clean_for_json(s) for s in core]
     watch_clean = [_clean_for_json(s) for s in watch]
     watchlist_clean = [_clean_for_json(s) for s in watchlist_results]
+    # 事件行事曆:選股當晚預告未來幾天的宏觀/重大事件(留倉風險提示),確定性、不爬網。
+    # 市場級公開資訊(非個人資料),寫進 data.json 供網頁「我的持倉」撞事件提醒 client-side join。
+    events_cfg = cfg.get("events", {}) or {}
+    events = (upcoming_events(today, events_cfg.get("horizon_days", 7))
+              if events_cfg.get("enabled", True) else None)
     with open(docs_dir / "data.json", "w", encoding="utf-8") as f:
         json.dump(_json_safe({
             "date": today.isoformat(),
@@ -658,6 +663,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "watch": watch_clean,
             "watchlist": watchlist_clean,
             "performance": performance,
+            "events": events,
             "label": STRATEGY_LABEL,
         }), f, ensure_ascii=False, indent=2, default=str)
 
@@ -671,6 +677,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "market_regime": regime,
             "scored_count": len(scored),
             "core": core_clean, "watch": watch_clean, "watchlist": watchlist_clean,
+            "events": events,
             "label": STRATEGY_LABEL,
         }), f, ensure_ascii=False, indent=2, default=str)
     dates = sorted(p.stem for p in hist_dir.glob("*.json"))
@@ -679,11 +686,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
 
     # 個股健檢(Stock Health)改為純即時查詢(api/health.py),不在批次流程內跑。
 
-    # 事件行事曆:選股當晚預告未來幾天的宏觀/重大事件(留倉風險提示),確定性、不爬網。
-    events_cfg = cfg.get("events", {}) or {}
-    events = (upcoming_events(today, events_cfg.get("horizon_days", 7))
-              if events_cfg.get("enabled", True) else None)
-
+    # events 已於 data.json 寫入前算好(見上),email ctx 沿用同一份。
     ctx = {
         "date_str": today.strftime("%Y-%m-%d (%a)"),
         "core": core,
