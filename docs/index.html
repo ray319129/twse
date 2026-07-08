@@ -528,6 +528,21 @@
 </style>
 <!-- 我的持倉(localStorage)樣式 -->
 <style>
+  /* 批次健檢 */
+  details.port-health-item{border-bottom:1px solid var(--line-soft);padding:0;}
+  details.port-health-item:last-child{border-bottom:none;}
+  .phi-sum{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:10px 4px;font-size:13px;}
+  .phi-sum::-webkit-details-marker{display:none;}
+  .phi-id{font-weight:700;min-width:48px;}
+  .phi-name{min-width:80px;}
+  .phi-status{margin-left:auto;font-size:12.5px;}
+  .phi-body{padding:0 4px 12px;}
+  .phi-detail{font-size:12.5px;}
+  .phi-dims{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .phi-dim{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:var(--radius-xs);padding:3px 9px;}
+  .phi-dim b{color:var(--muted);font-size:11px;margin-right:4px;}
+  .phi-reason{color:var(--muted);font-size:12px;line-height:1.6;margin-top:4px;}
+
   .port-tools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 8px;}
   .pbtn{font:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:var(--radius-xs);
     padding:7px 13px;border:1px solid var(--accent-line);background:var(--accent-bg);color:var(--accent-ink);}
@@ -1206,6 +1221,57 @@ function portEdit(id){
   const f=$('#port-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function portDelete(id){if(!confirm('刪除持倉 '+id+' ?'))return;PORT.positions=PORT.positions.filter(p=>String(p.id)!==String(id));portSave();renderPortfolio();}
+/* 單檔健檢:切換到健檢 tab 並查詢 */
+function portViewHealth(id){
+  if(!HEALTH_TAB_INIT){HEALTH_TAB_INIT=true;renderHealthTab();}
+  activateTab('health');
+  const inp=$('#health-input');if(inp)inp.value=id;
+  loadHealthStock(id);
+}
+/* 批次健檢:在持倉頁就地展開每檔健檢 accordion */
+function portBatchHealth(){
+  const box=$('#port-health-batch');if(!box)return;
+  const ids=PORT.positions.map(p=>String(p.id));
+  if(!ids.length)return;
+  const getName=id=>{const pr=PORT_PRICE[id];return (pr&&pr.name)||(PORT.positions.find(p=>String(p.id)===id)||{}).name||'';};
+  box.innerHTML=`<div class="port-card" style="margin-top:14px"><div class="pi-title">批次健檢(共 ${ids.length} 檔)</div>`+
+    ids.map(id=>`<details class="port-health-item" id="phi-${id}">
+      <summary class="phi-sum"><span class="phi-id">${id}</span><span class="phi-name mut">${esc(getName(id))}</span><span class="phi-status" id="phi-s-${id}">點開查詢</span></summary>
+      <div class="phi-body" id="phi-b-${id}"></div>
+    </details>`).join('')+`</div>`;
+  /* 為每個 details 掛 toggle 事件,懶載入 */
+  ids.forEach(id=>{
+    const det=box.querySelector('#phi-'+id);if(!det)return;
+    det.addEventListener('toggle',function handler(){
+      if(!det.open)return;
+      det.removeEventListener('toggle',handler);
+      const status=$('#phi-s-'+id),body=$('#phi-b-'+id);
+      if(!status||!body)return;
+      if(HEALTH_CACHE[id]){_portRenderMiniHealth(id,body,status);return;}
+      status.textContent='查詢中…';
+      fetch(HEALTH_API_BASE+'/api/health?stock='+encodeURIComponent(id)).then(r=>{
+        if(!r.ok)throw new Error('HTTP '+r.status);return r.json();
+      }).then(d=>{HEALTH_CACHE[id]=d;_portRenderMiniHealth(id,body,status);})
+      .catch(e=>{status.textContent='查詢失敗';body.innerHTML=`<div class="err" style="margin:8px 0">${esc(e&&e.message||e)}</div>`;});
+    });
+  });
+}
+function _portRenderMiniHealth(id,body,status){
+  const d=HEALTH_CACHE[id];if(!d||!d.scores){status.textContent='無資料';return;}
+  const style=d.default_style||Object.keys(d.scores||{})[0]||'value_investing';
+  const sc=d.scores[style]||{};
+  const total=isNum(sc.total)?sc.total:null;
+  const stars=total==null?'—':total>=80?'★★★★★':total>=65?'★★★★☆':total>=50?'★★★☆☆':total>=35?'★★☆☆☆':'★☆☆☆☆';
+  const clr=total==null?'':total>=65?'color:var(--up-ink)':total<35?'color:var(--down-ink)':'color:var(--warn)';
+  status.innerHTML=`<span style="${clr};font-weight:700">${total!=null?total+'分':'—'}</span> ${stars}`;
+  const dims=Object.entries(sc.dimensions||{}).map(([k,v])=>`<span class="phi-dim"><b>${esc(k)}</b> ${isNum(v.score)?v.score:'-'}</span>`).join('');
+  const reason=d.reason||'';
+  body.innerHTML=`<div class="phi-detail">
+    <div class="phi-dims">${dims}</div>
+    ${reason?`<div class="phi-reason">${esc(reason)}</div>`:''}
+    <button class="pbtn ghost" style="margin-top:8px;font-size:12px" onclick="portViewHealth('${esc(id)}')">查看完整健檢報告 →</button>
+  </div>`;
+}
 function portClear(){if(!confirm('清空全部持倉?建議先「匯出備份」。'))return;PORT.positions=[];portSave();renderPortfolio();}
 function portExport(){
   const blob=new Blob([JSON.stringify(PORT,null,2)],{type:'application/json'});
@@ -1258,6 +1324,7 @@ function renderPortfolio(){
     <button class="pbtn ghost" onclick="portExport()">⬇ 匯出備份</button>
     <button class="pbtn ghost" onclick="portImportFile()">⬆ 匯入備份</button>
     ${pos.length?'<button class="pbtn ghost danger" onclick="portClear()">清空</button>':''}
+    ${pos.length?'<button class="pbtn" onclick="portBatchHealth()">🔬 批次健檢</button>':''}
   </div>
   <div class="port-note">🔒 成本與持倉只存在你這台瀏覽器(localStorage),不會上傳、不進 GitHub、不進信件。換裝置或清瀏覽器資料前請先「匯出備份」。</div>
   <div id="port-form"></div>`;
@@ -1311,12 +1378,12 @@ function renderPortfolio(){
       <td class="r mono">${isNum(r.mkt)?fmtInt(r.mkt):'—'}</td>
       <td class="r mono ${cls(r.pnlPct)}">${isNum(r.pnlPct)?fmt(r.pnlPct)+'%':'—'}${isNum(r.pnl)?`<div class="hn ${cls(r.pnl)}">${(r.pnl>=0?'+':'')+fmtInt(r.pnl)}</div>`:''}</td>
       <td class="r mono">${isNum(r.stop)?num(r.stop):'—'}${isNum(r.distStop)?`<div class="hn ${r.distStop<0?'down':'mut'}">${r.distStop<0?'已破停損':'距 '+r.distStop.toFixed(1)+'%'}</div>`:''}</td>
-      <td class="r" style="white-space:nowrap"><button class="xrm" onclick="portEdit('${esc(r.p.id)}')" title="編輯">✎</button><button class="xrm" onclick="portDelete('${esc(r.p.id)}')" title="刪除">🗑</button></td>
+      <td class="r" style="white-space:nowrap"><button class="xrm" onclick="portViewHealth('${esc(r.p.id)}')" title="個股健檢">🔬</button><button class="xrm" onclick="portEdit('${esc(r.p.id)}')" title="編輯">✎</button><button class="xrm" onclick="portDelete('${esc(r.p.id)}')" title="刪除">🗑</button></td>
     </tr>`).join('')}
     </tbody></table></div>
     <div class="pi-hint">停損價 = 均價 ×(1−7%),對應系統預設硬停損;「距 x%」= 現價還要跌多少才觸及。損益未計手續費/證交稅。現價來自每日批次或即時查詢;標「匯入價」者為貼上當下的快照(非即時),重新貼上或該檔進榜單即會更新。</div>
   </div>`;
-  el.innerHTML=`<div class="lead">你的實際持倉損益與風險(共 <b>${rows.length}</b> 檔)。</div>`+alertHtml+tools+stats+conc+table;
+  el.innerHTML=`<div class="lead">你的實際持倉損益與風險(共 <b>${rows.length}</b> 檔)。</div>`+alertHtml+tools+stats+conc+table+`<div id="port-health-batch"></div>`;
 }
 
 /* ============================================================
