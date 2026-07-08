@@ -1018,7 +1018,7 @@ function renderWatchlist(){
 }
 
 /* ============================================================
-   我的持倉(2026-07-09 新增)— 純 localStorage,成本/張數只存本機瀏覽器,
+   我的持倉(2026-07-09 新增)— 純 localStorage,成本/持倉只存本機瀏覽器,
    絕不上傳、不進 GitHub、不進信件。現價取 data.json(核心/觀察/自選池)或
    /api/detail 末筆,缺價則損益顯示「—」。 [[twse-portfolio-import]]
    ============================================================ */
@@ -1026,7 +1026,9 @@ const PORT_KEY='twse-portfolio';
 const PORT_STOP=0.07;              /* 硬停損 %,對應 config exit.hard_stop 預設 */
 let PORT={v:1,positions:[],updated:null};
 let PORT_PRICE={},_portFetching={},_portFormOpen=false;
-function portLoad(){try{const r=localStorage.getItem(PORT_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.positions))PORT={v:1,positions:o.positions,updated:o.updated||null};}}catch(e){}}
+function portLoad(){try{const r=localStorage.getItem(PORT_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.positions)){
+  o.positions.forEach(p=>{if(p&&p.shares==null&&p.lots!=null)p.shares=Number(p.lots)*1000;});   /* 舊版張數→股數遷移 */
+  PORT={v:2,positions:o.positions,updated:o.updated||null};}}}catch(e){}}
 function portSave(){PORT.updated=new Date().toISOString();try{localStorage.setItem(PORT_KEY,JSON.stringify(PORT));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
 const portHas=id=>PORT.positions.some(p=>String(p.id)===String(id));
 const portGet=id=>PORT.positions.find(p=>String(p.id)===String(id))||null;
@@ -1036,8 +1038,8 @@ const heldTag=id=>portHas(id)?'<span class="badge held-badge" title="你的持�
 
 function portUpsert(o){
   const id=String(o.id),ex=portGet(id);
-  if(ex){ex.name=o.name||ex.name;ex.lots=o.lots;ex.cost=o.cost;if(o.note!=null)ex.note=o.note;ex.ts=new Date().toISOString();}
-  else PORT.positions.push({id,name:o.name||'',lots:o.lots,cost:o.cost,note:o.note||'',ts:new Date().toISOString()});
+  if(ex){ex.name=o.name||ex.name;ex.shares=o.shares;ex.cost=o.cost;if(isNum(o.price))ex.price=o.price;if(o.note!=null)ex.note=o.note;ex.ts=new Date().toISOString();}
+  else PORT.positions.push({id,name:o.name||'',shares:o.shares,cost:o.cost,price:(isNum(o.price)?o.price:null),note:o.note||'',ts:new Date().toISOString()});
 }
 /* 現價:先 data.json 批次,再 detail API 快取 */
 function portPriceOf(id){
@@ -1066,66 +1068,78 @@ function portCloseForm(){_portFormOpen=false;const f=$('#port-form');if(f)f.inne
 function portShowPaste(){
   _portFormOpen=true;const f=$('#port-form');if(!f)return;
   f.innerHTML=`<div class="port-card"><div class="pi-title">貼上券商庫存(把含表頭那幾列一起複製最準)</div>
-    <textarea id="port-paste" class="port-ta" placeholder="從看盤軟體『全部庫存』選取 → 複製 → 貼這裡\n例:代碼 商品 買進 賣出 成交 …\n2454 聯發科 3995 4000 3995s …"></textarea>
+    <textarea id="port-paste" class="port-ta" placeholder="最佳:券商『即時未實現損益』畫面(有股數+成本均價,可全自動帶入)。\n選取列 → 複製 → 貼這裡,例:\n股票名稱 即時庫存 … 成本均價 現價 …\n聯發科(2454) 3 … 3890.67 3995 …"></textarea>
     <div class="pi-actions"><button class="pbtn" onclick="portStage()">解析預覽</button><button class="pbtn ghost" onclick="portCloseForm()">取消</button></div>
-    <div class="pi-hint">解析後可逐列補「張數/均價」再匯入。你的庫存畫面若沒有『庫存量/成本』欄,張數與均價需自己填(那兩個數字只有你知道)。</div>
+    <div class="pi-hint">『即時未實現損益』有股數+成本均價欄→自動帶入;只有報價的『庫存』畫面→只帶代碼/名/現價,股數與均價需自己填。</div>
     <div id="port-stage"></div></div>`;
 }
+const portCleanName=s=>String(s==null?'':s).replace(/[（(]\s*\d{4,6}[A-Za-z]?\s*[）)]/,'').trim();  /* 去掉名稱裡的(代碼) */
 function portParse(text){
   const lines=String(text||'').split(/\r?\n/).map(l=>l.replace(/ /g,' ').trimEnd()).filter(l=>l.trim());
   if(!lines.length)return [];
   const splitLine=l=>l.includes('\t')?l.split('\t').map(c=>c.trim()):l.trim().split(/\s+/);
-  let hi=-1;for(let i=0;i<lines.length;i++){if(/代碼|代號/.test(lines[i])&&/商品|名稱|股票/.test(lines[i])){hi=i;break;}}
+  /* 表頭:含 代碼/名稱類 + 庫存/成本/現價類 任一,即視為表頭(相容『報價庫存』與『即時未實現損益』兩種畫面) */
+  let hi=-1;for(let i=0;i<lines.length;i++){
+    if(/代碼|代號|股票名稱|商品|名稱/.test(lines[i])&&/庫存|股數|餘額|成本|均價|成交|現價|市值/.test(lines[i])){hi=i;break;}}
   let col=null;
-  if(hi>=0){col={};splitLine(lines[hi]).forEach((c,i)=>{
-    if(col.id==null&&/代碼|代號/.test(c))col.id=i;
-    else if(col.name==null&&/商品|名稱|股票/.test(c))col.name=i;
-    else if(col.price==null&&/成交|市價|現價/.test(c))col.price=i;
-    else if(col.cost==null&&/成本|均價|平均/.test(c))col.cost=i;
-  });}
+  if(hi>=0){const H=splitLine(lines[hi]);
+    const find=(re,avoid)=>{for(let i=0;i<H.length;i++){if(re.test(H[i])&&!(avoid&&avoid.test(H[i])))return i;}return null;};
+    col={
+      id:    find(/代碼|代號/),
+      name:  find(/股票名稱|商品名稱|商品|名稱|股票/),
+      shares:find(/即時庫存|現股庫存|庫存|股數|部位/,/昨|餘額/),          /* 股數(非張數);排除昨日餘額 */
+      cost:  find(/均價/)!=null?find(/均價/):find(/成本/,/付出|總/),   /* 優先『成本均價』,避開『付出成本』(總額) */
+      price: find(/現價|成交|市價/,/昨|開盤|最高|最低|均/),
+    };
+  }
   const out=[];
   lines.forEach((l,i)=>{
     if(i===hi)return;
-    const id=portCode(l);if(!id)return;
-    let name='',price=null,cost=null;
+    let name='',shares=null,cost=null,price=null,id=null;
     if(col){const cells=splitLine(l);
       if(col.name!=null&&cells[col.name])name=cells[col.name];
+      id=(col.id!=null?portCode(cells[col.id]):null)||portCode(name)||portCode(l);
+      if(col.shares!=null)shares=portCleanNum(cells[col.shares]);
+      if(col.cost!=null)cost=portCleanNum(cells[col.cost]);
       if(col.price!=null)price=portCleanNum(cells[col.price]);
-      if(col.cost!=null)cost=portCleanNum(cells[col.cost]);}
+    } else { id=portCode(l); }
+    if(!id)return;
     if(!name){const m=l.match(/[一-鿿][一-鿿A-Za-z0-9．.\-]*/);if(m)name=m[0];}
-    out.push({id,name,price,cost});
+    out.push({id,name:portCleanName(name),shares,cost,price});
   });
   return out;
 }
 function portStage(){
   const ta=$('#port-paste'),box=$('#port-stage');if(!ta||!box)return;
   const rows=portParse(ta.value);
-  if(!rows.length){box.innerHTML='<div class="port-warn">沒解析到任何股票代碼。確認有把『代碼』那欄一起複製,或改用「手動新增」。</div>';return;}
-  box.innerHTML=`<div style="margin-top:12px"><div class="pi-title">解析到 ${rows.length} 檔 · 補上張數/均價後匯入</div>
-    <div class="port-table-wrap"><table class="port-table"><thead><tr><th>代碼</th><th>名稱</th><th class="r">現價</th><th class="r">張數 *</th><th class="r">均價 *</th><th></th></tr></thead><tbody>
+  if(!rows.length){box.innerHTML='<div class="port-warn">沒解析到任何股票代碼。確認有把『代碼/股票名稱』那欄一起複製,或改用「手動新增」。</div>';return;}
+  const auto=rows.some(r=>isNum(r.shares)&&isNum(r.cost));
+  box.innerHTML=`<div style="margin-top:12px"><div class="pi-title">解析到 ${rows.length} 檔${auto?' · 已自動帶入股數/均價,確認後匯入':' · 補上股數/均價後匯入'}</div>
+    <div class="port-table-wrap"><table class="port-table"><thead><tr><th>代碼</th><th>名稱</th><th class="r">現價</th><th class="r">股數 *</th><th class="r">均價 *</th><th></th></tr></thead><tbody>
     ${rows.map(r=>`<tr>
       <td class="mono pcode">${esc(r.id)}</td>
       <td><input class="pin pin-name" value="${esc(r.name||'')}" placeholder="名稱"></td>
-      <td class="r mut">${isNum(r.price)?num(r.price):'—'}</td>
-      <td class="r"><input class="pin pin-lots" inputmode="decimal" value="" placeholder="張"></td>
+      <td class="r mut pprice" data-price="${isNum(r.price)?r.price:''}">${isNum(r.price)?num(r.price):'—'}</td>
+      <td class="r"><input class="pin pin-shares" inputmode="decimal" value="${isNum(r.shares)?r.shares:''}" placeholder="股"></td>
       <td class="r"><input class="pin pin-cost" inputmode="decimal" value="${isNum(r.cost)?r.cost:''}" placeholder="均價"></td>
       <td class="r"><button class="xrm" onclick="this.closest('tr').remove()" title="移除此列">✕</button></td>
     </tr>`).join('')}
     </tbody></table></div>
     <div class="pi-actions"><button class="pbtn" onclick="portCommit()">✓ 匯入 / 更新持倉</button></div>
-    <div class="pi-hint">「張數」空白或 0 的列會略過;已存在的代碼會被覆蓋更新。</div></div>`;
+    <div class="pi-hint">股數為<b>股</b>(非張;1 張=1000 股,零股照填實際股數)。空白或 0 的列會略過;已存在的代碼會被覆蓋更新。</div></div>`;
 }
 function portCommit(){
   const box=$('#port-stage');if(!box)return;let n=0;
   box.querySelectorAll('tbody tr').forEach(tr=>{
     const id=portCode(tr.querySelector('.pcode')?.textContent);if(!id)return;
     const name=(tr.querySelector('.pin-name')?.value||'').trim();
-    const lots=portCleanNum(tr.querySelector('.pin-lots')?.value);
+    const shares=portCleanNum(tr.querySelector('.pin-shares')?.value);
     const cost=portCleanNum(tr.querySelector('.pin-cost')?.value);
-    if(!isNum(lots)||lots<=0||!isNum(cost)||cost<=0)return;
-    portUpsert({id,name,lots,cost});n++;
+    const price=portCleanNum(tr.querySelector('.pprice')?.dataset.price);
+    if(!isNum(shares)||shares<=0||!isNum(cost)||cost<=0)return;
+    portUpsert({id,name,shares,cost,price});n++;
   });
-  if(!n){alert('沒有可匯入的列(每列需填張數與均價,且 > 0)。');return;}
+  if(!n){alert('沒有可匯入的列(每列需填股數與均價,且 > 0)。');return;}
   portSave();portCloseForm();renderPortfolio();
 }
 function portShowManual(){
@@ -1134,22 +1148,22 @@ function portShowManual(){
     <div class="port-mform">
       <input id="pm-id" class="pin" placeholder="代碼 例:2330" inputmode="numeric">
       <input id="pm-name" class="pin" placeholder="名稱(選填)">
-      <input id="pm-lots" class="pin r" placeholder="張數" inputmode="decimal">
+      <input id="pm-shares" class="pin r" placeholder="股數(1張=1000股)" inputmode="decimal">
       <input id="pm-cost" class="pin r" placeholder="均價" inputmode="decimal">
       <input id="pm-note" class="pin" placeholder="備註(選填)">
     </div>
     <div class="pi-actions"><button class="pbtn" onclick="portAddManual()">✓ 加入</button><button class="pbtn ghost" onclick="portCloseForm()">取消</button></div></div>`;
 }
 function portAddManual(){
-  const id=portCode($('#pm-id').value),lots=portCleanNum($('#pm-lots').value),cost=portCleanNum($('#pm-cost').value);
+  const id=portCode($('#pm-id').value),shares=portCleanNum($('#pm-shares').value),cost=portCleanNum($('#pm-cost').value);
   if(!id){alert('請輸入有效代碼(4~6 碼數字)。');return;}
-  if(!isNum(lots)||lots<=0||!isNum(cost)||cost<=0){alert('請輸入張數與均價(需 > 0)。');return;}
-  portUpsert({id,name:($('#pm-name').value||'').trim(),lots,cost,note:($('#pm-note').value||'').trim()});
+  if(!isNum(shares)||shares<=0||!isNum(cost)||cost<=0){alert('請輸入股數與均價(需 > 0)。');return;}
+  portUpsert({id,name:($('#pm-name').value||'').trim(),shares,cost,note:($('#pm-note').value||'').trim()});
   portSave();portCloseForm();renderPortfolio();
 }
 function portEdit(id){
   const p=portGet(id);if(!p)return;portShowManual();
-  $('#pm-id').value=p.id;$('#pm-name').value=p.name||'';$('#pm-lots').value=p.lots;$('#pm-cost').value=p.cost;$('#pm-note').value=p.note||'';
+  $('#pm-id').value=p.id;$('#pm-name').value=p.name||'';$('#pm-shares').value=p.shares;$('#pm-cost').value=p.cost;$('#pm-note').value=p.note||'';
   const f=$('#port-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function portDelete(id){if(!confirm('刪除持倉 '+id+' ?'))return;PORT.positions=PORT.positions.filter(p=>String(p.id)!==String(id));portSave();renderPortfolio();}
@@ -1205,7 +1219,7 @@ function renderPortfolio(){
     <button class="pbtn ghost" onclick="portImportFile()">⬆ 匯入備份</button>
     ${pos.length?'<button class="pbtn ghost danger" onclick="portClear()">清空</button>':''}
   </div>
-  <div class="port-note">🔒 成本與張數只存在你這台瀏覽器(localStorage),不會上傳、不進 GitHub、不進信件。換裝置或清瀏覽器資料前請先「匯出備份」。</div>
+  <div class="port-note">🔒 成本與持倉只存在你這台瀏覽器(localStorage),不會上傳、不進 GitHub、不進信件。換裝置或清瀏覽器資料前請先「匯出備份」。</div>
   <div id="port-form"></div>`;
   if(!pos.length){
     el.innerHTML='<div class="lead">匯入你的實際持倉,看每檔損益、距停損、部位集中度。</div>'+tools+
@@ -1215,15 +1229,15 @@ function renderPortfolio(){
   portResolveMissing();
   let totCost=0,totMkt=0,haveMkt=true;
   const rows=pos.map(p=>{
-    const lots=Number(p.lots)||0,sh=lots*1000,cost=Number(p.cost)||0;
-    const pr=portPriceOf(p.id),price=pr?pr.close:null;
+    const sh=Number(p.shares)||0,cost=Number(p.cost)||0;
+    const pr=portPriceOf(p.id),price=pr?pr.close:(isNum(p.price)?Number(p.price):null),priceLive=!!pr;
     const name=p.name||(pr&&pr.name)||'',ind=(pr&&pr.industry)||'';
     const costTot=sh*cost,mkt=isNum(price)?sh*price:null;
     const pnl=isNum(mkt)?mkt-costTot:null,pnlPct=isNum(price)&&cost>0?(price-cost)/cost*100:null;
     const stop=cost>0?cost*(1-PORT_STOP):null;
     const distStop=isNum(price)&&isNum(stop)&&stop>0?(price-stop)/stop*100:null;
     totCost+=costTot;if(isNum(mkt))totMkt+=mkt;else haveMkt=false;
-    return {p,lots,cost,price,name,ind,costTot,mkt,pnl,pnlPct,stop,distStop};
+    return {p,sh,cost,price,priceLive,name,ind,costTot,mkt,pnl,pnlPct,stop,distStop};
   });
   const totPnl=haveMkt?totMkt-totCost:null,totPnlPct=haveMkt&&totCost>0?(totMkt-totCost)/totCost*100:null;
   const wBase=r=>haveMkt&&isNum(r.mkt)?r.mkt:r.costTot,wTot=rows.reduce((a,r)=>a+wBase(r),0)||1;
@@ -1248,19 +1262,19 @@ function renderPortfolio(){
   </div>`;
   const table=`<div class="port-card"><div class="pi-title">持股明細</div>
     <div class="port-table-wrap"><table class="port-table hold"><thead><tr>
-      <th>代碼</th><th class="r">張</th><th class="r">均價</th><th class="r">現價</th><th class="r">市值</th><th class="r">未實現</th><th class="r">停損(-7%)</th><th></th></tr></thead><tbody>
+      <th>代碼</th><th class="r">股數</th><th class="r">均價</th><th class="r">現價</th><th class="r">市值</th><th class="r">未實現</th><th class="r">停損(-7%)</th><th></th></tr></thead><tbody>
     ${rows.map(r=>`<tr>
       <td><div class="ht">${slink(r.p.id)}${einfo.byStock[String(r.p.id)]?`<span class="pe-chip" title="${esc(einfo.byStock[String(r.p.id)].map(e=>e.title).join('、'))}">⚠</span>`:''}<span class="nm2">${esc(r.name||'')}</span></div>${r.p.note?`<div class="hn">${esc(r.p.note)}</div>`:''}</td>
-      <td class="r mono">${num(r.lots,r.lots%1?2:0)}</td>
+      <td class="r mono">${fmtInt(r.sh)}${r.sh%1000===0?`<div class="hn">${r.sh/1000} 張</div>`:''}</td>
       <td class="r mono">${num(r.cost)}</td>
-      <td class="r mono ${cls(r.pnlPct)}">${isNum(r.price)?num(r.price):'—'}</td>
+      <td class="r mono ${cls(r.pnlPct)}">${isNum(r.price)?num(r.price):'—'}${isNum(r.price)&&!r.priceLive?'<div class="hn">匯入價</div>':''}</td>
       <td class="r mono">${isNum(r.mkt)?fmtInt(r.mkt):'—'}</td>
       <td class="r mono ${cls(r.pnlPct)}">${isNum(r.pnlPct)?fmt(r.pnlPct)+'%':'—'}${isNum(r.pnl)?`<div class="hn ${cls(r.pnl)}">${(r.pnl>=0?'+':'')+fmtInt(r.pnl)}</div>`:''}</td>
       <td class="r mono">${isNum(r.stop)?num(r.stop):'—'}${isNum(r.distStop)?`<div class="hn ${r.distStop<0?'down':'mut'}">${r.distStop<0?'已破停損':'距 '+r.distStop.toFixed(1)+'%'}</div>`:''}</td>
       <td class="r" style="white-space:nowrap"><button class="xrm" onclick="portEdit('${esc(r.p.id)}')" title="編輯">✎</button><button class="xrm" onclick="portDelete('${esc(r.p.id)}')" title="刪除">🗑</button></td>
     </tr>`).join('')}
     </tbody></table></div>
-    <div class="pi-hint">停損價 = 均價 ×(1−7%),對應系統預設硬停損;「距 x%」= 現價還要跌多少才觸及。損益未計手續費/證交稅。現價來自每日批次或即時查詢,非逐秒即時。</div>
+    <div class="pi-hint">停損價 = 均價 ×(1−7%),對應系統預設硬停損;「距 x%」= 現價還要跌多少才觸及。損益未計手續費/證交稅。現價來自每日批次或即時查詢;標「匯入價」者為貼上當下的快照(非即時),重新貼上或該檔進榜單即會更新。</div>
   </div>`;
   el.innerHTML=`<div class="lead">你的實際持倉損益與風險(共 <b>${rows.length}</b> 檔)。</div>`+alertHtml+tools+stats+conc+table;
 }
@@ -1797,7 +1811,8 @@ function portDetailBanner(d){
   const p=portGet(d&&d.stock_id);if(!p)return '';
   const k=(d.kline||[]),price=k.length?Number(k[k.length-1][4]):null,cost=Number(p.cost)||0;
   const pnlPct=isNum(price)&&cost>0?(price-cost)/cost*100:null;
-  return `<div class="port-held-banner">🔖 你的持倉 · ${num(p.lots,p.lots%1?2:0)} 張 · 均價 ${num(cost)}`+
+  const sh=Number(p.shares)||0,shTxt=sh%1000===0?`${sh/1000} 張`:`${fmtInt(sh)} 股`;
+  return `<div class="port-held-banner">🔖 你的持倉 · ${shTxt} · 均價 ${num(cost)}`+
     (isNum(price)?` · 現價 ${num(price)} · 未實現 <b class="${cls(pnlPct)}">${isNum(pnlPct)?fmt(pnlPct)+'%':'—'}</b>`:'')+`</div>`;
 }
 function renderDetail(d){
