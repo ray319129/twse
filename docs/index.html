@@ -1147,14 +1147,15 @@ function portOcrPicked(e){
   const status=$('#port-ocr-status');if(status)status.innerHTML='<div class="port-note">讀取圖片中…</div>';
   const rd=new FileReader();
   rd.onload=()=>{const img=new Image();img.onload=()=>{
-    const maxW=1600;let w=img.width,h=img.height;
+    // 密表小字很吃解析度:只在超寬時才縮到 2400px,並用無損 PNG(JPEG 壓縮會糊掉小數字)
+    const maxW=2400;let w=img.width,h=img.height;
     if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
     const c=document.createElement('canvas');c.width=w;c.height=h;
     c.getContext('2d').drawImage(img,0,0,w,h);
-    let b64='';try{b64=c.toDataURL('image/jpeg',0.85).split(',')[1];}catch(_){if(status)status.innerHTML='<div class="port-warn">圖片讀取失敗,請換一張。</div>';return;}
-    if(status)status.innerHTML='<div class="port-note">🔍 Claude 辨識中,約 5~15 秒…</div>';
+    let b64='';try{b64=c.toDataURL('image/png').split(',')[1];}catch(_){if(status)status.innerHTML='<div class="port-warn">圖片讀取失敗,請換一張。</div>';return;}
+    if(status)status.innerHTML='<div class="port-note">🔍 Claude 辨識中,約 10~20 秒…</div>';
     fetch(HEALTH_API_BASE+'/api/portfolio_ocr',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({image:b64,media_type:'image/jpeg'})})
+      body:JSON.stringify({image:b64,media_type:'image/png'})})
       .then(r=>r.json().catch(()=>{throw new Error('http '+r.status+'(API 未部署或無回應)');}))
       .then(d=>{if(d&&d.error)throw new Error(d.error);
         const rows=(d.positions||[]).map(p=>({id:portCode(p.id),name:portCleanName(p.name||''),shares:portCleanNum(p.shares),cost:portCleanNum(p.cost),price:portCleanNum(p.price)})).filter(r=>r.id);
