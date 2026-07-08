@@ -21,7 +21,7 @@ import pandas as pd
 from .config import load_screeners, SIGNALS_DIR, DATA_DIR, now_tpe, assert_env
 from .fetchers import (
     fetch_stock_info, fetch_mis_quotes, fetch_intraday_1m,
-    fetch_market_gate, fetch_adr_changes,
+    fetch_market_gate, fetch_adr_changes, fetch_tx_night,
 )
 from .notify import render_email, send_email
 from .utils import log
@@ -80,24 +80,91 @@ def _market_map() -> dict[str, str]:
     return {}
 
 
+def _industry_map() -> dict[str, str]:
+    """stock_id → 產業別(FinMind industry_category);供族群隔夜連動 β 用。"""
+    try:
+        info = fetch_stock_info()
+        if "industry_category" in info.columns:
+            return dict(zip(info["stock_id"].astype(str), info["industry_category"]))
+    except Exception as e:
+        log.warning(f"stock_info 取產業別失敗:{e}")
+    return {}
+
+
 # ---------- 大盤閘門 ----------
 
-def compute_gate(gate_data: dict, cfg_gate: dict) -> dict:
-    """美股隔夜投票 → risk-on / 中性 / risk-off。"""
+# 族群對『隔夜驅動因子(SOX/台指夜盤/美股)』的連動強弱。做多時,高連動族群在隔夜偏空的早盤
+# 更容易同步跳空 → 給較大 β;內需/金融/防禦型較不受美股電子牽動 → 較小 β。
+_BETA_HIGH_KW = ["半導體", "電子", "光電", "通信", "通訊", "電腦", "週邊", "資訊", "IC"]
+_BETA_LOW_KW = ["金融", "保險", "食品", "生技", "醫療", "觀光", "百貨", "貿易",
+                "油電", "燃氣", "建材", "營造", "水泥", "汽車"]
+
+
+def _sector_beta(industry: str, cfg_gate: dict) -> tuple[str, float]:
+    """產業別 → (連動級別 high/med/low, β 係數)。"""
+    s = str(industry or "")
+    if any(k in s for k in _BETA_HIGH_KW):
+        return "high", float(cfg_gate.get("beta_high", 1.3))
+    if any(k in s for k in _BETA_LOW_KW):
+        return "low", float(cfg_gate.get("beta_low", 0.6))
+    return "med", float(cfg_gate.get("beta_med", 1.0))
+
+
+def compute_gate(gate_data: dict, tx_night: dict | None, cfg_gate: dict) -> dict:
+    """隔夜多訊號 → 連續風險分數(≈隔夜加權漲跌%)+ risk-on / 中性 / risk-off。
+
+    主體 = 各隔夜%的『加權平均』(單位一致,可直接平均):
+      台指夜盤(最重,台股自身)> 台積電ADR ≈ 費半SOX > 美股期(NQ/ES)。
+    VIX 絕對高檔或單日跳升再額外扣分。
+    方向性:分數本身有號(正=偏多、負=偏空);做多時僅『負分』會觸發減碼動作(見 _overnight_note)。
+    台指夜盤僅在『今晨已被 FinMind 發布(is_today)』時才納入,否則交由美股代理承擔。"""
+    w = cfg_gate.get("weights", {}) or {}
+    drivers: list[tuple[float, float]] = []   # (weight, pct)
+    tx_used = bool(tx_night and tx_night.get("is_today") and tx_night.get("pct") is not None)
+    if tx_used:
+        drivers.append((float(w.get("tx_night", 3.0)), float(tx_night["pct"])))
+    tsm = (gate_data.get("tsm") or {}).get("pct")
+    if tsm is not None:
+        drivers.append((float(w.get("tsm", 2.0)), float(tsm)))
     sox = (gate_data.get("sox") or {}).get("pct")
-    nq = (gate_data.get("nasdaq") or {}).get("pct")
-    vix = (gate_data.get("vix") or {}).get("last")
-    score = 0
     if sox is not None:
-        score += 1 if sox >= cfg_gate.get("sox_riskon", 1.0) else (-1 if sox <= cfg_gate.get("sox_riskoff", -2.0) else 0)
-    if nq is not None:
-        score += 1 if nq >= cfg_gate.get("nq_riskon", 1.0) else (-1 if nq <= cfg_gate.get("nq_riskoff", -1.5) else 0)
-    if vix is not None and vix >= cfg_gate.get("vix_high", 25):
-        score -= 1
-    label = "risk-on" if score >= 1 else ("risk-off" if score <= -1 else "中性")
-    return {"label": label, "score": score,
+        drivers.append((float(w.get("sox", 2.0)), float(sox)))
+    nq = (gate_data.get("nasdaq") or {}).get("pct")
+    es = (gate_data.get("sp500") or {}).get("pct")
+    idx = nq if nq is not None else es
+    if idx is not None:
+        drivers.append((float(w.get("index", 1.0)), float(idx)))
+
+    tw = sum(wt for wt, _ in drivers)
+    risk_pct = (sum(wt * p for wt, p in drivers) / tw) if tw else 0.0
+
+    # VIX 修正:絕對高檔(預期跳空大)或單日大跳升(恐慌轉向)
+    vlast = (gate_data.get("vix") or {}).get("last")
+    vpct = (gate_data.get("vix") or {}).get("pct")
+    vix_pen = 0.0
+    if vlast is not None and vlast >= cfg_gate.get("vix_high", 25):
+        vix_pen -= float(cfg_gate.get("vix_pen", 0.8))
+    if vpct is not None and vpct >= cfg_gate.get("vix_spike", 15):
+        vix_pen -= float(cfg_gate.get("vix_spike_pen", 0.6))
+
+    risk_score = round(risk_pct + vix_pen, 2)
+    label = ("risk-on" if risk_score >= cfg_gate.get("riskon_score", 0.8)
+             else ("risk-off" if risk_score <= cfg_gate.get("riskoff_score", -0.8) else "中性"))
+    return {"label": label, "score": risk_score, "risk_pct": round(risk_pct, 2),
+            "tx_night": tx_night, "tx_used": tx_used, "tsm": gate_data.get("tsm"),
             "sox": gate_data.get("sox"), "nasdaq": gate_data.get("nasdaq"),
             "sp500": gate_data.get("sp500"), "vix": gate_data.get("vix")}
+
+
+def _overnight_note(sector: str, gate_label: str, overnight_risk: float | None) -> str | None:
+    """依族群 β 與大盤閘門,給每檔一句隔夜連動提示(僅在偏空早盤才有意義=方向性)。"""
+    if gate_label != "risk-off" or overnight_risk is None:
+        return None
+    if sector == "high":
+        return f"族群高連動(電子/半導體),隔夜偏空預估同步拖累 ~{overnight_risk:g}%;優先減碼或縮量,別逆勢加碼。"
+    if sector == "low":
+        return "族群低連動(金融/內需),受美股電子隔夜偏空牽動較小;仍守開盤價與停損即可。"
+    return f"族群中連動,隔夜偏空預估拖累 ~{overnight_risk:g}%;酌量保守。"
 
 
 # ---------- 個股分類(用試撮/開盤價套既有決策卡 plan)----------
@@ -138,8 +205,20 @@ def _action_text(scenario: str, plan: dict, gate_label: str) -> str:
     return "盤前無報價,開盤後自行確認。"
 
 
-def classify_preopen(pick: dict, quote: dict | None, gate_label: str) -> dict:
-    """單檔盤前分類(純函式,可離線測)。"""
+def classify_preopen(pick: dict, quote: dict | None, gate,
+                     beta_info: tuple[str, float] | None = None) -> dict:
+    """單檔盤前分類(純函式,可離線測)。
+    gate 可為完整 gate dict(含 label/score)或舊式純 label 字串(向後相容)。
+    beta_info = (族群級別, β);None 時視為中連動。"""
+    if isinstance(gate, dict):
+        gate_label = gate.get("label", "中性")
+        gate_score = gate.get("score", 0) or 0
+    else:
+        gate_label, gate_score = gate, 0
+    sector, beta = beta_info or ("med", 1.0)
+    # 隔夜連動風險僅在偏空(負分)時對做多有意義 → 方向性
+    overnight_risk = round(beta * gate_score, 2) if gate_score < 0 else None
+
     plan = pick.get("plan") or {}
     price = (quote or {}).get("price")
     res = {
@@ -147,6 +226,7 @@ def classify_preopen(pick: dict, quote: dict | None, gate_label: str) -> dict:
         "score": pick.get("score"), "profile": pick.get("profile"),
         "price": price, "src": (quote or {}).get("src"),
         "ref": plan.get("ref"), "plan": plan,
+        "sector": sector, "beta": beta, "overnight_risk": overnight_risk,
     }
     if not plan or price is None:
         res["scenario"] = "unknown"
@@ -155,6 +235,7 @@ def classify_preopen(pick: dict, quote: dict | None, gate_label: str) -> dict:
         res["gap_pct"] = round((price / plan["ref"] - 1) * 100, 2) if plan.get("ref") else None
     res["scenario_label"] = _SCEN_LABEL[res["scenario"]]
     res["action"] = _action_text(res["scenario"], plan, gate_label)
+    res["overnight_note"] = _overnight_note(sector, gate_label, overnight_risk)
     res["valid"] = res["scenario"] in ("A", "B", "C")
     return res
 
@@ -226,9 +307,14 @@ def run_preopen(test_mode: bool = False) -> None:
         log.info("盤前:找不到最近核心選股(data/signals 為空),略過。")
         return
 
+    cfg_gate = pm.get("gate", {})
     gate_data = fetch_market_gate()
-    gate = compute_gate(gate_data, pm.get("gate", {}))
+    tx_night = fetch_tx_night()
+    gate = compute_gate(gate_data, tx_night, cfg_gate)
+    if tx_night and not tx_night.get("is_today"):
+        log.info(f"盤前:台指夜盤最新資料為 {tx_night.get('date')}(非今日),尚未發布 → 本次閘門改用美股代理。")
     adr = fetch_adr_changes(pm.get("adr", {}))
+    ind = _industry_map()
     quotes = fetch_mis_quotes(symbols)
     if not quotes:
         log.info("盤前:MIS 試撮全無資料(可能休市或 API 異常),略過寄信。")
@@ -236,14 +322,17 @@ def run_preopen(test_mode: bool = False) -> None:
 
     rows = []
     for s in core:
-        r = classify_preopen(s, quotes.get(str(s["stock_id"])), gate["label"])
-        a = adr.get(str(s["stock_id"]))
+        sid = str(s["stock_id"])
+        r = classify_preopen(s, quotes.get(sid), gate, _sector_beta(ind.get(sid, ""), cfg_gate))
+        a = adr.get(sid)
         if a:
             r["adr"] = a
         rows.append(r)
-    # 排序:有效的(A/B/C)在前,再依信心分
+    # 排序:有效的(A/B/C)在前;偏空早盤時高族群連動(overnight_risk 較負)往後,再依信心分。
+    # (risk-on/中性時 overnight_risk=None→0,不影響原有依信心分排序)
     order = {"A": 0, "B": 1, "C": 2, "skip_up": 3, "skip_dn": 4, "unknown": 5}
-    rows.sort(key=lambda r: (order.get(r["scenario"], 9), -(r.get("score") or 0)))
+    rows.sort(key=lambda r: (order.get(r["scenario"], 9),
+                             -(r.get("overnight_risk") or 0), -(r.get("score") or 0)))
     valid = [r for r in rows if r["valid"]]
 
     today = now_tpe()

@@ -41,6 +41,7 @@ jobs:
 
       - name: Run premarket watch
         env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}   # 台指期夜盤閘門用(TaiwanFuturesDaily);沒設會退匿名低額度
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}

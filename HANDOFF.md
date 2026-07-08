@@ -147,7 +147,10 @@ M.daily_run(test_mode=True)
 GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 在 08:45 / 09:25(台北,一~五)呼叫 `workflow_dispatch` API**(觸發的 run 通常幾秒啟動 → 準時、免開電腦)。設定步驟見 [SETUP_PREMARKET_CRON.md](SETUP_PREMARKET_CRON.md)(含建 PAT + cron-job.org)。`premarket.yml` 用 `inputs.phase`(preopen/orb)分流;也可在 Actions 分頁手動 Run workflow。若 cron-job.org 當天掛掉則該日不自動跑(可手動補)。
 
 ### 兩個 phase(`.github/workflows/premarket.yml`)
-- **08:45 台北 `--phase preopen`**:讀最近一次盤後核心10 + 各自 `plan` → 抓個股『試撮/預估開盤價』(TWSE MIS API,免金鑰)+ 大盤盤前閘門(yfinance:費半 SOX / NASDAQ 期 NQ=F / S&P 期 ES=F / VIX,投票 risk-on/中性/risk-off)+ ADR 佐證 → 把每檔分類 **A平盤 / B開高 / C開低 / ❌棄單(跳空過進場上限)/ ❌作廢(開盤即破停損)**,寄信。
+- **08:45 台北 `--phase preopen`**:讀最近一次盤後核心10 + 各自 `plan` → 抓個股『試撮/預估開盤價』(TWSE MIS API,免金鑰)+ **大盤盤前閘門(2026-07-08 升級成連續風險分數)**+ ADR 佐證 → 把每檔分類 **A平盤 / B開高 / C開低 / ❌棄單(跳空過進場上限)/ ❌作廢(開盤即破停損)**,寄信。
+  - **閘門(`compute_gate`)= 各隔夜%的加權平均**,不再是 ±1 投票:**台指期夜盤(FinMind `TaiwanFuturesDaily` after_market,權重最重,台股自身重定價)** > 台積電ADR(TSM) ≈ 費半SOX > 美股期(NQ/ES);VIX 絕對≥25 或單日跳升≥15% 再扣分 → `score`(≈隔夜加權%)映射 risk-on/中性/risk-off。**方向性**:做多時只有負分(偏空)觸發減碼。
+  - **族群 β(`_sector_beta`,item 2)**:用 `industry_category` 把每檔標 high(電子/半導體/光電/通訊)/med/low(金融/內需/防禦);risk-off 早盤高β檔給 `overnight_note` 減碼提示,並在排序上把高連動檔往後(低β防禦檔優先)。
+  - **台指夜盤取得(`fetch_tx_night`,item 3)**:實測 FinMind after_market 標記日 D = 『D-1 傍晚開→D 清晨05:00收』夜盤,`spread_per` 即隔夜%;近月=同日同session最大量,排除價差單。**防禦**:`is_today=False`(今晨夜盤 08:45 前尚未發布)則忽略夜盤、退回美股代理。**待驗**:08:45 實跑時 FinMind 是否已發布今晨夜盤,看 log「非今日 → 改用美股代理」出現頻率。
 - **09:25 台北 `--phase orb`**:對(依真實開盤判為)A 的股抓 **09:00–09:15 yfinance 1分K** → 算開盤區間高 ORH → 判 09:15 後是否**帶量突破**(`premarket.orb.volume_filter`,預設開)→ 寄信「✅已突破可進 / ⏸尚未突破 / ❌跌破區間低」。
 
 ### 設計重點 / 注意
@@ -162,7 +165,8 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - `docs/index.html` 的 `renderLive()` 讀它,進入分頁時每 60 秒輪詢(cache-bust)+「↻ 重新整理」鈕。**非逐秒即時**:只在 08:45/09:25(與手動觸發)更新,UI 已誠實標示。瀏覽器無法直連 MIS(CORS),故走「Actions 產檔 → 網頁讀檔」。
 
 ### config(`config/screeners.yaml` → `premarket`)
-`gate`(SOX/NQ/VIX 門檻)、`orb`(range_minutes 15 / confirm_until 09:30 / volume_filter / volume_mult)、`adr`(台股代號→ADR ticker:2330→TSM、2303→UMC、3711→ASX、2317→HNHPF、2409→AUOTY)。
+`gate`(2026-07-08 改版:`weights`{tx_night 3 / tsm 2 / sox 2 / index 1}、`riskon_score`/`riskoff_score` 分數門檻、`vix_high`/`vix_pen`/`vix_spike`/`vix_spike_pen`、族群 `beta_high`/`beta_med`/`beta_low`)、`orb`(range_minutes 15 / confirm_until 09:30 / volume_filter / volume_mult)、`adr`(台股代號→ADR ticker:2330→TSM、2303→UMC、3711→ASX、2317→HNHPF、2409→AUOTY)。
+**premarket.yml 已加 `FINMIND_TOKEN` env**(台指夜盤需要;沒設會退匿名低額度)。
 
 ### 手動測試
 - 雲端:Actions → **Premarket Watch** → Run workflow → 選 `preopen`/`orb`。
@@ -170,7 +174,10 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - 離線單元測試:`classify_preopen` / `orb_decide` / `compute_gate` 都是純函式,可餵合成資料驗證(見開發紀錄)。
 
 ### 下一步(承第 6 節 #3)
-盤前 MVP 已涵蓋 A 的自動觸發;真正的盤中逐筆執行層(富邦 API 即時報價、B/C 的回測/吞噬自動判、半自動下單)仍是獨立大專案。可先補:台指夜盤接進閘門(FinMind/TAIFEX 隔夜檔);觀察層也納入盤前。
+盤前 MVP 已涵蓋 A 的自動觸發;真正的盤中逐筆執行層(富邦 API 即時報價、B/C 的回測/吞噬自動判、半自動下單)仍是獨立大專案。
+- ~~台指夜盤接進閘門~~ **已完成(2026-07-08,見上)**。待驗:08:45 夜盤發布新鮮度。
+- 未做的第 4 項:**選股當晚的排程事件預警**(FOMC/CPI/非農/台積電法說/台股結算日 → daily 選股信掛警語 + 軟性減碼)。確定性行事曆(FOMC日期、非農=每月首週五、結算=每月第三週三),不需爬 Investing.com。
+- 閘門門檻(`riskon/riskoff_score`、β 係數、VIX 門檻)目前為經驗值,**待用回測校準**(隔夜跳空 vs 隔日實際損益)。
 
 ---
 

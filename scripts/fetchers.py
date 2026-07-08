@@ -8,7 +8,7 @@ import requests
 import feedparser
 import yfinance as yf
 
-from .config import FINMIND_TOKEN, META_DIR
+from .config import FINMIND_TOKEN, META_DIR, now_tpe
 from .utils import http_get_json, log, chunked, UA
 
 # yfinance prints its own ERROR-level "possibly delisted" lines for every miss.
@@ -818,14 +818,53 @@ def _yf_overnight(ticker: str) -> dict | None:
 
 
 def fetch_market_gate() -> dict:
-    """隔夜國際盤(已收)當『大盤盤前閘門』:費半 SOX、NASDAQ 期貨、S&P 期貨、VIX。
-    回傳 {sox/nasdaq/sp500/vix: {last, prev, pct}};抓不到的鍵略過。"""
+    """隔夜國際盤(已收/仍在交易)當『大盤盤前閘門』:費半 SOX、NASDAQ 期貨、S&P 期貨、VIX,
+    再加台積電 ADR(TSM)——台積電佔大盤約 3 成權重,其 ADR 隔夜跳空是整個指數與電子的強領先。
+    回傳 {sox/nasdaq/sp500/vix/tsm: {last, prev, pct}};抓不到的鍵略過。"""
     out: dict[str, dict] = {}
-    for key, ticker in (("sox", "^SOX"), ("nasdaq", "NQ=F"), ("sp500", "ES=F"), ("vix", "^VIX")):
+    for key, ticker in (("sox", "^SOX"), ("nasdaq", "NQ=F"), ("sp500", "ES=F"),
+                        ("vix", "^VIX"), ("tsm", "TSM")):
         d = _yf_overnight(ticker)
         if d:
             out[key] = d
     return out
+
+
+def fetch_tx_night() -> dict | None:
+    """台指期(TX)夜盤(盤後 15:00–翌日 05:00)隔夜漲跌 —— 台股『自己』對隔夜消息的重定價,
+    盤前閘門最直接的訊號(涵蓋美股開盤前段,且是台股本身的籃子)。
+
+    FinMind TaiwanFuturesDaily 中 trading_session='after_market' 的那筆,經實測:
+    標記日期 D 的夜盤實際是『D-1 傍晚 15:00 開 → D 清晨 05:00 收』,其 spread_per 即
+    『夜盤收盤 vs 前一交易日日盤收盤』的漲跌%(近月合約 = 同日同 session 成交量最大者)。
+
+    回傳 {date, pct, close, volume, is_today};抓不到 / token 缺 / 夜盤未更新 → None。
+    ⚠ is_today=False 代表今晨的夜盤尚未被 FinMind 發布(08:45 可能有發布延遲),
+    呼叫端應忽略夜盤、改用美股代理(ES/NQ 在盤前仍在交易,本就涵蓋美股隔夜)。"""
+    today = now_tpe().date()
+    rows = fetch_finmind("TaiwanFuturesDaily", data_id="TX",
+                         start_date=(today - timedelta(days=7)).isoformat(),
+                         end_date=today.isoformat())
+    if not rows:
+        return None
+    # 只留夜盤 + 純月份合約(排除價差單如 '202607/202608')
+    night = [r for r in rows
+             if r.get("trading_session") == "after_market"
+             and "/" not in str(r.get("contract_date", ""))
+             and len(str(r.get("contract_date", ""))) == 6]
+    if not night:
+        return None
+    latest = max(r["date"] for r in night)
+    front = max((r for r in night if r["date"] == latest),
+               key=lambda r: r.get("volume", 0) or 0)  # 近月 = 成交量最大
+    pct = front.get("spread_per")
+    return {
+        "date": latest,
+        "pct": round(float(pct), 2) if pct is not None else None,
+        "close": front.get("close"),
+        "volume": front.get("volume"),
+        "is_today": latest == today.isoformat(),
+    }
 
 
 def fetch_adr_changes(adr_map: dict[str, str]) -> dict[str, dict]:
