@@ -301,3 +301,26 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - config [screeners.yaml](config/screeners.yaml) 新增 `events: {enabled, horizon_days}`;`enabled:false` → 三處(選股信/盤前信/網頁)都不顯示。
 
 **驗證**:離線純函式 + 兩模板 render 全過(同上);`docs/index.html` JS `node --check` 通過;瀏覽器 preview 餵合成 `premarket.json` → 盤中即時分頁確認三筆事件(CPI 重/結算中/台積法說重)、caution 正確渲染、無 console error。**尚未在真正排程或完整 `daily_run` 跑過**(events 段獨立、與選股邏輯無耦合,風險低);CPI/台積日期正確性依賴人工核對 yaml。
+
+---
+
+## 14. 我的持倉(2026-07-09 新增)— 純前端 localStorage,零隱私外洩
+起因:使用者要「匯入實際持倉」看真倉損益。**關鍵前提:repo 是 public**,實際成本/張數若走既有 watchlist 路徑(commit → 烤進 data.json)等於把部位與資產規模公開。決策:**成本/張數只存瀏覽器 localStorage,絕不 commit、不進信件、不進批次**;只在網頁看(使用者選定)。**全部改動集中在 [docs/index.html](docs/index.html) 一個檔,零 Python 改動**。
+
+**資料模型**(localStorage key `twse-portfolio`):`{v:1,positions:[{id,name,lots(張),cost(每股均價),note,ts}],updated}`。
+
+**檔案地圖(都在 docs/index.html)**:
+- 新分頁「我的持倉」(`data-p="port"` / `#p-port`),`renderAll()` + 初始 boot 都呼叫 `renderPortfolio()`;boot 先 `portLoad()` 再渲染一次(持倉獨立於 data.json,即使 data.json 失敗也能用)。
+- **輸入**:`portShowPaste()`(貼券商庫存)→ `portParse()`(表頭偵測欄位:代碼/商品/成交/成本;無表頭則抓 4~6 碼代號 + CJK 名)→ `portStage()`(**可編輯預覽表,逐列補張數/均價再匯入**,防呆:money 數字絕不靜默匯入)→ `portCommit()`;`portShowManual()`/`portAddManual()` 手動保底;`portEdit/portDelete/portClear`;`portExport()`/`portImportFile()`(JSON 備份,換裝置/清快取自保)。
+- **現價**:`portPriceOf()` 先查 data.json(core/watch/watchlist 已帶 close),查無 → `portResolveMissing()` 打 `/api/detail?stock=` 取 K 線末筆(需 Vercel;沒部署則 404 → 該檔損益顯示「—」,成本/張/停損照算,優雅降級)。
+- **呈現**:總覽(總成本/總市值/未實現損益額+%/檔數;任一檔缺價 → 總市值/損益顯示「—」避免誤導)、部位集中度長條(全用同一基準:全有價依市值、否則依成本)、持股明細表(張/均價/現價/市值/未實現%+額/停損價=均價×0.93 及「距 x%」)。
+- **跨頁徽章**:`heldTag(id)` 在核心/觀察/自選池卡 + `portDetailBanner(d)` 在個股詳情頁 modal 頂端顯示「🔖 持倉 · N 張 · 均價 · 未實現%」。
+
+**驗證(preview 實跑,非只靠 node --check)**:`node --check` 過;preview 用**使用者真實庫存截圖格式**測 `portParse` → 正確抽出 id(去 `>>`、6 碼 ETF 009816 OK)/名/成交價、cost 留空;完整 UI 路徑 貼上→stage(2列)→填張數均價→commit→localStorage 正確持久化;總成本/P&L/停損距離數字正確;缺價檔(不在 data.json)404 後顯示「—」不崩;集中度基準一致(修過一次 per-row market/cost 混用 bug);held 徽章跨頁出現;詳情頁 banner P&L 正確;無 console error。測完已清 localStorage 測試資料。
+
+**誠實邊界 / 待辦**:
+1. **使用者券商庫存畫面(截圖)目前欄位全是報價欄,沒有『庫存量/成本』欄** → 貼上只能自動帶代碼/名/成交價,張數與均價需自己填(那兩個數字只有他知道)。若他日後在看盤軟體「欄位」加入庫存量/成本欄,`portParse` 的 cost 表頭偵測會自動帶入(lots 目前刻意不自動帶,避免『股 vs 張』1000 倍陷阱,一律手填)。
+2. 現價要準需 Vercel 部署 `/api/detail`(同 health/detail);GitHub Pages 靜態上非 data.json 內的持股會顯示「—」。
+3. 損益**未計手續費/證交稅**(單純市值差);要精算可日後接 track.py 的 `_net_return` 概念。
+4. 部位感知的 **email/盤前信推播**(把成本停損帶進信件)使用者這次**明確不要**(只在網頁);要做需把持倉放 GitHub Secret 給批次讀,屬下一階段。
+5. β 集中度未做(β 分級在伺服器端 premarket,前端沒有);目前只有產業/權重集中度。

@@ -485,6 +485,7 @@
     <button class="tab" data-p="live" role="tab" aria-selected="false" aria-controls="p-live">盤中即時</button>
     <button class="tab" data-p="watch" role="tab" aria-selected="false" aria-controls="p-watch">觀察清單</button>
     <button class="tab" data-p="watchlist" role="tab" aria-selected="false" aria-controls="p-watchlist">自選池</button>
+    <button class="tab" data-p="port" role="tab" aria-selected="false" aria-controls="p-port">我的持倉</button>
     <button class="tab" data-p="health" role="tab" aria-selected="false" aria-controls="p-health">個股健檢</button>
     <button class="tab" data-p="perf" role="tab" aria-selected="false" aria-controls="p-perf">歷史追蹤與績效</button>
   </div>
@@ -494,6 +495,7 @@
   <div class="panel" id="p-live" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-watch" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-watchlist" role="tabpanel" tabindex="0"></div>
+  <div class="panel" id="p-port" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-health" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-perf" role="tabpanel" tabindex="0"></div>
 
@@ -523,6 +525,55 @@
   .detail-chart{width:100%;height:420px;}
   .detail-chart-sm{height:240px;}
   @media(max-width:640px){.detail-chart{height:340px;}.detail-chart-sm{height:200px;}.detail-body{padding:10px 10px 16px;}}
+</style>
+<!-- 我的持倉(localStorage)樣式 -->
+<style>
+  .port-tools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 8px;}
+  .pbtn{font:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:var(--radius-xs);
+    padding:7px 13px;border:1px solid var(--accent-line);background:var(--accent-bg);color:var(--accent-ink);}
+  .pbtn:hover{border-color:var(--accent);}
+  .pbtn.ghost{background:var(--surface-2);border-color:var(--line);color:var(--ink-2);}
+  .pbtn.danger{color:var(--down-ink);border-color:var(--down-line);background:var(--down-bg);}
+  .port-note{font-size:12px;color:var(--muted);background:var(--surface-2);border:1px dashed var(--line);
+    border-radius:var(--radius-xs);padding:8px 11px;margin:0 0 12px;line-height:1.5;}
+  .port-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+    padding:14px 15px;margin:12px 0;}
+  .pi-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+  .pi-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+  .pi-hint{font-size:12px;color:var(--muted-2);margin-top:9px;line-height:1.5;}
+  .port-warn{background:var(--down-bg);border:1px solid var(--down-line);color:var(--down-ink);
+    border-radius:var(--radius-xs);padding:10px 12px;font-size:13px;margin:12px 0;}
+  .port-ta{width:100%;box-sizing:border-box;min-height:120px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;
+    border:1px solid var(--line);border-radius:var(--radius-xs);padding:9px 11px;background:var(--surface-2);
+    color:var(--ink);resize:vertical;}
+  .port-mform{display:flex;flex-wrap:wrap;gap:8px;}
+  .pin{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:var(--radius-xs);
+    padding:6px 9px;background:var(--surface-2);color:var(--ink);min-width:0;max-width:140px;}
+  .pin.r,.pin[inputmode]{text-align:right;}
+  .pin:focus,.port-ta:focus{outline:none;border-color:var(--accent);}
+  .port-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .port-table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px;}
+  .port-table th,.port-table td{padding:7px 9px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top;}
+  .port-table th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
+  .port-table td.r,.port-table th.r{text-align:right;}
+  .port-table .mono,.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .port-table .pin{max-width:80px;padding:5px 7px;}
+  .port-table .pin-name{max-width:120px;text-align:left;}
+  .mut{color:var(--muted-2);}
+  .port-table .ht{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;}
+  .port-table .nm2{color:var(--ink-2);font-size:12px;}
+  .port-table .hn{font-size:11px;color:var(--muted-2);margin-top:2px;}
+  .xrm{cursor:pointer;border:none;background:none;font-size:14px;color:var(--muted);padding:2px 5px;border-radius:5px;}
+  .xrm:hover{background:var(--surface-3);color:var(--down-ink);}
+  .port-wrow{display:flex;align-items:center;gap:10px;margin:7px 0;}
+  .port-wrow .pw-l{flex:0 0 42%;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .port-wrow .pw-bar{flex:1;height:9px;background:var(--surface-3);border-radius:5px;overflow:hidden;}
+  .port-wrow .pw-bar span{display:block;height:100%;background:var(--accent);border-radius:5px;}
+  .port-wrow .pw-p{flex:0 0 46px;text-align:right;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+  .held-badge{background:var(--accent-bg);color:var(--accent-ink);border:1px solid var(--accent-line);}
+  .port-held-banner{background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:var(--radius-xs);
+    padding:9px 12px;margin:0 0 12px;font-size:13px;color:var(--accent-ink);line-height:1.6;}
+  @media(max-width:640px){.port-wrow .pw-l{flex-basis:38%;}.pin{max-width:calc(50% - 4px);}}
 </style>
 <!-- 個股詳情頁圖表用 ECharts(PyEcharts 的 JS 本體);只在使用者點開個股時才需要 -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
@@ -900,7 +951,7 @@ function coreCard(s,i){
   const bonusHtml=bonuses.map(b=>`<div class="chipb">${b}</div>`).join('');
   return `<div class="ccard">
     <div class="top">
-      <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}${s.new_stock?'<span class="badge b-bal" style="background:#e8eaf6;color:#3949ab">🆕 新股</span>':''}${s.first_board?'<span class="badge b-bal" style="background:#fff3cd;color:#8a6d00">首板</span>':''}${s.day_trade_warn?`<span class="badge b-bal" style="background:#fdecea;color:#c0392b">當沖${isNum(s.day_trade_ratio)?Math.round(s.day_trade_ratio*100)+'%':'高'}</span>`:''}</div>
+      <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}${s.new_stock?'<span class="badge b-bal" style="background:#e8eaf6;color:#3949ab">🆕 新股</span>':''}${s.first_board?'<span class="badge b-bal" style="background:#fff3cd;color:#8a6d00">首板</span>':''}${s.day_trade_warn?`<span class="badge b-bal" style="background:#fdecea;color:#c0392b">當沖${isNum(s.day_trade_ratio)?Math.round(s.day_trade_ratio*100)+'%':'高'}</span>`:''}${heldTag(s.stock_id)}</div>
         <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}<span class="mdot"></span><span class="trig">${trig}</span>${isNum(s.ret5_pct)?`<span class="mdot"></span>5日 <span class="${cls(s.ret5_pct)} num">${fmt(s.ret5_pct,1)}%</span>`:''}${isNum(s.ret20_pct)?`<span class="mdot"></span>20日 <span class="${cls(s.ret20_pct)} num">${fmt(s.ret20_pct,1)}%</span>`:''}</div>
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
@@ -923,7 +974,7 @@ function renderWatch(){
   if(!w.length){$('#p-watch').innerHTML=`<div class="lead">高信心分但還沒觸發,放口袋盯。</div><div class="empty"><span class="ei">👀</span>今日無醞釀中標的。</div>`;return;}
   const rows=w.map((r,i)=>`<tr>
     <td class="num" style="color:var(--muted-2)">${i+1}</td>
-    <td class="tk">${r.hot_industry?'🔥 ':''}${slink(r.stock_id)}</td>
+    <td class="tk">${r.hot_industry?'🔥 ':''}${slink(r.stock_id)}${heldTag(r.stock_id)}</td>
     <td>${esc(r.name)}</td>
     <td style="color:var(--muted)">${esc(r.industry)||''}</td>
     <td class="r num">${num(r.close)}</td>
@@ -949,7 +1000,7 @@ function renderWatchlist(){
     const news=(s.news||[]).slice(0,3).filter(n=>n&&n.title).map(n=>{const safe=/^https?:\/\//i.test(n.link||'');return `<li style="margin:3px 0">${safe?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a>`:esc(n.title)}</li>`;}).join('');
     return `<div class="ccard">
       <div class="top">
-        <div style="min-width:0"><div class="tkr">🔔 ${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${s.profile?badge(s.profile):''}</div>
+        <div style="min-width:0"><div class="tkr">🔔 ${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${s.profile?badge(s.profile):''}${heldTag(s.stock_id)}</div>
           ${s.note?`<div class="meta">備註:${esc(s.note)}</div>`:''}
           <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}</div>
         </div>
@@ -959,6 +1010,222 @@ function renderWatchlist(){
       ${news?`<ul style="margin:11px 0 0;padding-left:18px;font-size:13px;color:var(--ink-2)">${news}</ul>`:''}
     </div>`;
   }).join('');
+}
+
+/* ============================================================
+   我的持倉(2026-07-09 新增)— 純 localStorage,成本/張數只存本機瀏覽器,
+   絕不上傳、不進 GitHub、不進信件。現價取 data.json(核心/觀察/自選池)或
+   /api/detail 末筆,缺價則損益顯示「—」。 [[twse-portfolio-import]]
+   ============================================================ */
+const PORT_KEY='twse-portfolio';
+const PORT_STOP=0.07;              /* 硬停損 %,對應 config exit.hard_stop 預設 */
+let PORT={v:1,positions:[],updated:null};
+let PORT_PRICE={},_portFetching={},_portFormOpen=false;
+function portLoad(){try{const r=localStorage.getItem(PORT_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.positions))PORT={v:1,positions:o.positions,updated:o.updated||null};}}catch(e){}}
+function portSave(){PORT.updated=new Date().toISOString();try{localStorage.setItem(PORT_KEY,JSON.stringify(PORT));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
+const portHas=id=>PORT.positions.some(p=>String(p.id)===String(id));
+const portGet=id=>PORT.positions.find(p=>String(p.id)===String(id))||null;
+const portCleanNum=v=>{const n=parseFloat(String(v==null?'':v).replace(/,/g,'').replace(/[^0-9.\-]/g,''));return isFinite(n)?n:null;};
+const portCode=v=>{const m=String(v==null?'':v).match(/\d{4,6}/);return m?m[0]:null;};
+const heldTag=id=>portHas(id)?'<span class="badge held-badge" title="你的持倉">🔖 持有</span>':'';
+
+function portUpsert(o){
+  const id=String(o.id),ex=portGet(id);
+  if(ex){ex.name=o.name||ex.name;ex.lots=o.lots;ex.cost=o.cost;if(o.note!=null)ex.note=o.note;ex.ts=new Date().toISOString();}
+  else PORT.positions.push({id,name:o.name||'',lots:o.lots,cost:o.cost,note:o.note||'',ts:new Date().toISOString()});
+}
+/* 現價:先 data.json 批次,再 detail API 快取 */
+function portPriceOf(id){
+  id=String(id);const d=DATA||{};
+  for(const arr of [d.core,d.watch,d.watchlist]){
+    if(Array.isArray(arr)){const s=arr.find(x=>x&&String(x.stock_id)===id);
+      if(s&&isNum(s.close))return {close:Number(s.close),name:s.name,industry:s.industry};}
+  }
+  if(PORT_PRICE[id]&&isNum(PORT_PRICE[id].close))return PORT_PRICE[id];
+  return null;
+}
+function portResolveMissing(){
+  const ids=PORT.positions.map(p=>String(p.id)).filter(id=>!portPriceOf(id)&&!_portFetching[id]&&!(id in PORT_PRICE));
+  ids.forEach(id=>{
+    _portFetching[id]=1;
+    fetch(HEALTH_API_BASE+'/api/detail?stock='+encodeURIComponent(id)).then(r=>r.json()).then(d=>{
+      if(d&&!d.error&&Array.isArray(d.kline)&&d.kline.length){const k=d.kline[d.kline.length-1];
+        PORT_PRICE[id]={close:Number(k[4]),name:d.name,industry:d.industry};}
+      else PORT_PRICE[id]={close:null};
+    }).catch(()=>{PORT_PRICE[id]={close:null};}).then(()=>{delete _portFetching[id];if(!_portFormOpen)renderPortfolio();});
+  });
+}
+
+/* ---- 輸入表單:貼上 / 手動 ---- */
+function portCloseForm(){_portFormOpen=false;const f=$('#port-form');if(f)f.innerHTML='';}
+function portShowPaste(){
+  _portFormOpen=true;const f=$('#port-form');if(!f)return;
+  f.innerHTML=`<div class="port-card"><div class="pi-title">貼上券商庫存(把含表頭那幾列一起複製最準)</div>
+    <textarea id="port-paste" class="port-ta" placeholder="從看盤軟體『全部庫存』選取 → 複製 → 貼這裡\n例:代碼 商品 買進 賣出 成交 …\n2454 聯發科 3995 4000 3995s …"></textarea>
+    <div class="pi-actions"><button class="pbtn" onclick="portStage()">解析預覽</button><button class="pbtn ghost" onclick="portCloseForm()">取消</button></div>
+    <div class="pi-hint">解析後可逐列補「張數/均價」再匯入。你的庫存畫面若沒有『庫存量/成本』欄,張數與均價需自己填(那兩個數字只有你知道)。</div>
+    <div id="port-stage"></div></div>`;
+}
+function portParse(text){
+  const lines=String(text||'').split(/\r?\n/).map(l=>l.replace(/ /g,' ').trimEnd()).filter(l=>l.trim());
+  if(!lines.length)return [];
+  const splitLine=l=>l.includes('\t')?l.split('\t').map(c=>c.trim()):l.trim().split(/\s+/);
+  let hi=-1;for(let i=0;i<lines.length;i++){if(/代碼|代號/.test(lines[i])&&/商品|名稱|股票/.test(lines[i])){hi=i;break;}}
+  let col=null;
+  if(hi>=0){col={};splitLine(lines[hi]).forEach((c,i)=>{
+    if(col.id==null&&/代碼|代號/.test(c))col.id=i;
+    else if(col.name==null&&/商品|名稱|股票/.test(c))col.name=i;
+    else if(col.price==null&&/成交|市價|現價/.test(c))col.price=i;
+    else if(col.cost==null&&/成本|均價|平均/.test(c))col.cost=i;
+  });}
+  const out=[];
+  lines.forEach((l,i)=>{
+    if(i===hi)return;
+    const id=portCode(l);if(!id)return;
+    let name='',price=null,cost=null;
+    if(col){const cells=splitLine(l);
+      if(col.name!=null&&cells[col.name])name=cells[col.name];
+      if(col.price!=null)price=portCleanNum(cells[col.price]);
+      if(col.cost!=null)cost=portCleanNum(cells[col.cost]);}
+    if(!name){const m=l.match(/[一-鿿][一-鿿A-Za-z0-9．.\-]*/);if(m)name=m[0];}
+    out.push({id,name,price,cost});
+  });
+  return out;
+}
+function portStage(){
+  const ta=$('#port-paste'),box=$('#port-stage');if(!ta||!box)return;
+  const rows=portParse(ta.value);
+  if(!rows.length){box.innerHTML='<div class="port-warn">沒解析到任何股票代碼。確認有把『代碼』那欄一起複製,或改用「手動新增」。</div>';return;}
+  box.innerHTML=`<div style="margin-top:12px"><div class="pi-title">解析到 ${rows.length} 檔 · 補上張數/均價後匯入</div>
+    <div class="port-table-wrap"><table class="port-table"><thead><tr><th>代碼</th><th>名稱</th><th class="r">現價</th><th class="r">張數 *</th><th class="r">均價 *</th><th></th></tr></thead><tbody>
+    ${rows.map(r=>`<tr>
+      <td class="mono pcode">${esc(r.id)}</td>
+      <td><input class="pin pin-name" value="${esc(r.name||'')}" placeholder="名稱"></td>
+      <td class="r mut">${isNum(r.price)?num(r.price):'—'}</td>
+      <td class="r"><input class="pin pin-lots" inputmode="decimal" value="" placeholder="張"></td>
+      <td class="r"><input class="pin pin-cost" inputmode="decimal" value="${isNum(r.cost)?r.cost:''}" placeholder="均價"></td>
+      <td class="r"><button class="xrm" onclick="this.closest('tr').remove()" title="移除此列">✕</button></td>
+    </tr>`).join('')}
+    </tbody></table></div>
+    <div class="pi-actions"><button class="pbtn" onclick="portCommit()">✓ 匯入 / 更新持倉</button></div>
+    <div class="pi-hint">「張數」空白或 0 的列會略過;已存在的代碼會被覆蓋更新。</div></div>`;
+}
+function portCommit(){
+  const box=$('#port-stage');if(!box)return;let n=0;
+  box.querySelectorAll('tbody tr').forEach(tr=>{
+    const id=portCode(tr.querySelector('.pcode')?.textContent);if(!id)return;
+    const name=(tr.querySelector('.pin-name')?.value||'').trim();
+    const lots=portCleanNum(tr.querySelector('.pin-lots')?.value);
+    const cost=portCleanNum(tr.querySelector('.pin-cost')?.value);
+    if(!isNum(lots)||lots<=0||!isNum(cost)||cost<=0)return;
+    portUpsert({id,name,lots,cost});n++;
+  });
+  if(!n){alert('沒有可匯入的列(每列需填張數與均價,且 > 0)。');return;}
+  portSave();portCloseForm();renderPortfolio();
+}
+function portShowManual(){
+  _portFormOpen=true;const f=$('#port-form');if(!f)return;
+  f.innerHTML=`<div class="port-card"><div class="pi-title">手動新增 / 更新一檔</div>
+    <div class="port-mform">
+      <input id="pm-id" class="pin" placeholder="代碼 例:2330" inputmode="numeric">
+      <input id="pm-name" class="pin" placeholder="名稱(選填)">
+      <input id="pm-lots" class="pin r" placeholder="張數" inputmode="decimal">
+      <input id="pm-cost" class="pin r" placeholder="均價" inputmode="decimal">
+      <input id="pm-note" class="pin" placeholder="備註(選填)">
+    </div>
+    <div class="pi-actions"><button class="pbtn" onclick="portAddManual()">✓ 加入</button><button class="pbtn ghost" onclick="portCloseForm()">取消</button></div></div>`;
+}
+function portAddManual(){
+  const id=portCode($('#pm-id').value),lots=portCleanNum($('#pm-lots').value),cost=portCleanNum($('#pm-cost').value);
+  if(!id){alert('請輸入有效代碼(4~6 碼數字)。');return;}
+  if(!isNum(lots)||lots<=0||!isNum(cost)||cost<=0){alert('請輸入張數與均價(需 > 0)。');return;}
+  portUpsert({id,name:($('#pm-name').value||'').trim(),lots,cost,note:($('#pm-note').value||'').trim()});
+  portSave();portCloseForm();renderPortfolio();
+}
+function portEdit(id){
+  const p=portGet(id);if(!p)return;portShowManual();
+  $('#pm-id').value=p.id;$('#pm-name').value=p.name||'';$('#pm-lots').value=p.lots;$('#pm-cost').value=p.cost;$('#pm-note').value=p.note||'';
+  const f=$('#port-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function portDelete(id){if(!confirm('刪除持倉 '+id+' ?'))return;PORT.positions=PORT.positions.filter(p=>String(p.id)!==String(id));portSave();renderPortfolio();}
+function portClear(){if(!confirm('清空全部持倉?建議先「匯出備份」。'))return;PORT.positions=[];portSave();renderPortfolio();}
+function portExport(){
+  const blob=new Blob([JSON.stringify(PORT,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='twse-portfolio-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function portImportFile(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='application/json,.json';
+  inp.onchange=()=>{const fl=inp.files&&inp.files[0];if(!fl)return;const rd=new FileReader();
+    rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!Array.isArray(o.positions))throw new Error('格式不符');
+      PORT={v:1,positions:o.positions,updated:o.updated||null};portSave();renderPortfolio();alert('已匯入 '+o.positions.length+' 檔。');}
+      catch(e){alert('匯入失敗:'+(e&&e.message||e));}};rd.readAsText(fl);};
+  inp.click();
+}
+
+function renderPortfolio(){
+  const el=$('#p-port');if(!el)return;
+  const pos=PORT.positions;
+  const tools=`<div class="port-tools">
+    <button class="pbtn" onclick="portShowPaste()">📋 貼上券商庫存匯入</button>
+    <button class="pbtn" onclick="portShowManual()">＋ 手動新增</button>
+    <button class="pbtn ghost" onclick="portExport()">⬇ 匯出備份</button>
+    <button class="pbtn ghost" onclick="portImportFile()">⬆ 匯入備份</button>
+    ${pos.length?'<button class="pbtn ghost danger" onclick="portClear()">清空</button>':''}
+  </div>
+  <div class="port-note">🔒 成本與張數只存在你這台瀏覽器(localStorage),不會上傳、不進 GitHub、不進信件。換裝置或清瀏覽器資料前請先「匯出備份」。</div>
+  <div id="port-form"></div>`;
+  if(!pos.length){
+    el.innerHTML='<div class="lead">匯入你的實際持倉,看每檔損益、距停損、部位集中度。</div>'+tools+
+      '<div class="empty"><span class="ei">📦</span>還沒有持倉。點上方「貼上券商庫存匯入」或「手動新增」開始。</div>';
+    return;
+  }
+  portResolveMissing();
+  let totCost=0,totMkt=0,haveMkt=true;
+  const rows=pos.map(p=>{
+    const lots=Number(p.lots)||0,sh=lots*1000,cost=Number(p.cost)||0;
+    const pr=portPriceOf(p.id),price=pr?pr.close:null;
+    const name=p.name||(pr&&pr.name)||'';
+    const costTot=sh*cost,mkt=isNum(price)?sh*price:null;
+    const pnl=isNum(mkt)?mkt-costTot:null,pnlPct=isNum(price)&&cost>0?(price-cost)/cost*100:null;
+    const stop=cost>0?cost*(1-PORT_STOP):null;
+    const distStop=isNum(price)&&isNum(stop)&&stop>0?(price-stop)/stop*100:null;
+    totCost+=costTot;if(isNum(mkt))totMkt+=mkt;else haveMkt=false;
+    return {p,lots,cost,price,name,costTot,mkt,pnl,pnlPct,stop,distStop};
+  });
+  const totPnl=haveMkt?totMkt-totCost:null,totPnlPct=haveMkt&&totCost>0?(totMkt-totCost)/totCost*100:null;
+  const wBase=r=>haveMkt&&isNum(r.mkt)?r.mkt:r.costTot,wTot=rows.reduce((a,r)=>a+wBase(r),0)||1;
+  rows.forEach(r=>r.w=wBase(r)/wTot*100);
+  const byW=[...rows].sort((a,b)=>b.w-a.w);
+  const stats=`<div class="stats">
+    <div class="stat"><div class="v">${fmtInt(totCost)}</div><div class="l">總成本(元)</div></div>
+    <div class="stat"><div class="v">${haveMkt?fmtInt(totMkt):'—'}</div><div class="l">總市值(元)${haveMkt?'':' · 部分缺價'}</div></div>
+    <div class="stat"><div class="v ${cls(totPnl)}">${isNum(totPnl)?(totPnl>=0?'+':'')+fmtInt(totPnl):'—'}</div><div class="l">未實現損益(元)</div></div>
+    <div class="stat"><div class="v ${cls(totPnlPct)}">${isNum(totPnlPct)?fmt(totPnlPct)+'%':'—'}</div><div class="l">報酬率(未計費稅)</div></div>
+    <div class="stat"><div class="v">${rows.length}</div><div class="l">持有檔數</div></div>
+  </div>`;
+  const conc=`<div class="port-card"><div class="pi-title">部位集中度(依${haveMkt?'市值':'成本'})</div>
+    ${byW.map(r=>`<div class="port-wrow"><div class="pw-l">${slink(r.p.id)} <span class="mut">${esc(r.name||'')}</span></div>
+      <div class="pw-bar"><span style="width:${r.w.toFixed(1)}%"></span></div><div class="pw-p">${r.w.toFixed(1)}%</div></div>`).join('')}
+  </div>`;
+  const table=`<div class="port-card"><div class="pi-title">持股明細</div>
+    <div class="port-table-wrap"><table class="port-table hold"><thead><tr>
+      <th>代碼</th><th class="r">張</th><th class="r">均價</th><th class="r">現價</th><th class="r">市值</th><th class="r">未實現</th><th class="r">停損(-7%)</th><th></th></tr></thead><tbody>
+    ${rows.map(r=>`<tr>
+      <td><div class="ht">${slink(r.p.id)}<span class="nm2">${esc(r.name||'')}</span></div>${r.p.note?`<div class="hn">${esc(r.p.note)}</div>`:''}</td>
+      <td class="r mono">${num(r.lots,r.lots%1?2:0)}</td>
+      <td class="r mono">${num(r.cost)}</td>
+      <td class="r mono ${cls(r.pnlPct)}">${isNum(r.price)?num(r.price):'—'}</td>
+      <td class="r mono">${isNum(r.mkt)?fmtInt(r.mkt):'—'}</td>
+      <td class="r mono ${cls(r.pnlPct)}">${isNum(r.pnlPct)?fmt(r.pnlPct)+'%':'—'}${isNum(r.pnl)?`<div class="hn ${cls(r.pnl)}">${(r.pnl>=0?'+':'')+fmtInt(r.pnl)}</div>`:''}</td>
+      <td class="r mono">${isNum(r.stop)?num(r.stop):'—'}${isNum(r.distStop)?`<div class="hn ${r.distStop<0?'down':'mut'}">${r.distStop<0?'已破停損':'距 '+r.distStop.toFixed(1)+'%'}</div>`:''}</td>
+      <td class="r" style="white-space:nowrap"><button class="xrm" onclick="portEdit('${esc(r.p.id)}')" title="編輯">✎</button><button class="xrm" onclick="portDelete('${esc(r.p.id)}')" title="刪除">🗑</button></td>
+    </tr>`).join('')}
+    </tbody></table></div>
+    <div class="pi-hint">停損價 = 均價 ×(1−7%),對應系統預設硬停損;「距 x%」= 現價還要跌多少才觸及。損益未計手續費/證交稅。現價來自每日批次或即時查詢,非逐秒即時。</div>
+  </div>`;
+  el.innerHTML=`<div class="lead">你的實際持倉損益與風險(共 <b>${rows.length}</b> 檔)。</div>`+tools+stats+conc+table;
 }
 
 /* ============================================================
@@ -1401,7 +1668,7 @@ function activateTab(p){
   });
 })();
 
-function renderAll(){setSub();renderDash();renderCore();renderWatch();renderWatchlist();renderPerf();}
+function renderAll(){setSub();renderDash();renderCore();renderWatch();renderWatchlist();renderPortfolio();renderPerf();}
 function loadDay(dt){
   if(!LATEST)return;
   if(dt===LATEST.date){DATA=LATEST;LABEL=LATEST.label||{};renderAll();return;}
@@ -1432,9 +1699,10 @@ function loadDay(dt){
     $('#p-dash').innerHTML=msg;
   });
 }
+portLoad();renderPortfolio();   /* 持倉獨立於 data.json,先渲染一次,即使 data.json 失敗也可用 */
 fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
   LATEST=d;DATA=d;LABEL=d.label||{};
-  setSub();renderDash();renderCore();renderWatch();renderWatchlist();renderPerf();
+  setSub();renderDash();renderCore();renderWatch();renderWatchlist();renderPortfolio();renderPerf();
   fetch('./dates.json?'+Date.now()).then(r=>r.json()).then(dates=>{
     if(!dates||dates.length<2)return;
     const sel=document.createElement('select');sel.className='sel';
@@ -1488,11 +1756,19 @@ function openDetail(sid){
   ).then(d=>{if(d&&d.error)throw new Error(d.error);DETAIL_CACHE[sid]=d;renderDetail(d);})
   .catch(e=>{const b=$('#detail-body');if(b)b.innerHTML=`<div class="err">載入失敗:${esc(e&&e.message||e)}</div>`;});
 }
+function portDetailBanner(d){
+  const p=portGet(d&&d.stock_id);if(!p)return '';
+  const k=(d.kline||[]),price=k.length?Number(k[k.length-1][4]):null,cost=Number(p.cost)||0;
+  const pnlPct=isNum(price)&&cost>0?(price-cost)/cost*100:null;
+  return `<div class="port-held-banner">🔖 你的持倉 · ${num(p.lots,p.lots%1?2:0)} 張 · 均價 ${num(cost)}`+
+    (isNum(price)?` · 現價 ${num(price)} · 未實現 <b class="${cls(pnlPct)}">${isNum(pnlPct)?fmt(pnlPct)+'%':'—'}</b>`:'')+`</div>`;
+}
 function renderDetail(d){
   const body=$('#detail-body');if(!body)return;
   _disposeDetailCharts();
   $('#detail-title').innerHTML=`${esc(d.stock_id)} ${esc(d.name||'')}<span class="detail-ind">${esc(d.industry||'')}</span>`;
   body.innerHTML=`
+    ${portDetailBanner(d)}
     <div class="detail-actions"><a href="https://www.cmoney.tw/forum/stock/${esc(d.stock_id)}" target="_blank" rel="noopener">在 CMoney 看更多走勢/討論 ↗</a></div>
     <div class="detail-chart-title">日K線 · 量 · 均線(MA5/20/60)</div>
     <div id="detail-kchart" class="detail-chart"></div>
