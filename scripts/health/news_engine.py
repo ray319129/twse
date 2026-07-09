@@ -249,4 +249,26 @@ def compute(ctx: dict) -> dict:
         ))
 
     score = clip01((weighted_score_sum / weighted_score_w + 1) / 2) * 100 if weighted_score_w > 0 else None
-    return engine_result(score, metrics)
+
+    # 逐則被 AI 分析的新聞清單(供前端「分析了哪些新聞」可展開小頁,附原文連結)。
+    # 依發布日期新→舊排序;idx 對應 news_items 位置,帶回標題/連結/來源/情緒/是否讀到內文。
+    analyzed_news = []
+    for it in items:
+        idx = it.get("idx")
+        if not isinstance(idx, int) or idx >= len(news_items):
+            continue
+        n = news_items[idx]
+        analyzed_news.append({
+            "title": n.get("title") or "",
+            "link": n.get("link") or "",
+            "source": n.get("source") or "",
+            "date": n.get("published_date") or "",
+            "sentiment": it.get("sentiment"),
+            "impact": it.get("impact"),
+            "has_content": bool((n.get("content") or "").strip()),
+        })
+    analyzed_news.sort(key=lambda x: x["date"] or "", reverse=True)
+
+    res = engine_result(score, metrics)
+    res["analyzed_news"] = analyzed_news
+    return res

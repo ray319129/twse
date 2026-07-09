@@ -447,6 +447,18 @@
   .hm-detail{margin-top:6px;padding-left:4px;font-size:11.5px;color:var(--muted);line-height:1.7;}
   .hm-detail b{color:var(--muted-2);font-weight:700;}
   .hm-note{margin-top:8px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  details.hnl-panel{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:8px;}
+  details.hnl-panel>summary{cursor:pointer;list-style:none;font-size:12px;font-weight:700;color:var(--accent);padding:2px 0;}
+  details.hnl-panel>summary::-webkit-details-marker{display:none;}
+  .hnl-body{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+  .hnl-item{display:flex;gap:8px;align-items:flex-start;}
+  .hnl-badge{flex:none;font-size:10px;font-weight:700;border:1px solid;border-radius:4px;padding:1px 5px;margin-top:1px;}
+  .hnl-main{min-width:0;}
+  .hnl-title{font-size:12.5px;line-height:1.5;}
+  .hnl-title a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--muted);}
+  .hnl-title a:hover{color:var(--accent);border-bottom-color:var(--accent);}
+  .hnl-meta{font-size:11px;color:var(--muted-2);margin-top:2px;}
+  .hnl-read{color:var(--up);}
   .health-foot{margin-top:16px;font-size:11px;color:var(--muted-2);line-height:1.6;}
 
   @media(max-width:760px){
@@ -1667,13 +1679,27 @@ function metricRow(m){
     </div>
   </details>`;
 }
+function newsLinkRow(n){
+  const sColor=n.sentiment==='利多'?'var(--up)':n.sentiment==='利空'?'var(--down)':'var(--muted)';
+  const badge=n.sentiment?`<span class="hnl-badge" style="color:${sColor};border-color:${sColor}">${esc(n.sentiment)}</span>`:'';
+  const meta=[n.source,n.date].filter(Boolean).map(esc).join(' · ');
+  const title=esc(n.title||'(無標題)');
+  const titleHtml=n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">${title}</a>`:title;
+  const read=n.has_content?'<span class="hnl-read">已讀內文</span>':'';
+  return `<div class="hnl-item">${badge}<div class="hnl-main"><div class="hnl-title">${titleHtml}</div>
+    <div class="hnl-meta">${meta}${meta&&read?' · ':''}${read}</div></div></div>`;
+}
 function engineCard(eng){
   const has=isNum(eng.score);
   const color=has?(eng.score>=70?'var(--up)':eng.score<=40?'var(--down)':'var(--warn)'):'var(--muted)';
   const notes=(eng.notes||[]).map(n=>`<div class="hm-note">${esc(n)}</div>`).join('');
+  const news=eng.analyzed_news||[];
+  const newsPanel=news.length?`<details class="hnl-panel"><summary>📰 分析了哪些新聞（${news.length} 則,點標題看原文）</summary>
+    <div class="hnl-body">${news.map(newsLinkRow).join('')}</div></details>`:'';
   return `<details class="health-engine-card">
     <summary><span>${esc(eng.label)}</span><span style="color:${color};font-weight:800">${has?num(eng.score,1):'資料不足'}</span></summary>
     <div class="health-metric-list">${(eng.metrics||[]).map(metricRow).join('')}</div>
+    ${newsPanel}
     ${notes}
   </details>`;
 }
