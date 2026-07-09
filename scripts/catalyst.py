@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from .config import ANTHROPIC_API_KEY
-from .utils import log
+from .utils import log, extract_json
 
 # 使用者指定的催化劑類別(LLM 只能從這個 enum 選)
 CATALYST_TYPES = [
@@ -26,43 +26,6 @@ _DEFAULT_WEIGHTS = {
     "政策受惠": 0.9, "匯率受惠": 0.8, "產業轉機": 1.0,
 }
 
-_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "catalysts": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "type": {"type": "string", "enum": CATALYST_TYPES},
-                    "confidence": {"type": "number"},
-                    "evidence": {"type": "string"},
-                },
-                "required": ["type", "confidence", "evidence"],
-                "additionalProperties": False,
-            },
-        },
-        "summary": {"type": "string"},
-        "risk_flags": {"type": "array", "items": {"type": "string"}},
-        "target_prices": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "broker": {"type": "string"},
-                    "price": {"type": "number"},
-                    "asof": {"type": "string"},
-                    "evidence": {"type": "string"},
-                },
-                "required": ["broker", "price", "evidence"],
-                "additionalProperties": False,
-            },
-        },
-    },
-    "required": ["catalysts", "summary", "risk_flags", "target_prices"],
-    "additionalProperties": False,
-}
-
 _SYSTEM = (
     "你是台股短線分析助理。我會給你某檔股票近一個月的新聞標題清單。"
     "請只根據『實際出現在標題裡的內容』判斷是否出現下列催化劑類別,"
@@ -72,7 +35,11 @@ _SYSTEM = (
     "target_prices 列出標題中明確提到的法人/券商目標價(如「外資喊上看680元」「OO投顧目標價250元」):"
     "broker 填券商/外資/投顧名稱,price 填數字(元),asof 填標題日期(無法判斷就留空字串),"
     "evidence 必須是原文引用該標題;標題沒有明確數字就不要列,沒有就空陣列。"
-    "只做分類/摘錄,不要預測漲跌,不要自己估算或杜撰目標價。"
+    "只做分類/摘錄,不要預測漲跌,不要自己估算或杜撰目標價。\n"
+    "只輸出一個 JSON 物件,不要 markdown 圍欄、不要任何解釋文字。格式:\n"
+    '{"catalysts":[{"type":"類別(限用給定清單)","confidence":0到1的小數,"evidence":"原文引用標題"}],'
+    '"summary":"一句話摘要","risk_flags":["簡短片語"],'
+    '"target_prices":[{"broker":"券商名","price":數字,"asof":"日期或空字串","evidence":"原文引用標題"}]}'
 )
 
 
@@ -114,17 +81,14 @@ def classify_catalysts(stock_id: str, name: str, news_items: list[dict],
             max_tokens=int(cfg.get("max_tokens", 800)),
             system=_SYSTEM,
             messages=[{"role": "user", "content": user}],
-            output_config={"format": {"type": "json_schema", "schema": _SCHEMA}},
         )
     except Exception as e:
         log.warning(f"催化劑分析 {stock_id} 失敗:{e}")
         return None
 
-    import json
     text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), "")
-    try:
-        data = json.loads(text)
-    except Exception:
+    data = extract_json(text)
+    if not data:
         return None
     # 清洗:只留合法 enum + 夾 confidence
     cats = []

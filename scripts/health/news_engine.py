@@ -17,39 +17,13 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 
 from ..config import ANTHROPIC_API_KEY as _ANTHROPIC_API_KEY
-from ..utils import log
+from ..utils import log, extract_json
 from .metric import metric, missing_metric, engine_result, clip01
 
 _SRC = "Google News RSS(含內文摘要抓取)+ Claude Haiku 逐則標記,evidence 強制原文引用"
 
 _SENTIMENT_VALUES = {"利多": 1.0, "利空": -1.0, "中性": 0.0}
 _IMPACT_WEIGHTS = {"高": 1.5, "中": 1.0, "低": 0.5}
-
-_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "items": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "idx": {"type": "integer"},
-                    "sentiment": {"type": "string", "enum": ["利多", "利空", "中性"]},
-                    "durability": {"type": "string", "enum": ["一次性", "長期"]},
-                    "impact": {"type": "string", "enum": ["高", "中", "低"]},
-                    "confidence": {"type": "number"},
-                    "evidence": {"type": "string"},
-                },
-                "required": ["idx", "sentiment", "durability", "impact", "confidence", "evidence"],
-                "additionalProperties": False,
-            },
-        },
-        "summary": {"type": "string"},
-        "risk_flags": {"type": "array", "items": {"type": "string"}},
-    },
-    "required": ["items", "summary", "risk_flags"],
-    "additionalProperties": False,
-}
 
 _SYSTEM = (
     "你是台股基本面分析助理。我會給你某檔股票近90天的新聞清單,每則有編號 idx 與標題,"
@@ -62,7 +36,11 @@ _SYSTEM = (
     "evidence 必須是『標題或內文的原文引用』,不可改寫或杜撰。idx 必須對應到輸入清單的編號,"
     "每個 idx 最多輸出一筆。不要自己腦補沒寫出來的資訊,也不要預測股價漲跌。"
     "summary 用一句繁體中文摘要整體基調;"
-    "risk_flags 每則用『簡短片語』(≤30字,如「遭調查」「Q1財測下修」)列出標題/內文中的負面/風險訊號,沒有則空陣列。"
+    "risk_flags 每則用『簡短片語』(≤30字,如「遭調查」「Q1財測下修」)列出標題/內文中的負面/風險訊號,沒有則空陣列。\n"
+    "只輸出一個 JSON 物件,不要 markdown 圍欄、不要任何解釋文字。格式:\n"
+    '{"items":[{"idx":整數,"sentiment":"利多|利空|中性","durability":"一次性|長期",'
+    '"impact":"高|中|低","confidence":0到1的小數,"evidence":"標題或內文的原文引用"}],'
+    '"summary":"一句話摘要","risk_flags":["簡短片語"]}'
 )
 
 
@@ -128,17 +106,14 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
             max_tokens=int(cfg.get("max_tokens", 1600)),
             system=_SYSTEM,
             messages=[{"role": "user", "content": user}],
-            output_config={"format": {"type": "json_schema", "schema": _SCHEMA}},
         )
     except Exception as e:
         log.warning(f"健檢新聞分析 {stock_id} 失敗:{e}")
         return None
 
-    import json
     text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), "")
-    try:
-        data = json.loads(text)
-    except Exception:
+    data = extract_json(text)
+    if not data:
         return None
 
     items = []
