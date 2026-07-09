@@ -81,9 +81,13 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
         except Exception as e:
             log.warning(f"新聞內文讀取 {stock_id} 失敗(續用標題):{e}")
 
+    # 只把最新 ai_items 則送 AI 分類(而非全部 max_news 則):純呼叫沒有結構化輸出保護,
+    # 一次分類太多則的 JSON 輸出容易超過 max_tokens 被截斷 → 解析失敗 → 整個新聞面向掛掉。
+    # 7/30/90 天視窗本就以近期新聞為主,最新 ~30 則已足量。
+    ai_items = min(max_news, int(cfg.get("ai_max_items", 30)))
     valid_idx = set()
     numbered = []
-    for i, n in enumerate(news_items[:max_news]):
+    for i, n in enumerate(news_items[:ai_items]):
         t = (n.get("title") or "").strip()
         if not t:
             continue
@@ -95,6 +99,7 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
             line += f"\n   內文:{body}"
         numbered.append(line)
     if not numbered:
+        log.warning(f"健檢新聞分析 {stock_id}:無可用標題(news_items={len(news_items)})")
         return None
     user = f"股票:{stock_id} {name}\n新聞清單:\n" + "\n".join(numbered)
 
@@ -103,17 +108,21 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
         client = anthropic.Anthropic(api_key=_ANTHROPIC_API_KEY)
         resp = client.messages.create(
             model=model,
-            max_tokens=int(cfg.get("max_tokens", 1600)),
+            max_tokens=int(cfg.get("max_tokens", 3000)),
             system=_SYSTEM,
             messages=[{"role": "user", "content": user}],
         )
     except Exception as e:
-        log.warning(f"健檢新聞分析 {stock_id} 失敗:{e}")
+        log.warning(f"健檢新聞分析 {stock_id} 呼叫失敗:{type(e).__name__}: {e}")
         return None
 
     text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), "")
+    stop = getattr(resp, "stop_reason", None)
     data = extract_json(text)
     if not data:
+        # 診斷:把截斷/非 JSON 的實況寫進 Vercel Logs(stop_reason=max_tokens ⟹ 輸出被砍需調小 ai_items/調大 max_tokens)
+        log.warning(f"健檢新聞分析 {stock_id} JSON 解析失敗:stop_reason={stop}, "
+                    f"len={len(text)}, head={text[:160]!r}")
         return None
 
     items = []
@@ -131,6 +140,9 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
             "confidence": round(_clip01(it.get("confidence")), 2),
             "evidence": str(it["evidence"])[:120],
         })
+    if not items:
+        log.warning(f"健檢新聞分析 {stock_id}:AI 回應解析成功但無有效逐則標記"
+                    f"(raw items={len(data.get('items') or [])}, stop_reason={stop})")
     return {
         "items": items,
         "summary": str(data.get("summary", ""))[:200],

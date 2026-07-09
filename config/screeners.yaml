@@ -387,8 +387,9 @@ health:
   # 不是同一支,需 ANTHROPIC_API_KEY,沒設自動降級成 score=None)。
   news:
     model: claude-haiku-4-5
-    max_news: 60
-    max_tokens: 1600
+    max_news: 60          # 抓幾則新聞(供 7/30/90 天視窗分桶)
+    ai_max_items: 30      # 實際送 AI 逐則分類的則數(純呼叫無結構化輸出保護,太多則 JSON 會超 max_tokens 被截斷)
+    max_tokens: 3000      # AI 輸出上限;需夠大容納 ai_max_items 則的逐則 JSON,否則截斷→解析失敗→新聞面向掛掉
     # 讀內文版(2026-07-09):餵 AI 前先抓每則新聞的實際內文摘要(og:description + 內文段落),
     # 讓 AI 依內容而非可能誇大的標題判斷。Google News 新版 opaque URL 用 batchexecute RPC 解回
     # 真實網址。全程 best-effort + wall-clock budget,抓不到的則退回只用標題。設 false 可關閉(回純標題)。
