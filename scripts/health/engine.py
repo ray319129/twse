@@ -104,9 +104,9 @@ def build_ctx_batch(*, stock_id: str, name: str, industry: str | None, today: da
     (20季財報供5年CAGR、長窗PE/PB供歷史百分位、持股分散表供大戶/股東人數),這裡統一補抓+組裝,
     沿用既有 storage 快取機制(新鮮 + 已有足夠長度就不重打 FinMind)。"""
     from ..storage import (load_financials, upsert_financials, load_balance, upsert_balance,
-                           load_cashflow, upsert_cashflow, load_per, upsert_per)
+                           load_cashflow, upsert_cashflow, load_per, upsert_per, upsert_chips)
     from ..fetchers import (fetch_financial_statements, fetch_balance_sheet, fetch_cashflow,
-                            fetch_per_yield, fetch_holder_distribution)
+                            fetch_per_yield, fetch_holder_distribution, fetch_chips_history)
 
     health_cfg = health_cfg or {}
     quarters = int(health_cfg.get("quarters", 20))
@@ -133,6 +133,20 @@ def build_ctx_batch(*, stock_id: str, name: str, industry: str | None, today: da
         new = fetch_per_yield(stock_id, days=per_days)
         if not new.empty:
             per_hist = upsert_per(stock_id, new)
+
+    # 籌碼:即時路徑(Vercel)無持久 parquet 快取,load_chips 恆空 → 籌碼分析永遠「資料不足」。
+    # 批次路徑則可能有快取但當日尚未更新。統一在此:過期/太短就現抓一段窗回補
+    # (chip_engine 需近21個交易日供外資持股趨勢/融資5日變化,抓 ~120 個日曆日確保足量)。
+    chips_days = int(health_cfg.get("chips_days", 120))
+    if _stale(chips_df) or (chips_df is not None and len(chips_df) < 21):
+        try:
+            new_chips = fetch_chips_history(stock_id, today - timedelta(days=chips_days), today)
+            if not new_chips.empty:
+                # upsert_chips 的寫檔已有唯讀檔案系統防護(serverless 寫入失敗只記警告);
+                # 回傳合併後 DataFrame 供本次健檢直接使用,不必再 load。
+                chips_df = upsert_chips(stock_id, new_chips)
+        except Exception as e:
+            log.warning(f"chips fetch {stock_id} 失敗(續用既有/空):{e}")
 
     try:
         holder_dist = fetch_holder_distribution(stock_id, today - timedelta(days=400), today)

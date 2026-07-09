@@ -190,7 +190,7 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 
 ### 雙路徑架構
 - **路徑 A(批次,免費,核心+自選池)**:`scripts/main.py daily_run()` 在既有 stage-2 enrichment 之後,對核心10+自選池呼叫 `scripts/health/engine.py: build_ctx_batch()` + `compute_stock_health()`,寫 `docs/health/{代號}.json` + `docs/health/index.json`(manifest)。同時用 `scripts/health/industry_benchmark.py` 掃描本地已累積的 `data/financials|balance/*.parquet`(吃核心榜每天輪動的副產品,零額外 API)彙總同業平均,寫 `data/health/industry_benchmarks.json` 並複製一份到 `docs/health/`(供路徑 B 讀取)。
-- **路徑 B(即時,選用,任意代號)**:`api/health.py`(Vercel Python Serverless Function)reuse 同一套 `scripts/health/*` 引擎,平行抓取(ThreadPoolExecutor)後現抓現算,**不依賴本地 parquet 累積**(serverless 無持久磁碟)。預設**未啟用**——需照 [VERCEL_SETUP.md](VERCEL_SETUP.md) 部署,並把 `docs/index.html` 的 `HEALTH_API_ENABLED` 改 `true` 才會在前端被呼叫。沒部署也完全不影響路徑 A 正常運作。
+- **路徑 B(即時,選用,任意代號)**:`api/health.py`(Vercel Python Serverless Function)reuse 同一套 `scripts/health/*` 引擎,平行抓取(ThreadPoolExecutor)後現抓現算,**不依賴本地 parquet 累積**(serverless 無持久磁碟;籌碼 2026-07-09 修為 `build_ctx_batch` 內現抓,見文末當日條目)。預設**未啟用**——需照 [VERCEL_SETUP.md](VERCEL_SETUP.md) 部署,並把 `docs/index.html` 的 `HEALTH_API_ENABLED` 改 `true` 才會在前端被呼叫。沒部署也完全不影響路徑 A 正常運作。
 
 ### 檔案地圖
 - `scripts/health/metric.py` — 可解釋性資料契約(`metric()`/`engine_result()`),所有 Engine 共用。
@@ -340,3 +340,9 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **後端** [api/portfolio_ocr.py](api/portfolio_ocr.py):`POST /api/portfolio_ocr {image(base64), media_type}` → Claude **Opus 4.8 vision**(`claude-opus-4-8`)抽持股 → 回 `{positions:[{id,name,shares,cost,price}]}`(與前端 portParse 同形)。**⚠️ 2026-07-09 實測修正**:一開始用 Haiku 4.5,使用者實跑發現嚴重錯誤(009816凱基TOP50→誤認9050鴻海、光寶科→光磊科、群聯→智易,且把『淨值/資產市值』當均價/現價、甚至自行÷1000)——密集數字表格 Haiku 讀不準。改 **Opus 4.8** + 前端送**近原尺寸(≤2400px)PNG 無損**(原本縮 1600px+JPEG 把小字糊掉)+ prompt 明確禁止「拿淨值/資產市值當均價現價、÷1000、猜相近股名」。約 1~2 美分/張。system prompt 強調「即時庫存=股數不是張、成本取均價非付出成本、代號從括號抽、忽略合計列、讀不到填 null」;防禦式 JSON 解析(容忍圍欄)。讀 `os.environ["ANTHROPIC_API_KEY"]`,沒設回 error。`vercel.json` 已註冊。一張約 US$0.003。
 - **前端** [docs/index.html](docs/index.html):`portShowOcr`(檔案選擇)→ `portOcrPicked`(canvas 縮到 ≤1600px 寬 → jpeg base64,壓 token/體積)→ POST → 結果進**共用預覽表** `portStageTable(rows)`(貼上與截圖共用;`portStage` 也改用它)→ commit。dedup 沿用 `portUpsert`(依代號)。`portCommit` 改查 `#p-port .port-stage-table tbody tr`(涵蓋貼上與截圖兩處)。**順手移除**檔案裡一顆 dead 的 `portShowImage()` 按鈕(函式不存在)。
 - **驗證**:`py_compile` + `node --check` 過;preview 實跑:OCR 鈕開表單、canvas 縮圖+base64+POST 全跑、`/api/portfolio_ocr` 本機 501 → **優雅降級顯示「需部署 Vercel」**、模擬 OCR 結果進共用預覽表 → commit → localStorage 正確、貼上流程重構後仍正常。**⚠️ 真實 Claude 辨識未驗**(api/* 從沒真的 deploy 過;要部署+設 ANTHROPIC_API_KEY 才會動,見 VERCEL_SETUP.md)。**隱私**:截圖(含成本)會一次性經 Anthropic 辨識(貼上/手動則 100% 不出瀏覽器)——已在 UI/文件標明。
+
+---
+
+**修:即時健檢籌碼分析永遠「資料不足」(2026-07-09)**:使用者回報健檢的**籌碼分析**面向恆缺資料。根因——即時路徑 [api/health.py](api/health.py) `compute_live_health` 用 `load_chips(stock_id)` 讀本機 parquet,但 Vercel serverless **無持久磁碟 → 快取恆空**,`chip_engine` 每個法人/融資券指標都落到 `missing_metric`。財報、`holder_dist` 在 `build_ctx_batch` 都會現抓,唯獨籌碼漏了這步。
+- **修法** [scripts/health/engine.py](scripts/health/engine.py) `build_ctx_batch`:仿既有 `holder_dist` 現抓模式,傳入的 `chips_df` 若 `_stale` 或 <21 交易日,就 `fetch_chips_history` 現抓近 `chips_days`(預設 120 日曆日,足量供外資持股/融資5日窗)+ `upsert_chips` 合併回傳(寫檔已有唯讀防護)。`build_ctx_batch` **只被即時路徑呼叫**(批次健檢已停用,見 §main.py:687),不會對批次重複打 FinMind。
+- **驗證**:離線 monkeypatch(patch `scripts.fetchers`/`scripts.storage` 層,因 engine 函式內 from-import 綁定)餵空 `chips_df` → `ctx['chips']` 現抓 40 列、chip score 72.8、三大法人連買/今日/近5日淨買超、外資買賣超、外資持股、融資5日、融券回補、日均成交額**全部齊全**。**⚠️ 未用真實 FinMind token / 真 Vercel 端點跑**(本機無 token);要真正確認需部署後查一檔實看籌碼面向。大戶持股/股東人數走另一條 `holder_dist` 現抓,不在本次修正範圍。
