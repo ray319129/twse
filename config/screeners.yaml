@@ -389,6 +389,14 @@ health:
     model: claude-haiku-4-5
     max_news: 60
     max_tokens: 1600
+    # 讀內文版(2026-07-09):餵 AI 前先抓每則新聞的實際內文摘要(og:description + 內文段落),
+    # 讓 AI 依內容而非可能誇大的標題判斷。Google News 新版 opaque URL 用 batchexecute RPC 解回
+    # 真實網址。全程 best-effort + wall-clock budget,抓不到的則退回只用標題。設 false 可關閉(回純標題)。
+    read_content: true
+    content_max_items: 10      # 最多抓前幾則的內文(其餘只用標題;控延遲/頻寬)
+    content_timeout: 5.0       # 單則各次 HTTP 逾時(秒);batchexecute 需 GET 殼頁+POST+GET 真文
+    content_max_chars: 600     # 每則內文摘要截斷長度(控 AI input token)
+    content_budget: 30.0       # 抓內文總 wall-clock 上限(秒),保護 Vercel serverless timeout
   # AI 解讀潤飾(scripts/health/ai_summary.py):規則先產生事實句,LLM 只能重組句子,
   # 不能新增數字/結論(prompt 強制),沒有 API key 自動降級成純規則句。
   ai_summary:

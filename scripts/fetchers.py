@@ -996,3 +996,181 @@ def fetch_news(stock_id: str, name: str, limit: int = 10) -> list[dict]:
             "source": getattr(getattr(e, "source", None), "title", ""),
         })
     return items
+
+
+# ---------- 新聞內文抓取(讀內文版新聞分析用,2026-07-09)----------
+# 個股健檢 News Engine 原本只把「標題」餵給 AI,但台股新聞標題常誇大/與內文不符。
+# 這裡 best-effort 抓每則新聞的實際內文摘要(發布者 og:description + 內文段落),
+# 讓 AI 依內容判斷。任何一步失敗(Google News 轉址解不開/發布者擋爬蟲/逾時)→ 該則
+# 只留標題,絕不讓整個健檢失敗。全程 time-box,serverless(Vercel)也能在 timeout 內收斂。
+
+# 一般瀏覽器 UA:多數新聞站對預設 requests UA / 我們的 twse-screener UA 會擋或給空殼頁。
+_BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+               "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+
+
+_GNEWS_BATCH = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+
+
+def _decode_gnews_url(url: str) -> "str | None":
+    """快路徑:舊版 Google News link(`/articles/CBMi...`)的 base64 路徑段解開後(protobuf)
+    直接內嵌原始文章網址時,用 RFC3986 字元集正則抓出來(遇非網址位元組即停)。新版路徑段內
+    只是不可解的內部 ID(如 'AU_yq...',非 http)→ 回 None,呼叫端改走 batchexecute RPC。"""
+    import base64, re
+    m = re.search(r"/articles/([A-Za-z0-9_\-]+)", url)
+    if not m:
+        return None
+    seg = m.group(1)
+    seg += "=" * (-len(seg) % 4)
+    try:
+        raw = base64.urlsafe_b64decode(seg)
+    except Exception:
+        return None
+    text = raw.decode("latin-1", "ignore")
+    m2 = re.search(r"https?://[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+", text)
+    if not m2:
+        return None
+    cand = m2.group(0)
+    if len(cand) < 12 or "." not in cand:
+        return None
+    return cand
+
+
+def _resolve_gnews_batchexecute(url: str, session: "requests.Session", timeout: float) -> "str | None":
+    """解新版 Google News opaque URL:GET 文章殼頁取 c-wiz 的簽章(data-n-a-sg)、時間戳
+    (data-n-a-ts)、內部 id(data-n-a-id),再 POST Google 私有的 batchexecute RPC 換回
+    真實發布者網址。這是 Google 未公開的內部協定,未來 Google 若改版可能失效 → 全程包 try,
+    失敗回 None(該則新聞退回只用標題,不影響健檢)。"""
+    import json, re
+    try:
+        r = session.get(url, timeout=timeout)
+        html = r.text
+    except Exception:
+        return None
+
+    def _attr(name: str) -> "str | None":
+        m = re.search(name + r'="([^"]+)"', html)
+        return m.group(1) if m else None
+
+    gid, sig, ts = _attr("data-n-a-id"), _attr("data-n-a-sg"), _attr("data-n-a-ts")
+    if not (gid and sig and ts):
+        return None
+    try:
+        inner = ["garturlreq",
+                 [["X", "X", ["X", "X"], None, None, 1, 1, "US:en", None, 1,
+                   None, None, None, None, None, 0, 1],
+                  "X", "X", 1, [1, 1, 1], 1, 1, None, 0, 0, None, 0],
+                 gid, int(ts), sig]
+        freq = [[["Fbv4je", json.dumps(inner), None, "generic"]]]
+        data = "f.req=" + urllib.parse.quote(json.dumps(freq))
+        r2 = session.post(_GNEWS_BATCH, data=data, timeout=timeout,
+                          headers={"content-type": "application/x-www-form-urlencoded;charset=UTF-8"})
+    except Exception:
+        return None
+    m = re.search(r'\[\\"garturlres\\",\\"(https?:.*?)\\"', r2.text)
+    if not m:
+        return None
+    try:
+        real = m.group(1).encode("latin-1", "ignore").decode("unicode_escape")
+    except Exception:
+        real = m.group(1).replace("\\/", "/")
+    return real if real.startswith("http") and "google.com" not in urllib.parse.urlparse(real).netloc.lower() else None
+
+
+def _resolve_article_url(url: str, session: "requests.Session | None" = None,
+                         timeout: float = 5.0) -> "str | None":
+    """把新聞連結解成可直接抓的真實文章網址。非 Google News 直接用;是 Google News 轉址就
+    先試 base64 快路徑(舊格式),失敗再走 batchexecute RPC(新格式)。"""
+    if not url:
+        return None
+    host = urllib.parse.urlparse(url).netloc.lower()
+    if "news.google.com" not in host:
+        return url
+    decoded = _decode_gnews_url(url)
+    if decoded:
+        return decoded
+    sess = session or requests.Session()
+    if session is None:
+        sess.headers.update({"User-Agent": _BROWSER_UA})
+    return _resolve_gnews_batchexecute(url, sess, timeout)
+
+
+def _extract_article_text(html: str, max_chars: int = 600) -> str:
+    """從文章 HTML 抽乾淨的內文摘要:優先取發布者 meta 摘要(og:description /
+    description —— 這些在靜態 HTML 就有,即使內文是 JS 渲染或半付費牆也拿得到,且是
+    發布者自己寫的摘要而非誇大標題),再補內文 <p> 段落到 max_chars 為止。"""
+    from bs4 import BeautifulSoup
+    import re
+    soup = BeautifulSoup(html[:200_000], "lxml")
+    parts: list[str] = []
+    seen: set[str] = set()
+
+    def _add(t: str):
+        t = re.sub(r"\s+", " ", (t or "")).strip()
+        if len(t) >= 20 and t not in seen:
+            seen.add(t)
+            parts.append(t)
+
+    for attrs in ({"property": "og:description"}, {"name": "description"},
+                  {"name": "twitter:description"}):
+        tag = soup.find("meta", attrs=attrs)
+        if tag and tag.get("content"):
+            _add(tag["content"])
+            break
+
+    container = soup.find("article") or soup.body or soup
+    for p in container.find_all("p"):
+        _add(p.get_text(" ", strip=True))
+        if sum(len(x) for x in parts) >= max_chars:
+            break
+
+    return " ".join(parts)[:max_chars].strip()
+
+
+def _fetch_one_article(item: dict, timeout: float, max_chars: int) -> str:
+    # 每則自帶一個 Session:對 news.google.com 的殼頁 GET + batchexecute POST 共用連線,
+    # 且執行緒之間不共享 Session(requests.Session 非執行緒安全)。
+    sess = requests.Session()
+    sess.headers.update({"User-Agent": _BROWSER_UA, "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"})
+    try:
+        real = _resolve_article_url(item.get("link", ""), session=sess, timeout=timeout)
+        if not real:
+            return ""
+        r = sess.get(real, timeout=timeout)
+        if r.status_code != 200 or not r.text:
+            return ""
+        if not r.encoding or r.encoding.lower() == "iso-8859-1":
+            r.encoding = r.apparent_encoding      # 台股新聞常 UTF-8/Big5,標頭沒宣告時自動偵測
+        return _extract_article_text(r.text, max_chars=max_chars)
+    except Exception:
+        return ""
+    finally:
+        sess.close()
+
+
+def enrich_news_content(news_items: list[dict], *, limit: int = 10, timeout: float = 5.0,
+                        max_workers: int = 8, max_chars: int = 600, budget: float = 30.0) -> int:
+    """對前 limit 則新聞 best-effort 抓內文,成功者就地寫入 item['content']。回傳成功則數。
+    平行抓取 + 整體 wall-clock budget 上限(保護 serverless timeout);任一則失敗只是沒 content。"""
+    if not news_items:
+        return 0
+    from concurrent.futures import ThreadPoolExecutor
+    targets = [n for n in news_items[:limit] if n.get("link")]
+    if not targets:
+        return 0
+    start = time.monotonic()
+    count = 0
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(targets))) as ex:
+        futs = {ex.submit(_fetch_one_article, it, timeout, max_chars): it for it in targets}
+        for fut, it in futs.items():
+            remaining = budget - (time.monotonic() - start)
+            if remaining <= 0:
+                break
+            try:
+                content = fut.result(timeout=remaining)
+            except Exception:
+                content = ""
+            if content:
+                it["content"] = content
+                count += 1
+    return count

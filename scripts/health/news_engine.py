@@ -6,6 +6,10 @@
 完全用本地已知的新聞發布日期(fetchers.fetch_news 的 published_date,2026-06-30 新增)分桶,
 不需要也不會多打 LLM 三次。
 
+讀內文版(2026-07-09):餵給 AI 前先 best-effort 抓每則新聞的實際內文摘要
+(fetchers.enrich_news_content),連同標題一起送。台股新聞標題常誇大/與內文不符,
+system prompt 明確要求「有內文時以內文為準」。抓不到內文的則自動退回只用標題。
+
 沒有 ANTHROPIC_API_KEY 或沒有新聞 → analyze_news() 回 None,compute() 對應降級成
 score=None + 缺資料說明,不影響其餘 Engine(沿用 catalyst.py 既有降級慣例)。
 """
@@ -16,7 +20,7 @@ from ..config import ANTHROPIC_API_KEY as _ANTHROPIC_API_KEY
 from ..utils import log
 from .metric import metric, missing_metric, engine_result, clip01
 
-_SRC = "Google News RSS + Claude Haiku(逐則新聞標記,evidence 強制原文引用)"
+_SRC = "Google News RSS(含內文摘要抓取)+ Claude Haiku 逐則標記,evidence 強制原文引用"
 
 _SENTIMENT_VALUES = {"利多": 1.0, "利空": -1.0, "中性": 0.0}
 _IMPACT_WEIGHTS = {"高": 1.5, "中": 1.0, "低": 0.5}
@@ -48,14 +52,17 @@ _SCHEMA = {
 }
 
 _SYSTEM = (
-    "你是台股基本面分析助理。我會給你某檔股票近90天的新聞標題清單,每則標題前有編號 idx。"
-    "請針對清單中的『每一則』標題逐一判斷:"
+    "你是台股基本面分析助理。我會給你某檔股票近90天的新聞清單,每則有編號 idx 與標題,"
+    "部分新聞我還會附上抓取到的『內文:』摘要(有些抓不到就只有標題)。"
+    "請針對清單中的『每一則』逐一判斷:"
     "sentiment(利多/利空/中性,對該公司股價而言)、durability(一次性事件 或 長期趨勢/結構性利多利空)、"
     "impact(高/中/低,對基本面影響程度)、confidence(0~1,你對這個判斷的把握程度)。"
-    "evidence 必須是該則標題的原文引用,不可改寫或杜撰。idx 必須對應到輸入清單的編號,"
-    "每個 idx 最多輸出一筆。只根據標題字面內容判斷,不要自己腦補沒寫出來的資訊,"
-    "也不要預測股價漲跌。summary 用一句繁體中文摘要整體基調;"
-    "risk_flags 每則用『簡短片語』(≤30字,如「遭調查」「Q1財測下修」)列出標題中的負面/風險訊號,沒有則空陣列。"
+    "**有附『內文:』摘要時,務必以內文的實際內容為準**——台股新聞標題常誇大、聳動或與內文不符,"
+    "不要只看標題字面;沒有內文的則依標題判斷。"
+    "evidence 必須是『標題或內文的原文引用』,不可改寫或杜撰。idx 必須對應到輸入清單的編號,"
+    "每個 idx 最多輸出一筆。不要自己腦補沒寫出來的資訊,也不要預測股價漲跌。"
+    "summary 用一句繁體中文摘要整體基調;"
+    "risk_flags 每則用『簡短片語』(≤30字,如「遭調查」「Q1財測下修」)列出標題/內文中的負面/風險訊號,沒有則空陣列。"
 )
 
 
@@ -68,7 +75,7 @@ def _clip01(x) -> float:
 
 def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | None = None) -> dict | None:
     """單次 Haiku 呼叫,逐則新聞標記。回傳 {items:[{idx,sentiment,durability,impact,confidence,evidence}],
-    summary, risk_flags} 或 None(降級:無 API key / 無新聞 / 呼叫失敗)。"""
+    summary, risk_flags, content_read} 或 None(降級:無 API key / 無新聞 / 呼叫失敗)。"""
     cfg = cfg or {}
     if not _ANTHROPIC_API_KEY or not news_items:
         return None
@@ -79,16 +86,39 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
         return None
 
     max_news = int(cfg.get("max_news", 60))
+
+    # 讀內文:抓每則新聞的實際內文摘要,寫回 news_items 各筆的 'content',讓 AI 依內容
+    # (而非可能誇大的標題)判斷。抓不到的則只留標題。全程 best-effort + time-box。
+    content_read = 0
+    if cfg.get("read_content", True):
+        try:
+            from ..fetchers import enrich_news_content
+            content_read = enrich_news_content(
+                news_items[:max_news],
+                limit=int(cfg.get("content_max_items", 10)),
+                timeout=float(cfg.get("content_timeout", 5.0)),
+                max_chars=int(cfg.get("content_max_chars", 600)),
+                budget=float(cfg.get("content_budget", 30.0)),
+            )
+        except Exception as e:
+            log.warning(f"新聞內文讀取 {stock_id} 失敗(續用標題):{e}")
+
+    valid_idx = set()
     numbered = []
     for i, n in enumerate(news_items[:max_news]):
         t = (n.get("title") or "").strip()
         if not t:
             continue
+        valid_idx.add(i)
         pub = n.get("published_date") or (n.get("published") or "")[:16]
-        numbered.append(f"{i}. {t}" + (f"({pub})" if pub else ""))
+        line = f"{i}. {t}" + (f"({pub})" if pub else "")
+        body = (n.get("content") or "").strip()
+        if body:
+            line += f"\n   內文:{body}"
+        numbered.append(line)
     if not numbered:
         return None
-    user = f"股票:{stock_id} {name}\n新聞標題清單:\n" + "\n".join(numbered)
+    user = f"股票:{stock_id} {name}\n新聞清單:\n" + "\n".join(numbered)
 
     model = cfg.get("model", "claude-haiku-4-5")
     try:
@@ -114,7 +144,7 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
     items = []
     for it in (data.get("items") or []):
         idx = it.get("idx")
-        if not isinstance(idx, int) or not (0 <= idx < len(numbered)) or not it.get("evidence"):
+        if not isinstance(idx, int) or idx not in valid_idx or not it.get("evidence"):
             continue
         if it.get("sentiment") not in _SENTIMENT_VALUES:
             continue
@@ -130,6 +160,7 @@ def analyze_news(stock_id: str, name: str, news_items: list[dict], cfg: dict | N
         "items": items,
         "summary": str(data.get("summary", ""))[:200],
         "risk_flags": [str(x)[:80] for x in (data.get("risk_flags") or [])][:5],
+        "content_read": content_read,
     }
 
 
@@ -219,6 +250,15 @@ def compute(ctx: dict) -> dict:
         metrics.append(metric(
             "ai_news_summary", "AI 新聞摘要(原文佐證見上方逐則標記)", analysis["summary"],
             formula="Haiku 對本次新聞清單的一句話摘要", source=_SRC, asof=str(today), updated_at=updated,
+        ))
+
+    cr = analysis.get("content_read")
+    if cr is not None:
+        metrics.append(metric(
+            "news_content_read", "已讀取內文則數", cr, unit="則",
+            formula="AI 判定時實際抓到內文摘要的新聞則數(其餘僅依標題;內文優先於標題以避免標題誇大誤判)",
+            source=_SRC, asof=str(today), updated_at=updated,
+            rating=("good" if cr and cr > 0 else "neutral"),
         ))
 
     score = clip01((weighted_score_sum / weighted_score_w + 1) / 2) * 100 if weighted_score_w > 0 else None
