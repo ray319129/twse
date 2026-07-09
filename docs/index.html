@@ -1368,9 +1368,19 @@ function portAIReview(){
     const totals={cost:Math.round(totCost),market:hv?Math.round(totMkt):null,
       pnl:hv?Math.round(totMkt-totCost):null,pnl_pct:hv&&totCost>0?Math.round((totMkt-totCost)/totCost*1000)/10:null};
     fetch(HEALTH_API_BASE+'/api/portfolio_review',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({positions:rows,totals})}).then(r=>r.json()).then(res=>{
-      if(res.error)throw new Error(res.error);_portRenderAIReview(res);
-    }).catch(e=>{setStatus('AI 分析失敗:'+(e&&e.message||e));}).then(()=>{_portReviewBusy=false;});
+      body:JSON.stringify({positions:rows,totals})})
+      .then(r=>r.text().then(t=>({ok:r.ok,status:r.status,text:t})))
+      .then(o=>{
+        let res=null;try{res=JSON.parse(o.text);}catch(_){}
+        if(!res){   /* 非 JSON = Vercel 平台錯誤頁(多半是超過 60 秒逾時)*/
+          const timeout=o.status===504||/timeout|FUNCTION_INVOCATION|too long/i.test(o.text||'');
+          throw new Error(timeout
+            ?'分析逾時了。持倉檔數較多時 AI 運算會超過伺服器 60 秒上限;請稍後再試,或先刪掉幾檔市值較小的持倉再試。'
+            :('伺服器回應異常(HTTP '+o.status+'),請稍後再試。'));
+        }
+        if(res.error)throw new Error(res.error);
+        _portRenderAIReview(res);
+      }).catch(e=>{setStatus('AI 分析失敗:'+(e&&e.message||e));}).then(()=>{_portReviewBusy=false;});
   });
 }
 const PORT_VERDICT_CLR={'續抱':'var(--up)','加碼':'var(--up)','停利了結':'var(--warn)','減碼':'var(--warn)','停損':'var(--down)','觀望':'var(--muted)'};
@@ -1395,7 +1405,7 @@ function _portRenderAIReview(res){
     </div>`;
   }).join('');
   box.innerHTML=`<div class="port-card" style="margin-top:14px">
-    <div class="pi-title">🧠 AI 總覽 <span class="mut" style="font-weight:400;font-size:11px">· 分析 ${res.analyzed||0} 檔 · 研究參考,非投資建議</span></div>
+    <div class="pi-title">🧠 AI 總覽 <span class="mut" style="font-weight:400;font-size:11px">· 分析 ${res.analyzed||0}${(res.submitted&&res.submitted>res.analyzed)?'/'+res.submitted+' 檔(市值前 '+res.analyzed+')':' 檔'} · 研究參考,非投資建議</span></div>
     <div class="par-overall">
       ${ov.summary?`<div class="par-ov-sum">${esc(ov.summary)}</div>`:''}
       ${ov.health?`<div class="par-ov-line"><b>整體體質</b>${esc(ov.health)}</div>`:''}

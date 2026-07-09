@@ -16,9 +16,11 @@ body: {"positions":[{id,name,industry,shares,cost,price,pnl_pct,market_value,hea
 anthropic 版本對 output_config 結構化輸出參數會丟例外(見 HANDOFF 2026-07-09),OCR/ai_summary
 用純呼叫都正常,故統一純呼叫,用 scripts.utils.extract_json 穩健抽 JSON。
 
-模型:claude-opus-4-8(判斷品質優先;停利停損建議需要細緻推理)。Hobby 方案 serverless 上限
-60s,故 SDK timeout 設 55s、分析檔數上限 20(超過只分析市值前 20 檔),避免長尾逾時把整包打掉。
-成本:on-demand,一次約數千 output token,Opus $5/$25 每百萬,單次約 US$0.05~0.15。
+模型:claude-sonnet-4-6。原用 Opus 4.8(判斷品質優先),但 2026-07-10 實測使用者真實持倉
+會超過 Vercel Hobby 60s 上限 → 平台回傳非 JSON 錯誤頁、前端 JSON.parse 失敗。Sonnet 產出速度
+約 2x,判斷品質對此結構化綜合任務仍足,故改用。Hobby 60s 硬限:SDK timeout 設 50s、分析檔數
+上限 15(超過只分析市值前 15 檔),讓超時能回乾淨 JSON 錯誤而非被平台硬砍。
+成本:on-demand,一次約數千 output token,Sonnet $3/$15 每百萬,單次約 US$0.02~0.08。
 """
 from __future__ import annotations
 import json
@@ -33,11 +35,11 @@ if _ROOT not in sys.path:
 
 log = logging.getLogger("twse.portfolio_review")
 
-_MODEL = "claude-opus-4-8"
+_MODEL = "claude-sonnet-4-6"       # 見檔頭:Opus 對真實持倉會逾時,Sonnet ~2x 快、品質仍足
 _MAX_TOKENS = 8000
-_MAX_BODY = 4 * 1024 * 1024        # 4MB(digest 已壓縮,20 檔遠小於此)
-_MAX_POSITIONS = 20                # 只分析市值前 N 檔,控 output 長度 / 60s serverless 逾時
-_SDK_TIMEOUT = 55.0                # 低於 Vercel Hobby 60s 上限 → 逾時得到乾淨錯誤而非硬砍
+_MAX_BODY = 4 * 1024 * 1024        # 4MB(digest 已壓縮,15 檔遠小於此)
+_MAX_POSITIONS = 15                # 只分析市值前 N 檔,控 output 長度 / 60s serverless 逾時
+_SDK_TIMEOUT = 50.0                # 低於 Vercel Hobby 60s 上限 → 逾時得到乾淨 JSON 錯誤而非平台硬砍
 
 _SYSTEM = (
     "你是台股資深投資組合顧問。我會給你使用者的完整持倉:每檔含成本均價、現價、未實現損益%,"
@@ -90,6 +92,8 @@ def review(payload: dict) -> dict:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return {"error": "伺服器未設定 ANTHROPIC_API_KEY(需在 Vercel 環境變數加入)。"}
+    submitted = sum(1 for p in (payload.get("positions") or [])
+                    if isinstance(p, dict) and p.get("id"))
     positions = _sanitize_positions(payload.get("positions"))
     if not positions:
         return {"error": "沒有可分析的持倉。"}
@@ -143,7 +147,7 @@ def review(payload: dict) -> dict:
         "concentration_risk": str(ov.get("concentration_risk") or "")[:500],
         "action_priority": [str(x)[:200] for x in (ov.get("action_priority") or []) if str(x).strip()][:4],
     }
-    return {"overall": overall, "positions": out_pos, "analyzed": len(out_pos)}
+    return {"overall": overall, "positions": out_pos, "analyzed": len(out_pos), "submitted": submitted}
 
 
 class handler(BaseHTTPRequestHandler):
