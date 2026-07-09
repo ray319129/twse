@@ -111,17 +111,17 @@ def _signal_returns(raw: pd.DataFrame, pos_d: int, sig_close: float) -> dict:
     return out
 
 
-def run_backtest(universe_limit: int | None = None, start: str | None = None,
-                 end: str | None = None, use_regime: bool = True) -> dict:
-    cfg = load_screeners()
+import copy
+
+
+def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
+    """訊號重放(慢,~7 分鐘)—— 只做選股,不含出場。回傳 (selections, shared)。
+    出場參數不影響選股 → 重放一次即可對多組出場參數做敏感度掃描(見 sweep_exits)。
+    selections 每筆含:選股層報酬 sig_rets / benchmark bench_rets / style / _pos_master,皆與出場無關。"""
     score_cfg = dict(cfg.get("scoring", {}) or {})
     rank_cfg = cfg.get("ranking", {}) or {}
     score_cfg["min_dollar_volume"] = float(rank_cfg.get("min_dollar_volume", 30_000_000))
-    exit_cfg = cfg.get("exit", {}) or {}
-    entry_cfg = cfg.get("entry", {}) or {}
-    cost_cfg = cfg.get("cost", {}) or {}
     market_cfg = cfg.get("market", {}) or {}
-    max_chase = float(entry_cfg.get("max_chase", 0.03))
     fixed_core = int(rank_cfg.get("core_count", 10))
     fixed_min_score = float(rank_cfg.get("min_score", 45))
     lu_thr = float(market_cfg.get("limit_up_pct", 0.095)) * 100
@@ -133,7 +133,6 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
     if not inds:
         raise RuntimeError("無可用股票資料")
 
-    # master 交易日的位置索引 + 對齊到 master 的 TWII(供超額報酬 benchmark;缺日 ffill)
     master_vals = master.values
     master_pos = {ts: i for i, ts in enumerate(master)}
     if index_close is not None:
@@ -142,23 +141,18 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
     else:
         twii_m = pd.Series(index=master, dtype=float)
         twii_ma20 = twii_m
-
-    # 每檔的日期 numpy 陣列(searchsorted 用)
     ind_dates = {sid: ind.index.values for sid, ind in inds.items()}
 
-    # 重放區間:留 WARMUP_BARS 暖身;最後一天不重放(需隔日開盤才能進場)
     lo = WARMUP_BARS
     hi = len(master) - 1
     if start:
-        s = np.datetime64(start)
-        lo = max(lo, int(np.searchsorted(master_vals, s, side="left")))
+        lo = max(lo, int(np.searchsorted(master_vals, np.datetime64(start), side="left")))
     if end:
-        e = np.datetime64(end)
-        hi = min(hi, int(np.searchsorted(master_vals, e, side="right")))
+        hi = min(hi, int(np.searchsorted(master_vals, np.datetime64(end), side="right")))
     replay_days = master[lo:hi]
-    print(f"重放交易日:{len(replay_days)} 天 ({replay_days[0].date()} → {replay_days[-1].date()})")
+    print(f"重放交易日:{len(replay_days)} 天 ({replay_days[0].date()} -> {replay_days[-1].date()})")
 
-    picks: list[dict] = []      # 每一筆選股(含訊號報酬 + 撮合結果 + benchmark)
+    selections: list[dict] = []
     t0 = time.time()
     for di, d in enumerate(replay_days):
         d64 = np.datetime64(d)
@@ -168,7 +162,6 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
             index_below_ma20 = bool(twii_m.iloc[pos_master] < twii_ma20.iloc[pos_master])
 
         day_scored: list[dict] = []
-        # 市場廣度(regime 用):對所有 >=60 根的股票統計,近似線上 industry_rows 的廣度
         b_n = b_above = b_adv = b_dec = b_lu = b_ld = 0
         for sid, ind in inds.items():
             cut = int(np.searchsorted(ind_dates[sid], d64, side="right"))
@@ -176,9 +169,7 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
                 continue
             sl = ind.iloc[:cut]
             last = sl.iloc[-1]
-            close_v = last.get("close")
-            ma20_v = last.get("ma20")
-            # --- 廣度統計 ---
+            close_v = last.get("close"); ma20_v = last.get("ma20")
             if pd.notna(close_v):
                 b_n += 1
                 if pd.notna(ma20_v) and close_v > ma20_v:
@@ -195,17 +186,13 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
                             b_lu += 1
                         elif chg <= -lu_thr:
                             b_ld += 1
-            # --- 評分 ---
             conv = compute_conviction(sl, None, cfg=score_cfg)
             if conv and conv.get("trigger"):
                 sig_close = float(close_v) if pd.notna(close_v) else None
                 if sig_close:
-                    conv["stock_id"] = sid
-                    conv["sig_close"] = sig_close
-                    conv["_pos_d"] = cut - 1
+                    conv["stock_id"] = sid; conv["sig_close"] = sig_close; conv["_pos_d"] = cut - 1
                     day_scored.append(conv)
 
-        # --- 大盤閘門:決定當日 core_count / min_score / prefer_pullback ---
         core_count, min_score, prefer_pb = fixed_core, fixed_min_score, False
         if use_regime:
             breadth = {"n": b_n, "above_ma20": b_above, "adv": b_adv, "dec": b_dec,
@@ -219,7 +206,6 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
                     min_score = regime["min_score"]
                 prefer_pb = bool(regime.get("prefer_pullback"))
 
-        # --- 選核心:達門檻的觸發股,依 score 排序(弱盤對純追突破扣分),取前 core_count ---
         def _key(s):
             base = float(s["score"])
             if prefer_pb and s.get("breakout") and not s.get("pullback_turn"):
@@ -229,11 +215,8 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
 
         for s in selected:
             sid = s["stock_id"]; raw = raws[sid]; pos_d = s["_pos_d"]; sig_close = s["sig_close"]
-            style = _style_of(s)
-            sim = _simulate_exit(raw, d.isoformat(), sig_close, style, exit_cfg, max_chase, cost_cfg)
             sig_rets = _signal_returns(raw, pos_d, sig_close)
-            # benchmark(選股層):TWII 同 horizon 報酬 → 超額
-            bench_rets: dict[int, float | None] = {}
+            bench_rets: dict = {}
             for h in HORIZONS:
                 tp = pos_master + h
                 if index_close is not None and tp < len(master) \
@@ -241,32 +224,99 @@ def run_backtest(universe_limit: int | None = None, start: str | None = None,
                     bench_rets[h] = float(twii_m.iloc[tp] / twii_m.iloc[pos_master] - 1)
                 else:
                     bench_rets[h] = None
-            # benchmark(執行層):進場日→出場日 TWII 報酬(對齊 master 日位置)
-            bench_exec = None
-            if sim and sim.get("status") == "closed" and sim.get("hold_days") is not None \
-                    and index_close is not None:
-                ep = pos_master + 1
-                xp = ep + int(sim["hold_days"])
-                if 0 <= ep < len(master) and 0 <= xp < len(master) \
-                        and pd.notna(twii_m.iloc[ep]) and pd.notna(twii_m.iloc[xp]) and twii_m.iloc[ep]:
-                    bench_exec = float(twii_m.iloc[xp] / twii_m.iloc[ep] - 1)
-
-            picks.append({
-                "date": d.isoformat(), "stock_id": sid, "score": s["score"],
-                "profile": s.get("profile"),
+            selections.append({
+                "date": d.isoformat(), "stock_id": sid, "score": s["score"], "profile": s.get("profile"),
                 "breakout": bool(s.get("breakout")), "pullback_turn": bool(s.get("pullback_turn")),
-                "new_stock": bool(s.get("new_stock")),
-                "index_below_ma20": index_below_ma20,
-                "sig_close": round(sig_close, 2),
-                "sig_rets": sig_rets, "bench_rets": bench_rets,
-                "exit": sim, "bench_exec": bench_exec,
+                "new_stock": bool(s.get("new_stock")), "index_below_ma20": index_below_ma20,
+                "sig_close": round(sig_close, 2), "sig_rets": sig_rets, "bench_rets": bench_rets,
+                "style": _style_of(s), "_pos_master": pos_master,
             })
 
         if (di + 1) % 20 == 0:
-            print(f"  replay {di+1}/{len(replay_days)}  {d.date()}  累計選股 {len(picks)} 筆  ({time.time()-t0:.0f}s)")
+            print(f"  replay {di+1}/{len(replay_days)}  {d.date()}  累計選股 {len(selections)} 筆  ({time.time()-t0:.0f}s)")
 
-    print(f"重放完成:{len(picks)} 筆選股, {time.time()-t0:.0f}s")
-    return _aggregate(picks, bench_name, replay_days)
+    print(f"重放完成:{len(selections)} 筆選股, {time.time()-t0:.0f}s")
+    shared = {"raws": raws, "master": master,
+              "twii_m": twii_m if index_close is not None else None,
+              "bench_name": bench_name, "replay_days": replay_days}
+    return selections, shared
+
+
+def _simulate(selections: list[dict], shared: dict, exit_cfg: dict,
+              entry_cfg: dict, cost_cfg: dict) -> list[dict]:
+    """對已重放好的 selections 套一組出場參數(快,幾秒)。回傳 picks(含 exit + bench_exec)。"""
+    raws = shared["raws"]; master = shared["master"]; twii_m = shared["twii_m"]
+    max_chase = float((entry_cfg or {}).get("max_chase", 0.03))
+    picks: list[dict] = []
+    for sel in selections:
+        raw = raws[sel["stock_id"]]
+        sim = _simulate_exit(raw, sel["date"], sel["sig_close"], sel["style"],
+                             exit_cfg, max_chase, cost_cfg)
+        bench_exec = None
+        if sim and sim.get("status") == "closed" and sim.get("hold_days") is not None and twii_m is not None:
+            ep = sel["_pos_master"] + 1
+            xp = ep + int(sim["hold_days"])
+            if 0 <= ep < len(master) and 0 <= xp < len(master) \
+                    and pd.notna(twii_m.iloc[ep]) and pd.notna(twii_m.iloc[xp]) and twii_m.iloc[ep]:
+                bench_exec = float(twii_m.iloc[xp] / twii_m.iloc[ep] - 1)
+        pick = {k: v for k, v in sel.items() if not k.startswith("_") and k != "style"}
+        pick["exit"] = sim; pick["bench_exec"] = bench_exec
+        picks.append(pick)
+    return picks
+
+
+def run_backtest(universe_limit=None, start=None, end=None, use_regime: bool = True) -> dict:
+    cfg = load_screeners()
+    selections, shared = _replay(cfg, universe_limit, start, end, use_regime)
+    picks = _simulate(selections, shared, cfg.get("exit", {}) or {},
+                      cfg.get("entry", {}) or {}, cfg.get("cost", {}) or {})
+    return _aggregate(picks, shared["bench_name"], shared["replay_days"])
+
+
+def _exit_variants(base_exit: dict) -> list:
+    """出場參數敏感度網格。主軸:出場太早(均線停損佔多數、平均持有 3 天)
+    -> 給洗盤空間(拉長均線停損寬限)、或 TP1 前完全不用均線停損、或放寬移動停利。"""
+    out = []
+    def mk(name, **mods):
+        e = copy.deepcopy(base_exit)
+        for pathk, val in mods.items():
+            cur = e; parts = pathk.split(".")
+            for p in parts[:-1]:
+                cur = cur.setdefault(p, {})
+            cur[parts[-1]] = val
+        out.append((name, e))
+    mh = int(base_exit.get("max_hold_days", 30))
+    mk("baseline(現行)")
+    mk("grace 動能3/波段2", **{"momentum.ma_stop_grace_days": 3, "swing.ma_stop_grace_days": 2})
+    mk("grace 動能5/波段3", **{"momentum.ma_stop_grace_days": 5, "swing.ma_stop_grace_days": 3})
+    mk("grace 動能8/波段5", **{"momentum.ma_stop_grace_days": 8, "swing.ma_stop_grace_days": 5})
+    mk("TP1前關均線停損", **{"momentum.ma_stop_grace_days": mh, "swing.ma_stop_grace_days": mh})
+    mk("移動停利放宽(ATRx2.5)", **{"trail.atr_mult": 2.5, "trail.min_pct": 0.04, "trail.max_pct": 0.10})
+    mk("grace5/3+移動放宽", **{"momentum.ma_stop_grace_days": 5, "swing.ma_stop_grace_days": 3,
+                                        "trail.atr_mult": 2.5, "trail.min_pct": 0.04, "trail.max_pct": 0.10})
+    mk("grace5/3+max_hold45", **{"momentum.ma_stop_grace_days": 5, "swing.ma_stop_grace_days": 3,
+                                 "max_hold_days": 45})
+    mk("TP1前關均線+移動放宽", **{"momentum.ma_stop_grace_days": mh, "swing.ma_stop_grace_days": mh,
+                                            "trail.atr_mult": 2.5, "trail.min_pct": 0.04, "trail.max_pct": 0.10})
+    return out
+
+
+def sweep_exits(universe_limit=None, start=None, end=None, use_regime: bool = True) -> dict:
+    """重放一次 -> 對同一批選股套多組出場參數,比執行層統計。"""
+    cfg = load_screeners()
+    selections, shared = _replay(cfg, universe_limit, start, end, use_regime)
+    entry_cfg = cfg.get("entry", {}) or {}; cost_cfg = cfg.get("cost", {}) or {}
+    rows = []
+    print("\n掃描出場參數中…")
+    for name, exit_cfg in _exit_variants(cfg.get("exit", {}) or {}):
+        picks = _simulate(selections, shared, exit_cfg, entry_cfg, cost_cfg)
+        st = _exec_stats(picks) or {}
+        rows.append({"variant": name, **st})
+        print(f"  done {name}")
+    return {"benchmark": shared["bench_name"], "n_selections": len(selections),
+            "replay_from": shared["replay_days"][0].date().isoformat(),
+            "replay_to": shared["replay_days"][-1].date().isoformat(),
+            "variants": rows}
 
 
 # ---------------------------------------------------------------------------
@@ -477,6 +527,31 @@ def print_report(rep: dict) -> None:
     print("-" * 78)
 
 
+def print_sweep(rep: dict) -> None:
+    """出場參數敏感度掃描報表:同一批選股,各出場參數的執行層勝率/淨報酬/超額。"""
+    print("\n" + "=" * 92)
+    print(f"出場參數敏感度掃描  |  benchmark = {rep['benchmark']}  |  同一批 {rep['n_selections']} 筆選股  "
+          f"|  {rep.get('replay_from')} → {rep.get('replay_to')}")
+    print("=" * 92)
+    print(f"  {'出場參數':<24} {'n':>5} {'勝率':>6} {'淨報酬':>8} {'扣前':>8} {'超額':>8} {'贏大盤':>6} "
+          f"{'持有':>5} {'均線停損%':>8}")
+    print("  " + "-" * 88)
+    base_net = None
+    for r in rep["variants"]:
+        if not r.get("n"):
+            continue
+        if base_net is None:
+            base_net = r["avg_net_ret_pct"]
+        ma = r.get("exit_reasons", {}).get("均線停損", 0)
+        print(f"  {r['variant']:<24} {r['n']:>5} {str(r['win_rate'])+'%':>6} "
+              f"{_fmt(r['avg_net_ret_pct']):>8} {_fmt(r['avg_gross_ret_pct']):>8} "
+              f"{_fmt(r['avg_excess_vs_bench_pct']):>8} {str(r['pct_beat_bench'])+'%':>6} "
+              f"{r['avg_hold_days']:>5} {str(ma)+'%':>8}")
+    print("  " + "-" * 88)
+    print("  淨報酬/超額為執行層(隔日開盤進場+扣成本);均線停損% = 該出場參數下由均線停損出場的比例。")
+    print("  誠實邊界同單次回測(倖存者/除權息/單一多頭段/純技術層);此掃描僅比『相對高下』,別當絕對保證。")
+
+
 def _json_safe(o):
     if isinstance(o, dict):
         return {k: _json_safe(v) for k, v in o.items()}
@@ -500,6 +575,7 @@ def parse_args():
     p.add_argument("--start", help="重放起始日 YYYY-MM-DD")
     p.add_argument("--end", help="重放結束日 YYYY-MM-DD")
     p.add_argument("--no-regime", action="store_true", help="不套用大盤閘門,用固定 core_count/min_score")
+    p.add_argument("--sweep", action="store_true", help="出場參數敏感度掃描(重放一次,套多組出場參數)")
     p.add_argument("--out", default=str(DATA_DIR / "backtest.json"), help="輸出 JSON 路徑")
     return p.parse_args()
 
@@ -510,9 +586,18 @@ if __name__ == "__main__":
     except Exception:
         pass
     args = parse_args()
-    rep = run_backtest(universe_limit=args.limit, start=args.start, end=args.end,
-                       use_regime=not args.no_regime)
-    print_report(rep)
-    with open(args.out, "w", encoding="utf-8") as f:
-        json.dump(_json_safe(rep), f, ensure_ascii=False, indent=2, default=str)
-    print(f"\n完整結果已寫入 {args.out}")
+    if args.sweep:
+        rep = sweep_exits(universe_limit=args.limit, start=args.start, end=args.end,
+                          use_regime=not args.no_regime)
+        print_sweep(rep)
+        out = args.out if args.out != str(DATA_DIR / "backtest.json") else str(DATA_DIR / "backtest_sweep.json")
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(_json_safe(rep), f, ensure_ascii=False, indent=2, default=str)
+        print(f"\n掃描結果已寫入 {out}")
+    else:
+        rep = run_backtest(universe_limit=args.limit, start=args.start, end=args.end,
+                           use_regime=not args.no_regime)
+        print_report(rep)
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(_json_safe(rep), f, ensure_ascii=False, indent=2, default=str)
+        print(f"\n完整結果已寫入 {args.out}")

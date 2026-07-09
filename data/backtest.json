@@ -6,10 +6,10 @@
     "replay_from": "2024-12-06",
     "replay_to": "2026-07-08",
     "status_counts": {
-      "closed": 2413,
+      "closed": 2410,
       "skip": 552,
       "none": 10,
-      "open": 4
+      "open": 7
     },
     "horizons": [
       1,
@@ -65,46 +65,49 @@
     }
   },
   "execution_overall": {
-    "n": 2413,
-    "win_rate": 28.3,
-    "avg_net_ret_pct": -0.4,
-    "avg_gross_ret_pct": 0.25,
-    "avg_excess_vs_bench_pct": -0.78,
-    "pct_beat_bench": 28.5,
-    "avg_hold_days": 3.0104,
+    "n": 2410,
+    "win_rate": 32.0,
+    "avg_net_ret_pct": 0.16,
+    "avg_gross_ret_pct": 0.82,
+    "avg_excess_vs_bench_pct": -0.53,
+    "pct_beat_bench": 30.5,
+    "avg_hold_days": 4.6639,
     "exit_reasons": {
-      "止損": 29.1,
-      "均線停損": 50.8,
-      "移動停利": 20.1
+      "止損": 44.4,
+      "均線停損": 30.6,
+      "移動停利": 24.8,
+      "到期": 0.2
     }
   },
   "execution_by_trigger": {
     "breakout": {
-      "n": 1686,
-      "win_rate": 30.7,
-      "avg_net_ret_pct": -0.27,
-      "avg_gross_ret_pct": 0.39,
-      "avg_excess_vs_bench_pct": -0.63,
-      "pct_beat_bench": 30.5,
-      "avg_hold_days": 3.0451,
+      "n": 1683,
+      "win_rate": 34.0,
+      "avg_net_ret_pct": 0.32,
+      "avg_gross_ret_pct": 0.98,
+      "avg_excess_vs_bench_pct": -0.25,
+      "pct_beat_bench": 32.5,
+      "avg_hold_days": 4.4872,
       "exit_reasons": {
-        "止損": 32.7,
-        "均線停損": 46.6,
-        "移動停利": 20.8
+        "止損": 45.3,
+        "均線停損": 29.5,
+        "移動停利": 25.1,
+        "到期": 0.1
       }
     },
     "pullback_turn": {
       "n": 727,
-      "win_rate": 22.8,
-      "avg_net_ret_pct": -0.7,
-      "avg_gross_ret_pct": -0.08,
+      "win_rate": 27.2,
+      "avg_net_ret_pct": -0.22,
+      "avg_gross_ret_pct": 0.45,
       "avg_excess_vs_bench_pct": -1.15,
-      "pct_beat_bench": 23.8,
-      "avg_hold_days": 2.9298,
+      "pct_beat_bench": 25.7,
+      "avg_hold_days": 5.0729,
       "exit_reasons": {
-        "止損": 20.9,
-        "均線停損": 60.5,
-        "移動停利": 18.6
+        "止損": 42.4,
+        "均線停損": 33.0,
+        "移動停利": 23.9,
+        "到期": 0.7
       }
     }
   },
@@ -126,31 +129,32 @@
   },
   "execution_by_market": {
     "index_above_ma20": {
-      "n": 2076,
-      "win_rate": 28.9,
-      "avg_net_ret_pct": -0.39,
-      "avg_gross_ret_pct": 0.26,
-      "avg_excess_vs_bench_pct": -0.77,
-      "pct_beat_bench": 28.4,
-      "avg_hold_days": 3.0222,
+      "n": 2073,
+      "win_rate": 32.4,
+      "avg_net_ret_pct": 0.1,
+      "avg_gross_ret_pct": 0.76,
+      "avg_excess_vs_bench_pct": -0.54,
+      "pct_beat_bench": 30.1,
+      "avg_hold_days": 4.6618,
       "exit_reasons": {
-        "止損": 28.7,
-        "均線停損": 51.0,
-        "移動停利": 20.3
+        "止損": 44.4,
+        "均線停損": 30.6,
+        "移動停利": 24.7,
+        "到期": 0.3
       }
     },
     "index_below_ma20": {
       "n": 337,
-      "win_rate": 25.2,
-      "avg_net_ret_pct": -0.45,
-      "avg_gross_ret_pct": 0.19,
-      "avg_excess_vs_bench_pct": -0.85,
-      "pct_beat_bench": 29.1,
-      "avg_hold_days": 2.9377,
+      "win_rate": 29.4,
+      "avg_net_ret_pct": 0.51,
+      "avg_gross_ret_pct": 1.17,
+      "avg_excess_vs_bench_pct": -0.43,
+      "pct_beat_bench": 32.3,
+      "avg_hold_days": 4.6766,
       "exit_reasons": {
-        "止損": 31.8,
-        "均線停損": 49.3,
-        "移動停利": 19.0
+        "止損": 44.5,
+        "均線停損": 30.6,
+        "移動停利": 24.9
       }
     }
   },
@@ -172,59 +176,63 @@
   },
   "execution_by_score_quartile": {
     "Q1_low": {
-      "n": 646,
-      "win_rate": 22.6,
-      "avg_net_ret_pct": -1.16,
-      "avg_gross_ret_pct": -0.53,
-      "avg_excess_vs_bench_pct": -1.49,
-      "pct_beat_bench": 22.3,
-      "avg_hold_days": 3.1362,
+      "n": 645,
+      "win_rate": 27.1,
+      "avg_net_ret_pct": -0.62,
+      "avg_gross_ret_pct": 0.04,
+      "avg_excess_vs_bench_pct": -1.27,
+      "pct_beat_bench": 24.8,
+      "avg_hold_days": 5.0155,
       "exit_reasons": {
-        "止損": 26.2,
-        "均線停損": 57.7,
-        "移動停利": 16.1
+        "止損": 41.4,
+        "均線停損": 37.2,
+        "移動停利": 21.1,
+        "到期": 0.3
       }
     },
     "Q2": {
-      "n": 612,
-      "win_rate": 31.2,
-      "avg_net_ret_pct": 0.18,
-      "avg_gross_ret_pct": 0.83,
-      "avg_excess_vs_bench_pct": -0.27,
-      "pct_beat_bench": 31.7,
-      "avg_hold_days": 2.9869,
+      "n": 611,
+      "win_rate": 34.0,
+      "avg_net_ret_pct": 0.68,
+      "avg_gross_ret_pct": 1.35,
+      "avg_excess_vs_bench_pct": 0.02,
+      "pct_beat_bench": 32.4,
+      "avg_hold_days": 4.7201,
       "exit_reasons": {
-        "止損": 24.3,
-        "均線停損": 52.6,
-        "移動停利": 23.0
+        "止損": 42.4,
+        "均線停損": 30.1,
+        "移動停利": 27.2,
+        "到期": 0.3
       }
     },
     "Q3": {
       "n": 589,
-      "win_rate": 27.3,
-      "avg_net_ret_pct": -0.35,
-      "avg_gross_ret_pct": 0.3,
-      "avg_excess_vs_bench_pct": -0.65,
-      "pct_beat_bench": 28.9,
-      "avg_hold_days": 2.9083,
+      "win_rate": 31.9,
+      "avg_net_ret_pct": 0.4,
+      "avg_gross_ret_pct": 1.07,
+      "avg_excess_vs_bench_pct": -0.25,
+      "pct_beat_bench": 32.4,
+      "avg_hold_days": 4.6095,
       "exit_reasons": {
-        "止損": 29.5,
-        "均線停損": 50.6,
-        "移動停利": 19.9
+        "止損": 45.5,
+        "均線停損": 29.4,
+        "移動停利": 25.0,
+        "到期": 0.2
       }
     },
     "Q4_high": {
-      "n": 566,
-      "win_rate": 32.9,
-      "avg_net_ret_pct": -0.2,
-      "avg_gross_ret_pct": 0.45,
-      "avg_excess_vs_bench_pct": -0.67,
-      "pct_beat_bench": 31.6,
-      "avg_hold_days": 2.9982,
+      "n": 565,
+      "win_rate": 35.2,
+      "avg_net_ret_pct": 0.23,
+      "avg_gross_ret_pct": 0.88,
+      "avg_excess_vs_bench_pct": -0.56,
+      "pct_beat_bench": 32.7,
+      "avg_hold_days": 4.2584,
       "exit_reasons": {
-        "止損": 37.3,
-        "均線停損": 41.0,
-        "移動停利": 21.7
+        "止損": 48.8,
+        "均線停損": 24.8,
+        "移動停利": 26.2,
+        "到期": 0.2
       }
     }
   },
@@ -236,282 +244,285 @@
   "execution_by_month": {
     "2024-12": {
       "n": 95,
-      "win_rate": 23.2,
-      "avg_net_ret_pct": -1.21,
-      "avg_gross_ret_pct": -0.56,
-      "avg_excess_vs_bench_pct": -1.08,
-      "pct_beat_bench": 24.2,
-      "avg_hold_days": 3.0421,
+      "win_rate": 26.3,
+      "avg_net_ret_pct": -1.45,
+      "avg_gross_ret_pct": -0.8,
+      "avg_excess_vs_bench_pct": -1.56,
+      "pct_beat_bench": 23.2,
+      "avg_hold_days": 4.3579,
       "exit_reasons": {
-        "止損": 33.7,
-        "均線停損": 47.4,
-        "移動停利": 18.9
+        "止損": 44.2,
+        "均線停損": 33.7,
+        "移動停利": 22.1
       }
     },
     "2025-01": {
       "n": 95,
-      "win_rate": 23.2,
-      "avg_net_ret_pct": -0.72,
-      "avg_gross_ret_pct": -0.08,
-      "avg_excess_vs_bench_pct": 0.13,
-      "pct_beat_bench": 30.5,
-      "avg_hold_days": 3.1474,
+      "win_rate": 26.3,
+      "avg_net_ret_pct": -0.08,
+      "avg_gross_ret_pct": 0.59,
+      "avg_excess_vs_bench_pct": 0.97,
+      "pct_beat_bench": 32.6,
+      "avg_hold_days": 5.0737,
       "exit_reasons": {
-        "止損": 29.5,
-        "均線停損": 53.7,
-        "移動停利": 16.8
+        "止損": 52.6,
+        "均線停損": 23.2,
+        "移動停利": 24.2
       }
     },
     "2025-02": {
       "n": 151,
-      "win_rate": 26.5,
+      "win_rate": 29.1,
       "avg_net_ret_pct": -1.09,
-      "avg_gross_ret_pct": -0.43,
-      "avg_excess_vs_bench_pct": -0.6,
-      "pct_beat_bench": 29.1,
-      "avg_hold_days": 3.2318,
+      "avg_gross_ret_pct": -0.44,
+      "avg_excess_vs_bench_pct": -0.16,
+      "pct_beat_bench": 33.8,
+      "avg_hold_days": 4.8808,
       "exit_reasons": {
-        "止損": 23.8,
-        "均線停損": 62.9,
-        "移動停利": 13.2
+        "止損": 39.7,
+        "均線停損": 44.4,
+        "移動停利": 15.9
       }
     },
     "2025-03": {
       "n": 77,
-      "win_rate": 19.5,
-      "avg_net_ret_pct": -2.13,
-      "avg_gross_ret_pct": -1.52,
-      "avg_excess_vs_bench_pct": -1.29,
+      "win_rate": 15.6,
+      "avg_net_ret_pct": -3.51,
+      "avg_gross_ret_pct": -2.88,
+      "avg_excess_vs_bench_pct": -2.0,
       "pct_beat_bench": 24.7,
-      "avg_hold_days": 1.9221,
+      "avg_hold_days": 2.9481,
       "exit_reasons": {
-        "止損": 37.7,
-        "均線停損": 48.1,
+        "止損": 62.3,
+        "均線停損": 23.4,
         "移動停利": 14.3
       }
     },
     "2025-04": {
       "n": 83,
       "win_rate": 36.1,
-      "avg_net_ret_pct": 0.11,
-      "avg_gross_ret_pct": 0.75,
-      "avg_excess_vs_bench_pct": -1.76,
-      "pct_beat_bench": 34.9,
-      "avg_hold_days": 4.7952,
+      "avg_net_ret_pct": -0.71,
+      "avg_gross_ret_pct": -0.04,
+      "avg_excess_vs_bench_pct": -3.18,
+      "pct_beat_bench": 32.5,
+      "avg_hold_days": 6.2289,
       "exit_reasons": {
-        "止損": 19.3,
-        "均線停損": 57.8,
+        "止損": 28.9,
+        "均線停損": 48.2,
         "移動停利": 22.9
       }
     },
     "2025-05": {
       "n": 160,
-      "win_rate": 22.5,
-      "avg_net_ret_pct": -1.61,
-      "avg_gross_ret_pct": -0.97,
-      "avg_excess_vs_bench_pct": -2.35,
-      "pct_beat_bench": 23.1,
-      "avg_hold_days": 3.7625,
+      "win_rate": 23.1,
+      "avg_net_ret_pct": -2.24,
+      "avg_gross_ret_pct": -1.59,
+      "avg_excess_vs_bench_pct": -3.05,
+      "pct_beat_bench": 20.6,
+      "avg_hold_days": 5.2125,
       "exit_reasons": {
-        "止損": 18.1,
-        "均線停損": 71.2,
-        "移動停利": 10.6
+        "止損": 38.8,
+        "均線停損": 49.4,
+        "移動停利": 11.9
       }
     },
     "2025-06": {
       "n": 150,
-      "win_rate": 34.0,
-      "avg_net_ret_pct": 0.4,
-      "avg_gross_ret_pct": 1.06,
-      "avg_excess_vs_bench_pct": -0.15,
-      "pct_beat_bench": 31.3,
-      "avg_hold_days": 3.6867,
+      "win_rate": 36.0,
+      "avg_net_ret_pct": 1.27,
+      "avg_gross_ret_pct": 1.95,
+      "avg_excess_vs_bench_pct": 0.44,
+      "pct_beat_bench": 33.3,
+      "avg_hold_days": 5.4867,
       "exit_reasons": {
-        "止損": 20.7,
-        "均線停損": 55.3,
-        "移動停利": 24.0
+        "止損": 33.3,
+        "均線停損": 40.0,
+        "移動停利": 25.3,
+        "到期": 1.3
       }
     },
     "2025-07": {
       "n": 194,
-      "win_rate": 33.0,
-      "avg_net_ret_pct": 1.32,
-      "avg_gross_ret_pct": 1.99,
-      "avg_excess_vs_bench_pct": 0.7,
-      "pct_beat_bench": 29.4,
-      "avg_hold_days": 3.8402,
+      "win_rate": 39.7,
+      "avg_net_ret_pct": 2.42,
+      "avg_gross_ret_pct": 3.1,
+      "avg_excess_vs_bench_pct": 1.25,
+      "pct_beat_bench": 37.1,
+      "avg_hold_days": 6.201,
       "exit_reasons": {
-        "止損": 19.1,
-        "均線停損": 59.3,
-        "移動停利": 21.6
+        "止損": 28.4,
+        "均線停損": 43.3,
+        "移動停利": 26.8,
+        "到期": 1.5
       }
     },
     "2025-08": {
       "n": 145,
-      "win_rate": 33.8,
-      "avg_net_ret_pct": 0.09,
-      "avg_gross_ret_pct": 0.75,
-      "avg_excess_vs_bench_pct": 0.29,
-      "pct_beat_bench": 31.7,
-      "avg_hold_days": 3.2966,
+      "win_rate": 37.9,
+      "avg_net_ret_pct": 0.69,
+      "avg_gross_ret_pct": 1.35,
+      "avg_excess_vs_bench_pct": 0.69,
+      "pct_beat_bench": 36.6,
+      "avg_hold_days": 5.0552,
       "exit_reasons": {
-        "止損": 25.5,
-        "均線停損": 50.3,
-        "移動停利": 24.1
+        "止損": 37.9,
+        "均線停損": 31.0,
+        "移動停利": 31.0
       }
     },
     "2025-09": {
       "n": 151,
-      "win_rate": 23.8,
-      "avg_net_ret_pct": -1.13,
-      "avg_gross_ret_pct": -0.49,
-      "avg_excess_vs_bench_pct": -2.26,
-      "pct_beat_bench": 21.2,
-      "avg_hold_days": 2.4636,
+      "win_rate": 27.2,
+      "avg_net_ret_pct": -1.85,
+      "avg_gross_ret_pct": -1.2,
+      "avg_excess_vs_bench_pct": -3.42,
+      "pct_beat_bench": 21.9,
+      "avg_hold_days": 3.9934,
       "exit_reasons": {
-        "止損": 24.5,
-        "均線停損": 59.6,
-        "移動停利": 15.9
+        "止損": 47.7,
+        "均線停損": 35.1,
+        "移動停利": 17.2
       }
     },
     "2025-10": {
       "n": 144,
-      "win_rate": 25.7,
-      "avg_net_ret_pct": -0.99,
-      "avg_gross_ret_pct": -0.35,
-      "avg_excess_vs_bench_pct": -1.3,
-      "pct_beat_bench": 26.4,
-      "avg_hold_days": 2.7708,
+      "win_rate": 29.2,
+      "avg_net_ret_pct": -1.13,
+      "avg_gross_ret_pct": -0.47,
+      "avg_excess_vs_bench_pct": -1.72,
+      "pct_beat_bench": 28.5,
+      "avg_hold_days": 4.4722,
       "exit_reasons": {
-        "止損": 27.8,
-        "均線停損": 52.8,
-        "移動停利": 19.4
+        "止損": 44.4,
+        "均線停損": 31.2,
+        "移動停利": 24.3
       }
     },
     "2025-11": {
       "n": 106,
-      "win_rate": 17.9,
-      "avg_net_ret_pct": -1.85,
-      "avg_gross_ret_pct": -1.22,
-      "avg_excess_vs_bench_pct": -1.25,
-      "pct_beat_bench": 22.6,
-      "avg_hold_days": 2.4906,
+      "win_rate": 24.5,
+      "avg_net_ret_pct": -1.17,
+      "avg_gross_ret_pct": -0.52,
+      "avg_excess_vs_bench_pct": -0.81,
+      "pct_beat_bench": 27.4,
+      "avg_hold_days": 4.5283,
       "exit_reasons": {
-        "止損": 32.1,
-        "均線停損": 54.7,
-        "移動停利": 13.2
+        "止損": 46.2,
+        "均線停損": 31.1,
+        "移動停利": 22.6
       }
     },
     "2025-12": {
       "n": 143,
-      "win_rate": 42.7,
-      "avg_net_ret_pct": 2.34,
-      "avg_gross_ret_pct": 3.01,
-      "avg_excess_vs_bench_pct": 0.47,
-      "pct_beat_bench": 39.9,
-      "avg_hold_days": 3.8811,
+      "win_rate": 45.5,
+      "avg_net_ret_pct": 4.31,
+      "avg_gross_ret_pct": 5.0,
+      "avg_excess_vs_bench_pct": 1.43,
+      "pct_beat_bench": 40.6,
+      "avg_hold_days": 6.1049,
       "exit_reasons": {
-        "止損": 21.0,
-        "均線停損": 46.9,
-        "移動停利": 32.2
+        "止損": 35.0,
+        "均線停損": 28.0,
+        "移動停利": 36.4,
+        "到期": 0.7
       }
     },
     "2026-01": {
       "n": 134,
-      "win_rate": 26.9,
-      "avg_net_ret_pct": -0.99,
-      "avg_gross_ret_pct": -0.35,
-      "avg_excess_vs_bench_pct": -1.55,
-      "pct_beat_bench": 27.6,
-      "avg_hold_days": 2.6642,
+      "win_rate": 32.8,
+      "avg_net_ret_pct": 0.23,
+      "avg_gross_ret_pct": 0.88,
+      "avg_excess_vs_bench_pct": -0.46,
+      "pct_beat_bench": 30.6,
+      "avg_hold_days": 3.806,
       "exit_reasons": {
-        "止損": 47.8,
-        "均線停損": 32.8,
-        "移動停利": 19.4
+        "止損": 57.5,
+        "均線停損": 17.9,
+        "移動停利": 24.6
       }
     },
     "2026-02": {
       "n": 75,
-      "win_rate": 40.0,
-      "avg_net_ret_pct": 1.8,
-      "avg_gross_ret_pct": 2.45,
-      "avg_excess_vs_bench_pct": 2.24,
-      "pct_beat_bench": 38.7,
-      "avg_hold_days": 2.4133,
+      "win_rate": 48.0,
+      "avg_net_ret_pct": 2.33,
+      "avg_gross_ret_pct": 3.01,
+      "avg_excess_vs_bench_pct": 3.32,
+      "pct_beat_bench": 41.3,
+      "avg_hold_days": 4.0133,
       "exit_reasons": {
-        "止損": 26.7,
-        "均線停損": 41.3,
-        "移動停利": 32.0
+        "止損": 45.3,
+        "均線停損": 13.3,
+        "移動停利": 41.3
       }
     },
     "2026-03": {
       "n": 87,
-      "win_rate": 28.7,
-      "avg_net_ret_pct": -0.6,
-      "avg_gross_ret_pct": 0.04,
-      "avg_excess_vs_bench_pct": 0.67,
+      "win_rate": 37.9,
+      "avg_net_ret_pct": 1.77,
+      "avg_gross_ret_pct": 2.44,
+      "avg_excess_vs_bench_pct": 2.34,
       "pct_beat_bench": 37.9,
-      "avg_hold_days": 2.4368,
+      "avg_hold_days": 4.5172,
       "exit_reasons": {
-        "止損": 39.1,
-        "均線停損": 39.1,
-        "移動停利": 21.8
+        "止損": 46.0,
+        "均線停損": 21.8,
+        "移動停利": 32.2
       }
     },
     "2026-04": {
       "n": 131,
-      "win_rate": 40.5,
-      "avg_net_ret_pct": 2.86,
-      "avg_gross_ret_pct": 3.53,
-      "avg_excess_vs_bench_pct": 0.38,
-      "pct_beat_bench": 35.1,
-      "avg_hold_days": 2.9313,
+      "win_rate": 45.8,
+      "avg_net_ret_pct": 5.22,
+      "avg_gross_ret_pct": 5.92,
+      "avg_excess_vs_bench_pct": 1.26,
+      "pct_beat_bench": 36.6,
+      "avg_hold_days": 4.5191,
       "exit_reasons": {
-        "止損": 31.3,
-        "均線停損": 35.1,
-        "移動停利": 33.6
+        "止損": 40.5,
+        "均線停損": 18.3,
+        "移動停利": 41.2
       }
     },
     "2026-05": {
       "n": 128,
-      "win_rate": 25.0,
-      "avg_net_ret_pct": -0.94,
-      "avg_gross_ret_pct": -0.31,
-      "avg_excess_vs_bench_pct": -1.77,
-      "pct_beat_bench": 24.2,
-      "avg_hold_days": 2.3672,
+      "win_rate": 28.1,
+      "avg_net_ret_pct": 1.3,
+      "avg_gross_ret_pct": 1.96,
+      "avg_excess_vs_bench_pct": -0.32,
+      "pct_beat_bench": 27.3,
+      "avg_hold_days": 3.9531,
       "exit_reasons": {
-        "止損": 36.7,
-        "均線停損": 42.2,
-        "移動停利": 21.1
+        "止損": 56.2,
+        "均線停損": 18.8,
+        "移動停利": 25.0
       }
     },
     "2026-06": {
       "n": 123,
-      "win_rate": 17.1,
-      "avg_net_ret_pct": -2.88,
-      "avg_gross_ret_pct": -2.27,
-      "avg_excess_vs_bench_pct": -2.64,
-      "pct_beat_bench": 18.7,
-      "avg_hold_days": 1.5935,
+      "win_rate": 20.3,
+      "avg_net_ret_pct": -3.22,
+      "avg_gross_ret_pct": -2.59,
+      "avg_excess_vs_bench_pct": -2.87,
+      "pct_beat_bench": 19.5,
+      "avg_hold_days": 2.6423,
       "exit_reasons": {
-        "止損": 44.7,
-        "均線停損": 43.1,
-        "移動停利": 12.2
+        "止損": 65.0,
+        "均線停損": 13.8,
+        "移動停利": 21.1
       }
     },
     "2026-07": {
-      "n": 41,
-      "win_rate": 12.2,
-      "avg_net_ret_pct": -4.97,
-      "avg_gross_ret_pct": -4.38,
-      "avg_excess_vs_bench_pct": -4.14,
-      "pct_beat_bench": 14.6,
-      "avg_hold_days": 1.0,
+      "n": 38,
+      "win_rate": 7.9,
+      "avg_net_ret_pct": -6.44,
+      "avg_gross_ret_pct": -5.86,
+      "avg_excess_vs_bench_pct": -5.35,
+      "pct_beat_bench": 7.9,
+      "avg_hold_days": 1.1316,
       "exit_reasons": {
-        "止損": 63.4,
-        "均線停損": 26.8,
-        "移動停利": 9.8
+        "止損": 86.8,
+        "均線停損": 2.6,
+        "移動停利": 10.5
       }
     }
   },
@@ -547,10 +558,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.09,
-      "bench_exec_pct": -0.97,
-      "hold_days": 3
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -1.09,
+      "hold_days": 4
     },
     {
       "date": "2024-12-06T00:00:00",
@@ -632,7 +643,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 7.16,
+      "net_ret_pct": 3.7,
       "bench_exec_pct": -0.37,
       "hold_days": 4
     },
@@ -644,9 +655,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -5.37,
-      "bench_exec_pct": -0.34,
-      "hold_days": 2
+      "net_ret_pct": -5.24,
+      "bench_exec_pct": -0.46,
+      "hold_days": 5
     },
     {
       "date": "2024-12-09T00:00:00",
@@ -655,10 +666,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.29,
-      "bench_exec_pct": -0.34,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -6.44,
+      "bench_exec_pct": -0.45,
+      "hold_days": 3
     },
     {
       "date": "2024-12-10T00:00:00",
@@ -679,10 +690,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.73,
-      "bench_exec_pct": 0.51,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.44,
+      "bench_exec_pct": 0.59,
+      "hold_days": 3
     },
     {
       "date": "2024-12-10T00:00:00",
@@ -691,10 +702,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -1.66,
-      "bench_exec_pct": 0.51,
-      "hold_days": 2
+      "exit_reason": "移動停利",
+      "net_ret_pct": 25.9,
+      "bench_exec_pct": 1.25,
+      "hold_days": 13
     },
     {
       "date": "2024-12-10T00:00:00",
@@ -704,9 +715,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -6.77,
-      "bench_exec_pct": 0.51,
-      "hold_days": 2
+      "net_ret_pct": -4.4,
+      "bench_exec_pct": 0.12,
+      "hold_days": 6
     },
     {
       "date": "2024-12-10T00:00:00",
@@ -727,10 +738,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.46,
-      "bench_exec_pct": -0.03,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -0.12,
+      "hold_days": 3
     },
     {
       "date": "2024-12-11T00:00:00",
@@ -800,9 +811,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.98,
-      "bench_exec_pct": -0.38,
-      "hold_days": 4
+      "net_ret_pct": -5.98,
+      "bench_exec_pct": -2.22,
+      "hold_days": 5
     },
     {
       "date": "2024-12-12T00:00:00",
@@ -824,9 +835,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.6,
-      "bench_exec_pct": -0.38,
-      "hold_days": 4
+      "net_ret_pct": -3.56,
+      "bench_exec_pct": -2.22,
+      "hold_days": 5
     },
     {
       "date": "2024-12-12T00:00:00",
@@ -884,9 +895,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.03,
-      "bench_exec_pct": -0.37,
-      "hold_days": 2
+      "net_ret_pct": -6.01,
+      "bench_exec_pct": 0.44,
+      "hold_days": 5
     },
     {
       "date": "2024-12-16T00:00:00",
@@ -896,7 +907,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 16.89,
+      "net_ret_pct": 16.9,
       "bench_exec_pct": 0.99,
       "hold_days": 7
     },
@@ -932,9 +943,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.07,
-      "bench_exec_pct": -2.21,
-      "hold_days": 3
+      "net_ret_pct": -2.08,
+      "bench_exec_pct": 0.07,
+      "hold_days": 10
     },
     {
       "date": "2024-12-17T00:00:00",
@@ -944,9 +955,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.86,
-      "bench_exec_pct": -0.28,
-      "hold_days": 3
+      "net_ret_pct": -3.34,
+      "bench_exec_pct": 0.34,
+      "hold_days": 6
     },
     {
       "date": "2024-12-17T00:00:00",
@@ -956,9 +967,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 12.76,
-      "bench_exec_pct": 0.46,
-      "hold_days": 7
+      "net_ret_pct": 14.06,
+      "bench_exec_pct": 0.09,
+      "hold_days": 8
     },
     {
       "date": "2024-12-17T00:00:00",
@@ -981,8 +992,8 @@
       "exit_status": "closed",
       "exit_reason": "均線停損",
       "net_ret_pct": -2.13,
-      "bench_exec_pct": -2.84,
-      "hold_days": 2
+      "bench_exec_pct": 0.22,
+      "hold_days": 5
     },
     {
       "date": "2024-12-17T00:00:00",
@@ -992,7 +1003,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 22.28,
+      "net_ret_pct": 22.6,
       "bench_exec_pct": 0.46,
       "hold_days": 7
     },
@@ -1003,10 +1014,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.33,
-      "bench_exec_pct": -2.84,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": 0.09,
+      "hold_days": 8
     },
     {
       "date": "2024-12-17T00:00:00",
@@ -1016,7 +1027,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 15.43,
+      "net_ret_pct": 15.44,
       "bench_exec_pct": 0.34,
       "hold_days": 6
     },
@@ -1028,9 +1039,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 12.76,
-      "bench_exec_pct": 1.5,
-      "hold_days": 6
+      "net_ret_pct": 14.06,
+      "bench_exec_pct": 1.12,
+      "hold_days": 7
     },
     {
       "date": "2024-12-18T00:00:00",
@@ -1088,9 +1099,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.48,
-      "bench_exec_pct": 0.82,
-      "hold_days": 3
+      "net_ret_pct": -0.26,
+      "bench_exec_pct": 1.5,
+      "hold_days": 6
     },
     {
       "date": "2024-12-18T00:00:00",
@@ -1100,7 +1111,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 18.3,
+      "net_ret_pct": 17.61,
       "bench_exec_pct": 1.12,
       "hold_days": 7
     },
@@ -1124,9 +1135,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.81,
-      "bench_exec_pct": 2.71,
-      "hold_days": 2
+      "net_ret_pct": -3.21,
+      "bench_exec_pct": 3.4,
+      "hold_days": 5
     },
     {
       "date": "2024-12-19T00:00:00",
@@ -1148,9 +1159,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.45,
-      "bench_exec_pct": 2.71,
-      "hold_days": 2
+      "net_ret_pct": -2.26,
+      "bench_exec_pct": 3.4,
+      "hold_days": 5
     },
     {
       "date": "2024-12-19T00:00:00",
@@ -1160,7 +1171,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 4.27,
+      "net_ret_pct": 2.02,
       "bench_exec_pct": 2.33,
       "hold_days": 7
     },
@@ -1219,10 +1230,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -2.48,
-      "bench_exec_pct": 0.67,
-      "hold_days": 3
+      "exit_reason": "移動停利",
+      "net_ret_pct": 6.95,
+      "bench_exec_pct": 1.85,
+      "hold_days": 8
     },
     {
       "date": "2024-12-23T00:00:00",
@@ -1243,10 +1254,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.05,
-      "bench_exec_pct": 0.67,
-      "hold_days": 3
+      "exit_reason": "移動停利",
+      "net_ret_pct": 7.95,
+      "bench_exec_pct": 2.3,
+      "hold_days": 9
     },
     {
       "date": "2024-12-23T00:00:00",
@@ -1256,9 +1267,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 3.6,
-      "bench_exec_pct": 0.67,
-      "hold_days": 3
+      "net_ret_pct": 0.19,
+      "bench_exec_pct": 0.3,
+      "hold_days": 4
     },
     {
       "date": "2024-12-23T00:00:00",
@@ -1268,9 +1279,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.28,
-      "bench_exec_pct": 0.67,
-      "hold_days": 3
+      "net_ret_pct": -3.83,
+      "bench_exec_pct": -0.37,
+      "hold_days": 5
     },
     {
       "date": "2024-12-23T00:00:00",
@@ -1292,9 +1303,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.06,
-      "bench_exec_pct": 0.24,
-      "hold_days": 2
+      "net_ret_pct": -6.69,
+      "bench_exec_pct": -1.67,
+      "hold_days": 5
     },
     {
       "date": "2024-12-24T00:00:00",
@@ -1304,7 +1315,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 5.44,
+      "net_ret_pct": 2.04,
       "bench_exec_pct": -0.8,
       "hold_days": 4
     },
@@ -1328,7 +1339,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 9.73,
+      "net_ret_pct": 6.19,
       "bench_exec_pct": -1.67,
       "hold_days": 5
     },
@@ -1352,9 +1363,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.79,
-      "bench_exec_pct": 0.24,
-      "hold_days": 2
+      "net_ret_pct": -6.39,
+      "bench_exec_pct": -1.67,
+      "hold_days": 5
     },
     {
       "date": "2024-12-24T00:00:00",
@@ -1364,9 +1375,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -5.4,
-      "bench_exec_pct": -0.13,
-      "hold_days": 3
+      "net_ret_pct": -1.1,
+      "bench_exec_pct": 1.41,
+      "hold_days": 7
     },
     {
       "date": "2024-12-25T00:00:00",
@@ -1376,9 +1387,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.75,
-      "bench_exec_pct": -0.24,
-      "hold_days": 2
+      "net_ret_pct": -4.3,
+      "bench_exec_pct": 1.29,
+      "hold_days": 6
     },
     {
       "date": "2024-12-25T00:00:00",
@@ -1400,9 +1411,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.26,
-      "bench_exec_pct": -0.24,
-      "hold_days": 2
+      "net_ret_pct": -5.84,
+      "bench_exec_pct": 1.74,
+      "hold_days": 7
     },
     {
       "date": "2024-12-25T00:00:00",
@@ -1424,7 +1435,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 14.82,
+      "net_ret_pct": 11.12,
       "bench_exec_pct": -1.46,
       "hold_days": 5
     },
@@ -1436,9 +1447,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 0.68,
-      "bench_exec_pct": -1.78,
-      "hold_days": 4
+      "net_ret_pct": 0.93,
+      "bench_exec_pct": -1.46,
+      "hold_days": 5
     },
     {
       "date": "2024-12-25T00:00:00",
@@ -1472,9 +1483,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.34,
-      "bench_exec_pct": -0.24,
-      "hold_days": 2
+      "net_ret_pct": 0.67,
+      "bench_exec_pct": 1.74,
+      "hold_days": 7
     },
     {
       "date": "2024-12-25T00:00:00",
@@ -1520,9 +1531,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -5.5,
-      "bench_exec_pct": -1.91,
-      "hold_days": 3
+      "net_ret_pct": -4.64,
+      "bench_exec_pct": 1.17,
+      "hold_days": 5
     },
     {
       "date": "2024-12-26T00:00:00",
@@ -1544,9 +1555,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.6,
-      "bench_exec_pct": -1.91,
-      "hold_days": 3
+      "net_ret_pct": -5.0,
+      "bench_exec_pct": 1.17,
+      "hold_days": 5
     },
     {
       "date": "2024-12-26T00:00:00",
@@ -1567,10 +1578,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.38,
-      "bench_exec_pct": -1.03,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -1.91,
+      "hold_days": 3
     },
     {
       "date": "2024-12-26T00:00:00",
@@ -1580,9 +1591,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.38,
-      "bench_exec_pct": -1.91,
-      "hold_days": 3
+      "net_ret_pct": -7.28,
+      "bench_exec_pct": 1.61,
+      "hold_days": 6
     },
     {
       "date": "2024-12-26T00:00:00",
@@ -1591,10 +1602,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.84,
-      "bench_exec_pct": -1.03,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.61,
+      "bench_exec_pct": -1.58,
+      "hold_days": 4
     },
     {
       "date": "2024-12-26T00:00:00",
@@ -1604,9 +1615,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.25,
-      "bench_exec_pct": -1.91,
-      "hold_days": 3
+      "net_ret_pct": -3.62,
+      "bench_exec_pct": 0.57,
+      "hold_days": 7
     },
     {
       "date": "2024-12-27T00:00:00",
@@ -1616,9 +1627,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 0.1,
-      "bench_exec_pct": -1.22,
-      "hold_days": 3
+      "net_ret_pct": -3.36,
+      "bench_exec_pct": -0.77,
+      "hold_days": 8
     },
     {
       "date": "2024-12-27T00:00:00",
@@ -1663,10 +1674,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.31,
-      "bench_exec_pct": -1.54,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -5.75,
+      "bench_exec_pct": 1.54,
+      "hold_days": 4
     },
     {
       "date": "2024-12-27T00:00:00",
@@ -1688,9 +1699,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 7.83,
-      "bench_exec_pct": -1.54,
-      "hold_days": 2
+      "net_ret_pct": 3.7,
+      "bench_exec_pct": 1.54,
+      "hold_days": 4
     },
     {
       "date": "2024-12-30T00:00:00",
@@ -1700,7 +1711,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 6.96,
+      "net_ret_pct": 3.51,
       "bench_exec_pct": -0.55,
       "hold_days": 2
     },
@@ -1712,7 +1723,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 11.89,
+      "net_ret_pct": 8.42,
       "bench_exec_pct": -0.1,
       "hold_days": 7
     },
@@ -1759,10 +1770,10 @@
       "trigger": "breakout",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.24,
-      "bench_exec_pct": 3.59,
-      "hold_days": 3
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": 1.09,
+      "hold_days": 5
     },
     {
       "date": "2024-12-31T00:00:00",
@@ -1772,7 +1783,7 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 6.64,
+      "net_ret_pct": 3.33,
       "bench_exec_pct": 0.79,
       "hold_days": 6
     },
@@ -1783,10 +1794,10 @@
       "trigger": "breakout",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.37,
-      "bench_exec_pct": 3.13,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": 1.09,
+      "hold_days": 5
     },
     {
       "date": "2024-12-31T00:00:00",
@@ -1796,9 +1807,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -0.36,
-      "bench_exec_pct": 2.52,
-      "hold_days": 4
+      "net_ret_pct": -5.38,
+      "bench_exec_pct": 1.09,
+      "hold_days": 5
     },
     {
       "date": "2024-12-31T00:00:00",
@@ -1832,9 +1843,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -0.09,
-      "bench_exec_pct": 0.75,
-      "hold_days": 4
+      "net_ret_pct": -0.2,
+      "bench_exec_pct": -1.72,
+      "hold_days": 8
     },
     {
       "date": "2025-01-02T00:00:00",
@@ -1880,9 +1891,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -0.67,
-      "bench_exec_pct": -2.28,
-      "hold_days": 4
+      "net_ret_pct": -2.27,
+      "bench_exec_pct": -4.5,
+      "hold_days": 5
     },
     {
       "date": "2025-01-03T00:00:00",
@@ -1891,10 +1902,10 @@
       "trigger": "breakout",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.61,
-      "bench_exec_pct": -1.98,
-      "hold_days": 3
+      "exit_reason": "止損",
+      "net_ret_pct": -5.93,
+      "bench_exec_pct": -2.28,
+      "hold_days": 4
     },
     {
       "date": "2025-01-03T00:00:00",
@@ -1915,10 +1926,10 @@
       "trigger": "breakout",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -2.38,
-      "bench_exec_pct": -0.6,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.63,
+      "bench_exec_pct": -4.5,
+      "hold_days": 5
     },
     {
       "date": "2025-01-03T00:00:00",
@@ -1951,10 +1962,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.03,
-      "bench_exec_pct": -2.7,
-      "hold_days": 3
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -4.92,
+      "hold_days": 4
     },
     {
       "date": "2025-01-06T00:00:00",
@@ -1963,10 +1974,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.56,
-      "bench_exec_pct": -2.41,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -4.92,
+      "hold_days": 4
     },
     {
       "date": "2025-01-06T00:00:00",
@@ -1975,10 +1986,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.99,
-      "bench_exec_pct": -2.41,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.15,
+      "bench_exec_pct": -4.92,
+      "hold_days": 4
     },
     {
       "date": "2025-01-06T00:00:00",
@@ -1987,10 +1998,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.5,
-      "bench_exec_pct": -2.41,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.06,
+      "bench_exec_pct": -2.7,
+      "hold_days": 3
     },
     {
       "date": "2025-01-06T00:00:00",
@@ -1999,10 +2010,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.8,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -7.61,
+      "bench_exec_pct": -2.41,
+      "hold_days": 2
     },
     {
       "date": "2025-01-06T00:00:00",
@@ -2012,7 +2023,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 6.15,
+      "net_ret_pct": 2.73,
       "bench_exec_pct": -4.92,
       "hold_days": 4
     },
@@ -2024,9 +2035,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.24,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "net_ret_pct": -3.17,
+      "bench_exec_pct": -2.7,
+      "hold_days": 3
     },
     {
       "date": "2025-01-06T00:00:00",
@@ -2047,10 +2058,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.64,
-      "bench_exec_pct": -2.41,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -4.92,
+      "hold_days": 4
     },
     {
       "date": "2025-01-07T00:00:00",
@@ -2059,10 +2070,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.42,
-      "bench_exec_pct": -1.69,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.63,
+      "bench_exec_pct": -3.93,
+      "hold_days": 3
     },
     {
       "date": "2025-01-07T00:00:00",
@@ -2071,10 +2082,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.21,
-      "bench_exec_pct": -1.69,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -3.93,
+      "hold_days": 3
     },
     {
       "date": "2025-01-07T00:00:00",
@@ -2084,9 +2095,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 1.15,
-      "bench_exec_pct": -3.93,
-      "hold_days": 3
+      "net_ret_pct": -1.1,
+      "bench_exec_pct": -3.81,
+      "hold_days": 5
     },
     {
       "date": "2025-01-07T00:00:00",
@@ -2096,9 +2107,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 11.81,
-      "bench_exec_pct": -3.93,
-      "hold_days": 3
+      "net_ret_pct": 9.25,
+      "bench_exec_pct": -3.81,
+      "hold_days": 5
     },
     {
       "date": "2025-01-07T00:00:00",
@@ -2131,10 +2142,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.68,
-      "bench_exec_pct": -1.69,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -3.93,
+      "hold_days": 3
     },
     {
       "date": "2025-01-08T00:00:00",
@@ -2167,10 +2178,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": 2.85,
-      "bench_exec_pct": -2.45,
-      "hold_days": 4
+      "exit_reason": "移動停利",
+      "net_ret_pct": 27.96,
+      "bench_exec_pct": 0.35,
+      "hold_days": 12
     },
     {
       "date": "2025-01-08T00:00:00",
@@ -2252,9 +2263,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -6.3,
-      "bench_exec_pct": -2.57,
-      "hold_days": 2
+      "net_ret_pct": -2.43,
+      "bench_exec_pct": 0.95,
+      "hold_days": 8
     },
     {
       "date": "2025-01-09T00:00:00",
@@ -2287,10 +2298,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -2.81,
-      "bench_exec_pct": -2.28,
-      "hold_days": 1
+      "exit_reason": "移動停利",
+      "net_ret_pct": 18.38,
+      "bench_exec_pct": 2.57,
+      "hold_days": 21
     },
     {
       "date": "2025-01-09T00:00:00",
@@ -2299,10 +2310,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.63,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -2.28,
+      "hold_days": 1
     },
     {
       "date": "2025-01-09T00:00:00",
@@ -2323,10 +2334,10 @@
       "trigger": "breakout",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.68,
-      "bench_exec_pct": 2.93,
-      "hold_days": 4
+      "exit_reason": "移動停利",
+      "net_ret_pct": 38.22,
+      "bench_exec_pct": 4.52,
+      "hold_days": 18
     },
     {
       "date": "2025-01-10T00:00:00",
@@ -2336,9 +2347,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 20.6,
-      "bench_exec_pct": 4.61,
-      "hold_days": 7
+      "net_ret_pct": 16.71,
+      "bench_exec_pct": 0.92,
+      "hold_days": 8
     },
     {
       "date": "2025-01-10T00:00:00",
@@ -2347,10 +2358,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -0.88,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "移動停利",
+      "net_ret_pct": 20.54,
+      "bench_exec_pct": 4.96,
+      "hold_days": 20
     },
     {
       "date": "2025-01-10T00:00:00",
@@ -2384,9 +2395,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 12.47,
-      "bench_exec_pct": 1.0,
-      "hold_days": 2
+      "net_ret_pct": 7.96,
+      "bench_exec_pct": 1.54,
+      "hold_days": 3
     },
     {
       "date": "2025-01-13T00:00:00",
@@ -2395,10 +2406,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -1.81,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -6.15,
+      "bench_exec_pct": -1.24,
+      "hold_days": 1
     },
     {
       "date": "2025-01-13T00:00:00",
@@ -2408,9 +2419,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.36,
-      "bench_exec_pct": -1.24,
-      "hold_days": 1
+      "net_ret_pct": -2.73,
+      "bench_exec_pct": 1.54,
+      "hold_days": 3
     },
     {
       "date": "2025-01-14T00:00:00",
@@ -2420,9 +2431,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.59,
-      "bench_exec_pct": 3.34,
-      "hold_days": 3
+      "net_ret_pct": -5.11,
+      "bench_exec_pct": 0.8,
+      "hold_days": 6
     },
     {
       "date": "2025-01-14T00:00:00",
@@ -2432,7 +2443,7 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 30.21,
+      "net_ret_pct": 26.01,
       "bench_exec_pct": 3.49,
       "hold_days": 4
     },
@@ -2443,10 +2454,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -2.21,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "移動停利",
+      "net_ret_pct": 16.67,
+      "bench_exec_pct": 3.86,
+      "hold_days": 12
     },
     {
       "date": "2025-01-14T00:00:00",
@@ -2456,9 +2467,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.01,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "net_ret_pct": -0.53,
+      "bench_exec_pct": 3.34,
+      "hold_days": 3
     },
     {
       "date": "2025-01-14T00:00:00",
@@ -2492,9 +2503,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 15.07,
-      "bench_exec_pct": 1.15,
-      "hold_days": 12
+      "net_ret_pct": 14.28,
+      "bench_exec_pct": 2.51,
+      "hold_days": 17
     },
     {
       "date": "2025-01-15T00:00:00",
@@ -2516,7 +2527,7 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 9.68,
+      "net_ret_pct": 7.89,
       "bench_exec_pct": 2.51,
       "hold_days": 17
     },
@@ -2540,7 +2551,7 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 36.33,
+      "net_ret_pct": 38.01,
       "bench_exec_pct": 1.54,
       "hold_days": 14
     },
@@ -2564,9 +2575,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.53,
-      "bench_exec_pct": 1.63,
-      "hold_days": 3
+      "net_ret_pct": -1.16,
+      "bench_exec_pct": -1.53,
+      "hold_days": 5
     },
     {
       "date": "2025-01-16T00:00:00",
@@ -2588,9 +2599,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 7.16,
-      "bench_exec_pct": -1.96,
-      "hold_days": 4
+      "net_ret_pct": 6.82,
+      "bench_exec_pct": -1.53,
+      "hold_days": 5
     },
     {
       "date": "2025-01-16T00:00:00",
@@ -2599,10 +2610,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": true,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.39,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -1.53,
+      "hold_days": 5
     },
     {
       "date": "2025-01-16T00:00:00",
@@ -2612,9 +2623,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 7.0,
-      "bench_exec_pct": 1.43,
-      "hold_days": 8
+      "net_ret_pct": 14.06,
+      "bench_exec_pct": 1.54,
+      "hold_days": 14
     },
     {
       "date": "2025-01-17T00:00:00",
@@ -2624,7 +2635,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 6.36,
+      "net_ret_pct": 2.93,
       "bench_exec_pct": -2.46,
       "hold_days": 3
     },
@@ -2635,10 +2646,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.29,
-      "bench_exec_pct": -2.46,
-      "hold_days": 3
+      "exit_reason": "止損",
+      "net_ret_pct": -5.32,
+      "bench_exec_pct": -2.03,
+      "hold_days": 4
     },
     {
       "date": "2025-01-17T00:00:00",
@@ -2671,10 +2682,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -0.67,
-      "bench_exec_pct": -2.46,
-      "hold_days": 3
+      "exit_reason": "移動停利",
+      "net_ret_pct": 10.14,
+      "bench_exec_pct": 0.5,
+      "hold_days": 9
     },
     {
       "date": "2025-01-17T00:00:00",
@@ -2708,9 +2719,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.16,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "net_ret_pct": -4.62,
+      "bench_exec_pct": -2.46,
+      "hold_days": 3
     },
     {
       "date": "2025-01-17T00:00:00",
@@ -2719,10 +2730,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": 0.57,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -5.85,
+      "bench_exec_pct": -2.46,
+      "hold_days": 3
     },
     {
       "date": "2025-01-17T00:00:00",
@@ -2744,9 +2755,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.76,
-      "bench_exec_pct": -2.17,
-      "hold_days": 3
+      "net_ret_pct": -1.99,
+      "bench_exec_pct": 0.07,
+      "hold_days": 5
     },
     {
       "date": "2025-01-20T00:00:00",
@@ -2755,10 +2766,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.45,
-      "bench_exec_pct": -2.6,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -2.17,
+      "hold_days": 3
     },
     {
       "date": "2025-01-20T00:00:00",
@@ -2804,9 +2815,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.74,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "net_ret_pct": -2.8,
+      "bench_exec_pct": -2.17,
+      "hold_days": 3
     },
     {
       "date": "2025-01-20T00:00:00",
@@ -2815,10 +2826,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.17,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -7.61,
+      "bench_exec_pct": -2.6,
+      "hold_days": 2
     },
     {
       "date": "2025-01-20T00:00:00",
@@ -2827,10 +2838,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.84,
-      "bench_exec_pct": -2.6,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -2.17,
+      "hold_days": 3
     },
     {
       "date": "2025-01-20T00:00:00",
@@ -2839,10 +2850,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.14,
-      "bench_exec_pct": -2.6,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -2.17,
+      "hold_days": 3
     },
     {
       "date": "2025-01-20T00:00:00",
@@ -2863,10 +2874,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -0.89,
-      "bench_exec_pct": -3.11,
-      "hold_days": 2
+      "exit_reason": "移動停利",
+      "net_ret_pct": 5.56,
+      "bench_exec_pct": -1.0,
+      "hold_days": 8
     },
     {
       "date": "2025-01-21T00:00:00",
@@ -2888,9 +2899,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.03,
-      "bench_exec_pct": -0.89,
-      "hold_days": 4
+      "net_ret_pct": -2.09,
+      "bench_exec_pct": -0.2,
+      "hold_days": 5
     },
     {
       "date": "2025-01-21T00:00:00",
@@ -2912,9 +2923,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 32.13,
-      "bench_exec_pct": -0.16,
-      "hold_days": 14
+      "net_ret_pct": 30.01,
+      "bench_exec_pct": -2.01,
+      "hold_days": 19
     },
     {
       "date": "2025-01-21T00:00:00",
@@ -2935,10 +2946,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -2.39,
-      "bench_exec_pct": -3.53,
-      "hold_days": 1
+      "exit_reason": "止損",
+      "net_ret_pct": -7.63,
+      "bench_exec_pct": -3.11,
+      "hold_days": 2
     },
     {
       "date": "2025-01-21T00:00:00",
@@ -2947,10 +2958,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.08,
-      "bench_exec_pct": 0.0,
-      "hold_days": 0
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -3.53,
+      "hold_days": 1
     },
     {
       "date": "2025-01-21T00:00:00",
@@ -2960,9 +2971,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 0.37,
-      "bench_exec_pct": -0.89,
-      "hold_days": 4
+      "net_ret_pct": -0.67,
+      "bench_exec_pct": -0.2,
+      "hold_days": 5
     },
     {
       "date": "2025-01-21T00:00:00",
@@ -3032,9 +3043,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 14.03,
-      "bench_exec_pct": 2.74,
-      "hold_days": 3
+      "net_ret_pct": 15.47,
+      "bench_exec_pct": 2.46,
+      "hold_days": 5
     },
     {
       "date": "2025-01-22T00:00:00",
@@ -3044,9 +3055,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 30.87,
-      "bench_exec_pct": 3.49,
-      "hold_days": 13
+      "net_ret_pct": 35.75,
+      "bench_exec_pct": 4.56,
+      "hold_days": 14
     },
     {
       "date": "2025-01-22T00:00:00",
@@ -3068,9 +3079,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 6.82,
-      "bench_exec_pct": 2.74,
-      "hold_days": 3
+      "net_ret_pct": 3.37,
+      "bench_exec_pct": 3.45,
+      "hold_days": 4
     },
     {
       "date": "2025-01-22T00:00:00",
@@ -3092,9 +3103,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.01,
-      "bench_exec_pct": 3.45,
-      "hold_days": 4
+      "net_ret_pct": -0.89,
+      "bench_exec_pct": 2.46,
+      "hold_days": 5
     },
     {
       "date": "2025-02-03T00:00:00",
@@ -3104,9 +3115,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.72,
-      "bench_exec_pct": 2.29,
-      "hold_days": 2
+      "net_ret_pct": 1.41,
+      "bench_exec_pct": 2.66,
+      "hold_days": 7
     },
     {
       "date": "2025-02-03T00:00:00",
@@ -3116,9 +3127,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 26.07,
-      "bench_exec_pct": 3.04,
-      "hold_days": 12
+      "net_ret_pct": 30.77,
+      "bench_exec_pct": 4.11,
+      "hold_days": 13
     },
     {
       "date": "2025-02-03T00:00:00",
@@ -3140,7 +3151,7 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 12.22,
+      "net_ret_pct": 8.6,
       "bench_exec_pct": -0.04,
       "hold_days": 7
     },
@@ -3152,9 +3163,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 9.23,
-      "bench_exec_pct": 1.03,
-      "hold_days": 6
+      "net_ret_pct": 16.16,
+      "bench_exec_pct": 2.46,
+      "hold_days": 12
     },
     {
       "date": "2025-02-04T00:00:00",
@@ -3176,9 +3187,9 @@
       "index_below_ma20": true,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 15.47,
-      "bench_exec_pct": -3.03,
-      "hold_days": 22
+      "net_ret_pct": 11.75,
+      "bench_exec_pct": -4.71,
+      "hold_days": 23
     },
     {
       "date": "2025-02-04T00:00:00",
@@ -3200,9 +3211,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 14.27,
-      "bench_exec_pct": 0.73,
-      "hold_days": 10
+      "net_ret_pct": 18.54,
+      "bench_exec_pct": 1.77,
+      "hold_days": 11
     },
     {
       "date": "2025-02-05T00:00:00",
@@ -3212,9 +3223,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.51,
-      "bench_exec_pct": 0.29,
-      "hold_days": 3
+      "net_ret_pct": -3.08,
+      "bench_exec_pct": 0.36,
+      "hold_days": 5
     },
     {
       "date": "2025-02-05T00:00:00",
@@ -3248,9 +3259,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 0.69,
-      "bench_exec_pct": 0.29,
-      "hold_days": 3
+      "net_ret_pct": 1.59,
+      "bench_exec_pct": 0.36,
+      "hold_days": 5
     },
     {
       "date": "2025-02-05T00:00:00",
@@ -3260,9 +3271,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 1.46,
-      "bench_exec_pct": -0.28,
-      "hold_days": 2
+      "net_ret_pct": 0.09,
+      "bench_exec_pct": 0.29,
+      "hold_days": 3
     },
     {
       "date": "2025-02-05T00:00:00",
@@ -3272,9 +3283,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 23.32,
-      "bench_exec_pct": -0.7,
-      "hold_days": 6
+      "net_ret_pct": 54.34,
+      "bench_exec_pct": -0.13,
+      "hold_days": 13
     },
     {
       "date": "2025-02-05T00:00:00",
@@ -3296,9 +3307,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -5.92,
-      "bench_exec_pct": -0.28,
-      "hold_days": 2
+      "net_ret_pct": -4.92,
+      "bench_exec_pct": -0.7,
+      "hold_days": 6
     },
     {
       "date": "2025-02-05T00:00:00",
@@ -3308,9 +3319,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 3.51,
-      "bench_exec_pct": -0.12,
-      "hold_days": 4
+      "net_ret_pct": -1.13,
+      "bench_exec_pct": 0.36,
+      "hold_days": 5
     },
     {
       "date": "2025-02-06T00:00:00",
@@ -3320,9 +3331,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 4.13,
-      "bench_exec_pct": -0.8,
-      "hold_days": 3
+      "net_ret_pct": 0.57,
+      "bench_exec_pct": -1.39,
+      "hold_days": 5
     },
     {
       "date": "2025-02-06T00:00:00",
@@ -3344,9 +3355,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.56,
-      "bench_exec_pct": -0.4,
-      "hold_days": 2
+      "net_ret_pct": -5.74,
+      "bench_exec_pct": -1.39,
+      "hold_days": 5
     },
     {
       "date": "2025-02-06T00:00:00",
@@ -3356,9 +3367,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 5.73,
-      "bench_exec_pct": -0.8,
-      "hold_days": 3
+      "net_ret_pct": 2.01,
+      "bench_exec_pct": -0.34,
+      "hold_days": 4
     },
     {
       "date": "2025-02-06T00:00:00",
@@ -3368,9 +3379,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 1.24,
-      "bench_exec_pct": -0.34,
-      "hold_days": 4
+      "net_ret_pct": -0.4,
+      "bench_exec_pct": -1.39,
+      "hold_days": 5
     },
     {
       "date": "2025-02-06T00:00:00",
@@ -3392,9 +3403,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 0.58,
-      "bench_exec_pct": -0.34,
-      "hold_days": 4
+      "net_ret_pct": -0.85,
+      "bench_exec_pct": 0.04,
+      "hold_days": 9
     },
     {
       "date": "2025-02-06T00:00:00",
@@ -3440,9 +3451,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.93,
-      "bench_exec_pct": -0.43,
-      "hold_days": 4
+      "net_ret_pct": -2.62,
+      "bench_exec_pct": 1.51,
+      "hold_days": 7
     },
     {
       "date": "2025-02-07T00:00:00",
@@ -3476,9 +3487,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.23,
-      "bench_exec_pct": 0.63,
-      "hold_days": 3
+      "net_ret_pct": -2.45,
+      "bench_exec_pct": 1.09,
+      "hold_days": 5
     },
     {
       "date": "2025-02-07T00:00:00",
@@ -3488,9 +3499,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.9,
-      "bench_exec_pct": 0.63,
-      "hold_days": 3
+      "net_ret_pct": -1.33,
+      "bench_exec_pct": 1.78,
+      "hold_days": 6
     },
     {
       "date": "2025-02-07T00:00:00",
@@ -3500,7 +3511,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 46.84,
+      "net_ret_pct": 46.33,
       "bench_exec_pct": 0.65,
       "hold_days": 12
     },
@@ -3512,9 +3523,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 9.12,
-      "bench_exec_pct": 0.16,
-      "hold_days": 2
+      "net_ret_pct": 9.88,
+      "bench_exec_pct": -0.43,
+      "hold_days": 4
     },
     {
       "date": "2025-02-07T00:00:00",
@@ -3536,9 +3547,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -5.21,
-      "bench_exec_pct": 0.63,
-      "hold_days": 3
+      "net_ret_pct": -3.97,
+      "bench_exec_pct": 1.35,
+      "hold_days": 10
     },
     {
       "date": "2025-02-07T00:00:00",
@@ -3548,9 +3559,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 1.24,
-      "bench_exec_pct": 0.63,
-      "hold_days": 3
+      "net_ret_pct": 0.96,
+      "bench_exec_pct": 1.78,
+      "hold_days": 6
     },
     {
       "date": "2025-02-10T00:00:00",
@@ -3560,9 +3571,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.31,
-      "bench_exec_pct": 0.07,
-      "hold_days": 2
+      "net_ret_pct": 3.3,
+      "bench_exec_pct": 0.78,
+      "hold_days": 9
     },
     {
       "date": "2025-02-10T00:00:00",
@@ -3572,7 +3583,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": 10.85,
+      "net_ret_pct": 7.28,
       "bench_exec_pct": 1.21,
       "hold_days": 5
     },
@@ -3608,9 +3619,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -2.26,
-      "bench_exec_pct": -0.99,
-      "hold_days": 3
+      "net_ret_pct": -2.0,
+      "bench_exec_pct": 1.21,
+      "hold_days": 5
     },
     {
       "date": "2025-02-10T00:00:00",
@@ -3620,7 +3631,7 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "移動停利",
-      "net_ret_pct": -1.25,
+      "net_ret_pct": -0.67,
       "bench_exec_pct": 0.07,
       "hold_days": 2
     },
@@ -3632,9 +3643,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -5.61,
-      "bench_exec_pct": 0.07,
-      "hold_days": 2
+      "net_ret_pct": -7.46,
+      "bench_exec_pct": -0.99,
+      "hold_days": 3
     },
     {
       "date": "2025-02-10T00:00:00",
@@ -3644,9 +3655,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.84,
-      "bench_exec_pct": -0.99,
-      "hold_days": 3
+      "net_ret_pct": -5.12,
+      "bench_exec_pct": 1.21,
+      "hold_days": 5
     },
     {
       "date": "2025-02-10T00:00:00",
@@ -3655,10 +3666,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.15,
-      "bench_exec_pct": 0.07,
-      "hold_days": 2
+      "exit_reason": "移動停利",
+      "net_ret_pct": 9.32,
+      "bench_exec_pct": -2.68,
+      "hold_days": 13
     },
     {
       "date": "2025-02-10T00:00:00",
@@ -3669,8 +3680,8 @@
       "exit_status": "closed",
       "exit_reason": "均線停損",
       "net_ret_pct": -3.18,
-      "bench_exec_pct": -0.99,
-      "hold_days": 3
+      "bench_exec_pct": 0.94,
+      "hold_days": 6
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3691,10 +3702,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -2.48,
-      "bench_exec_pct": 1.62,
-      "hold_days": 4
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": 1.35,
+      "hold_days": 5
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3704,9 +3715,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.77,
-      "bench_exec_pct": 1.62,
-      "hold_days": 4
+      "net_ret_pct": -4.56,
+      "bench_exec_pct": 1.35,
+      "hold_days": 5
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3727,10 +3738,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.65,
-      "bench_exec_pct": -0.59,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.63,
+      "bench_exec_pct": 1.62,
+      "hold_days": 4
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3751,10 +3762,10 @@
       "trigger": "pullback_turn",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.38,
-      "bench_exec_pct": 0.47,
-      "hold_days": 1
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -0.59,
+      "hold_days": 2
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3764,9 +3775,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -4.08,
-      "bench_exec_pct": -0.59,
-      "hold_days": 2
+      "net_ret_pct": -2.94,
+      "bench_exec_pct": 1.35,
+      "hold_days": 5
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3776,9 +3787,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.76,
-      "bench_exec_pct": -0.59,
-      "hold_days": 2
+      "net_ret_pct": 1.61,
+      "bench_exec_pct": 1.18,
+      "hold_days": 8
     },
     {
       "date": "2025-02-11T00:00:00",
@@ -3836,9 +3847,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": 1.18,
-      "bench_exec_pct": 1.14,
-      "hold_days": 3
+      "net_ret_pct": 1.8,
+      "bench_exec_pct": 1.41,
+      "hold_days": 6
     },
     {
       "date": "2025-02-12T00:00:00",
@@ -3860,9 +3871,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -3.71,
-      "bench_exec_pct": 0.45,
-      "hold_days": 2
+      "net_ret_pct": -6.19,
+      "bench_exec_pct": 0.38,
+      "hold_days": 5
     },
     {
       "date": "2025-02-12T00:00:00",
@@ -3908,9 +3919,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.56,
-      "bench_exec_pct": 1.14,
-      "hold_days": 3
+      "net_ret_pct": -3.02,
+      "bench_exec_pct": 0.38,
+      "hold_days": 5
     },
     {
       "date": "2025-02-13T00:00:00",
@@ -3920,9 +3931,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -0.14,
-      "bench_exec_pct": 1.95,
-      "hold_days": 3
+      "net_ret_pct": -1.74,
+      "bench_exec_pct": 2.49,
+      "hold_days": 5
     },
     {
       "date": "2025-02-13T00:00:00",
@@ -3944,9 +3955,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -0.1,
-      "bench_exec_pct": 2.22,
-      "hold_days": 2
+      "net_ret_pct": 2.0,
+      "bench_exec_pct": 2.49,
+      "hold_days": 5
     },
     {
       "date": "2025-02-13T00:00:00",
@@ -3955,10 +3966,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -4.86,
-      "bench_exec_pct": 2.22,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -6.75,
+      "bench_exec_pct": 1.95,
+      "hold_days": 3
     },
     {
       "date": "2025-02-13T00:00:00",
@@ -3991,10 +4002,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -5.65,
-      "bench_exec_pct": 2.22,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.63,
+      "bench_exec_pct": 1.45,
+      "hold_days": 4
     },
     {
       "date": "2025-02-13T00:00:00",
@@ -4003,10 +4014,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -3.12,
-      "bench_exec_pct": 2.22,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -5.33,
+      "bench_exec_pct": 1.95,
+      "hold_days": 3
     },
     {
       "date": "2025-02-13T00:00:00",
@@ -4028,9 +4039,9 @@
       "index_below_ma20": false,
       "exit_status": "closed",
       "exit_reason": "均線停損",
-      "net_ret_pct": -1.14,
-      "bench_exec_pct": 1.45,
-      "hold_days": 4
+      "net_ret_pct": -0.67,
+      "bench_exec_pct": 2.49,
+      "hold_days": 5
     },
     {
       "date": "2025-02-14T00:00:00",
@@ -4099,10 +4110,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -6.6,
-      "bench_exec_pct": 0.42,
-      "hold_days": 2
+      "exit_reason": "止損",
+      "net_ret_pct": -7.62,
+      "bench_exec_pct": -0.08,
+      "hold_days": 3
     },
     {
       "date": "2025-02-14T00:00:00",
@@ -4111,10 +4122,10 @@
       "trigger": "breakout",
       "index_below_ma20": false,
       "exit_status": "closed",
-      "exit_reason": "均線停損",
-      "net_ret_pct": -1.46,
-      "bench_exec_pct": -0.08,
-      "hold_days": 3
+      "exit_reason": "移動停利",
+      "net_ret_pct": 17.76,
+      "bench_exec_pct": -3.19,
+      "hold_days": 9
     }
   ]
 }
