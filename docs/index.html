@@ -1354,7 +1354,6 @@ function portAIReview(){
       .then(d=>{if(d&&!d.error)HEALTH_CACHE[id]=d;}).catch(()=>{})
       .then(()=>{done++;setStatus(`健檢資料準備中(${done}/${ids.length})…`);})
   )).then(()=>{
-    setStatus('AI 分析中…(逐檔整理重點與停利停損,約 20~40 秒)');
     const rows=PORT.positions.map(p=>{
       const id=String(p.id),d=HEALTH_CACHE[id];
       const pr=portPriceOf(id),price=pr?pr.close:(isNum(p.price)?Number(p.price):null);
@@ -1367,21 +1366,39 @@ function portAIReview(){
     let totCost=0,totMkt=0,hv=true;rows.forEach(r=>{totCost+=r.shares*r.cost;if(isNum(r.market_value))totMkt+=r.market_value;else hv=false;});
     const totals={cost:Math.round(totCost),market:hv?Math.round(totMkt):null,
       pnl:hv?Math.round(totMkt-totCost):null,pnl_pct:hv&&totCost>0?Math.round((totMkt-totCost)/totCost*1000)/10:null};
-    fetch(HEALTH_API_BASE+'/api/portfolio_review',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({positions:rows,totals})})
-      .then(r=>r.text().then(t=>({ok:r.ok,status:r.status,text:t})))
-      .then(o=>{
-        let res=null;try{res=JSON.parse(o.text);}catch(_){}
-        if(!res){   /* 非 JSON = Vercel 平台錯誤頁(多半是超過 60 秒逾時)*/
-          const timeout=o.status===504||/timeout|FUNCTION_INVOCATION|too long/i.test(o.text||'');
-          throw new Error(timeout
-            ?'分析逾時了。持倉檔數較多時 AI 運算會超過伺服器 60 秒上限;請稍後再試,或先刪掉幾檔市值較小的持倉再試。'
-            :('伺服器回應異常(HTTP '+o.status+'),請稍後再試。'));
-        }
-        if(res.error)throw new Error(res.error);
-        _portRenderAIReview(res);
+    const submitted=rows.length;
+    /* 依市值排序、上限 15 檔,再切成每塊 4 檔平行呼叫(每次都遠低於 Vercel 60s 硬限)。 */
+    const capped=[...rows].sort((a,b)=>(b.market_value||0)-(a.market_value||0)).slice(0,15);
+    const analyzed=capped.length;
+    const chunks=[];for(let i=0;i<capped.length;i+=4)chunks.push(capped.slice(i,i+4));
+    setStatus(`AI 逐檔分析中…(${analyzed} 檔,分 ${chunks.length} 批平行處理,約 20~40 秒)`);
+    Promise.all(chunks.map(ch=>_portReviewPost({task:'positions',positions:ch})))
+      .then(results=>{
+        const positions=[].concat.apply([],results.map(r=>(r&&r.positions)||[]));
+        const vmap={};positions.forEach(p=>{vmap[p.id]=p.verdict;});
+        const ovIn=capped.map(r=>({id:r.id,name:r.name,industry:r.industry,pnl_pct:r.pnl_pct,
+          market_value:r.market_value,verdict:vmap[r.id]||'',
+          health:r.health?{total:r.health.total,dims:r.health.dims}:null}));
+        setStatus('彙整整體總結中…');
+        return _portReviewPost({task:'overall',positions:ovIn,totals}).then(ov=>{
+          _portRenderAIReview({overall:(ov&&ov.overall)||{},positions,analyzed,submitted});
+        });
       }).catch(e=>{setStatus('AI 分析失敗:'+(e&&e.message||e));}).then(()=>{_portReviewBusy=false;});
   });
+}
+/* 單次 POST /api/portfolio_review:讀 text 再 parse,非 JSON(平台逾時/錯誤頁)給友善訊息。 */
+function _portReviewPost(body){
+  return fetch(HEALTH_API_BASE+'/api/portfolio_review',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)}).then(r=>r.text().then(t=>({ok:r.ok,status:r.status,text:t}))).then(o=>{
+      let res=null;try{res=JSON.parse(o.text);}catch(_){}
+      if(!res){
+        const timeout=o.status===504||/timeout|FUNCTION_INVOCATION|too long/i.test(o.text||'');
+        throw new Error(timeout?'AI 運算逾時。請稍後再試,或先刪掉幾檔市值較小的持倉再試。'
+          :('伺服器回應異常(HTTP '+o.status+'),請稍後再試。'));
+      }
+      if(res.error)throw new Error(res.error);
+      return res;
+    });
 }
 const PORT_VERDICT_CLR={'續抱':'var(--up)','加碼':'var(--up)','停利了結':'var(--warn)','減碼':'var(--warn)','停損':'var(--down)','觀望':'var(--muted)'};
 function _portRenderAIReview(res){

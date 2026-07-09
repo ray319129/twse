@@ -1,13 +1,19 @@
 """Vercel Python Serverless Function — 我的持倉「AI 總覽」。
 
 POST /api/portfolio_review
-body: {"positions":[{id,name,industry,shares,cost,price,pnl_pct,market_value,health:{...digest...}}],
-       "totals":{cost,market,pnl,pnl_pct}}
+body: {"task":"positions"|"overall", "positions":[...], "totals":{...}}
 
 用途:一次讀完使用者所有持倉,逐檔整理重點 + 依該股「預期」(基本面/成長/估值/題材)判斷
-何時停利、何時停損,並給整體組合總結。每檔的健檢七面向分數與關鍵指標由前端從既有
-/api/health(單一事實來源的健檢引擎)萃取成 digest 後帶進來,這支只負責 AI 綜合判讀,
-不重複抓資料(避免 serverless timeout)。
+何時停利、何時停損,並給整體組合總結。
+
+**為何分兩種 task + 由前端分塊呼叫(2026-07-10 重構)**:Vercel Hobby 方案 serverless 硬上限
+60 秒,且 anthropic SDK 的 `timeout` 是「讀取逾時」(只要持續有 token 進來就一直重置),**無法**
+當成整體 wall-clock 上限。實測:單次一口氣分析 ~10 檔(即使 Sonnet)產出時間會超過 60s → 平台
+回 504 FUNCTION_INVOCATION_TIMEOUT 非 JSON 錯誤頁 → 前端 JSON.parse 失敗。故改成:
+  - task="positions":只分析『前端丟進來的這一小批(≤_MAX_PER_CALL 檔)』,只回 positions[]。
+    前端把持倉切成小塊(每塊 4 檔)平行呼叫,每次都遠低於 60s。
+  - task="overall":吃『所有檔的精簡摘要 + 各檔已算好的 verdict』,只回一段 overall 總結,輸出短、快。
+每一次 HTTP 呼叫都小而快,徹底避開 60s 硬砍。
 
 **誠實邊界(同 portfolio_ocr)**:持倉(含成本)會一次性經此函式 → Anthropic 分析,不留存;
 成本最終仍只由前端 localStorage 保存,不寫任何檔、不進 GitHub、不進信件。
@@ -16,11 +22,8 @@ body: {"positions":[{id,name,industry,shares,cost,price,pnl_pct,market_value,hea
 anthropic 版本對 output_config 結構化輸出參數會丟例外(見 HANDOFF 2026-07-09),OCR/ai_summary
 用純呼叫都正常,故統一純呼叫,用 scripts.utils.extract_json 穩健抽 JSON。
 
-模型:claude-sonnet-4-6。原用 Opus 4.8(判斷品質優先),但 2026-07-10 實測使用者真實持倉
-會超過 Vercel Hobby 60s 上限 → 平台回傳非 JSON 錯誤頁、前端 JSON.parse 失敗。Sonnet 產出速度
-約 2x,判斷品質對此結構化綜合任務仍足,故改用。Hobby 60s 硬限:SDK timeout 設 50s、分析檔數
-上限 15(超過只分析市值前 15 檔),讓超時能回乾淨 JSON 錯誤而非被平台硬砍。
-成本:on-demand,一次約數千 output token,Sonnet $3/$15 每百萬,單次約 US$0.02~0.08。
+模型:claude-sonnet-4-6(速度優先以吃住 60s 限制;結構化綜合判斷品質仍足)。
+成本:on-demand,分塊後每次數百~千 output token,Sonnet $3/$15 每百萬,整份約 US$0.02~0.08。
 """
 from __future__ import annotations
 import json
@@ -35,119 +38,139 @@ if _ROOT not in sys.path:
 
 log = logging.getLogger("twse.portfolio_review")
 
-_MODEL = "claude-sonnet-4-6"       # 見檔頭:Opus 對真實持倉會逾時,Sonnet ~2x 快、品質仍足
-_MAX_TOKENS = 8000
-_MAX_BODY = 4 * 1024 * 1024        # 4MB(digest 已壓縮,15 檔遠小於此)
-_MAX_POSITIONS = 15                # 只分析市值前 N 檔,控 output 長度 / 60s serverless 逾時
-_SDK_TIMEOUT = 50.0                # 低於 Vercel Hobby 60s 上限 → 逾時得到乾淨 JSON 錯誤而非平台硬砍
+_MODEL = "claude-sonnet-4-6"
+_MAX_TOKENS_POS = 3500             # 逐檔任務:≤_MAX_PER_CALL 檔的逐檔 JSON
+_MAX_TOKENS_OVERALL = 1400         # 總結任務:一段 overall,短
+_MAX_BODY = 4 * 1024 * 1024
+_MAX_PER_CALL = 6                  # 單次逐檔任務上限(前端以 4 分塊,這裡留餘裕)
+_MAX_OVERALL = 15                  # 總結最多納入檔數
+_SDK_TIMEOUT = 55.0
 
-_SYSTEM = (
-    "你是台股資深投資組合顧問。我會給你使用者的完整持倉:每檔含成本均價、現價、未實現損益%,"
-    "以及該檔『個股健檢』的七面向分數(財務體質/成長能力/估值分析/風險分析/技術面/籌碼分析/新聞分析)、"
-    "關鍵指標數值、短線評估(swing)、AI 摘要優缺點與新聞摘要。請據此為『每一檔』做完整分析,"
-    "並給整體組合總結。\n"
+_VERDICTS = {"續抱", "加碼", "減碼", "停利了結", "停損", "觀望"}
+
+_SYS_POSITIONS = (
+    "你是台股資深投資組合顧問。我會給你使用者持倉中的『一批』個股,每檔含成本均價、現價、"
+    "未實現損益%,以及該檔『個股健檢』的七面向分數(財務體質/成長能力/估值分析/風險分析/技術面/"
+    "籌碼分析/新聞分析)、關鍵指標數值、短線評估、AI 摘要優缺點與新聞摘要。請為『每一檔』做完整分析。\n"
     "每檔要判斷:\n"
     "- verdict:一詞定調,只能是【續抱/加碼/減碼/停利了結/停損/觀望】其中之一。\n"
-    "- outlook:該股的『預期』——綜合成長能力/財務體質(基本面動能)、估值分析(是否已貴、還有多少空間)、"
-    "新聞題材,判斷往上的空間或往下的風險,2~3 句。\n"
-    "- key_points:3~5 條最重要的重點(要完整,涵蓋基本面、估值、技術、籌碼、新聞裡最關鍵的訊號)。\n"
+    "- outlook:該股的『預期』——綜合成長能力/財務體質、估值(是否已貴、還有多少空間)、新聞題材,"
+    "判斷往上空間或往下風險,2~3 句。\n"
+    "- key_points:3~5 條最重要的重點(涵蓋基本面、估值、技術、籌碼、新聞裡最關鍵訊號)。\n"
     "- take_profit:何時『停利』——**依該股預期**給條件與/或參考價位並說明理由"
-    "(例:估值已達歷史高位百分位、成長趨緩、題材兌現、RSI 過熱、外資轉賣;可用『現價 +X% 或跌破月線二選一』式條件)。\n"
-    "- stop_loss:何時『停損』——給條件與/或參考價位 + 理由"
-    "(例:跌破關鍵均線/前低、基本面轉壞如營收年增轉負、風險面出現重大訊號;系統預設硬停損為成本 −7%,可參考但要依該股波動與體質調整)。\n"
-    "- pnl_note:目前損益處境的一句短評(已獲利宜守成/已虧損檢視續抱理由 等)。\n"
-    "整體 overall 要有:summary(組合體質與損益總評)、concentration_risk(部位集中度/產業曝險提醒)、"
-    "action_priority(依急迫性列出最該處理的 1~3 件事)。\n"
-    "重要規則:只依我提供的數據判斷,不得杜撰不存在的數字或指標;所有價位一律標示為『參考』;"
-    "用繁體中文;客觀中性,結尾不做獲利保證,本質為研究參考非投資建議。\n"
+    "(例:估值達歷史高位百分位、成長趨緩、題材兌現、RSI 過熱、外資轉賣)。\n"
+    "- stop_loss:何時『停損』——條件與/或參考價位 + 理由"
+    "(例:跌破關鍵均線/前低、營收年增轉負、風險面重大訊號;系統預設硬停損為成本 −7%,可參考但依該股波動與體質調整)。\n"
+    "- pnl_note:目前損益處境的一句短評。\n"
+    "重要:只依提供的數據判斷,不得杜撰不存在的數字或指標;所有價位標『參考』;繁體中文;"
+    "結尾不做獲利保證,本質為研究參考非投資建議。\n"
     "只輸出一個 JSON 物件,不要 markdown 圍欄、不要任何解釋文字。格式:\n"
-    '{"overall":{"summary":"","health":"","concentration_risk":"","action_priority":["",""]},'
-    '"positions":[{"id":"代號","verdict":"續抱/加碼/減碼/停利了結/停損/觀望",'
+    '{"positions":[{"id":"代號","verdict":"續抱/加碼/減碼/停利了結/停損/觀望",'
     '"outlook":"","key_points":["",""],"take_profit":"","stop_loss":"","pnl_note":""}]}'
 )
 
+_SYS_OVERALL = (
+    "你是台股資深投資組合顧問。我會給你使用者的整體持倉:總成本/總市值/總損益,以及每檔的"
+    "代號、名稱、產業、未實現損益%、市值、健檢總分與七面向分數、以及該檔已判定的操作定調 verdict。"
+    "請只輸出『整體組合』的總結,不需逐檔重述。\n"
+    "overall 要有:summary(組合體質與損益總評,2~4 句)、health(整體體質一句話)、"
+    "concentration_risk(部位集中度/產業曝險提醒,請依市值算出最大持股佔比與主要產業曝險)、"
+    "action_priority(依急迫性列出最該處理的 1~3 件事)。\n"
+    "只依提供數據判斷,不杜撰;繁體中文;非投資建議。\n"
+    "只輸出一個 JSON 物件,不要 markdown 圍欄、不要任何解釋。格式:\n"
+    '{"overall":{"summary":"","health":"","concentration_risk":"","action_priority":["",""]}}'
+)
 
-def _sanitize_positions(positions: list) -> list:
-    """只保留必要欄位、依市值排序取前 N 檔,避免 payload 過大/output 過長逾時。"""
-    clean = []
-    for p in positions or []:
+
+def _clean_in_positions(raw: list, limit: int) -> list:
+    out = []
+    for p in raw or []:
         if not isinstance(p, dict) or not p.get("id"):
             continue
-        clean.append({
+        out.append({
             "id": str(p.get("id"))[:8],
             "name": str(p.get("name") or "")[:20],
             "industry": str(p.get("industry") or "")[:20],
-            "shares": p.get("shares"),
-            "cost": p.get("cost"),
-            "price": p.get("price"),
-            "pnl_pct": p.get("pnl_pct"),
-            "market_value": p.get("market_value"),
-            "health": p.get("health"),      # 前端萃取好的 digest(dict 或 None)
+            "shares": p.get("shares"), "cost": p.get("cost"), "price": p.get("price"),
+            "pnl_pct": p.get("pnl_pct"), "market_value": p.get("market_value"),
+            "verdict": (str(p.get("verdict") or "") if p.get("verdict") in _VERDICTS else ""),
+            "health": p.get("health"),
         })
-    clean.sort(key=lambda x: (x.get("market_value") or 0), reverse=True)
-    return clean[:_MAX_POSITIONS]
+    out.sort(key=lambda x: (x.get("market_value") or 0), reverse=True)
+    return out[:limit]
+
+
+def _call(system: str, user: str, max_tokens: int):
+    import anthropic
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"], timeout=_SDK_TIMEOUT)
+    resp = client.messages.create(model=_MODEL, max_tokens=max_tokens, system=system,
+                                  messages=[{"role": "user", "content": user}])
+    from scripts.utils import extract_json
+    text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), "")
+    return extract_json(text), getattr(resp, "stop_reason", None), text
+
+
+def _clean_pos_item(it: dict) -> "dict | None":
+    if not isinstance(it, dict) or not it.get("id"):
+        return None
+    v = str(it.get("verdict") or "").strip()
+    return {
+        "id": str(it.get("id"))[:8],
+        "verdict": v if v in _VERDICTS else "觀望",
+        "outlook": str(it.get("outlook") or "")[:600],
+        "key_points": [str(x)[:200] for x in (it.get("key_points") or []) if str(x).strip()][:6],
+        "take_profit": str(it.get("take_profit") or "")[:500],
+        "stop_loss": str(it.get("stop_loss") or "")[:500],
+        "pnl_note": str(it.get("pnl_note") or "")[:300],
+    }
 
 
 def review(payload: dict) -> dict:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
+    if not os.environ.get("ANTHROPIC_API_KEY"):
         return {"error": "伺服器未設定 ANTHROPIC_API_KEY(需在 Vercel 環境變數加入)。"}
-    submitted = sum(1 for p in (payload.get("positions") or [])
-                    if isinstance(p, dict) and p.get("id"))
-    positions = _sanitize_positions(payload.get("positions"))
-    if not positions:
-        return {"error": "沒有可分析的持倉。"}
     try:
-        import anthropic
+        import anthropic  # noqa: F401
     except ImportError:
         return {"error": "伺服器未安裝 anthropic 套件。"}
 
-    user = json.dumps({"totals": payload.get("totals") or {}, "positions": positions},
-                      ensure_ascii=False)
+    task = payload.get("task") or "positions"
+
+    if task == "overall":
+        positions = _clean_in_positions(payload.get("positions"), _MAX_OVERALL)
+        if not positions:
+            return {"error": "沒有可分析的持倉。"}
+        user = json.dumps({"totals": payload.get("totals") or {}, "positions": positions}, ensure_ascii=False)
+        try:
+            data, stop, text = _call(_SYS_OVERALL, user, _MAX_TOKENS_OVERALL)
+        except Exception as e:
+            log.warning(f"portfolio_review[overall] 失敗:{type(e).__name__}: {e}")
+            return {"error": f"整體總結失敗:{e}"}
+        ov = (data or {}).get("overall")
+        if not isinstance(ov, dict):
+            log.warning(f"portfolio_review[overall] 解析失敗:stop={stop}, head={text[:120]!r}")
+            return {"error": "整體總結解析失敗,請稍後再試。"}
+        return {"overall": {
+            "summary": str(ov.get("summary") or "")[:800],
+            "health": str(ov.get("health") or "")[:400],
+            "concentration_risk": str(ov.get("concentration_risk") or "")[:500],
+            "action_priority": [str(x)[:200] for x in (ov.get("action_priority") or []) if str(x).strip()][:4],
+        }}
+
+    # task == "positions":只分析這一小批
+    positions = _clean_in_positions(payload.get("positions"), _MAX_PER_CALL)
+    if not positions:
+        return {"error": "沒有可分析的持倉。"}
+    user = json.dumps({"positions": positions}, ensure_ascii=False)
     try:
-        client = anthropic.Anthropic(api_key=api_key, timeout=_SDK_TIMEOUT)
-        resp = client.messages.create(
-            model=_MODEL,
-            max_tokens=_MAX_TOKENS,
-            system=_SYSTEM,
-            messages=[{"role": "user", "content": user}],
-        )
+        data, stop, text = _call(_SYS_POSITIONS, user, _MAX_TOKENS_POS)
     except Exception as e:
-        log.warning(f"portfolio_review Claude 呼叫失敗:{type(e).__name__}: {e}")
+        log.warning(f"portfolio_review[positions] 失敗:{type(e).__name__}: {e}")
         return {"error": f"AI 分析失敗:{e}"}
-
-    from scripts.utils import extract_json
-    text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), "")
-    data = extract_json(text)
     if not data or not isinstance(data.get("positions"), list):
-        stop = getattr(resp, "stop_reason", None)
-        log.warning(f"portfolio_review JSON 解析失敗:stop_reason={stop}, len={len(text)}, head={text[:160]!r}")
-        return {"error": "AI 回應解析失敗,請稍後再試(可能分析檔數過多被截斷,建議精簡持倉後重試)。"}
-
-    # 清洗:verdict 限白名單、欄位轉字串、list 欄位保底
-    allowed = {"續抱", "加碼", "減碼", "停利了結", "停損", "觀望"}
-    out_pos = []
-    for it in data.get("positions") or []:
-        if not isinstance(it, dict) or not it.get("id"):
-            continue
-        v = str(it.get("verdict") or "").strip()
-        out_pos.append({
-            "id": str(it.get("id"))[:8],
-            "verdict": v if v in allowed else "觀望",
-            "outlook": str(it.get("outlook") or "")[:600],
-            "key_points": [str(x)[:200] for x in (it.get("key_points") or []) if str(x).strip()][:6],
-            "take_profit": str(it.get("take_profit") or "")[:500],
-            "stop_loss": str(it.get("stop_loss") or "")[:500],
-            "pnl_note": str(it.get("pnl_note") or "")[:300],
-        })
-    ov = data.get("overall") or {}
-    overall = {
-        "summary": str(ov.get("summary") or "")[:800],
-        "health": str(ov.get("health") or "")[:400],
-        "concentration_risk": str(ov.get("concentration_risk") or "")[:500],
-        "action_priority": [str(x)[:200] for x in (ov.get("action_priority") or []) if str(x).strip()][:4],
-    }
-    return {"overall": overall, "positions": out_pos, "analyzed": len(out_pos), "submitted": submitted}
+        log.warning(f"portfolio_review[positions] 解析失敗:stop={stop}, len={len(text)}, head={text[:160]!r}")
+        return {"error": "AI 回應解析失敗,請稍後再試。"}
+    out = [x for x in (_clean_pos_item(it) for it in data["positions"]) if x]
+    return {"positions": out}
 
 
 class handler(BaseHTTPRequestHandler):
