@@ -366,3 +366,11 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **後端** [news_engine.py](scripts/health/news_engine.py) `compute()`:回傳的 news engine 結果多帶 `analyzed_news`——把 AI 逐則標記的 `items` 依 idx 映射回 `news_items` 的標題/連結/來源/發布日,加上該則 sentiment/impact 與 `has_content`(是否讀到內文),依日期新→舊排序。`compute_stock_health` 已把 engine 結果整包 spread 進 `engines[]`,故前端自動拿得到。
 - **前端** [docs/index.html](docs/index.html):`engineCard` 泛型渲染時,若 `eng.analyzed_news` 有值就多渲一個巢狀 `<details class="hnl-panel">`(標題「📰 分析了哪些新聞(N 則,點標題看原文)」),內含 `newsLinkRow`:情緒色 badge(利多綠/利空紅/中性灰)+ 可點標題(`target=_blank` 開原文)+ 來源·日期·已讀內文。只有 news engine 有此欄,其他面向不受影響。**連結用 news_items 的 Google News link**(瀏覽器點了會自動轉址到原文)。
 - **驗證**:後端 `compute()` 單元測試 analyzed_news 含連結/情緒/內文旗標/日期排序正確;前端 preview 注入合成報告,DOM 驗證面板存在、3 則、badge 利多/利空/中性、href+target=_blank、已讀內文 tag 數正確,截圖確認外觀。
+
+**我的持倉「AI 總覽」(2026-07-10 新增)**:使用者要一次整理所有持倉的完整重點 + 總結 + AI 依各股預期判斷停利停損。
+- **端點** [api/portfolio_review.py](api/portfolio_review.py)(新 Vercel serverless,vercel.json 已加 maxDuration 60):收前端組好的 `{positions:[{id,name,shares,cost,price,pnl_pct,market_value,health:digest}],totals}` → 純 `messages.create`(Opus 4.8,**不用 output_config**,沿用 2026-07-09 教訓)+ `scripts.utils.extract_json` → 回 `{overall:{summary,health,concentration_risk,action_priority[]}, positions:[{id,verdict,outlook,key_points[],take_profit,stop_loss,pnl_note}], analyzed}`。verdict 限白名單【續抱/加碼/減碼/停利了結/停損/觀望】。
+- **隱私**:同 OCR 精神——持倉(含成本)一次性送 AI、不留存;成本仍只存前端 localStorage。前端與端點都有明示。
+- **資料來源不重抓**:每檔 health digest 由前端從既有 `/api/health`(HEALTH_CACHE,批次健檢已快取)萃取(七面向分數+關鍵指標+swing+估值+AI摘要優缺點+新聞摘要),端點只做 AI 綜合判讀,避免 serverless 重抓逾時。
+- **前端** [docs/index.html](docs/index.html):持倉工具列加「🧠 AI 總覽」鈕(gated on HEALTH_API_ENABLED);`portAIReview()` 先平行補齊各檔 health(顯示進度)→ 組 payload → POST → `_portRenderAIReview` 渲染:整體卡(總結/體質/集中度風險/優先處理)+ 逐檔卡(verdict 色標 badge + outlook + key_points + 綠停利/紅停損 + 損益短評)。`_portHealthDigest` 負責萃取。
+- **⚠️ 60s 限制取捨(Hobby 方案)**:Opus 判斷品質優先,但多檔長輸出有逾時風險 → `_MAX_POSITIONS=20`(超過只分析市值前 20)、`_SDK_TIMEOUT=55s`、解析失敗回「可能被截斷,精簡持倉重試」。若實測常逾時,把 `_MODEL` 改 `claude-sonnet-4-6`(約 2x 快)即可,判斷品質仍足。
+- **驗證**:後端 review() mock 測試解析/清洗/verdict 白名單過;前端 preview 注入合成 review → DOM 驗證(verdict 續抱/減碼、停利停損各 2、key_points 7、優先處理 2、accent 鈕存在)+ 截圖確認外觀。**⚠️ 尚未在真 Vercel 用真 Opus 跑端到端**(需 push 部署後,拿真持倉點一次確認)。
