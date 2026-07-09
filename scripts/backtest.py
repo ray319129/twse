@@ -16,7 +16,7 @@ from .storage import load_prices
 from .indicators import compute_all, compute_relative_strength
 from .scoring import compute_conviction
 from .market import compute_market_regime
-from .track import _simulate_exit, _style_of, HORIZONS
+from .track import _simulate_exit, _style_of, _net_return, HORIZONS
 
 """純技術回測(第一版)— 誠實回答「純技術選股訊號有沒有 edge vs 大盤」。
 
@@ -153,6 +153,7 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
     print(f"重放交易日:{len(replay_days)} 天 ({replay_days[0].date()} -> {replay_days[-1].date()})")
 
     selections: list[dict] = []
+    day_min_score: dict = {}
     t0 = time.time()
     for di, d in enumerate(replay_days):
         d64 = np.datetime64(d)
@@ -206,6 +207,8 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
                     min_score = regime["min_score"]
                 prefer_pb = bool(regime.get("prefer_pullback"))
 
+        day_min_score[d.isoformat()] = min_score
+
         def _key(s):
             base = float(s["score"])
             if prefer_pb and s.get("breakout") and not s.get("pullback_turn"):
@@ -229,7 +232,7 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
                 "breakout": bool(s.get("breakout")), "pullback_turn": bool(s.get("pullback_turn")),
                 "new_stock": bool(s.get("new_stock")), "index_below_ma20": index_below_ma20,
                 "sig_close": round(sig_close, 2), "sig_rets": sig_rets, "bench_rets": bench_rets,
-                "style": _style_of(s), "_pos_master": pos_master,
+                "style": _style_of(s), "_pos_master": pos_master, "_pos_d": pos_d,
             })
 
         if (di + 1) % 20 == 0:
@@ -238,7 +241,10 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
     print(f"重放完成:{len(selections)} 筆選股, {time.time()-t0:.0f}s")
     shared = {"raws": raws, "master": master,
               "twii_m": twii_m if index_close is not None else None,
-              "bench_name": bench_name, "replay_days": replay_days}
+              "bench_name": bench_name, "replay_days": replay_days,
+              # 供投資組合模擬器逐日重評持股 / 判斷失去訊號用:
+              "inds": inds, "ind_dates": ind_dates, "score_cfg": score_cfg,
+              "master_pos": master_pos, "day_min_score": day_min_score}
     return selections, shared
 
 
@@ -552,6 +558,268 @@ def print_sweep(rep: dict) -> None:
     print("  誠實邊界同單次回測(倖存者/除權息/單一多頭段/純技術層);此掃描僅比『相對高下』,別當絕對保證。")
 
 
+# ---------------------------------------------------------------------------
+# 投資組合回測(資金有限 → 最多同時 N 檔 + 滿倉換股規則)
+# ---------------------------------------------------------------------------
+# 使用者情境:現金有限,不可能每天每檔都買。規則(2026-07-10 與使用者逐項確認):
+#   - 同時最多持有 N 檔(等權分成 N 本帳);湊不滿就擺現金(不硬湊爛票,現金報酬 0)。
+#   - 每天:①手上部位照常跑停損/移動停利出場(空出名額)②當日觸發選股照分數排序
+#           ③先填空名額 ④滿倉才考慮換股。
+#   - 換股:只有「新訊號明顯強過最弱持股」才一賣一買。
+#       最弱持股 = 三因子等權綜合排名(今天重評分數↓ / 帳面損益↓ / 持有天數↑)。
+#       明顯強過 = 最弱持股今天『失去訊號』(重評 None/過熱/分數<當日門檻) 或 分差≥M,任一即換。
+#       最短持有閘:進場未滿 min_hold 個交易日的部位不可被換掉(防當沖式來回燒手續費)。
+#   - 汰出/新進都走隔日開盤成交,換股吃一賣一買兩趟成本。
+# 撮合:每檔部位的「自然出場」直接複用 _simulate_exit(與逐筆回測一致);換股只是提早平倉的疊加層。
+
+
+def _nat_exit(sel: dict, shared: dict, exit_cfg: dict, max_chase: float, cost_cfg: dict):
+    """用 _simulate_exit 算某選股的自然出場(隔日開盤進場)。跳空棄單/待進場/資料不足 → None(不佔名額)。"""
+    raw = shared["raws"][sel["stock_id"]]
+    sim = _simulate_exit(raw, sel["date"], sel["sig_close"], sel["style"], exit_cfg, max_chase, cost_cfg)
+    if not sim or sim.get("status") in ("skip", "pending") or sim.get("entry_price") is None:
+        return None
+    e = sel["_pos_d"] + 1                       # 進場 bar(隔日開盤)在該股索引的位置
+    if e >= len(raw):
+        return None
+    hold = int(sim.get("hold_days") or 0)
+    xbar = min(e + hold, len(raw) - 1)
+    return {
+        "sid": sel["stock_id"], "style": sel["style"], "entry_score": float(sel["score"]),
+        "entry_bar": e, "entry_date": raw.index[e], "entry_price": float(sim["entry_price"]),
+        "nat_exit_date": raw.index[xbar], "nat_exit_ret": sim.get("exit_ret"),
+        "nat_reason": sim.get("reason"), "nat_status": sim.get("status"),
+    }
+
+
+def _rescore(shared: dict, sid: str, d64) -> dict | None:
+    ind = shared["inds"].get(sid)
+    if ind is None:
+        return None
+    cut = int(np.searchsorted(shared["ind_dates"][sid], d64, side="right"))
+    if cut < WARMUP_BARS:
+        return None
+    return compute_conviction(ind.iloc[:cut], None, cfg=shared["score_cfg"])
+
+
+def _close_at(raw, d64):
+    dates = raw.index.values
+    pos = int(np.searchsorted(dates, d64, side="right")) - 1
+    if pos < 0:
+        return None
+    v = raw["close"].iloc[pos]
+    return float(v) if pd.notna(v) else None
+
+
+def _next_open_after(raw, d64):
+    dates = raw.index.values
+    pos = int(np.searchsorted(dates, d64, side="right"))
+    if pos >= len(raw):
+        return None
+    o = raw["open"].iloc[pos] if "open" in raw.columns else raw["close"].iloc[pos]
+    if pd.isna(o):
+        o = raw["close"].iloc[pos]
+    return float(o) if pd.notna(o) else None
+
+
+LOST_SIGNAL_FLOOR = 30.0   # 「失去訊號」= 重評 None / 過熱 / 分數 < 此(真弱,非只是掉到入榜門檻 45 以下)
+
+
+def _pick_weakest(occ: list, books: list, d64, shared: dict, min_hold: int):
+    """在佔用中的帳裡,依三因子等權綜合排名選最弱、且已過最短持有閘者。回傳 (best_i, weak_info) 或 (None, None)。
+    weak_info 帶 entry_score(進場當時分數,供公平比較,避免『新訊號因今天剛觸發而虛高』的換股偏誤)。"""
+    master_pos = shared["master_pos"]
+    d_pos = int(np.searchsorted(shared["master"].values, d64, side="right")) - 1
+    infos = []
+    for i in occ:
+        p = books[i]["pos"]
+        held = d_pos - master_pos.get(p["entry_date"], d_pos)
+        if held < min_hold:
+            continue
+        conv = _rescore(shared, p["sid"], d64)
+        score = float(conv["score"]) if conv else -1e9
+        lost = (conv is None) or bool(conv.get("exhausted")) or (float(conv["score"]) < LOST_SIGNAL_FLOOR)
+        cur = _close_at(shared["raws"][p["sid"]], d64)
+        pnl = (cur / p["entry_price"] - 1) if (cur and p["entry_price"]) else 0.0
+        infos.append({"i": i, "score": score, "lost": lost, "pnl": pnl, "held": held, "rk": 0,
+                      "entry_score": float(p.get("entry_score", score))})
+    if not infos:
+        return None, None
+    for key, reverse in (("score", False), ("pnl", False), ("held", True)):
+        for rank, info in enumerate(sorted(infos, key=lambda x: x[key], reverse=reverse)):
+            info["rk"] += rank          # 每維最弱者 rank 0;總和越小越弱
+    best = min(infos, key=lambda x: (x["rk"], x["score"]))
+    return best["i"], best
+
+
+def simulate_portfolio(selections, shared, naturals, cost_cfg, N, M, min_hold):
+    """單組 (N, M, min_hold) 的投資組合逐日模擬。回傳權益曲線 + 指標 + 交易明細。"""
+    master = shared["master"]; master_vals = master.values
+    picks_by_day = defaultdict(list)
+    for si, sel in enumerate(selections):
+        if naturals[si] is not None:
+            picks_by_day[sel["date"]].append((sel, naturals[si]))
+    for dd in picks_by_day:
+        picks_by_day[dd].sort(key=lambda t: -t[0]["score"])   # 每天內分數高→低
+
+    books = [{"val": 1.0 / N, "pos": None} for _ in range(N)]   # N 本等權帳,合計 1.0
+    trades = []; n_rot = 0; equity_curve = []
+    start_pos = int(np.searchsorted(master_vals, np.datetime64(shared["replay_days"][0]), side="left"))
+    for dpos in range(start_pos, len(master)):     # 走到最後,讓尾端部位跑到自然出場
+        d = master[dpos]; d64 = np.datetime64(d); d_iso = d.isoformat()
+
+        # 1. 自然出場(出場日 <= d 的佔用帳結算)
+        for bk in books:
+            p = bk["pos"]
+            if p is not None and p["nat_exit_date"] <= d:
+                ret = p["nat_exit_ret"] if p["nat_exit_ret"] is not None else 0.0
+                bk["val"] *= (1 + ret)
+                trades.append({"sid": p["sid"], "entry": p["entry_date"].isoformat(),
+                               "exit": p["nat_exit_date"].isoformat(), "ret": ret,
+                               "reason": p["nat_reason"], "rotated": False})
+                bk["pos"] = None
+
+        cands = list(picks_by_day.get(d_iso, []))
+        held_ids = {bk["pos"]["sid"] for bk in books if bk["pos"]}
+        cands = [(s, nat) for (s, nat) in cands if s["stock_id"] not in held_ids]
+
+        # 3. 填空名額
+        ci = 0
+        for bk in books:
+            if bk["pos"] is None and ci < len(cands):
+                sel, nat = cands[ci]; ci += 1
+                bk["pos"] = {**nat, "basis": bk["val"]}
+        cands = cands[ci:]
+
+        # 4. 滿倉換股(對剩餘候選分數高→低,換掉最弱持股;明顯強過才換)
+        while cands and all(bk["pos"] is not None for bk in books):
+            sel, nat = cands[0]
+            occ = [i for i in range(N) if books[i]["pos"] is not None]
+            wi, winfo = _pick_weakest(occ, books, d64, shared, min_hold)
+            if wi is None:
+                break
+            # 明顯強過:最弱持股『失去訊號』(真弱) 或 新訊號分數 高過該持股『進場當時分數』≥ M
+            #   (比進場分數而非今天重評分數 → 公平,不會因新訊號今天剛觸發虛高而每天亂換)
+            if not (winfo["lost"] or (float(sel["score"]) - winfo["entry_score"] >= M)):
+                break                    # 最強候選都打不過最弱持股 → 停(候選已排序)
+            w = books[wi]["pos"]
+            wopen = _next_open_after(shared["raws"][w["sid"]], d64)
+            if wopen is None:
+                break
+            rot_ret = _net_return(w["entry_price"], wopen, cost_cfg, hold_days=max(1, winfo["held"]))
+            books[wi]["val"] *= (1 + rot_ret)
+            trades.append({"sid": w["sid"], "entry": w["entry_date"].isoformat(), "exit": d_iso,
+                           "ret": rot_ret, "reason": "換股汰出", "rotated": True})
+            n_rot += 1
+            books[wi]["pos"] = {**nat, "basis": books[wi]["val"]}   # 換入(承接該帳現值)
+            cands = cands[1:]
+
+        # 5. 每日 mark-to-market 權益(尚未進場的部位仍以現金計)
+        eq = 0.0
+        for bk in books:
+            p = bk["pos"]
+            if p is None or d < p["entry_date"]:
+                eq += bk["val"]
+            else:
+                cur = _close_at(shared["raws"][p["sid"]], d64)
+                eq += p["basis"] * (cur / p["entry_price"]) if (cur and p["entry_price"]) else bk["val"]
+        equity_curve.append((d, eq))
+
+    return _portfolio_metrics(equity_curve, trades, n_rot, shared, N, M, min_hold)
+
+
+def _max_drawdown(vals: list) -> float:
+    peak = -1e18; mdd = 0.0
+    for v in vals:
+        peak = max(peak, v)
+        if peak > 0:
+            mdd = min(mdd, v / peak - 1)
+    return mdd
+
+
+def _portfolio_metrics(equity_curve, trades, n_rot, shared, N, M, min_hold) -> dict:
+    dates = [d for d, _ in equity_curve]; eq = [v for _, v in equity_curve]
+    twii = shared["twii_m"]
+    d0, d1 = dates[0], dates[-1]
+    years = max((d1 - d0).days / 365.25, 1e-9)
+    total = eq[-1] - 1
+    cagr = eq[-1] ** (1 / years) - 1 if eq[-1] > 0 else -1
+    mdd = _max_drawdown(eq)
+    b_tot = b_cagr = b_mdd = None
+    if twii is not None:
+        tw = twii.reindex(pd.DatetimeIndex(dates)).ffill()
+        if pd.notna(tw.iloc[0]) and tw.iloc[0] and pd.notna(tw.iloc[-1]):
+            b_tot = float(tw.iloc[-1] / tw.iloc[0] - 1)
+            b_cagr = (1 + b_tot) ** (1 / years) - 1
+            b_mdd = _max_drawdown(list(tw.values))
+    closed = [t for t in trades if t["ret"] is not None]
+    wins = sum(1 for t in closed if t["ret"] > 0)
+    nat = [t for t in closed if not t["rotated"]]
+    rot = [t for t in closed if t["rotated"]]
+    return {
+        "N": N, "M": M, "min_hold": min_hold,
+        "avg_natural_ret_pct": round(sum(t["ret"] for t in nat) / len(nat) * 100, 2) if nat else None,
+        "avg_rotated_ret_pct": round(sum(t["ret"] for t in rot) / len(rot) * 100, 2) if rot else None,
+        "n_natural": len(nat), "n_rotated_out": len(rot),
+        "from": d0.date().isoformat(), "to": d1.date().isoformat(), "years": round(years, 2),
+        "total_return_pct": round(total * 100, 1), "cagr_pct": round(cagr * 100, 1),
+        "max_drawdown_pct": round(mdd * 100, 1),
+        "bench_total_pct": round(b_tot * 100, 1) if b_tot is not None else None,
+        "bench_cagr_pct": round(b_cagr * 100, 1) if b_cagr is not None else None,
+        "bench_mdd_pct": round(b_mdd * 100, 1) if b_mdd is not None else None,
+        "excess_cagr_pct": round((cagr - b_cagr) * 100, 1) if b_cagr is not None else None,
+        "n_trades": len(closed), "n_rotations": n_rot, "rotations_per_year": round(n_rot / years, 1),
+        "trade_win_rate": round(wins / len(closed) * 100, 1) if closed else None,
+        "avg_trade_ret_pct": round(sum(t["ret"] for t in closed) / len(closed) * 100, 2) if closed else None,
+        "equity_curve": [(d.date().isoformat(), round(v, 4)) for d, v in equity_curve[::5]],
+    }
+
+
+def sweep_portfolio(universe_limit=None, start=None, end=None, use_regime: bool = True,
+                    n_grid=(3, 4, 5), m_grid=(10, 15, 20), hold_grid=(0, 2, 3)) -> dict:
+    """組合回測掃描:重放一次 → 對 (N, M, min_hold) 網格各跑一次逐日組合模擬。"""
+    cfg = load_screeners()
+    selections, shared = _replay(cfg, universe_limit, start, end, use_regime)
+    exit_cfg = cfg.get("exit", {}) or {}; cost_cfg = cfg.get("cost", {}) or {}
+    max_chase = float((cfg.get("entry", {}) or {}).get("max_chase", 0.03))
+    print("預算各選股自然出場(複用 _simulate_exit)…")
+    naturals = [_nat_exit(sel, shared, exit_cfg, max_chase, cost_cfg) for sel in selections]
+    n_enter = sum(1 for x in naturals if x is not None)
+    print(f"  可進場選股 {n_enter}/{len(selections)}(其餘跳空棄單/待進場)")
+    rows = []
+    print("組合模擬掃描中…")
+    for N in n_grid:
+        for M in m_grid:
+            for mh in hold_grid:
+                r = simulate_portfolio(selections, shared, naturals, cost_cfg, N, M, mh)
+                rows.append(r)
+                print(f"  N={N} M={M} 最短持有={mh} → CAGR {r['cagr_pct']}% "
+                      f"(大盤 {r['bench_cagr_pct']}%, 超額 {r['excess_cagr_pct']}%) "
+                      f"MDD {r['max_drawdown_pct']}% 換股/年 {r['rotations_per_year']}")
+    return {"benchmark": shared["bench_name"], "n_selections": len(selections),
+            "n_enterable": n_enter, "results": rows}
+
+
+def print_portfolio(rep: dict) -> None:
+    print("\n" + "=" * 104)
+    print(f"投資組合回測(資金有限 + 滿倉換股)  |  benchmark = {rep['benchmark']}  |  "
+          f"可進場選股 {rep['n_enterable']}/{rep['n_selections']}")
+    print("=" * 104)
+    print(f"  {'N':>2} {'M':>3} {'持有閘':>5} {'總報酬':>8} {'CAGR':>7} {'大盤CAGR':>8} {'超額':>7} "
+          f"{'最大回撤':>8} {'大盤回撤':>8} {'交易':>5} {'換股/年':>7} {'勝率':>6}")
+    print("  " + "-" * 100)
+    best = max(rep["results"], key=lambda r: (r["excess_cagr_pct"] if r["excess_cagr_pct"] is not None else -1e9))
+    for r in rep["results"]:
+        mark = "  <<最佳超額" if r is best else ""
+        print(f"  {r['N']:>2} {r['M']:>3} {r['min_hold']:>5} {_fmt(r['total_return_pct']):>8} "
+              f"{_fmt(r['cagr_pct']):>7} {_fmt(r['bench_cagr_pct']):>8} {_fmt(r['excess_cagr_pct']):>7} "
+              f"{_fmt(r['max_drawdown_pct']):>8} {_fmt(r['bench_mdd_pct']):>8} {r['n_trades']:>5} "
+              f"{r['rotations_per_year']:>7} {str(r['trade_win_rate'])+'%':>6}{mark}")
+    print("  " + "-" * 100)
+    print("  CAGR/回撤為『固定資金、最多同時N檔、湊不滿擺現金』的權益曲線;超額 = 策略CAGR - 買TWII抱著CAGR。")
+    print("  ⚠️ 誠實邊界同前:單一多頭段 + 倖存者偏誤 + 純技術層。超額為正也只代表『這段多頭贏過大盤』,非未來保證。")
+
+
 def _json_safe(o):
     if isinstance(o, dict):
         return {k: _json_safe(v) for k, v in o.items()}
@@ -576,6 +844,8 @@ def parse_args():
     p.add_argument("--end", help="重放結束日 YYYY-MM-DD")
     p.add_argument("--no-regime", action="store_true", help="不套用大盤閘門,用固定 core_count/min_score")
     p.add_argument("--sweep", action="store_true", help="出場參數敏感度掃描(重放一次,套多組出場參數)")
+    p.add_argument("--portfolio", action="store_true",
+                   help="投資組合回測(資金有限:最多同時 N 檔 + 滿倉換股規則;掃 N×M×最短持有)")
     p.add_argument("--out", default=str(DATA_DIR / "backtest.json"), help="輸出 JSON 路徑")
     return p.parse_args()
 
@@ -586,7 +856,15 @@ if __name__ == "__main__":
     except Exception:
         pass
     args = parse_args()
-    if args.sweep:
+    if args.portfolio:
+        rep = sweep_portfolio(universe_limit=args.limit, start=args.start, end=args.end,
+                              use_regime=not args.no_regime)
+        print_portfolio(rep)
+        out = args.out if args.out != str(DATA_DIR / "backtest.json") else str(DATA_DIR / "backtest_portfolio.json")
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(_json_safe(rep), f, ensure_ascii=False, indent=2, default=str)
+        print(f"\n組合回測結果已寫入 {out}")
+    elif args.sweep:
         rep = sweep_exits(universe_limit=args.limit, start=args.start, end=args.end,
                           use_regime=not args.no_regime)
         print_sweep(rep)
