@@ -1367,10 +1367,11 @@ function portAIReview(){
     const totals={cost:Math.round(totCost),market:hv?Math.round(totMkt):null,
       pnl:hv?Math.round(totMkt-totCost):null,pnl_pct:hv&&totCost>0?Math.round((totMkt-totCost)/totCost*1000)/10:null};
     const submitted=rows.length;
-    /* 依市值排序、上限 15 檔,再切成每塊 4 檔平行呼叫(每次都遠低於 Vercel 60s 硬限)。 */
+    /* 依市值排序、上限 15 檔,再切成每塊 3 檔平行呼叫(實測 4 檔約 43s、3 檔約 32s,
+       留足 Vercel 60s 硬限的餘裕,含冷啟動也安全)。 */
     const capped=[...rows].sort((a,b)=>(b.market_value||0)-(a.market_value||0)).slice(0,15);
     const analyzed=capped.length;
-    const chunks=[];for(let i=0;i<capped.length;i+=4)chunks.push(capped.slice(i,i+4));
+    const chunks=[];for(let i=0;i<capped.length;i+=3)chunks.push(capped.slice(i,i+3));
     setStatus(`AI 逐檔分析中…(${analyzed} 檔,分 ${chunks.length} 批平行處理,約 20~40 秒)`);
     Promise.all(chunks.map(ch=>_portReviewPost({task:'positions',positions:ch})))
       .then(results=>{
