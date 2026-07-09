@@ -360,4 +360,4 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 
 **第二層 bug:純呼叫重新暴露 JSON 截斷脆弱性(2026-07-09,接續上條)**。拿掉 output_config 部署後(deploy a8ce47f Ready),`ai_summary` AI 解讀正常但新聞**仍**「資料不足」。推論:純呼叫無結構化輸出保護,一次要 AI 逐則分類 60 則 → 輸出 JSON 超過 `max_tokens=1600` 被**截斷** → 不完整 JSON → `extract_json` 回 {} → `analyze_news` 靜默回 None。(這正是 output_config「有用」處——保證 JSON 完整;拿掉後得自己控輸出量。)
 - **修法** [news_engine.py](scripts/health/news_engine.py):①新增 `ai_max_items`(預設 30)只送最新 30 則給 AI(視窗本以近期為主,足量);②`max_tokens` 1600→3000;③在**每一條靜默 return None 路徑**加 `log.warning`(呼叫失敗印 type+msg、JSON 解析失敗印 `stop_reason`+回應前 160 字、解析成功但無有效標記)→ 之後若還失敗,直接看 **Vercel Logs** 拿確切原因(`stop_reason=max_tokens` ⟹ 仍截斷)。yaml `health.news` 同步加 `ai_max_items: 30`、`max_tokens: 3000`。
-- **⚠️ 仍需真 Vercel 部署後查一檔確認新聞出分**;若 Vercel Logs 出現 `stop_reason=max_tokens` 代表 30 則仍太多,再調小 ai_max_items。
+- **✅ 已在真 Vercel 驗證(2026-07-09)**:`twse-main.vercel.app/api/health?stock=2330` 新聞面向 score=61.6、已讀取內文 10 則、近90天分類 30 則;AI 摘要含「外資連續6天賣超並提款310億元」等**只能從內文讀到**的細節,證明讀內文版真的生效。三個 bug(chips 快取空→現抓、output_config→純呼叫、JSON 截斷→限則數+加 token)全部解決。若日後又「資料不足」,先看 **Vercel Logs** 的 `健檢新聞分析 ... 失敗` 行拿確切原因。
