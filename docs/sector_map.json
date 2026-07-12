@@ -1,247 +1,1414 @@
 {
   "_industry_map": {
-    "半導體業":       {"sector": "半導體",    "sub_sector": "半導體"},
-    "電子工業":       {"sector": "電子零組件", "sub_sector": "電子工業"},
-    "電子零組件業":   {"sector": "電子零組件", "sub_sector": "電子零組件"},
-    "光電業":         {"sector": "光電顯示",   "sub_sector": "光電"},
-    "電腦及週邊設備業":{"sector": "終端設備",  "sub_sector": "電腦週邊"},
-    "通信網路業":     {"sector": "通訊網路",   "sub_sector": "網通設備"},
-    "其他電子業":     {"sector": "電子零組件", "sub_sector": "其他電子"},
-    "其他電子類":     {"sector": "電子零組件", "sub_sector": "其他電子"},
-    "電子通路業":     {"sector": "半導體",     "sub_sector": "IC通路"},
-    "電機機械":       {"sector": "能源電力",   "sub_sector": "電機機械"},
-    "汽車工業":       {"sector": "車用電動車", "sub_sector": "車用電子"},
-    "金融保險":       {"sector": "金融",       "sub_sector": "金控銀行"},
-    "金融業":         {"sector": "金融",       "sub_sector": "證券"},
-    "塑膠工業":       {"sector": "傳產",       "sub_sector": "塑化化工"},
-    "化學工業":       {"sector": "傳產",       "sub_sector": "塑化化工"},
-    "鋼鐵工業":       {"sector": "傳產",       "sub_sector": "鋼鐵"},
-    "航運業":         {"sector": "傳產",       "sub_sector": "航運"},
-    "紡織纖維":       {"sector": "傳產",       "sub_sector": "紡織"},
-    "食品工業":       {"sector": "傳產",       "sub_sector": "食品飲料"},
-    "生技醫療業":     {"sector": "生技醫療",   "sub_sector": "生技醫療"},
-    "化學生技醫療":   {"sector": "生技醫療",   "sub_sector": "化學生技"},
-    "建材營造":       {"sector": "其他",       "sub_sector": "建設營造"},
-    "觀光餐旅":       {"sector": "其他",       "sub_sector": "觀光"},
-    "觀光事業":       {"sector": "其他",       "sub_sector": "觀光"},
-    "貿易百貨":       {"sector": "其他",       "sub_sector": "貿易百貨"},
-    "油電燃氣業":     {"sector": "能源電力",   "sub_sector": "電力設備"},
-    "其他":           {"sector": "其他",       "sub_sector": "其他"},
-    "玻璃陶瓷":       {"sector": "傳產",       "sub_sector": "材料"},
-    "橡膠工業":       {"sector": "傳產",       "sub_sector": "材料"},
-    "水泥工業":       {"sector": "傳產",       "sub_sector": "材料"},
-    "造紙工業":       {"sector": "傳產",       "sub_sector": "材料"},
-    "資訊服務業":     {"sector": "終端設備",   "sub_sector": "資訊服務"},
-    "綠能環保":       {"sector": "能源電力",   "sub_sector": "綠能環保"},
-    "綠能環保類":     {"sector": "能源電力",   "sub_sector": "綠能環保"},
-    "數位雲端類":     {"sector": "通訊網路",   "sub_sector": "數位雲端"},
-    "數位雲端":       {"sector": "通訊網路",   "sub_sector": "數位雲端"},
-    "電器電纜":       {"sector": "能源電力",   "sub_sector": "電機機械"},
-    "文化創意業":     {"sector": "其他",       "sub_sector": "其他"},
-    "居家生活類":     {"sector": "其他",       "sub_sector": "其他"},
-    "居家生活":       {"sector": "其他",       "sub_sector": "其他"},
-    "運動休閒":       {"sector": "其他",       "sub_sector": "其他"},
-    "運動休閒類":     {"sector": "其他",       "sub_sector": "其他"},
-    "電子商務業":     {"sector": "通訊網路",   "sub_sector": "數位雲端"},
-    "電信業":         {"sector": "通訊網路",   "sub_sector": "電信"},
-    "電力供應業":     {"sector": "能源電力",   "sub_sector": "電力設備"},
-    "鋼鐵":           {"sector": "傳產",       "sub_sector": "鋼鐵"}
+    "半導體業": {
+      "sector": "半導體",
+      "sub_sector": "半導體"
+    },
+    "電子工業": {
+      "sector": "電子零組件",
+      "sub_sector": "電子工業"
+    },
+    "電子零組件業": {
+      "sector": "電子零組件",
+      "sub_sector": "電子零組件"
+    },
+    "光電業": {
+      "sector": "光電顯示",
+      "sub_sector": "光電"
+    },
+    "電腦及週邊設備業": {
+      "sector": "終端設備",
+      "sub_sector": "電腦週邊"
+    },
+    "通信網路業": {
+      "sector": "通訊網路",
+      "sub_sector": "網通設備"
+    },
+    "其他電子業": {
+      "sector": "電子零組件",
+      "sub_sector": "其他電子"
+    },
+    "其他電子類": {
+      "sector": "電子零組件",
+      "sub_sector": "其他電子"
+    },
+    "電子通路業": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "電機機械": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "汽車工業": {
+      "sector": "車用電動車",
+      "sub_sector": "車用電子"
+    },
+    "金融保險": {
+      "sector": "金融",
+      "sub_sector": "金控銀行"
+    },
+    "金融業": {
+      "sector": "金融",
+      "sub_sector": "證券"
+    },
+    "塑膠工業": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "化學工業": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "鋼鐵工業": {
+      "sector": "傳產",
+      "sub_sector": "鋼鐵"
+    },
+    "航運業": {
+      "sector": "傳產",
+      "sub_sector": "航運"
+    },
+    "紡織纖維": {
+      "sector": "傳產",
+      "sub_sector": "紡織"
+    },
+    "食品工業": {
+      "sector": "傳產",
+      "sub_sector": "食品飲料"
+    },
+    "生技醫療業": {
+      "sector": "生技醫療",
+      "sub_sector": "生技醫療"
+    },
+    "化學生技醫療": {
+      "sector": "生技醫療",
+      "sub_sector": "化學生技"
+    },
+    "建材營造": {
+      "sector": "其他",
+      "sub_sector": "建設營造"
+    },
+    "觀光餐旅": {
+      "sector": "其他",
+      "sub_sector": "觀光"
+    },
+    "觀光事業": {
+      "sector": "其他",
+      "sub_sector": "觀光"
+    },
+    "貿易百貨": {
+      "sector": "其他",
+      "sub_sector": "貿易百貨"
+    },
+    "油電燃氣業": {
+      "sector": "能源電力",
+      "sub_sector": "電力設備"
+    },
+    "其他": {
+      "sector": "其他",
+      "sub_sector": "其他"
+    },
+    "玻璃陶瓷": {
+      "sector": "傳產",
+      "sub_sector": "材料"
+    },
+    "橡膠工業": {
+      "sector": "傳產",
+      "sub_sector": "材料"
+    },
+    "水泥工業": {
+      "sector": "傳產",
+      "sub_sector": "材料"
+    },
+    "造紙工業": {
+      "sector": "傳產",
+      "sub_sector": "材料"
+    },
+    "資訊服務業": {
+      "sector": "終端設備",
+      "sub_sector": "資訊服務"
+    },
+    "綠能環保": {
+      "sector": "能源電力",
+      "sub_sector": "綠能環保"
+    },
+    "綠能環保類": {
+      "sector": "能源電力",
+      "sub_sector": "綠能環保"
+    },
+    "數位雲端類": {
+      "sector": "通訊網路",
+      "sub_sector": "數位雲端"
+    },
+    "數位雲端": {
+      "sector": "通訊網路",
+      "sub_sector": "數位雲端"
+    },
+    "電器電纜": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "文化創意業": {
+      "sector": "其他",
+      "sub_sector": "數位娛樂"
+    },
+    "居家生活類": {
+      "sector": "傳產",
+      "sub_sector": "消費品"
+    },
+    "居家生活": {
+      "sector": "傳產",
+      "sub_sector": "消費品"
+    },
+    "運動休閒": {
+      "sector": "傳產",
+      "sub_sector": "運動休閒"
+    },
+    "運動休閒類": {
+      "sector": "傳產",
+      "sub_sector": "運動休閒"
+    },
+    "電子商務業": {
+      "sector": "通訊網路",
+      "sub_sector": "數位雲端"
+    },
+    "電信業": {
+      "sector": "通訊網路",
+      "sub_sector": "電信"
+    },
+    "電力供應業": {
+      "sector": "能源電力",
+      "sub_sector": "電力設備"
+    },
+    "鋼鐵": {
+      "sector": "傳產",
+      "sub_sector": "鋼鐵"
+    }
   },
   "_override": {
-    "2330": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-    "2303": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-    "5347": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-    "6770": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-    "6488": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-    "5483": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-    "6182": {"sector": "半導體",    "sub_sector": "晶圓代工"},
-
-    "2454": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "2379": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "2458": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "2401": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3006": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3141": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3227": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3317": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3443": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "4923": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "5299": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "5425": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "5471": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6138": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6291": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6435": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6451": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6651": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6719": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "8016": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "8028": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "8040": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "8227": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3675": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "7828": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6016": {"sector": "金融",      "sub_sector": "證券"},
-    "2363": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3016": {"sector": "半導體",    "sub_sector": "化合物半導體"},
-
-    "3711": {"sector": "半導體",    "sub_sector": "封測"},
-    "2441": {"sector": "半導體",    "sub_sector": "封測"},
-    "8150": {"sector": "半導體",    "sub_sector": "封測"},
-    "6239": {"sector": "半導體",    "sub_sector": "封測"},
-    "6257": {"sector": "半導體",    "sub_sector": "封測"},
-    "3374": {"sector": "半導體",    "sub_sector": "封測"},
-
-    "2408": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
-    "2344": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
-    "2337": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
-
-    "3707": {"sector": "半導體",    "sub_sector": "化合物半導體"},
-
-    "3583": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "6223": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "3189": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-
-    "5434": {"sector": "半導體",    "sub_sector": "IC通路"},
-    "8096": {"sector": "半導體",    "sub_sector": "IC通路"},
-    "3090": {"sector": "半導體",    "sub_sector": "IC通路"},
-    "3028": {"sector": "半導體",    "sub_sector": "IC通路"},
-
-    "3017": {"sector": "AI/伺服器", "sub_sector": "散熱模組"},
-    "3324": {"sector": "AI/伺服器", "sub_sector": "散熱模組"},
-    "6230": {"sector": "AI/伺服器", "sub_sector": "散熱模組"},
-    "3483": {"sector": "AI/伺服器", "sub_sector": "散熱模組"},
-
-    "2317": {"sector": "AI/伺服器", "sub_sector": "伺服器品牌"},
-    "2356": {"sector": "AI/伺服器", "sub_sector": "伺服器品牌"},
-    "2382": {"sector": "AI/伺服器", "sub_sector": "伺服器品牌"},
-    "6669": {"sector": "AI/伺服器", "sub_sector": "伺服器品牌"},
-    "3231": {"sector": "AI/伺服器", "sub_sector": "伺服器品牌"},
-
-    "3037": {"sector": "電子零組件","sub_sector": "ABF載板"},
-    "8046": {"sector": "電子零組件","sub_sector": "ABF載板"},
-    "2383": {"sector": "電子零組件","sub_sector": "ABF載板"},
-
-    "4958": {"sector": "電子零組件","sub_sector": "PCB"},
-    "2316": {"sector": "電子零組件","sub_sector": "PCB"},
-    "3044": {"sector": "電子零組件","sub_sector": "PCB"},
-
-    "2327": {"sector": "電子零組件","sub_sector": "被動元件"},
-    "2428": {"sector": "電子零組件","sub_sector": "被動元件"},
-    "3026": {"sector": "電子零組件","sub_sector": "被動元件"},
-    "6173": {"sector": "電子零組件","sub_sector": "被動元件"},
-    "3042": {"sector": "電子零組件","sub_sector": "被動元件"},
-    "2492": {"sector": "電子零組件","sub_sector": "被動元件"},
-    "2375": {"sector": "電子零組件","sub_sector": "被動元件"},
-
-    "3605": {"sector": "電子零組件","sub_sector": "連接器"},
-    "6197": {"sector": "電子零組件","sub_sector": "連接器"},
-    "2392": {"sector": "電子零組件","sub_sector": "連接器"},
-
-    "2409": {"sector": "光電顯示",  "sub_sector": "面板"},
-    "3481": {"sector": "光電顯示",  "sub_sector": "面板"},
-    "8069": {"sector": "光電顯示",  "sub_sector": "面板"},
-    "3673": {"sector": "光電顯示",  "sub_sector": "觸控面板"},
-    "3149": {"sector": "光電顯示",  "sub_sector": "面板"},
-    "3008": {"sector": "光電顯示",  "sub_sector": "光學零組件"},
-    "6278": {"sector": "光電顯示",  "sub_sector": "光學零組件"},
-
-    "2395": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "3088": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "3479": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "3577": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "3022": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "6579": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "4931": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "5386": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "6831": {"sector": "終端設備",  "sub_sector": "工業電腦"},
-    "2377": {"sector": "終端設備",  "sub_sector": "筆電/桌機"},
-    "2352": {"sector": "終端設備",  "sub_sector": "筆電/桌機"},
-
-    "2308": {"sector": "能源電力",  "sub_sector": "電力設備"},
-    "8926": {"sector": "能源電力",  "sub_sector": "電力設備"},
-    "8027": {"sector": "能源電力",  "sub_sector": "電機機械"},
-    "3167": {"sector": "能源電力",  "sub_sector": "電機機械"},
-    "6829": {"sector": "能源電力",  "sub_sector": "電機機械"},
-
-    "1563": {"sector": "車用電動車","sub_sector": "車用電子"},
-    "3346": {"sector": "車用電動車","sub_sector": "車用電子"},
-    "4551": {"sector": "車用電動車","sub_sector": "車用電子"},
-
-    "2801": {"sector": "金融",      "sub_sector": "銀行"},
-    "2885": {"sector": "金融",      "sub_sector": "金控"},
-    "2887": {"sector": "金融",      "sub_sector": "金控"},
-    "2882": {"sector": "金融",      "sub_sector": "金控"},
-    "2881": {"sector": "金融",      "sub_sector": "金控"},
-    "2884": {"sector": "金融",      "sub_sector": "金控"},
-    "2886": {"sector": "金融",      "sub_sector": "金控"},
-    "2891": {"sector": "金融",      "sub_sector": "金控"},
-    "2892": {"sector": "金融",      "sub_sector": "銀行"},
-    "2855": {"sector": "金融",      "sub_sector": "證券"},
-
-    "1303": {"sector": "傳產",      "sub_sector": "塑化化工"},
-    "1409": {"sector": "傳產",      "sub_sector": "紡織"},
-    "1714": {"sector": "傳產",      "sub_sector": "塑化化工"},
-    "1727": {"sector": "傳產",      "sub_sector": "塑化化工"},
-    "4722": {"sector": "傳產",      "sub_sector": "塑化化工"},
-    "4764": {"sector": "傳產",      "sub_sector": "塑化化工"},
-    "3430": {"sector": "傳產",      "sub_sector": "塑化化工"},
-    "5011": {"sector": "傳產",      "sub_sector": "鋼鐵"},
-    "2527": {"sector": "其他",      "sub_sector": "建設營造"},
-    "1809": {"sector": "傳產",      "sub_sector": "材料"},
-    "1810": {"sector": "傳產",      "sub_sector": "材料"},
-
-    "4127": {"sector": "生技醫療",  "sub_sector": "醫材"},
-    "6446": {"sector": "生技醫療",  "sub_sector": "新藥研發"},
-    "6491": {"sector": "生技醫療",  "sub_sector": "醫材"},
-
-    "5904": {"sector": "其他",      "sub_sector": "貿易百貨"},
-    "8936": {"sector": "其他",      "sub_sector": "其他"},
-    "2059": {"sector": "電子零組件","sub_sector": "連接器"},
-
-    "8299": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "5274": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6683": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "3529": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6202": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6788": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "8054": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6104": {"sector": "半導體",    "sub_sector": "IC設計"},
-    "6643": {"sector": "半導體",    "sub_sector": "IC設計"},
-
-    "2449": {"sector": "半導體",    "sub_sector": "封測"},
-    "6147": {"sector": "半導體",    "sub_sector": "封測"},
-    "6271": {"sector": "半導體",    "sub_sector": "封測"},
-    "3264": {"sector": "半導體",    "sub_sector": "封測"},
-    "2369": {"sector": "半導體",    "sub_sector": "封測"},
-    "6789": {"sector": "半導體",    "sub_sector": "封測"},
-    "6548": {"sector": "半導體",    "sub_sector": "封測"},
-    "6693": {"sector": "半導體",    "sub_sector": "封測"},
-    "8110": {"sector": "半導體",    "sub_sector": "封測"},
-    "6187": {"sector": "半導體",    "sub_sector": "封測"},
-    "7712": {"sector": "半導體",    "sub_sector": "封測"},
-    "7751": {"sector": "半導體",    "sub_sector": "封測"},
-    "8088": {"sector": "半導體",    "sub_sector": "封測"},
-
-    "3105": {"sector": "半導體",    "sub_sector": "化合物半導體"},
-    "8086": {"sector": "半導體",    "sub_sector": "化合物半導體"},
-    "3265": {"sector": "半導體",    "sub_sector": "化合物半導體"},
-
-    "3260": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
-    "5351": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
-    "6531": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
-    "4973": {"sector": "半導體",    "sub_sector": "IC通路"},
-
-    "6515": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "6510": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "3131": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "3680": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "4749": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "8091": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "7734": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "5285": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "5443": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "6640": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
-    "6208": {"sector": "半導體",    "sub_sector": "半導體設備材料"}
+    "2330": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "2303": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "5347": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "6770": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "6488": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "5483": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "6182": {
+      "sector": "半導體",
+      "sub_sector": "晶圓代工"
+    },
+    "2454": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "2379": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "2458": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "2401": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3006": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3141": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3227": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3317": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3443": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "4923": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5299": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5425": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5471": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6138": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6291": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6435": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6451": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6651": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6719": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "8016": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "8028": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "8040": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "8227": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3675": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "7828": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6016": {
+      "sector": "金融",
+      "sub_sector": "證券"
+    },
+    "2363": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3016": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "3711": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "2441": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "8150": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6239": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6257": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "3374": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "2408": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "2344": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "2337": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "3707": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "3583": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6223": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "3189": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "5434": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "8096": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "3090": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "3028": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "3017": {
+      "sector": "AI/伺服器",
+      "sub_sector": "散熱模組"
+    },
+    "3324": {
+      "sector": "AI/伺服器",
+      "sub_sector": "散熱模組"
+    },
+    "6230": {
+      "sector": "AI/伺服器",
+      "sub_sector": "散熱模組"
+    },
+    "3483": {
+      "sector": "AI/伺服器",
+      "sub_sector": "散熱模組"
+    },
+    "2317": {
+      "sector": "AI/伺服器",
+      "sub_sector": "伺服器品牌"
+    },
+    "2356": {
+      "sector": "AI/伺服器",
+      "sub_sector": "伺服器品牌"
+    },
+    "2382": {
+      "sector": "AI/伺服器",
+      "sub_sector": "伺服器品牌"
+    },
+    "6669": {
+      "sector": "AI/伺服器",
+      "sub_sector": "伺服器品牌"
+    },
+    "3231": {
+      "sector": "AI/伺服器",
+      "sub_sector": "伺服器品牌"
+    },
+    "3037": {
+      "sector": "電子零組件",
+      "sub_sector": "ABF載板"
+    },
+    "8046": {
+      "sector": "電子零組件",
+      "sub_sector": "ABF載板"
+    },
+    "2383": {
+      "sector": "電子零組件",
+      "sub_sector": "ABF載板"
+    },
+    "4958": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2316": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "3044": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2327": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "2428": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "3026": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "6173": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "3042": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "2492": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "2375": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "3605": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "6197": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "2392": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "2409": {
+      "sector": "光電顯示",
+      "sub_sector": "面板"
+    },
+    "3481": {
+      "sector": "光電顯示",
+      "sub_sector": "面板"
+    },
+    "8069": {
+      "sector": "光電顯示",
+      "sub_sector": "面板"
+    },
+    "3673": {
+      "sector": "光電顯示",
+      "sub_sector": "觸控面板"
+    },
+    "3149": {
+      "sector": "光電顯示",
+      "sub_sector": "面板"
+    },
+    "3008": {
+      "sector": "光電顯示",
+      "sub_sector": "光學零組件"
+    },
+    "6278": {
+      "sector": "光電顯示",
+      "sub_sector": "光學零組件"
+    },
+    "2395": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "3088": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "3479": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "3577": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "3022": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "6579": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "4931": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "5386": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "6831": {
+      "sector": "終端設備",
+      "sub_sector": "工業電腦"
+    },
+    "2377": {
+      "sector": "終端設備",
+      "sub_sector": "筆電/桌機"
+    },
+    "2352": {
+      "sector": "終端設備",
+      "sub_sector": "筆電/桌機"
+    },
+    "2308": {
+      "sector": "能源電力",
+      "sub_sector": "電力設備"
+    },
+    "8926": {
+      "sector": "能源電力",
+      "sub_sector": "電力設備"
+    },
+    "8027": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "3167": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "6829": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "1563": {
+      "sector": "車用電動車",
+      "sub_sector": "車用電子"
+    },
+    "3346": {
+      "sector": "車用電動車",
+      "sub_sector": "車用電子"
+    },
+    "4551": {
+      "sector": "車用電動車",
+      "sub_sector": "車用電子"
+    },
+    "2801": {
+      "sector": "金融",
+      "sub_sector": "銀行"
+    },
+    "2885": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2887": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2882": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2881": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2884": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2886": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2891": {
+      "sector": "金融",
+      "sub_sector": "金控"
+    },
+    "2892": {
+      "sector": "金融",
+      "sub_sector": "銀行"
+    },
+    "2855": {
+      "sector": "金融",
+      "sub_sector": "證券"
+    },
+    "1303": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "1409": {
+      "sector": "傳產",
+      "sub_sector": "紡織"
+    },
+    "1714": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "1727": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "4722": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "4764": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "3430": {
+      "sector": "傳產",
+      "sub_sector": "塑化化工"
+    },
+    "5011": {
+      "sector": "傳產",
+      "sub_sector": "鋼鐵"
+    },
+    "2527": {
+      "sector": "其他",
+      "sub_sector": "建設營造"
+    },
+    "1809": {
+      "sector": "傳產",
+      "sub_sector": "材料"
+    },
+    "1810": {
+      "sector": "傳產",
+      "sub_sector": "材料"
+    },
+    "4127": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "6446": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "6491": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "5904": {
+      "sector": "其他",
+      "sub_sector": "貿易百貨"
+    },
+    "8936": {
+      "sector": "其他",
+      "sub_sector": "其他"
+    },
+    "2059": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "8299": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5274": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6683": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3529": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6202": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6788": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "8054": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6104": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6643": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "2449": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6147": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6271": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "3264": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "2369": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6789": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6548": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6693": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "8110": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6187": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "7712": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "7751": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "8088": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "3105": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "8086": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "3265": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "3260": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "5351": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "6531": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "4973": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "6515": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6510": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "3131": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "3680": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "4749": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "8091": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "7734": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "5285": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "5443": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6640": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6208": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "2313": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "6274": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "6213": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2368": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "8358": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "5328": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "1815": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "3357": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "3715": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "8039": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "6207": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2367": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2355": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "4939": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "5469": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "6153": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2413": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "2484": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "2472": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "2478": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "3624": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "6449": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "6284": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "6224": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "8121": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "6155": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "6290": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "6175": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "3023": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "2476": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "2483": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "6127": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "5457": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "6282": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "6191": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "3015": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "6412": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "2385": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "3078": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "3653": {
+      "sector": "AI/伺服器",
+      "sub_sector": "散熱模組"
+    },
+    "2421": {
+      "sector": "AI/伺服器",
+      "sub_sector": "散熱模組"
+    },
+    "3533": {
+      "sector": "AI/伺服器",
+      "sub_sector": "AI連接器"
+    },
+    "6805": {
+      "sector": "AI/伺服器",
+      "sub_sector": "AI連接器"
+    },
+    "8042": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "3236": {
+      "sector": "能源電力",
+      "sub_sector": "電機機械"
+    },
+    "6217": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "7788": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "2467": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6462": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6411": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3556": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3228": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6732": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6684": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6909": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6799": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5222": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6533": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6679": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6243": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6494": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3581": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6937": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "6261": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "2434": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "1795": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "6712": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4743": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4147": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4169": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4123": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "6547": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4105": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4128": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4162": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "4114": {
+      "sector": "生技醫療",
+      "sub_sector": "新藥研發"
+    },
+    "7799": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "6620": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "4771": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "3218": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "6841": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "2345": {
+      "sector": "通訊網路",
+      "sub_sector": "網通設備"
+    },
+    "8071": {
+      "sector": "通訊網路",
+      "sub_sector": "網通設備"
+    },
+    "2412": {
+      "sector": "通訊網路",
+      "sub_sector": "電信"
+    },
+    "4904": {
+      "sector": "通訊網路",
+      "sub_sector": "電信"
+    },
+    "3045": {
+      "sector": "通訊網路",
+      "sub_sector": "電信"
+    },
+    "3034": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "4919": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3035": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5269": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "2481": {
+      "sector": "半導體",
+      "sub_sector": "功率半導體"
+    },
+    "8261": {
+      "sector": "半導體",
+      "sub_sector": "功率半導體"
+    },
+    "2455": {
+      "sector": "半導體",
+      "sub_sector": "化合物半導體"
+    },
+    "3532": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "2486": {
+      "sector": "半導體",
+      "sub_sector": "封測"
+    },
+    "2451": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "4967": {
+      "sector": "半導體",
+      "sub_sector": "記憶體DRAM"
+    },
+    "3702": {
+      "sector": "半導體",
+      "sub_sector": "IC通路"
+    },
+    "2404": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "7769": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "2360": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "8021": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "3406": {
+      "sector": "光電顯示",
+      "sub_sector": "光學零組件"
+    },
+    "3450": {
+      "sector": "光電顯示",
+      "sub_sector": "光學零組件"
+    },
+    "3019": {
+      "sector": "光電顯示",
+      "sub_sector": "光學零組件"
+    },
+    "2426": {
+      "sector": "光電顯示",
+      "sub_sector": "光電"
+    },
+    "2376": {
+      "sector": "AI/伺服器",
+      "sub_sector": "伺服器品牌"
+    },
+    "2324": {
+      "sector": "終端設備",
+      "sub_sector": "筆電/桌機"
+    },
+    "2312": {
+      "sector": "終端設備",
+      "sub_sector": "電腦週邊"
+    },
+    "2474": {
+      "sector": "終端設備",
+      "sub_sector": "電腦週邊"
+    },
+    "2351": {
+      "sector": "電子零組件",
+      "sub_sector": "PCB"
+    },
+    "8383": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "4951": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6716": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6485": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6129": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5236": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6532": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5468": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "6568": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3527": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "5302": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "3372": {
+      "sector": "半導體",
+      "sub_sector": "IC設計"
+    },
+    "1595": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "5439": {
+      "sector": "半導體",
+      "sub_sector": "半導體設備材料"
+    },
+    "6174": {
+      "sector": "終端設備",
+      "sub_sector": "資訊服務"
+    },
+    "4915": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "8155": {
+      "sector": "電子零組件",
+      "sub_sector": "電源供應器"
+    },
+    "5498": {
+      "sector": "電子零組件",
+      "sub_sector": "連接器"
+    },
+    "5475": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "3689": {
+      "sector": "電子零組件",
+      "sub_sector": "被動元件"
+    },
+    "3550": {
+      "sector": "光電顯示",
+      "sub_sector": "光電"
+    },
+    "4163": {
+      "sector": "生技醫療",
+      "sub_sector": "醫材"
+    },
+    "9945": {
+      "sector": "其他",
+      "sub_sector": "建設營造"
+    },
+    "9933": {
+      "sector": "其他",
+      "sub_sector": "建設營造"
+    },
+    "2348": {
+      "sector": "其他",
+      "sub_sector": "建設營造"
+    }
   }
 }
