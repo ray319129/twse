@@ -684,6 +684,22 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     with open(docs_dir / "dates.json", "w", encoding="utf-8") as f:
         json.dump(dates, f, ensure_ascii=False)
 
+    # 族群熱力圖資料包(docs/heatmap.json):前端 ECharts Treemap 讀這一包
+    heatmap_stocks = [
+        {
+            "id": s["stock_id"],
+            "n":  s.get("name", ""),
+            "ind": s.get("industry", ""),
+            "chg": s.get("change_pct"),
+            "r20": s.get("ret20_pct"),
+            "sc":  round(float(s.get("score") or 0), 1),
+            "vol": max(float(s.get("dollar_vol_m") or 1), 1),
+        }
+        for s in scored
+    ]
+    with open(docs_dir / "heatmap.json", "w", encoding="utf-8") as f:
+        json.dump({"date": today.isoformat(), "stocks": heatmap_stocks}, f, ensure_ascii=False)
+
     # 個股健檢(Stock Health)改為純即時查詢(api/health.py),不在批次流程內跑。
 
     # events 已於 data.json 寫入前算好(見上),email ctx 沿用同一份。

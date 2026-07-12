@@ -499,6 +499,7 @@
     <button class="tab" data-p="watchlist" role="tab" aria-selected="false" aria-controls="p-watchlist">自選池</button>
     <button class="tab" data-p="port" role="tab" aria-selected="false" aria-controls="p-port">我的持倉</button>
     <button class="tab" data-p="health" role="tab" aria-selected="false" aria-controls="p-health">個股健檢</button>
+    <button class="tab" data-p="heatmap" role="tab" aria-selected="false" aria-controls="p-heatmap">族群熱力圖</button>
     <button class="tab" data-p="perf" role="tab" aria-selected="false" aria-controls="p-perf">歷史追蹤與績效</button>
   </div>
 
@@ -509,10 +510,25 @@
   <div class="panel" id="p-watchlist" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-port" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-health" role="tabpanel" tabindex="0"></div>
+  <div class="panel" id="p-heatmap" role="tabpanel" tabindex="0">
+    <div class="hm-toolbar">
+      <div class="hm-toggle">
+        <button id="hm-btn-chg" class="hm-toggle-btn active" onclick="setHmMode('chg')">今日漲跌</button>
+        <button id="hm-btn-r20" class="hm-toggle-btn" onclick="setHmMode('r20')">20日動能</button>
+      </div>
+      <span class="muted" style="font-size:12px" id="hm-date-label"></span>
+      <div style="flex:1"></div>
+      <span class="muted" style="font-size:11px">方塊大小＝日均成交額・點族群下鑽・點個股查摘要</span>
+    </div>
+    <div id="heatmap-chart"></div>
+  </div>
   <div class="panel" id="p-perf" role="tabpanel" tabindex="0"></div>
 
   <div class="foot-note">資料每個交易日由 GitHub Actions 自動更新 · 本頁為條件排序結果,非投資建議</div>
 </div>
+
+<!-- 族群熱力圖個股摘要 popup -->
+<div id="hm-popup" class="hm-popup" onclick="if(event.target===this)this.classList.remove('active')"></div>
 
 <!-- 個股詳情頁 overlay 樣式 -->
 <style>
@@ -634,6 +650,35 @@
   .port-held-banner{background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:var(--radius-xs);
     padding:9px 12px;margin:0 0 12px;font-size:13px;color:var(--accent-ink);line-height:1.6;}
   @media(max-width:640px){.port-wrow .pw-l{flex-basis:38%;}.pin{max-width:calc(50% - 4px);}}
+
+  /* ============================================================
+     族群熱力圖
+     ============================================================ */
+  #heatmap-chart{width:100%;height:calc(100vh - 190px);min-height:480px;}
+  .hm-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .hm-toggle{display:flex;gap:4px;}
+  .hm-toggle-btn{padding:5px 14px;border-radius:var(--radius-xs);border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-2);cursor:pointer;font-size:12px;transition:all .15s;}
+  .hm-toggle-btn:hover{border-color:var(--accent-line);}
+  .hm-toggle-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .hm-popup{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:1200;
+    display:none;align-items:center;justify-content:center;}
+  .hm-popup.active{display:flex;}
+  .hm-popup-inner{background:var(--surface);border-radius:var(--radius);padding:22px 22px 18px;
+    min-width:260px;max-width:340px;width:90%;box-shadow:var(--shadow-lg);position:relative;}
+  .hm-popup-close{position:absolute;top:12px;right:14px;background:none;border:none;cursor:pointer;
+    color:var(--muted);font-size:18px;line-height:1;padding:0;}
+  .hm-popup-close:hover{color:var(--ink);}
+  .hm-popup-head{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:2px;}
+  .hm-popup-sub{font-size:11.5px;color:var(--muted);margin-bottom:14px;}
+  .hm-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .hm-stat{background:var(--surface-2);border-radius:var(--radius-xs);padding:8px 12px;}
+  .hm-stat-lbl{font-size:10.5px;color:var(--muted);display:block;margin-bottom:2px;}
+  .hm-stat-val{font-size:15px;font-weight:700;color:var(--ink);}
+  .hm-detail-btn{display:block;text-align:center;padding:9px;background:var(--accent-bg);
+    color:var(--accent-ink);border-radius:var(--radius-xs);text-decoration:none;
+    font-size:13px;font-weight:600;border:1px solid var(--accent-line);}
+  .hm-detail-btn:hover{background:var(--accent);color:#fff;}
 </style>
 <!-- 個股詳情頁圖表用 ECharts(PyEcharts 的 JS 本體);只在使用者點開個股時才需要 -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
@@ -1980,6 +2025,154 @@ function renderHealthTab(){
 }
 
 /* ============================================================
+   族群熱力圖
+   ============================================================ */
+let _hmChart=null,_hmData=null,_hmSM=null,_hmMode='chg',_hmReady=false;
+
+async function initHeatmap(){
+  if(_hmReady)return;
+  const panel=$('#p-heatmap');
+  try{
+    const [hm,sm]=await Promise.all([
+      fetch('./heatmap.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}),
+      fetch('./sector_map.json').then(r=>r.json()),
+    ]);
+    _hmData=hm;_hmSM=sm;_hmReady=true;
+    const lbl=$('#hm-date-label');
+    if(lbl&&hm.date)lbl.textContent='資料日期 '+hm.date;
+    renderHeatmap();
+  }catch(e){
+    if(panel)panel.innerHTML='<div class="hm-toolbar"></div><div class="empty" style="padding:60px 0;font-size:14px">族群熱力圖尚無資料，請先執行每日掃描以產生 heatmap.json</div>';
+  }
+}
+
+function _hmLerp(a,b,t){
+  const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const [ar,ag,ab]=p(a),[br,bg,bb]=p(b);
+  return '#'+[ar+(br-ar)*t,ag+(bg-ag)*t,ab+(bb-ab)*t].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+}
+function _hmColor(v,maxAbs){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  const neutral=dark?'#1e2840':'#dde2ec';
+  const gUp=dark?'#34d27e':'#0f9d58',gDn=dark?'#ff5c63':'#e0383e';
+  if(v==null)return neutral;
+  const t=Math.min(1,Math.abs(v)/maxAbs);
+  return v>=0?_hmLerp(neutral,gUp,t):_hmLerp(neutral,gDn,t);
+}
+
+function _buildHmTree(stocks,sm,mode){
+  const ov=sm._override||{},im=sm._industry_map||{};
+  const secs={};
+  for(const s of stocks){
+    const o=ov[s.id];
+    let sec,sub;
+    if(o){sec=o.sector;sub=o.sub_sector;}
+    else{const m=im[s.ind];sec=m?m.sector:'其他';sub=m?m.sub_sector:(s.ind||'其他');}
+    if(!secs[sec])secs[sec]={};
+    if(!secs[sec][sub])secs[sec][sub]=[];
+    const val=mode==='chg'?s.chg:s.r20;
+    const disp=val!=null?(val>=0?'+':'')+val.toFixed(1)+'%':'-';
+    secs[sec][sub].push({
+      name:s.id,
+      value:Math.max(s.vol||1,1),
+      itemStyle:{color:_hmColor(val,mode==='chg'?6:20)},
+      label:{show:true,formatter:()=>s.id+'\n'+disp,fontSize:10,lineHeight:14,color:'rgba(255,255,255,.92)'},
+      _s:s,_sub:sub,_sec:sec,
+    });
+  }
+  const sortV=c=>c.reduce((s,x)=>s+x.value,0);
+  const result=[];
+  for(const[sec,subs]of Object.entries(secs)){
+    const children=Object.entries(subs)
+      .map(([sub,items])=>({name:sub,children:items.sort((a,b)=>b.value-a.value)}))
+      .sort((a,b)=>sortV(b.children)-sortV(a.children));
+    result.push({name:sec,children});
+  }
+  return result.sort((a,b)=>{
+    const v=x=>x.children.reduce((s,c)=>s+sortV(c.children),0);
+    return v(b)-v(a);
+  });
+}
+
+function renderHeatmap(){
+  const el=$('#heatmap-chart');
+  if(!el||!_hmData||!_hmSM)return;
+  if(!_hmChart){
+    _hmChart=echarts.init(el,null,{renderer:'canvas'});
+    _hmChart.on('click',params=>{if(params.data&&params.data._s)_showHmPopup(params.data);});
+    new ResizeObserver(()=>_hmChart&&_hmChart.resize()).observe(el);
+  }
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  const ink=dark?'#eef2f8':'#0d1424';
+  const surf=dark?'#1c2436':'#ffffff';
+  _hmChart.setOption({
+    animation:false,
+    backgroundColor:'transparent',
+    series:[{
+      type:'treemap',
+      data:_buildHmTree(_hmData.stocks,_hmSM,_hmMode),
+      roam:false,
+      nodeClick:'zoomToNode',
+      width:'100%',height:'100%',
+      squareRatio:0.7,
+      breadcrumb:{
+        show:true,bottom:6,height:26,
+        itemStyle:{color:surf,borderColor:'transparent',shadowColor:'transparent',textStyle:{color:ink,fontSize:12}},
+        emphasis:{itemStyle:{color:surf,textStyle:{color:ink}}},
+      },
+      levels:[
+        {// 大族群
+          itemStyle:{borderWidth:6,borderColor:dark?'#0a0e17':'#f4f6f9',gapWidth:6},
+          upperLabel:{show:true,color:'#fff',fontWeight:'bold',fontSize:13,height:26},
+          label:{show:false},
+        },
+        {// 子族群
+          itemStyle:{borderWidth:3,borderColor:dark?'#0a0e17':'#f4f6f9',gapWidth:3},
+          upperLabel:{show:true,color:'rgba(255,255,255,.85)',fontSize:11,height:20},
+          label:{show:false},
+        },
+        {// 個股
+          itemStyle:{borderWidth:1,borderColor:'rgba(0,0,0,.2)',gapWidth:1},
+          upperLabel:{show:false},
+          label:{show:true,color:'rgba(255,255,255,.92)',fontSize:10,lineHeight:14,overflow:'truncate'},
+        },
+      ],
+    }],
+  });
+}
+
+function setHmMode(mode){
+  _hmMode=mode;
+  [$('#hm-btn-chg'),$('#hm-btn-r20')].forEach(b=>{if(b)b.classList.toggle('active',b.id==='hm-btn-'+mode);});
+  if(_hmReady)renderHeatmap();
+}
+
+function _showHmPopup(node){
+  const s=node._s,sub=node._sub,sec=node._sec;
+  const fmtV=(v,d=2)=>v==null?'-':((v>=0?'+':'')+v.toFixed(d)+'%');
+  const cl=v=>v==null?'flat':v>0?'up':v<0?'down':'flat';
+  const pop=$('#hm-popup');if(!pop)return;
+  pop.innerHTML=`<div class="hm-popup-inner">
+    <button class="hm-popup-close" onclick="$('#hm-popup').classList.remove('active')">✕</button>
+    <div class="hm-popup-head">${esc(s.n||s.id)} <span class="muted" style="font-size:12px;font-weight:400">${esc(s.id)}</span></div>
+    <div class="hm-popup-sub">${esc(sec)} › ${esc(sub)}</div>
+    <div class="hm-popup-grid">
+      <div class="hm-stat"><span class="hm-stat-lbl">今日漲跌</span><span class="hm-stat-val ${cl(s.chg)}">${fmtV(s.chg)}</span></div>
+      <div class="hm-stat"><span class="hm-stat-lbl">20日動能</span><span class="hm-stat-val ${cl(s.r20)}">${fmtV(s.r20,1)}</span></div>
+      <div class="hm-stat"><span class="hm-stat-lbl">信心分</span><span class="hm-stat-val">${s.sc!=null?s.sc.toFixed(0):'-'}</span></div>
+      <div class="hm-stat"><span class="hm-stat-lbl">日均成交額</span><span class="hm-stat-val">${isNum(s.vol)?num(s.vol,0)+' M':'-'}</span></div>
+    </div>
+    <a class="hm-detail-btn" href="#stock=${encodeURIComponent(s.id)}"
+       onclick="$('#hm-popup').classList.remove('active');openDetail('${esc(s.id)}');return false;">查看個股詳情 →</a>
+  </div>`;
+  pop.classList.add('active');
+}
+
+/* 主題切換時重繪熱力圖 */
+const _origApplyTheme=window.applyThemeLabel;
+window.applyThemeLabel=function(){if(_origApplyTheme)_origApplyTheme();if(_hmReady)renderHeatmap();};
+
+/* ============================================================
    tabs / 載入
    ============================================================ */
 function activateTab(p){
@@ -1988,6 +2181,7 @@ function activateTab(p){
   if(p==='live')startLivePoll();else stopLivePoll();
   if(p==='dash')loadDashLive();
   if(p==='health'&&!HEALTH_TAB_INIT){HEALTH_TAB_INIT=true;renderHealthTab();}
+  if(p==='heatmap')initHeatmap();
 }
 (function wireTabs(){
   const tabs=[...document.querySelectorAll('.tab')];
