@@ -78,6 +78,7 @@ GitHub Pages (Settings→Pages: main /docs) → docs/index.html 讀 docs/data.js
 - **sticky `<th>`**:`position:sticky` 在非捲動容器會讓表頭浮到資料中間錯位。已移除。
 - **merge conflict markers**:本專案歷史曾被 `<<<<<<<` 衝突標記汙染整段函式;改檔後務必 `python -m py_compile scripts/*.py` 驗證。
 - **enrich 資料抓取順序**(2026-07-07 修 Bug 1):`_enrich_pick` 必須「先抓籌碼/財報,再呼叫 `screen_stock`」。若 `screen_stock` 在前,D 籌碼類/E 基本面類與**全部 combos 永遠 False**(2026-07-06 審查:11 天 355 檔命中 0 次)。加策略時別把資料抓取搬回 screen 之後。
+- **yfinance 颱風假/補假 volume=0 假K棒(2026-07-13 修)**:yfinance 對台股非交易日(颱風假 7/10 驗證)會回填 `close=前收、volume=0` 的假K棒。若未過濾:①`_is_trading_day` 看到 `inc.max=假日` ≠ today → 整天誤判非交易日跳出;②假K棒進 parquet 稀釋 `vol_ma5`/`vol_ratio`/均量指標。已在 `fetch_price_history` 與 `fetch_index_history` 加 `df[volume > 0]` 過濾,同樣原理的假日皆自動排除。
 - **量比分母別含今日**(2026-07-07 修 Bug 2):`vol_ratio` 分母用 `vol_ma5.shift(1)`(前 5 日均量)。含今日會稀釋自己的分母、數學上限被壓到 5.0,系統性低估爆量。`vol_ma5`/`vol_ma20`(兩均量比值)維持含今日不受影響。
 - **籌碼合併用 combine_first + 重疊回補**(2026-07-07 修 Bug 3):三大法人(~16:00)/融資券(~21:00)/外資持股(隔日)出表時間差 → 當天跑那列後兩者是 NaN。`upsert_chips` 用 `combine_first`(新 NaN 不覆蓋舊值)、`_update_chips` 從 `last-4d` 重疊回補,否則缺洞永久補不回。外資 30 日變化一律用「日期差」不用「位置差」(序列有洞位置差會飄到 40~60 天)。
 
