@@ -409,3 +409,76 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 - **根因鏈**:①純技術訊號 edge razor-thin(逐筆 +0.16%/超額 −0.53%)②集中到 3~5 檔=高變異小樣本,且實測高分票子集比平均更差(呼應信心分四分位非單調)③多頭段裡「有時空手擺現金」對always-invested指數天生落後(cash drag)④換股成本。
 - **對使用者的誠實建議**:以這段資料+扣成本,機械式交易這套**打不贏直接買 0050/TWII**、還多吞回撤。可行方向:(a)把選股當**研究靈感/觀察清單**、自己判斷,別機械全買;(b)資金主體擺指數,只用一小 sleeve 交易 1~2 檔高信心;(c)真要做,槓桿在**選股層本身**(唯一有超額的地方)不是換股/執行。**雙面誠實**:這是單一多頭段+倖存者偏誤;空頭裡指數也會 −20%+、有停損的系統『可能』反而保本更好——但憑現有證據,打不贏指數。
 - **未 commit 前狀態**:`data/backtest_portfolio.json` 為修正後結果快照。
+
+---
+
+## 15. 族群熱力圖(2026-07-13 新增)— Finviz 式三層 Treemap,新分頁
+
+起因:使用者要「盤前選股/盤中監控雙用」的族群熱力圖,不靠任何名單、光看熱力圖決定今天看哪幾個族群再去撈個股。
+
+### 功能概述
+- **視覺風格**:Finviz 式方塊 treemap(大方塊=族群、小方塊=個股),直接複用已有的 ECharts 5.5.1。
+- **三層下鑽**:`nodeClick:'zoomToNode'` + breadcrumb:大族群(12個) → 子族群(42個) → 個股(~880檔)。
+- **方塊大小**:`dollar_vol_m`(日均成交額,百萬),市值代理,越熱越大。
+- **顏色切換**:工具列 toggle 按鈕:
+  - **今日漲跌**(預設):±6% 映射到紅/綠,中性灰。
+  - **20日動能**(`ret20_pct`):±20% 映射到紅/綠。
+- **個股方塊內容**:股票代號 + 今日漲跌% + 評分(sc)。
+- **點擊行為**:
+  - 點族群/子族群 → ECharts 原生下鑽。
+  - 點個股 → 快速摘要 popup(今日漲跌/20日動能/信心分/日均成交額/子族群路徑)+ 「查看詳情」連結跳個股詳情頁。
+- **主題感知**:亮/暗主題切換後重渲。
+
+### 新增檔案
+
+**`docs/sector_map.json`**:族群對照表,兩層結構:
+- `_industry_map`:TWSE 官方 46 個產業類別 → `{sector, sub_sector}` 預設映射。
+- `_override`:130 個股 ID → `{sector, sub_sector}` 覆蓋(優先度高於 _industry_map)。
+- **12 個大族群**:半導體、AI/伺服器、電子零組件、光電顯示、終端設備、車用電動車、能源電力、金融、傳產、生技醫療、通訊網路、其他。
+- **42 個子族群**:晶圓代工/IC設計/封測/記憶體DRAM/化合物半導體/半導體設備材料/IC通路/散熱模組/伺服器品牌/ABF載板/PCB/被動元件/連接器/面板/觸控面板/光學零組件/工業電腦/筆電桌機/電力設備/電機機械/綠能環保/車用電子/金控/銀行/證券/塑化化工/鋼鐵/航運/紡織/食品飲料/材料/生技醫療/醫材/新藥研發/化學生技/網通設備/電信/數位雲端/建設營造/觀光/貿易百貨/其他。
+
+**`docs/heatmap.json`**:每日熱力圖資料包,由 `main.py` 生成。格式:
+```json
+{"date": "YYYY-MM-DD", "stocks": [
+  {"id": "2330", "n": "台積電", "ind": "半導體業", "chg": 1.5, "r20": 15.2, "sc": 85.3, "vol": 12000.0}
+]}
+```
+`chg` = 今日漲跌%、`r20` = 20日動能%、`sc` = 信心分、`vol` = 日均成交額(百萬)、`ind` = TWSE 產業類別(前端用來查 sector_map)。
+
+⚠️ **目前 `heatmap.json` 只含 188 支從歷史訊號萃取的股票(測試資料)**,待下次 `main.py` 排程跑後才會產生完整 ~880 檔。
+
+### 修改檔案
+
+**`scripts/main.py`**(新增 heatmap.json 輸出):在 `dates.json` write 之後加一段,從 `scored`(全市場所有已評分股票)輸出 compact JSON:
+```python
+heatmap_stocks = [{"id":s["stock_id"],"n":s.get("name",""),"ind":s.get("industry",""),
+  "chg":s.get("change_pct"),"r20":s.get("ret20_pct"),"sc":round(float(s.get("score") or 0),1),
+  "vol":max(float(s.get("dollar_vol_m") or 1),1)} for s in scored]
+with open(docs_dir/"heatmap.json","w",encoding="utf-8") as f:
+    json.dump({"date":today.isoformat(),"stocks":heatmap_stocks},f,ensure_ascii=False)
+```
+`scored` 已含全市場 ~880 檔(含未進核心/觀察的),`ret20_pct`/`dollar_vol_m` 來自 `compute_conviction()`。
+
+**`docs/index.html`**(5 處修改):
+- Tab 按鈕(`data-p="heatmap"`)插入「個股健檢」與「歷史追蹤」之間。
+- Panel `#p-heatmap`:工具列(兩個 toggle 按鈕 + 資料日期 + 說明)+ `#heatmap-chart` div。
+- CSS:`.hm-toolbar`/`.hm-toggle-btn`/`.hm-popup`/`.hm-popup-inner`/`.hm-stat`/`.hm-detail-btn` 等。
+- Popup div `#hm-popup`(modal overlay,點外部關閉)。
+- JS 區塊:
+  - `initHeatmap()`:lazy(只第一次點 tab 才 fetch),平行抓 `heatmap.json` + `sector_map.json`。
+  - `_buildHmTree(stocks,sm,mode)`:依 `_override` 優先、`_industry_map` fallback 分群 → ECharts treemap data 格式;leaf 含顏色(RGB lerp)、label(代號+漲跌%)、`_s` 原始資料。
+  - `renderHeatmap()`:三層 level style(大族群 borderWidth 6/粗字、子族群 3、個股 1)、breadcrumb、ResizeObserver 響應式。
+  - `setHmMode(mode)`:切換今日/動能,更新 toggle active 狀態並重渲。
+  - `_showHmPopup(node)`:填 popup HTML,4 格統計 + detail 連結。
+  - applyThemeLabel hook:主題變換時重渲熱力圖。
+
+### 驗證結果(browser preview)
+- `hmReady:true`, stocks:188, chartExists:true。
+- 12 個大族群正確渲染。
+- 半導體下鑽:IC設計(26支)/晶圓代工(6)/封測(6)/半導體(9)/半導體設備材料(3)/IC通路(4)/化合物半導體(2)。
+- 今日漲跌 ↔ 20日動能 切換正常。
+- 點個股(2303)popup 開、四格數字正確、連結到詳情頁。
+
+### 下一步
+1. **等下次 `main.py` 排程跑完**,`heatmap.json` 才會從 188 支擴到完整 ~880 支(全市場)。不需手動介入。
+2. 若 `ind`(TWSE 產業類別)有新種類未在 `sector_map.json` 的 `_industry_map` 涵蓋,該股落入「其他」。有需要時可在 `_override` 或 `_industry_map` 補。
