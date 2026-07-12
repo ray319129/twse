@@ -132,6 +132,10 @@ def fetch_price_history(stock_id: str, market: str, days: int = 400) -> pd.DataF
     # yfinance 有時對「剛收盤/未定」的最新一根回傳 NaN 收盤,丟掉(否則均線全毀、評分當掉)
     if "close" in df.columns:
         df = df[df["close"].notna()]
+    # yfinance 在台股休市日(颱風假/補假)填回 volume=0、close=前收的假 K 棒,必須排除:
+    # 1. _is_trading_day 若看到假K棒最新日 != today 會錯誤跳出; 2. 假K棒進 parquet 會汙染 vol_ratio/均量。
+    if "volume" in df.columns:
+        df = df[df["volume"] > 0]
     df.index.name = "date"
     df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     return df
@@ -159,6 +163,8 @@ def fetch_index_history(days: int = 400, ticker: str = "^TWII") -> pd.DataFrame:
     df = df[keep].copy()
     if "close" in df.columns:
         df = df[df["close"].notna()]
+    if "volume" in df.columns:
+        df = df[df["volume"] > 0]
     df.index.name = "date"
     df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     return df
