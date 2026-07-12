@@ -480,6 +480,17 @@ with open(docs_dir/"heatmap.json","w",encoding="utf-8") as f:
 - 今日漲跌 ↔ 20日動能 切換正常。
 - 點個股(2303)popup 開、四格數字正確、連結到詳情頁。
 
+### 2026-07-13 修正(颱風假後修資料 + 分類/顯示三項改進)
+
+**heatmap.json 重建(2026-07-13)**:原始 188 支測試資料混了多個不同日期(最早 6/22、最晚 7/9),今日漲跌全錯。以本機全量 1976 個 parquet 跑 `compute_conviction()` + `fetch_stock_info()` 重建,得 874 支(資料基準日 2026-07-09,為颱風假前最後一個交易日)。7/9 漲跌:漲 319/跌 515/平 40,符合該日市場實際偏空走勢。
+
+**sector_map.json 分類修正(2026-07-13)**:舊的 `_override` 僅 130 個,造成 70 支半導體被落入「半導體→半導體」同名 catch-all。增補 40 個 override(共 170 個),依成交額排序手動分類 IC 設計/封測/化合物半導體/記憶體 DRAM/半導體設備材料/IC 通路。catch-all 由 70 → 30,重點股驗證:8299 群聯→IC設計、2449 京元電子→封測、3105 穩懋→化合物半導體、3260 威剛→記憶體DRAM、6510 精測→半導體設備材料 全部正確。
+
+**docs/index.html 兩項顯示修正(2026-07-13)**:
+1. **個股方塊加股票名稱**:leaf label formatter 從 `s.id+'\n'+disp` 改成 `(s.n?s.n+'\n':'')+s.id+' '+disp`,塊夠大時顯示名稱+代號+漲跌%,加 `overflow:'truncate'`。
+2. **子族群 upperLabel 加深色背景**:原本 `upperLabel` 在淺色底上文字幾乎看不到。加 `backgroundColor:'rgba(0,0,0,0.45)', padding:[3,8], fontWeight:'bold', height:22`,讓子族群標題清晰可讀。
+
 ### 下一步
-1. **等下次 `main.py` 排程跑完**,`heatmap.json` 才會從 188 支擴到完整 ~880 支(全市場)。不需手動介入。
+1. 等下次 `main.py` 排程跑完,`heatmap.json` 會自動更新到最新交易日的 ~880 支全市場資料。不需手動介入。
 2. 若 `ind`(TWSE 產業類別)有新種類未在 `sector_map.json` 的 `_industry_map` 涵蓋,該股落入「其他」。有需要時可在 `_override` 或 `_industry_map` 補。
+3. 半導體 catch-all 仍剩 30 支(中小型),可依需求繼續補 override。

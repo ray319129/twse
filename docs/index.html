@@ -2076,7 +2076,7 @@ function _buildHmTree(stocks,sm,mode){
       name:s.id,
       value:Math.max(s.vol||1,1),
       itemStyle:{color:_hmColor(val,mode==='chg'?6:20)},
-      label:{show:true,formatter:()=>s.id+'\n'+disp,fontSize:10,lineHeight:14,color:'rgba(255,255,255,.92)'},
+      label:{show:true,formatter:()=>(s.n?s.n+'\n':'')+s.id+' '+disp,fontSize:10,lineHeight:14,color:'rgba(255,255,255,.92)',overflow:'truncate'},
       _s:s,_sub:sub,_sec:sec,
     });
   }
@@ -2128,7 +2128,8 @@ function renderHeatmap(){
         },
         {// 子族群
           itemStyle:{borderWidth:3,borderColor:dark?'#0a0e17':'#f4f6f9',gapWidth:3},
-          upperLabel:{show:true,color:'rgba(255,255,255,.85)',fontSize:11,height:20},
+          upperLabel:{show:true,color:'#fff',fontWeight:'bold',fontSize:11,height:22,
+            backgroundColor:'rgba(0,0,0,0.45)',padding:[3,8]},
           label:{show:false},
         },
         {// 個股

@@ -197,6 +197,51 @@
 
     "5904": {"sector": "其他",      "sub_sector": "貿易百貨"},
     "8936": {"sector": "其他",      "sub_sector": "其他"},
-    "2059": {"sector": "電子零組件","sub_sector": "連接器"}
+    "2059": {"sector": "電子零組件","sub_sector": "連接器"},
+
+    "8299": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "5274": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "6683": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "3529": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "6202": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "6788": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "8054": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "6104": {"sector": "半導體",    "sub_sector": "IC設計"},
+    "6643": {"sector": "半導體",    "sub_sector": "IC設計"},
+
+    "2449": {"sector": "半導體",    "sub_sector": "封測"},
+    "6147": {"sector": "半導體",    "sub_sector": "封測"},
+    "6271": {"sector": "半導體",    "sub_sector": "封測"},
+    "3264": {"sector": "半導體",    "sub_sector": "封測"},
+    "2369": {"sector": "半導體",    "sub_sector": "封測"},
+    "6789": {"sector": "半導體",    "sub_sector": "封測"},
+    "6548": {"sector": "半導體",    "sub_sector": "封測"},
+    "6693": {"sector": "半導體",    "sub_sector": "封測"},
+    "8110": {"sector": "半導體",    "sub_sector": "封測"},
+    "6187": {"sector": "半導體",    "sub_sector": "封測"},
+    "7712": {"sector": "半導體",    "sub_sector": "封測"},
+    "7751": {"sector": "半導體",    "sub_sector": "封測"},
+    "8088": {"sector": "半導體",    "sub_sector": "封測"},
+
+    "3105": {"sector": "半導體",    "sub_sector": "化合物半導體"},
+    "8086": {"sector": "半導體",    "sub_sector": "化合物半導體"},
+    "3265": {"sector": "半導體",    "sub_sector": "化合物半導體"},
+
+    "3260": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
+    "5351": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
+    "6531": {"sector": "半導體",    "sub_sector": "記憶體DRAM"},
+    "4973": {"sector": "半導體",    "sub_sector": "IC通路"},
+
+    "6515": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "6510": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "3131": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "3680": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "4749": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "8091": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "7734": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "5285": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "5443": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "6640": {"sector": "半導體",    "sub_sector": "半導體設備材料"},
+    "6208": {"sector": "半導體",    "sub_sector": "半導體設備材料"}
   }
 }
