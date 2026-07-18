@@ -296,7 +296,8 @@ def _chip_signal(chips: dict | None, cfg: dict) -> float | None:
 
 
 def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int,
-               industry_rank: dict[str, int] | None = None) -> list[dict]:
+               industry_rank: dict[str, int] | None = None,
+               risk_on: bool | None = None) -> list[dict]:
     """stage-2 重排:對已 enrich 的核心候選算 籌碼 + 基本面 + 新聞催化劑 + 產業相對強度 四種加成,
     全部併入 rank_score 後重排取前 core_count。原 score(信心分)語意不變;
     各加成可由 config 個別開關,無資料 → 該項 bonus 0(中性不扣分)。"""
@@ -342,6 +343,15 @@ def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int,
             n_combo = len(s.get("combos") or [])
             s["combo_bonus"] = round(min(n_combo * combo_per, combo_w), 1) if n_combo else 0.0
             bonus += s["combo_bonus"]
+        if (scoring_cfg.get("branch_bonus", {}) or {}).get("enabled", False):
+            # 券商分點逆向廣度(2026-07-18):擁擠買(廣度高)一律扣分;低廣度加分只在 risk-on 給
+            # ——弱盤時「分點在賣」的股是真的弱、不會反彈(見 branch.branch_signal 註解)。
+            from .branch import branch_signal
+            bcfg = scoring_cfg.get("branch_bonus", {}) or {}
+            bsig = branch_signal(s.get("branch_breadth"), risk_on, bcfg)
+            s["branch_signal"] = round(bsig, 2) if bsig is not None else None
+            s["branch_bonus"] = round(float(bcfg.get("weight", 10)) * (bsig or 0.0), 1)
+            bonus += s["branch_bonus"]
         if dt_cfg.get("enabled", False):
             # 當沖比過高扣分(3.4-2):當沖比 > thr → 隔日沖對手盤多、隔天賣壓重,線性扣到 penalty。
             dtr = s.get("day_trade_ratio")
@@ -585,8 +595,28 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     for s in core_candidates:
         _enrich_pick(s, today, index_close, fundamentals=True, news=True, screen_cfg=cfg, plan_cfg=plan_cfg)
 
-    # stage-2 加成(籌碼/基本面/催化劑/產業相對強度)後重排取核心;無資料 → 該項 bonus 0(中性不扣分);信心分 score 不變
-    core = _rank_core(core_candidates, scoring_cfg, core_count, industry_rank)
+    # ---------- 券商分點「逆向廣度」(2026-07-18):候選股各 1 次呼叫,平行 ----------
+    # ⚠️ 分點當晚 21:00 才發布。批次若在 21:00 前跑,查「今天」會回空 → 自然不加成(無副作用),
+    # 待批次改到 21:30 後才會真正生效。不用昨天的分點回填,以免用到過期籌碼。
+    branch_cfg = scoring_cfg.get("branch_bonus", {}) or {}
+    if branch_cfg.get("enabled", False) and core_candidates:
+        try:
+            from .branch import fetch_breadth_for
+            d_str = today.isoformat()
+            breadth = fetch_breadth_for([s["stock_id"] for s in core_candidates], d_str)
+            for s in core_candidates:
+                s["branch_breadth"] = breadth.get(s["stock_id"])
+            got = sum(1 for s in core_candidates if s.get("branch_breadth") is not None)
+            log.info(f"分點廣度:{got}/{len(core_candidates)} 檔取得({d_str})"
+                     + ("" if got else " —— 可能尚未到 21:00 發布時間,本次不加成"))
+        except Exception as e:
+            log.warning(f"分點廣度抓取失敗(略過該加成,不影響選股):{e}")
+
+    # stage-2 加成(籌碼/基本面/催化劑/產業相對強度/分點逆向)後重排取核心;無資料 → 該項 bonus 0(中性不扣分);信心分 score 不變
+    risk_on = None
+    if regime and isinstance(regime.get("risk_gate"), dict):
+        risk_on = regime["risk_gate"].get("state") == "risk_on"
+    core = _rank_core(core_candidates, scoring_cfg, core_count, industry_rank, risk_on=risk_on)
     # 新股獨立軌道:保留最多 new_max 個核心名額給新股(_rank_core 已對所有候選寫好 rank_score)。
     # 新股同樣須觸發+達門檻;若核心裡新股不足,用最佳新股替換核心中 rank_score 最低的老股(維持 core_count 不變)。
     if new_max and core:

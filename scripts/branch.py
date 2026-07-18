@@ -72,6 +72,76 @@ def fetch_branch_daily(stock_id: str, dates: list[str], max_workers: int = 8) ->
     return g.sort_values("date")
 
 
+def breadth_ratio_from_rows(rows: list[dict]) -> float | None:
+    """單一 (股票, 日) 的分點買賣「廣度比」= (買超家數 − 賣超家數) / 總家數,範圍 −1~+1。
+
+    為什麼用比例而非絕對家數:驗證時用的絕對 net_breadth 隨個股熱度/分點總數浮動很大,
+    跨個股無法比較;除以總家數後才是可跨股比較的「擁擠度」。
+
+    語意(已驗證,見 branch_validation):**比例越高 = 越多分點在買 = 越擁擠 = 後續越差**
+    (逆向訊號)。台股是反轉市場,連八大行庫買超都要 fade(validate_govbank 亦同向)。
+    """
+    if not rows:
+        return None
+    agg: dict[str, list[float]] = {}
+    for r in rows:
+        tid = r.get("securities_trader_id")
+        a = agg.setdefault(tid, [0.0, 0.0])
+        a[0] += float(r.get("buy") or 0)
+        a[1] += float(r.get("sell") or 0)
+    if not agg:
+        return None
+    nets = [b - s for b, s in agg.values()]
+    n_buy = sum(1 for x in nets if x > 0)
+    n_sell = sum(1 for x in nets if x < 0)
+    tot = n_buy + n_sell
+    if tot == 0:
+        return None
+    return (n_buy - n_sell) / tot
+
+
+def fetch_breadth_for(stock_ids: list[str], d: str, max_workers: int = 6) -> dict[str, float]:
+    """對一批候選股抓「當日」分點並算廣度比。回傳 {stock_id: ratio}(抓不到的不放進 dict)。
+
+    ⚠️ 分點當晚 21:00 才發布 —— 批次若在 21:00 前跑,這裡拿到的是**昨天**的分點。
+    逐檔各 1 次呼叫(候選約 30 檔 → 30 次),平行後數秒。失敗個股略過,不影響其他。
+    """
+    if not stock_ids:
+        return {}
+    from concurrent.futures import ThreadPoolExecutor
+    out: dict[str, float] = {}
+
+    def one(sid: str):
+        try:
+            return sid, breadth_ratio_from_rows(_fetch_one_day(sid, d))
+        except Exception:
+            return sid, None
+
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(stock_ids))) as ex:
+        for sid, r in ex.map(one, stock_ids):
+            if r is not None:
+                out[sid] = r
+    return out
+
+
+def branch_signal(breadth: float | None, risk_on: bool | None, cfg: dict | None = None) -> float | None:
+    """把廣度比轉成 stage-2 加成訊號(−1~+1),直接編碼已驗證的多空 regime 差異。
+
+    驗證結論([[twse-branch-factor-validated]]):
+      · **Q4「一窩蜂買」= 最差,且強盤弱盤都成立** → 擁擠買**一律扣分**(regime-robust 的半邊)。
+      · **Q1「低廣度/分點在賣」= 最好,但只在強盤成立**;弱盤時 Q1 執行淨 −1.66% 反而最差
+        → 低廣度加分**只在 risk-on 時給**,risk-off/未知時把正訊號夾成 0(只留扣分)。
+    """
+    if breadth is None:
+        return None
+    cfg = cfg or {}
+    sig = -float(breadth)                     # 廣度越高(越擁擠)→ 訊號越負
+    if sig > 0 and not risk_on:               # 逆向「加分」那半邊只在順風時採用
+        sig = 0.0
+    lo = float(cfg.get("clamp_lo", -1.0)); hi = float(cfg.get("clamp_hi", 1.0))
+    return max(lo, min(hi, sig))
+
+
 def _reversal_score(sub: pd.DataFrame) -> float | None:
     """該分點在這檔股票的「今買明賣」程度:取淨額序列的 lag-1 相關係數的負值。
     越接近 +1 = 買完隔天就倒(典型隔日沖);≈0 = 無此規律;<0 = 買了會續買(波段)。
