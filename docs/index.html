@@ -711,6 +711,21 @@
   .mood-val{font-size:13px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums;}
   .mood-sub{display:none;font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.6;}
   .mood-r.open .mood-sub{display:block;}
+  .mk-meta{font-size:11px;color:var(--muted-2);margin-bottom:7px;}
+  .mk-head{display:grid;grid-template-columns:16px 1fr 68px 74px;gap:8px;font-size:10.5px;
+    color:var(--muted-2);font-weight:700;padding:0 2px 5px;border-bottom:1px solid var(--line);}
+  .mk-head .r{text-align:right;}
+  .mk-row{display:grid;grid-template-columns:16px 1fr 68px 74px;gap:8px;align-items:center;
+    padding:5px 2px;border-bottom:1px solid var(--line-soft);}
+  .mk-row:last-child{border-bottom:none;}
+  .mk-k{display:flex;align-items:center;justify-content:center;}
+  .mk{display:block;overflow:visible;}
+  .mk-e{display:inline-block;width:9px;height:26px;}
+  .mk-nm{display:flex;align-items:baseline;gap:6px;min-width:0;font-size:12px;color:var(--ink-2);}
+  .mk-nm b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mk-id{font-size:10.5px;color:var(--muted-2);}
+  .mk-p,.mk-c{text-align:right;font-size:12px;font-variant-numeric:tabular-nums;}
+  .mk-c{font-weight:700;}
   @media(max-width:640px){.mood-main{grid-template-columns:1fr 64px 52px;}.mood-bar{display:none;}}
   .hm-toggle{display:flex;gap:4px;}
   .hm-toggle-btn{padding:5px 14px;border-radius:var(--radius-xs);border:1px solid var(--line);
@@ -2337,19 +2352,46 @@ function moodAgg(stocks,sm,level){
   }
   return out.sort((a,b)=>b.mood-a.mood);
 }
+/* 迷你 K 棒:用最後一根的 [開,高,低,收] 畫「實體+上下影線」,一眼看出當日型態
+   (長紅/長黑/十字/上影線=衝高被壓…)。無 OHLC 就回空字串,不畫佔位。 */
+function miniK(k){
+  if(!Array.isArray(k)||k.length<4||!k.every(isNum))return '<span class="mk-e"></span>';
+  const [o,h,l,c]=k, span=h-l;
+  const W=9,H=26,cx=W/2;
+  if(!(span>0)){                                   /* 一字板(開高低收同價) */
+    return `<svg class="mk" width="${W}" height="${H}"><line x1="1" y1="${H/2}" x2="${W-1}" y2="${H/2}" stroke="${c>=o?'var(--up)':'var(--down)'}" stroke-width="2"/></svg>`;
+  }
+  const y=v=>1+(H-2)*(1-(v-l)/span);
+  const up=c>=o, col=up?'var(--up)':'var(--down)';
+  const yo=y(o),yc=y(c),top=Math.min(yo,yc),bh=Math.max(1.5,Math.abs(yc-yo));
+  return `<svg class="mk" width="${W}" height="${H}" aria-hidden="true">
+    <line x1="${cx}" y1="${y(h)}" x2="${cx}" y2="${y(l)}" stroke="${col}" stroke-width="1"/>
+    <rect x="1.5" y="${top}" width="${W-3}" height="${bh}" fill="${up?col:'none'}" stroke="${col}" stroke-width="1.2"/>
+  </svg>`;
+}
 function _moodRow(r,i){
   const col=r.mood>=0?'var(--up-ink)':'var(--down-ink)';
   const w=Math.min(100,Math.abs(r.mood)/50*100);
-  const top=r.stocks.slice().sort((a,b)=>(b.chg||0)-(a.chg||0)).slice(0,5)
-    .map(s=>`${slink(s.id)} <span class="${cls(s.chg)}">${fmt(s.chg)}%</span>`).join('・');
-  return `<div class="mood-r" onclick="this.classList.toggle('open')">
+  /* 成分股:依漲跌幅排序,列出 名稱/代號、股價、漲跌幅、最後一根K棒型態 */
+  const list=r.stocks.slice().sort((a,b)=>(b.chg==null?-1e9:b.chg)-(a.chg==null?-1e9:a.chg))
+    .map(s=>`<div class="mk-row">
+        <div class="mk-k">${miniK(s.k)}</div>
+        <div class="mk-nm"><b>${esc(s.n||'')}</b><span class="mk-id">${slink(s.id)}</span></div>
+        <div class="mk-p num">${s.p==null?'—':num(s.p)}</div>
+        <div class="mk-c num ${cls(s.chg)}">${fmt(s.chg)}%</div>
+      </div>`).join('');
+  return `<div class="mood-r" onclick="if(!event.target.closest('a'))this.classList.toggle('open')">
     <div class="mood-main">
       <div class="mood-nm"><span class="mood-rk">${i+1}</span>${esc(r.name)}<span class="mood-cnt">${r.n}</span></div>
       <div class="mood-num ${cls(r.chg)}">${fmt(r.chg)}%</div>
       <div class="mood-bar"><span style="width:${w}%;background:${col}"></span></div>
       <div class="mood-val" style="color:${col}">${r.mood>=0?'+':''}${r.mood.toFixed(1)}</div>
     </div>
-    <div class="mood-sub">上漲 ${r.up}/${r.n} 檔・20日 <span class="${cls(r.r20)}">${fmt(r.r20,1)}%</span>　·　領漲:${top}</div>
+    <div class="mood-sub">
+      <div class="mk-meta">上漲 ${r.up}/${r.n} 檔・20日 <span class="${cls(r.r20)}">${fmt(r.r20,1)}%</span></div>
+      <div class="mk-head"><span></span><span>名稱 / 代號</span><span class="r">股價</span><span class="r">漲跌幅</span></div>
+      ${list}
+    </div>
   </div>`;
 }
 let _moodTab=null;

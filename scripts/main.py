@@ -295,6 +295,21 @@ def _chip_signal(chips: dict | None, cfg: dict) -> float | None:
     return sum(parts) / len(parts)
 
 
+def _last_ohlc(df) -> list | None:
+    """最後一根 K 棒的 [開, 高, 低, 收](原始成交價,四捨五入 2 位)。
+    供市場氛圍列表畫迷你 K 棒型態(紅/綠實體 + 上下影線)。任一欄缺或 NaN → None(前端不畫)。"""
+    try:
+        if df is None or len(df) == 0:
+            return None
+        last = df.iloc[-1]
+        vals = [last.get(c) for c in ("open", "high", "low", "close")]
+        if any(v is None or pd.isna(v) for v in vals):
+            return None
+        return [round(float(v), 2) for v in vals]
+    except Exception:
+        return None
+
+
 def _rank_core(candidates: list[dict], scoring_cfg: dict, core_count: int,
                industry_rank: dict[str, int] | None = None,
                risk_on: bool | None = None) -> list[dict]:
@@ -517,6 +532,9 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
                 "close": float(close_disp) if pd.notna(close_disp) else None,   # 顯示用原始成交價
                 "change_pct": chg,
                 "valuation": valuation_snapshot.get(sid, {}),
+                # 最後一根 K 棒(原始價,顯示用)—— 市場氛圍展開族群成分股時畫迷你 K 棒型態。
+                # 取 compute_all 之前的 df(未被還原價等比例縮放),才與使用者在券商看到的一致。
+                "last_ohlc": _last_ohlc(df),
             })
             scored.append(conv)
 
@@ -745,6 +763,8 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "a20": 1 if (_ind_flags.get(s["stock_id"]) or {}).get("above_ma20") else 0,
             "a60": 1 if (_ind_flags.get(s["stock_id"]) or {}).get("above_ma60") else 0,
             "bl":  1 if (_ind_flags.get(s["stock_id"]) or {}).get("bullish") else 0,
+            "p":   s.get("close"),          # 股價(顯示用原始成交價)
+            "k":   s.get("last_ohlc"),      # 最後一根 K 棒 [開,高,低,收] → 前端畫迷你 K 棒型態
         }
         for s in scored
     ]
