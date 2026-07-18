@@ -25,6 +25,21 @@
   {% endif %}
 </div>
 
+{# 風險狀態提示(2026-07-18):指數長均線 + 期貨法人未平倉。整合回測顯示「指數>60MA 且法人偏多」
+   的日子選股平均淨 +0.58%/筆,不分日子則 −0.40%。只提示不過濾 —— 名單照常給,判斷權在使用者。 #}
+{% if market_regime and market_regime.risk_gate %}{% set rg = market_regime.risk_gate %}
+{% set rgc = {'risk_on':('#27ae60','#eafaf1','🟢'),'risk_off':('#c0392b','#fdecea','🔴'),'mixed':('#e67e22','#fff6e9','🟡')} %}
+{% set rgi = rgc.get(rg.state, rgc['mixed']) %}
+<div style="background:{{ rgi[1] }};border:1px solid {{ rgi[0] }}33;border-left:3px solid {{ rgi[0] }};padding:11px 15px;border-radius:6px;margin-bottom:16px;">
+  <strong style="color:{{ rgi[0] }};">{{ rgi[2] }} 風險狀態:{{ rg.label }}</strong>
+  <div style="color:#333;font-size:13px;margin-top:5px;line-height:1.6;">{{ rg.text }}</div>
+  <div style="color:#888;font-size:11.5px;margin-top:5px;">
+    指數 {{ '{:,.0f}'.format(rg.index_last) }} vs {{ rg.ma_long }}MA {{ '{:,.0f}'.format(rg.index_ma) }}{% if rg.fut_ok is not none %} · 期貨法人未平倉偏{{ '多' if rg.fut_ok else '空' }}{% endif %}
+    　·　僅為風險提示,不影響選股名單
+  </div>
+</div>
+{% endif %}
+
 {% if events and events.events %}
 {% set ebg = '#fdecea' if events.has_high else '#eef6ff' %}
 {% set ebd = '#f5c6cb' if events.has_high else '#cfe2ff' %}

@@ -818,7 +818,22 @@ function renderDash(){
       <div class="ks">${isNum(es.avg_hold_days)?`平均持有 ${es.avg_hold_days} 日`:'隔日開盤模擬進場'}</div>
     </div></div>`;
 
-  /* ----- market regime hero ----- */
+  /* ----- market regime hero(含 2026-07-18 加的「風險狀態」提示)----- */
+  // risk_gate 來自含 2022 空頭的整合回測:同一批選股在「指數>60MA 且 期貨法人未平倉偏多」的
+  // 日子平均淨 +0.58%/筆,不分日子則 −0.40%。刻意只提示、不過濾(不藏推薦、判斷權留給使用者)。
+  const rg=(d.market_regime||{}).risk_gate;
+  const rgStyle={risk_on:['var(--up-ink)','var(--up-bg)','var(--up-line)','🟢'],
+                 risk_off:['var(--down-ink)','var(--down-bg)','var(--down-line)','🔴'],
+                 mixed:['var(--warn)','var(--surface-3)','var(--line)','🟡']};
+  const rgHtml=rg?(()=>{const [ink,bg,bd,ic]=rgStyle[rg.state]||rgStyle.mixed;
+    return `<div style="background:${bg};border:1px solid ${bd};border-left:3px solid ${ink};
+        border-radius:10px;padding:10px 13px;margin-top:12px;">
+      <div style="font-size:12.5px;font-weight:800;color:${ink};">${ic} 風險狀態:${esc(rg.label)}</div>
+      <div style="font-size:11.5px;color:var(--ink-2);margin-top:5px;line-height:1.6;">${esc(rg.text)}</div>
+      <div style="font-size:10.5px;color:var(--muted-2);margin-top:5px;">
+        指數 ${num(rg.index_last)} vs ${rg.ma_long}MA ${num(rg.index_ma)}${rg.fut_ok==null?'':' · 期貨法人未平倉偏'+(rg.fut_ok?'多':'空')}
+        　·　僅為風險提示,不影響選股名單</div>
+    </div>`;})():'';
   const regimeHtml=`<div class="panelcard">
     <div class="pc-h">市場狀態 <span class="lk" data-go="core">看核心精選 →</span></div>
     <div class="regime">
@@ -828,6 +843,7 @@ function renderDash(){
         <div class="rd">${bull?'指數位於 20 日均線之上,趨勢偏多,系統正常輸出核心標的。':'指數跌破 20 日均線,趨勢轉弱。寧缺勿濫、嚴設停損、降低部位。'}</div>
       </div>
     </div>
+    ${rgHtml}
   </div>`;
 
   /* ----- top picks (rank_score order) ----- */

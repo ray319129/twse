@@ -28,7 +28,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
-from .market import compute_market_regime
+from .market import compute_market_regime, compute_risk_gate
 from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
 from .catalyst import classify_catalysts, catalyst_score
@@ -531,6 +531,21 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         prefer_pb = bool(regime.get("prefer_pullback"))
         log.info(f"大盤閘門:{regime['level_label']}(votes={regime['votes']})"
                  f" → core_count={core_count}, min_score={min_score}, 弱盤偏好回測={prefer_pb}")
+
+    # ---------- 風險狀態提示(2026-07-18):指數長均線 + 期貨法人未平倉。只提示、不過濾 ----------
+    # 整合回測顯示同一批選股在「指數>60MA 且 法人偏多」的日子平均淨 +0.58%/筆,不分日子則 −0.40%。
+    # 刻意不做硬過濾(見 compute_risk_gate 註解)。抓不到期貨資料 → 只用指數均線,不影響主流程。
+    try:
+        from .fetchers import fetch_futures_inst_net_oi
+        fut_oi = fetch_futures_inst_net_oi(days=120)
+        risk_gate = compute_risk_gate(index_close, fut_oi)
+        if risk_gate and regime is not None:
+            regime["risk_gate"] = risk_gate
+            log.info(f"風險狀態:{risk_gate['label']}({risk_gate['state']}) "
+                     f"指數{'>' if risk_gate['trend_ok'] else '<'}{risk_gate['ma_long']}MA, "
+                     f"法人未平倉偏{'多' if risk_gate.get('fut_ok') else '空' if risk_gate.get('fut_ok') is False else '?'}")
+    except Exception as e:
+        log.warning(f"風險狀態提示計算失敗(略過,不影響選股):{e}")
 
     # ---------- 排序 → 候選池 →(stage-2 重排:籌碼+基本面+催化劑)→ 核心 / 觀察 ----------
     scoring_cfg = (cfg.get("scoring", {}) or {})

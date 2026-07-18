@@ -873,6 +873,32 @@ def fetch_tx_night() -> dict | None:
     }
 
 
+def fetch_futures_inst_net_oi(days: int = 90, futures_id: str = "TX") -> pd.Series:
+    """台指期(TX)三大法人「未平倉淨口數」時間序列 —— 大盤 risk-on/off 判讀用。
+
+    多空未平倉餘額相減後加總三大法人 = 法人在期貨的**部位方向**(非當日買賣),
+    實證(2026-07-18 整合回測)比「當日買賣超」更能分辨後續選股表現:
+    淨 OI 高於 20 日均 → risk-on 段的選股平均淨報酬 +0.11%,反之 −0.51%。
+
+    回傳 index=date 的 Series(口數);抓不到回空 Series(呼叫端降級成只看指數均線)。
+    """
+    end = date.today()
+    start = end - timedelta(days=days)
+    rows = fetch_finmind("TaiwanFuturesInstitutionalInvestors", data_id=futures_id,
+                         start_date=start.isoformat(), end_date=end.isoformat())
+    if not rows:
+        return pd.Series(dtype=float)
+    df = pd.DataFrame(rows)
+    lo, sh = "long_open_interest_balance_volume", "short_open_interest_balance_volume"
+    if not {lo, sh, "date"}.issubset(df.columns):
+        return pd.Series(dtype=float)
+    df["net"] = pd.to_numeric(df[lo], errors="coerce").fillna(0) - \
+                pd.to_numeric(df[sh], errors="coerce").fillna(0)
+    s = df.groupby("date")["net"].sum()
+    s.index = pd.to_datetime(s.index).tz_localize(None).normalize()
+    return s.sort_index()
+
+
 def fetch_adr_changes(adr_map: dict[str, str]) -> dict[str, dict]:
     """台股代號 → 美股 ADR 的隔夜漲跌(個股級盤前佐證)。回傳 {stock_id: {ticker, last, pct}}."""
     out: dict[str, dict] = {}

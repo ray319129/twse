@@ -27,6 +27,58 @@ _TIER_ORDER = ("aggressive", "neutral", "cautious", "defensive")
 LEVEL_LABEL = {"aggressive": "積極", "neutral": "中性", "cautious": "保守", "defensive": "觀望"}
 
 
+def compute_risk_gate(index_close: "pd.Series | None", fut_net_oi: "pd.Series | None",
+                      ma_long: int = 60, oi_ma: int = 20) -> dict | None:
+    """大盤『風險狀態』提示(2026-07-18 加)—— **只提示,不過濾、不改選股**。
+
+    來自含 2022 空頭的整合回測:把同一批選股依當日大盤狀態切開,平均淨報酬差距極大 ——
+        不設閘門            −0.40%/筆
+        指數 > 60MA         −0.09%
+        指數 > 60MA 且 法人偏多  +0.58%   (三種出場參數下皆是同方向)
+    亦即「指數站上長均線 + 期貨三大法人未平倉淨額高於 20 日均」的日子,選股勝算明顯較好。
+
+    **刻意不做成硬過濾**的理由:①使用者是人工判斷型,硬藏推薦會剝奪他自己判斷的機會;
+    ②閘門在 2021 段反而幫倒忙(每種出場加了法人條件後 2021 都更差),代表它有一部分是
+    擬合後期資料、不是普世規律。故只標示風險、把決定權留給使用者。
+
+    回傳 {state, trend_ok, fut_ok, label, text, stats};資料不足回 None。
+    """
+    if index_close is None or len(index_close) < ma_long:
+        return None
+    s = index_close.dropna()
+    if len(s) < ma_long:
+        return None
+    last = float(s.iloc[-1]); ma = float(s.rolling(ma_long).mean().iloc[-1])
+    trend_ok = bool(last >= ma)
+
+    fut_ok = None
+    if fut_net_oi is not None and len(fut_net_oi.dropna()) >= oi_ma:
+        f = fut_net_oi.dropna()
+        fut_ok = bool(float(f.iloc[-1]) >= float(f.rolling(oi_ma).mean().iloc[-1]))
+
+    if trend_ok and fut_ok is True:
+        state, label = "risk_on", "順風"
+        text = (f"指數站上 {ma_long}MA、且期貨三大法人未平倉偏多 —— 回測中這種日子的選股"
+                f"平均淨報酬 +0.58%/筆(不分日子時為 −0.40%)。順風,但仍須逐檔判斷。")
+    elif not trend_ok and fut_ok is False:
+        state, label = "risk_off", "逆風"
+        text = (f"指數跌破 {ma_long}MA、且期貨三大法人未平倉偏空 —— 回測中這種日子的選股"
+                f"表現明顯較差。建議降低部位、提高選股標準,或直接觀望。")
+    else:
+        state, label = "mixed", "分歧"
+        parts = []
+        parts.append(f"指數{'站上' if trend_ok else '跌破'} {ma_long}MA")
+        if fut_ok is not None:
+            parts.append(f"期貨法人未平倉偏{'多' if fut_ok else '空'}")
+        text = "、".join(parts) + " —— 訊號分歧,建議偏保守、只做最有把握的。"
+
+    return {
+        "state": state, "label": label, "text": text,
+        "trend_ok": trend_ok, "fut_ok": fut_ok,
+        "index_last": round(last, 2), "index_ma": round(ma, 2), "ma_long": ma_long,
+    }
+
+
 def compute_market_regime(index_close: "pd.Series | None", breadth: dict | None, cfg: dict | None) -> dict | None:
     """回傳 regime dict:{enabled, votes, level, core_count, min_score, prefer_pullback, detail}。
     market.enabled=false 或無任何可用訊號時回 None(呼叫端沿用 config 的固定 core_count/min_score)。"""
