@@ -546,14 +546,19 @@
   <div class="panel" id="p-heatmap" role="tabpanel" tabindex="0">
     <div class="hm-toolbar">
       <div class="hm-toggle">
+        <button id="hm-btn-map" class="hm-toggle-btn active" onclick="setHmView('map')">熱力圖</button>
+        <button id="hm-btn-mood" class="hm-toggle-btn" onclick="setHmView('mood')">市場氛圍</button>
+      </div>
+      <div class="hm-toggle" id="hm-metric-toggle">
         <button id="hm-btn-chg" class="hm-toggle-btn active" onclick="setHmMode('chg')">今日漲跌</button>
         <button id="hm-btn-r20" class="hm-toggle-btn" onclick="setHmMode('r20')">20日動能</button>
       </div>
       <span class="muted" style="font-size:12px" id="hm-date-label"></span>
       <div style="flex:1"></div>
-      <span class="muted" style="font-size:11px">方塊大小＝日均成交額・點族群下鑽・點個股查摘要</span>
+      <span class="muted" style="font-size:11px" id="hm-hint">方塊大小＝日均成交額・點族群下鑽・點個股查摘要</span>
     </div>
     <div id="heatmap-chart"></div>
+    <div id="mood-view" style="display:none"></div>
   </div>
   <div class="panel" id="p-perf" role="tabpanel" tabindex="0"></div>
 
@@ -689,6 +694,24 @@
      ============================================================ */
   #heatmap-chart{width:100%;height:calc(100vh - 190px);min-height:480px;}
   .hm-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  /* 市場氛圍 */
+  .mood-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .mood-mkt{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .mood-note{font-size:11px;color:var(--muted-2);line-height:1.55;margin-bottom:10px;}
+  .mood-r{border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;
+    background:var(--surface);cursor:pointer;transition:border-color .18s ease;}
+  .mood-r:hover{border-color:var(--accent-line);}
+  .mood-main{display:grid;grid-template-columns:1fr 74px 120px 58px;align-items:center;gap:10px;}
+  .mood-nm{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;min-width:0;}
+  .mood-rk{font-size:10.5px;color:var(--muted-2);font-weight:800;min-width:18px;}
+  .mood-cnt{font-size:10.5px;color:var(--muted-2);background:var(--surface-3);border-radius:999px;padding:0 6px;font-weight:700;}
+  .mood-num{font-size:13px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums;}
+  .mood-bar{height:7px;background:var(--surface-3);border-radius:999px;overflow:hidden;}
+  .mood-bar span{display:block;height:100%;border-radius:999px;}
+  .mood-val{font-size:13px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums;}
+  .mood-sub{display:none;font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.6;}
+  .mood-r.open .mood-sub{display:block;}
+  @media(max-width:640px){.mood-main{grid-template-columns:1fr 64px 52px;}.mood-bar{display:none;}}
   .hm-toggle{display:flex;gap:4px;}
   .hm-toggle-btn{padding:5px 14px;border-radius:var(--radius-xs);border:1px solid var(--line);
     background:var(--surface);color:var(--ink-2);cursor:pointer;font-size:12px;transition:all .15s;}
@@ -2269,14 +2292,106 @@ function _hmColor(v,maxAbs){
   return v>=0?_hmLerp(neutral,gUp,t):_hmLerp(neutral,gDn,t);
 }
 
-function _buildHmTree(stocks,sm,mode){
+/* 個股 → (產業, 細產業):熱力圖與市場氛圍共用同一份對照(sector_map.json 的 306 筆 override
+   + 46 條 industry_map),避免兩地各維護一份分類。 */
+function hmSecOf(s,sm){
   const ov=sm._override||{},im=sm._industry_map||{};
+  const o=ov[s.id];
+  if(o)return {sec:o.sector,sub:o.sub_sector};
+  const m=im[s.ind];
+  return {sec:m?m.sector:'其他',sub:m?m.sub_sector:(s.ind||'其他')};
+}
+/* ============================================================
+   市場氛圍(2026-07-19)— 各產業/細產業當下偏多還偏空。
+   氣氛值(−50~+50)以「廣度」為主而非漲跌幅:只看漲跌幅會被少數大漲股帶偏,
+   廣度(多少成分股站上均線/多頭排列)才看得出族群是真轉強還是假彈。
+     站上季線比例 35% + 多頭排列比例 25% + 站上月線比例 15% + 20日動能 25%
+   每項先置中成 −1~+1(比例 0.5 = 中性 0),加權後 ×50。
+   舊版 heatmap.json 沒有廣度欄位(a20/a60/bl)時自動退化成只用動能+漲跌幅,不會壞掉。
+   ============================================================ */
+const _clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+function moodAgg(stocks,sm,level){
+  const hasBreadth=stocks.some(s=>s.a20!=null);
+  const g={};
+  for(const s of stocks){
+    const {sec,sub}=hmSecOf(s,sm);
+    const k=level==='sub'?sub:sec;
+    if(!k)continue;
+    (g[k]=g[k]||[]).push(s);
+  }
+  const out=[];
+  for(const [name,arr] of Object.entries(g)){
+    if(arr.length<3)continue;                     /* 家數太少無代表性 */
+    const avg=f=>arr.reduce((a,s)=>a+(isNum(f(s))?f(s):0),0)/arr.length;
+    const chg=avg(s=>s.chg),r20=avg(s=>s.r20);
+    const momc=_clamp(r20/20,-1,1);
+    let mood;
+    if(hasBreadth){
+      const b60=avg(s=>s.a60),bl=avg(s=>s.bl),b20=avg(s=>s.a20);
+      mood=50*(0.35*((b60-0.5)*2)+0.25*((bl-0.5)*2)+0.15*((b20-0.5)*2)+0.25*momc);
+    }else{
+      mood=50*(0.6*momc+0.4*_clamp(chg/3,-1,1));
+    }
+    out.push({name,n:arr.length,chg,r20,mood,
+      up:arr.filter(s=>isNum(s.chg)&&s.chg>0).length,stocks:arr});
+  }
+  return out.sort((a,b)=>b.mood-a.mood);
+}
+function _moodRow(r,i){
+  const col=r.mood>=0?'var(--up-ink)':'var(--down-ink)';
+  const w=Math.min(100,Math.abs(r.mood)/50*100);
+  const top=r.stocks.slice().sort((a,b)=>(b.chg||0)-(a.chg||0)).slice(0,5)
+    .map(s=>`${slink(s.id)} <span class="${cls(s.chg)}">${fmt(s.chg)}%</span>`).join('・');
+  return `<div class="mood-r" onclick="this.classList.toggle('open')">
+    <div class="mood-main">
+      <div class="mood-nm"><span class="mood-rk">${i+1}</span>${esc(r.name)}<span class="mood-cnt">${r.n}</span></div>
+      <div class="mood-num ${cls(r.chg)}">${fmt(r.chg)}%</div>
+      <div class="mood-bar"><span style="width:${w}%;background:${col}"></span></div>
+      <div class="mood-val" style="color:${col}">${r.mood>=0?'+':''}${r.mood.toFixed(1)}</div>
+    </div>
+    <div class="mood-sub">上漲 ${r.up}/${r.n} 檔・20日 <span class="${cls(r.r20)}">${fmt(r.r20,1)}%</span>　·　領漲:${top}</div>
+  </div>`;
+}
+let _moodTab=null;
+function setMoodTab(t){_moodTab=t;renderMood();}
+function renderMood(){
+  const el=$('#mood-view');if(!el||!_hmData||!_hmSM)return;
+  /* 首次進入自動選「有內容」的那一邊:全盤偏空的日子預設開多方會是空白(沒用),
+     反之亦然。使用者手動切過之後就尊重他的選擇。 */
+  if(_moodTab===null){
+    const s0=moodAgg(_hmData.stocks,_hmSM,'sec');
+    _moodTab=s0.some(r=>r.mood>0)?'long':'short';
+  }
+  const level=_moodTab==='sub'?'sub':'sec';
+  let rows=moodAgg(_hmData.stocks,_hmSM,level);
+  if(_moodTab==='long')rows=rows.filter(r=>r.mood>0);
+  else if(_moodTab==='short')rows=rows.slice().reverse().filter(r=>r.mood<0);
+  const all=moodAgg(_hmData.stocks,_hmSM,'sec');
+  const mkt=all.length?all.reduce((a,r)=>a+r.mood*r.n,0)/all.reduce((a,r)=>a+r.n,0):0;
+  const mc=mkt>=0?'var(--up-ink)':'var(--down-ink)';
+  const tab=(k,t)=>`<button class="hm-toggle-btn${_moodTab===k?' active':''}" onclick="setMoodTab('${k}')">${t}</button>`;
+  el.innerHTML=`<div class="mood-head">
+      <div class="mood-mkt">市場氛圍 <b style="color:${mc}">${mkt>=0?'+':''}${mkt.toFixed(1)}</b>
+        <span style="color:${mc};font-weight:800">${mkt>=8?'偏多':mkt<=-8?'偏空':'中性'}</span></div>
+      <div class="hm-toggle">${tab('long','多方')}${tab('short','空方')}${tab('sub','細產業')}</div>
+    </div>
+    <div class="mood-note">氣氛值 −50~+50,以廣度為主(站上季線35%+多頭排列25%+站上月線15%+20日動能25%);點一列看領漲股。家數<3 的族群不列。</div>
+    ${rows.length?rows.map(_moodRow).join(''):'<div class="empty" style="padding:40px 0">此分類目前沒有符合的族群</div>'}`;
+}
+function setHmView(v){
+  const map=v!=='mood';
+  $('#hm-btn-map').classList.toggle('active',map);
+  $('#hm-btn-mood').classList.toggle('active',!map);
+  $('#heatmap-chart').style.display=map?'':'none';
+  $('#mood-view').style.display=map?'none':'';
+  $('#hm-metric-toggle').style.display=map?'':'none';
+  $('#hm-hint').textContent=map?'方塊大小＝日均成交額・點族群下鑽・點個股查摘要':'各產業當下偏多/偏空・點一列展開領漲股';
+  if(map){if(_hmChart)_hmChart.resize();}else renderMood();
+}
+function _buildHmTree(stocks,sm,mode){
   const secs={};
   for(const s of stocks){
-    const o=ov[s.id];
-    let sec,sub;
-    if(o){sec=o.sector;sub=o.sub_sector;}
-    else{const m=im[s.ind];sec=m?m.sector:'其他';sub=m?m.sub_sector:(s.ind||'其他');}
+    const {sec,sub}=hmSecOf(s,sm);
     if(!secs[sec])secs[sec]={};
     if(!secs[sec][sub])secs[sec][sub]=[];
     const val=mode==='chg'?s.chg:s.r20;

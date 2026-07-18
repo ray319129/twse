@@ -729,7 +729,10 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     with open(docs_dir / "dates.json", "w", encoding="utf-8") as f:
         json.dump(dates, f, ensure_ascii=False)
 
-    # 族群熱力圖資料包(docs/heatmap.json):前端 ECharts Treemap 讀這一包
+    # 族群熱力圖資料包(docs/heatmap.json):前端 ECharts Treemap + 市場氛圍 讀這一包。
+    # a20/a60/bl(站上月線/季線/多頭排列)是「市場氛圍」算各產業偏多偏空的核心成分 ——
+    # 只有漲跌幅會被少數大漲股帶偏,廣度(多少成分股站上均線)才看得出族群是真的轉強還是假彈。
+    _ind_flags = {r["stock_id"]: r for r in industry_rows}
     heatmap_stocks = [
         {
             "id": s["stock_id"],
@@ -739,6 +742,9 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "r20": s.get("ret20_pct"),
             "sc":  round(float(s.get("score") or 0), 1),
             "vol": max(float(s.get("dollar_vol_m") or 1), 1),
+            "a20": 1 if (_ind_flags.get(s["stock_id"]) or {}).get("above_ma20") else 0,
+            "a60": 1 if (_ind_flags.get(s["stock_id"]) or {}).get("above_ma60") else 0,
+            "bl":  1 if (_ind_flags.get(s["stock_id"]) or {}).get("bullish") else 0,
         }
         for s in scored
     ]
