@@ -153,6 +153,18 @@
   .pc-h .lk{font-size:12px;font-weight:600;color:var(--accent-ink);cursor:pointer;}
   .pc-h .lk:hover{text-decoration:underline;}
 
+  /* 持倉多帳戶切換列 */
+  .acc-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .acc-bar .acc-lb{font-size:11px;font-weight:800;color:var(--muted-2);letter-spacing:.06em;margin-right:2px;}
+  .acc-t{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:999px;
+    padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .acc-t:hover{border-color:var(--accent-line);color:var(--ink-2);}
+  .acc-t.on{background:var(--accent-bg);color:var(--accent-ink);border-color:var(--accent-line);}
+  .acc-t .acc-n{font-size:10.5px;font-weight:800;opacity:.7;background:var(--surface);border-radius:999px;padding:0 5px;}
+  .acc-x{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:8px;
+    padding:3px 8px;font-size:12px;cursor:pointer;line-height:1.5;}
+  .acc-x:hover{border-color:var(--accent-line);color:var(--ink-2);}
+
   /* 我的實戰紀錄(買/跳標記 + 三組對照) */
   .mp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .mp-c{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;}
@@ -165,6 +177,8 @@
   .mp-verdict.down{background:var(--down-bg);color:var(--down-ink);border:1px solid var(--down-line);}
   .mp-verdict.neu{background:var(--surface-3);color:var(--muted);border:1px solid var(--line);}
   .mp-btns{display:inline-flex;gap:3px;}
+  .mp-card{display:flex;gap:4px;margin-top:7px;justify-content:flex-end;}
+  .mp-card .mp-b{padding:3px 9px;font-size:11.5px;}
   .mp-b{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);
     border-radius:6px;font-size:11px;font-weight:700;padding:2px 7px;cursor:pointer;line-height:1.5;}
   .mp-b:hover{border-color:var(--accent-line);color:var(--ink-2);}
@@ -1096,7 +1110,7 @@ function coreCard(s,i){
       <div style="min-width:0"><div class="tkr"><span class="rank">#${i+1}</span>${s.hot_industry?'🔥 ':''}${slink(s.stock_id)}<span class="nm">${esc(s.name)}</span> ${badge(s.profile)}${s.new_stock?'<span class="badge b-bal" style="background:#e8eaf6;color:#3949ab">🆕 新股</span>':''}${s.first_board?'<span class="badge b-bal" style="background:#fff3cd;color:#8a6d00">首板</span>':''}${s.day_trade_warn?`<span class="badge b-bal" style="background:#fdecea;color:#c0392b">當沖${isNum(s.day_trade_ratio)?Math.round(s.day_trade_ratio*100)+'%':'高'}</span>`:''}${heldTag(s.stock_id)}</div>
         <div class="meta">收 <b class="num">${num(s.close)}</b> <span class="${cls(s.change_pct)} num">(${fmt(s.change_pct)}%)</span><span class="mdot"></span>${esc(s.industry)||''}<span class="mdot"></span><span class="trig">${trig}</span>${isNum(s.ret5_pct)?`<span class="mdot"></span>5日 <span class="${cls(s.ret5_pct)} num">${fmt(s.ret5_pct,1)}%</span>`:''}${isNum(s.ret20_pct)?`<span class="mdot"></span>20日 <span class="${cls(s.ret20_pct)} num">${fmt(s.ret20_pct,1)}%</span>`:''}</div>
       </div>
-      <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}</div>
+      <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}${mpCardBtns(s)}</div>
     </div>
     ${kbars(s)}${bars(s)}${planBox(s.plan,s.position)}${cat}${tp}${rf}${chip}${val}${fund2}${whyPanel(s)}
   </div>`;
@@ -1106,6 +1120,7 @@ function renderCore(){
   $('#p-core').innerHTML=`<div class="lead">信心分最高、今天有新鮮觸發(帶量突破 / 回測支撐轉強)、未過熱 → 可考慮進場(<b>${c.length}</b> 檔)。</div>`
     +`<div class="note-box">📌 <b>隔日跳空怎麼辦</b>:依每檔「進場決策卡」掛<b>限價單</b>,別市價追。開盤在進場上限內才進;開高超過上限就別追(R:R 已破壞),等回測或放棄;開低破初始停損則作廢。停損 / TP1 以實際成交價重算,部位用固定風險回推。</div>`
     +(c.length?c.map(coreCard).join(''):`<div class="empty"><span class="ei">🗒️</span>今日無核心標的(大盤偏弱或無新鮮突破)。寧缺勿濫。</div>`);
+  mpBindBtns($('#p-core'));   /* 卡片上的買/跳 */
 }
 
 /* ============================================================
@@ -1163,10 +1178,63 @@ const PORT_KEY='twse-portfolio';
 const PORT_STOP=0.07;              /* 硬停損 %,對應 config exit.hard_stop 預設 */
 let PORT={v:1,positions:[],updated:null};
 let PORT_PRICE={},_portFetching={},_portFormOpen=false,_portPasteHandler=null,_tessLoading=null;
-function portLoad(){try{const r=localStorage.getItem(PORT_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.positions)){
-  o.positions.forEach(p=>{if(p&&p.shares==null&&p.lots!=null)p.shares=Number(p.lots)*1000;});   /* 舊版張數→股數遷移 */
-  PORT={v:2,positions:o.positions,updated:o.updated||null};}}}catch(e){}}
-function portSave(){PORT.updated=new Date().toISOString();try{localStorage.setItem(PORT_KEY,JSON.stringify(PORT));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
+/* 多帳戶存檔(2026-07-19):使用者有兩個券商帳號,需分開管理。
+   資料結構:ACC={v,active,accounts:{帳戶名:[持倉...]}};PORT.positions 永遠是「目前帳戶」的持倉,
+   所以既有全部程式(portGet/portUpsert/renderPortfolio…)完全不用改。 */
+const PORT_ACC_KEY='twse-portfolio-accounts';
+let ACC={v:1,active:'預設',accounts:{'預設':[]}};
+const accNames=()=>Object.keys(ACC.accounts||{});
+function accSaveAll(){ACC.updated=new Date().toISOString();
+  try{localStorage.setItem(PORT_ACC_KEY,JSON.stringify(ACC));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
+function portLoad(){
+  /* 1) 先讀新版多帳戶 */
+  try{const r=localStorage.getItem(PORT_ACC_KEY);
+    if(r){const o=JSON.parse(r);
+      if(o&&o.accounts&&Object.keys(o.accounts).length){
+        ACC={v:o.v||1,active:(o.accounts[o.active]?o.active:Object.keys(o.accounts)[0]),accounts:o.accounts,updated:o.updated||null};
+        Object.values(ACC.accounts).forEach(list=>(list||[]).forEach(p=>{if(p&&p.shares==null&&p.lots!=null)p.shares=Number(p.lots)*1000;}));
+        PORT={v:2,positions:ACC.accounts[ACC.active]||[],updated:ACC.updated};return;}}
+  }catch(e){}
+  /* 2) 沒有新版 → 從舊版單一持倉遷移成「預設」帳戶(不刪舊 key,保留可回溯) */
+  try{const r=localStorage.getItem(PORT_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.positions)){
+    o.positions.forEach(p=>{if(p&&p.shares==null&&p.lots!=null)p.shares=Number(p.lots)*1000;});
+    ACC={v:1,active:'預設',accounts:{'預設':o.positions},updated:o.updated||null};
+    PORT={v:2,positions:ACC.accounts['預設'],updated:o.updated||null};accSaveAll();return;}}}catch(e){}
+  ACC={v:1,active:'預設',accounts:{'預設':[]}};PORT={v:2,positions:ACC.accounts['預設'],updated:null};
+}
+function portSave(){
+  ACC.accounts[ACC.active]=PORT.positions;      /* 目前帳戶的持倉寫回 */
+  PORT.updated=new Date().toISOString();accSaveAll();
+}
+function accSwitch(name){
+  if(!ACC.accounts[name]||name===ACC.active)return;
+  portSave();                                   /* 先存目前帳戶 */
+  ACC.active=name;PORT.positions=ACC.accounts[name]||[];
+  accSaveAll();PORT_PRICE={};renderPortfolio();
+}
+function accAdd(){
+  const n=(prompt('新帳戶名稱(例如:富邦、永豐)')||'').trim();
+  if(!n)return;
+  if(ACC.accounts[n]){alert('已有同名帳戶');return;}
+  portSave();ACC.accounts[n]=[];ACC.active=n;PORT.positions=ACC.accounts[n];
+  accSaveAll();renderPortfolio();
+}
+function accRename(){
+  const cur=ACC.active,n=(prompt('改帳戶名稱',cur)||'').trim();
+  if(!n||n===cur)return;
+  if(ACC.accounts[n]){alert('已有同名帳戶');return;}
+  portSave();
+  const ordered={};accNames().forEach(k=>{ordered[k===cur?n:k]=ACC.accounts[k];});  /* 保持原順序 */
+  ACC.accounts=ordered;ACC.active=n;PORT.positions=ACC.accounts[n];
+  accSaveAll();renderPortfolio();
+}
+function accDelete(){
+  if(accNames().length<=1){alert('至少要保留一個帳戶');return;}
+  if(!confirm(`刪除帳戶「${ACC.active}」及其 ${PORT.positions.length} 檔持倉?建議先「匯出備份」。`))return;
+  delete ACC.accounts[ACC.active];
+  ACC.active=accNames()[0];PORT.positions=ACC.accounts[ACC.active]||[];
+  accSaveAll();PORT_PRICE={};renderPortfolio();
+}
 const portHas=id=>PORT.positions.some(p=>String(p.id)===String(id));
 const portGet=id=>PORT.positions.find(p=>String(p.id)===String(id))||null;
 const portCleanNum=v=>{const n=parseFloat(String(v==null?'':v).replace(/,/g,'').replace(/[^0-9.\-]/g,''));return isFinite(n)?n:null;};
@@ -1519,7 +1587,9 @@ function _portRenderAIReview(res){
 }
 function portClear(){if(!confirm('清空全部持倉?建議先「匯出備份」。'))return;PORT.positions=[];portSave();renderPortfolio();}
 function portExport(){
-  const blob=new Blob([JSON.stringify(PORT,null,2)],{type:'application/json'});
+  /* 備份「全部帳戶」(不只目前這個),避免使用者以為備份了卻漏掉另一個帳號 */
+  portSave();
+  const blob=new Blob([JSON.stringify(ACC,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='twse-portfolio-'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
@@ -1527,8 +1597,16 @@ function portExport(){
 function portImportFile(){
   const inp=document.createElement('input');inp.type='file';inp.accept='application/json,.json';
   inp.onchange=()=>{const fl=inp.files&&inp.files[0];if(!fl)return;const rd=new FileReader();
-    rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!Array.isArray(o.positions))throw new Error('格式不符');
-      PORT={v:1,positions:o.positions,updated:o.updated||null};portSave();renderPortfolio();alert('已匯入 '+o.positions.length+' 檔。');}
+    rd.onload=()=>{try{const o=JSON.parse(rd.result);
+      if(o&&o.accounts&&Object.keys(o.accounts).length){          /* 新版:多帳戶備份 */
+        ACC={v:o.v||1,active:(o.accounts[o.active]?o.active:Object.keys(o.accounts)[0]),accounts:o.accounts,updated:o.updated||null};
+        PORT={v:2,positions:ACC.accounts[ACC.active]||[],updated:ACC.updated};accSaveAll();
+        const tot=Object.values(ACC.accounts).reduce((n,l)=>n+(l||[]).length,0);
+        renderPortfolio();alert(`已匯入 ${Object.keys(ACC.accounts).length} 個帳戶、共 ${tot} 檔。`);return;}
+      if(!o||!Array.isArray(o.positions))throw new Error('格式不符');
+      /* 舊版:單一持倉備份 → 匯入成目前帳戶 */
+      PORT.positions=o.positions;portSave();renderPortfolio();
+      alert(`已匯入 ${o.positions.length} 檔到帳戶「${ACC.active}」。`);}
       catch(e){alert('匯入失敗:'+(e&&e.message||e));}};rd.readAsText(fl);};
   inp.click();
 }
@@ -1562,7 +1640,16 @@ function portEventAlertHtml(info,expCount,expBase,expBaseLabel,topInd){
 function renderPortfolio(){
   const el=$('#p-port');if(!el)return;
   const pos=PORT.positions;
-  const tools=`<div class="port-tools">
+  /* 帳戶切換列(2026-07-19):兩個券商帳號分開存檔;每個帳戶各自一份持倉 */
+  const accBar=`<div class="acc-bar">
+    <span class="acc-lb">帳戶</span>
+    ${accNames().map(n=>{const cnt=(ACC.accounts[n]||[]).length;
+      return `<button class="acc-t${n===ACC.active?' on':''}" onclick="accSwitch(${JSON.stringify(n).replace(/"/g,'&quot;')})">${esc(n)}<span class="acc-n">${cnt}</span></button>`;}).join('')}
+    <button class="acc-x" onclick="accAdd()" title="新增帳戶">＋</button>
+    <button class="acc-x" onclick="accRename()" title="改名目前帳戶">✏️</button>
+    ${accNames().length>1?'<button class="acc-x" onclick="accDelete()" title="刪除目前帳戶">🗑</button>':''}
+  </div>`;
+  const tools=accBar+`<div class="port-tools">
     <button class="pbtn" onclick="portShowOcr()">📷 截圖辨識匯入</button>
     <button class="pbtn" onclick="portShowPaste()">📋 貼上券商庫存匯入</button>
     <button class="pbtn" onclick="portShowManual()">＋ 手動新增</button>
@@ -1572,7 +1659,7 @@ function renderPortfolio(){
     ${pos.length?'<button class="pbtn" onclick="portBatchHealth()">🔬 批次健檢</button>':''}
     ${pos.length&&HEALTH_API_ENABLED?'<button class="pbtn accent" onclick="portAIReview()">🧠 AI 總覽</button>':''}
   </div>
-  <div class="port-note">🔒 成本與持倉只存在你這台瀏覽器(localStorage),不會上傳、不進 GitHub、不進信件。換裝置或清瀏覽器資料前請先「匯出備份」。</div>
+  <div class="port-note">🔒 成本與持倉只存在你這台瀏覽器(localStorage),不會上傳、不進 GitHub、不進信件。多個帳戶各自獨立存檔;「匯出備份」會一次備份<b>全部帳戶</b>。換裝置或清瀏覽器資料前請先備份。</div>
   <div id="port-form"></div>`;
   if(!pos.length){
     el.innerHTML='<div class="lead">匯入你的實際持倉,看每檔損益、距停損、部位集中度。</div>'+tools+
@@ -1735,7 +1822,37 @@ function mpLoad(){try{const r=localStorage.getItem(MYPICK_KEY);if(r)MYPICK=JSON.
 function mpSave(){try{localStorage.setItem(MYPICK_KEY,JSON.stringify(MYPICK));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
 const mpKey=r=>`${r.date}|${r.stock_id}`;
 const mpGet=r=>MYPICK[mpKey(r)]||null;
-function mpSet(k,v){ if(MYPICK[k]===v)delete MYPICK[k]; else MYPICK[k]=v; mpSave(); drawLedger(); }
+/* 核心精選卡片上的買/跳(2026-07-19 加):使用者每天第一個看的就是這裡,在這標記最自然。
+   key 與台帳共用同一組(選股日|代號),所以兩邊標記互通、統計一致。 */
+function mpCardBtns(s){
+  const d=(typeof DATA!=='undefined'&&DATA&&DATA.date)?String(DATA.date).slice(0,10):null;
+  if(!d||!s||!s.stock_id)return '';
+  const k=`${d}|${s.stock_id}`,v=MYPICK[k]||null;
+  return `<div class="mp-card">
+    <button class="mp-b${v==='bought'?' on-b':''}" data-mk="${esc(k)}" data-mv="bought" title="我買了這檔">買</button>
+    <button class="mp-b${v==='skipped'?' on-s':''}" data-mk="${esc(k)}" data-mv="skipped" title="我看過但沒買">跳</button>
+  </div>`;
+}
+/* 就地同步同一個 key 的所有按鈕(核心卡 + 台帳可能同時存在),不整段重繪、不跳掉捲動位置 */
+function mpSyncBtns(k){
+  const v=MYPICK[k]||null;
+  document.querySelectorAll('.mp-b').forEach(b=>{
+    if(b.dataset.mk!==k)return;
+    b.classList.toggle('on-b', v==='bought'&&b.dataset.mv==='bought');
+    b.classList.toggle('on-s', v==='skipped'&&b.dataset.mv==='skipped');
+  });
+}
+function mpBindBtns(root){
+  (root||document).querySelectorAll('.mp-b').forEach(b=>{
+    if(b._mpBound)return; b._mpBound=1;
+    b.onclick=e=>{e.stopPropagation();e.preventDefault();mpSet(b.dataset.mk,b.dataset.mv);};
+  });
+}
+function mpSet(k,v){
+  if(MYPICK[k]===v)delete MYPICK[k]; else MYPICK[k]=v;
+  mpSave(); mpSyncBtns(k);
+  if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();  /* 同步更新台帳上方的三組對照 */
+}
 function _mpAgg(arr){
   const rets=arr.map(r=>r.ret_pct).filter(isNum);
   if(!rets.length)return null;
@@ -1804,8 +1921,7 @@ function drawLedger(){
   // 「我的」欄不參與排序(非資料欄位);其餘照舊
   $('#ledtable').querySelectorAll('th').forEach(th=>{const k=th.dataset.k;if(!k||k.startsWith('_'))return;
     th.onclick=()=>{if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}drawLedger();};});
-  $('#ledtable').querySelectorAll('.mp-b').forEach(b=>b.onclick=e=>{
-    e.stopPropagation(); mpSet(b.dataset.mk, b.dataset.mv);});
+  mpBindBtns($('#ledtable'));
 }
 
 /* ============================================================

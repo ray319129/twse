@@ -118,7 +118,7 @@ def _signal_returns(raw: pd.DataFrame, pos_d: int, sig_close: float) -> dict:
 import copy
 
 
-def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
+def _replay(cfg: dict, universe_limit, start, end, use_regime: bool, swing_band: float = 0.0):
     """訊號重放(慢,~7 分鐘)—— 只做選股,不含出場。回傳 (selections, shared)。
     出場參數不影響選股 → 重放一次即可對多組出場參數做敏感度掃描(見 sweep_exits)。
     selections 每筆含:選股層報酬 sig_rets / benchmark bench_rets / style / _pos_master,皆與出場無關。"""
@@ -224,9 +224,21 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
             if prefer_pb and s.get("breakout") and not s.get("pullback_turn"):
                 base -= bo_pen
             return -base
-        selected = sorted([s for s in day_scored if s["score"] >= min_score], key=_key)[:core_count]
+        ranked = sorted([s for s in day_scored if s["score"] >= min_score], key=_key)
+        selected = ranked[:core_count]
 
-        for s in selected:
+        # 因子研究用:除了實際入選的,額外記錄「擺盪區間」內的候選 —— 加成上限為 ±swing_band/2 時,
+        # 只有分數距離第 core_count 名不到 swing_band 的候選,才可能因加成而進出核心;區間外抓了也不會
+        # 改變結果。這讓「完整整合驗證」的分點抓取量從 top30×全期(~35,000 次)大幅降到可行範圍。
+        capture = selected
+        if swing_band and len(ranked) > core_count:
+            cut = float(selected[-1]["score"]) if selected else None
+            if cut is not None:
+                extra = [s for s in ranked[core_count:] if float(s["score"]) >= cut - swing_band]
+                capture = selected + extra
+        sel_ids = {id(s) for s in selected}
+
+        for s in capture:
             sid = s["stock_id"]; raw = raws[sid]; pos_d = s["_pos_d"]; sig_close = s["sig_close"]
             sig_rets = _signal_returns(raw, pos_d, sig_close)
             bench_rets: dict = {}
@@ -248,6 +260,8 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
                 "c_trend": s.get("trend"), "c_rs": s.get("rs"), "c_setup": s.get("setup"),
                 "c_quality": s.get("quality"), "c_liquidity": s.get("liquidity"),
                 "c_exhausted": bool(s.get("exhausted")),
+                # swing_band 模式下才有意義:此筆是否真的入選(False = 只是擺盪區間內的候選)
+                "selected": id(s) in sel_ids,
             })
 
         if (di + 1) % 20 == 0:
