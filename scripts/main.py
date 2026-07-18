@@ -28,6 +28,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
+from .industry_chain import build_sector_map
 from .market import compute_market_regime, compute_risk_gate
 from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
@@ -770,6 +771,13 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     ]
     with open(docs_dir / "heatmap.json", "w", encoding="utf-8") as f:
         json.dump({"date": today.isoformat(), "stocks": heatmap_stocks}, f, ensure_ascii=False)
+
+    # 產業鏈分類(docs/sector_map.json):熱力圖與市場氛圍的分組依據。
+    # 分類本身變動很慢,但每天跟著批次重抓最省事;抓不到就沿用舊檔(見 build_sector_map)。
+    try:
+        build_sector_map(docs_dir / "sector_map.json")
+    except Exception as e:
+        log.warning(f"產業鏈分類更新失敗,沿用既有 sector_map.json: {e}")
 
     # 個股健檢(Stock Health)改為純即時查詢(api/health.py),不在批次流程內跑。
 

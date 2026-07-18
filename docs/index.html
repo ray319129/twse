@@ -2307,14 +2307,23 @@ function _hmColor(v,maxAbs){
   return v>=0?_hmLerp(neutral,gUp,t):_hmLerp(neutral,gDn,t);
 }
 
-/* 個股 → (產業, 細產業):熱力圖與市場氛圍共用同一份對照(sector_map.json 的 306 筆 override
-   + 46 條 industry_map),避免兩地各維護一份分類。 */
+/* 個股 → 產業鏈(sector_map.json,FinMind TaiwanStockIndustryChain:47 產業 / 483 細產業)。
+   跟舊版手工 46 條對照表最大的差別是「一檔可以屬於多條產業鏈」——鴻海同時在
+   電腦及週邊設備(伺服器/主機板/機殼)、通信網路、連接器、電動車輛,這才是台股在講的族群。
+     hmSecsOf 回全部歸屬  → 市場氛圍(一檔可計入多個族群)
+     hmSecOf  回代表性那條 → treemap(一檔只能放一格,不然成交額會重複計)
+   FinMind 沒收錄的(多為 KY 股,約掃描池 2%)退回 TWSE 原始產業名,不硬塞。 */
+function hmSecsOf(s,sm){
+  const c=(sm.chain||{})[s.id];
+  if(c&&c.length)return c.map(([sec,sub])=>({sec,sub}));
+  const raw=s.ind||'其他';
+  return [{sec:raw,sub:raw}];
+}
 function hmSecOf(s,sm){
-  const ov=sm._override||{},im=sm._industry_map||{};
-  const o=ov[s.id];
-  if(o)return {sec:o.sector,sub:o.sub_sector};
-  const m=im[s.ind];
-  return {sec:m?m.sector:'其他',sub:m?m.sub_sector:(s.ind||'其他')};
+  const p=(sm.primary||{})[s.id];
+  if(p)return {sec:p[0],sub:p[1]};
+  const raw=s.ind||'其他';
+  return {sec:raw,sub:raw};
 }
 /* ============================================================
    市場氛圍(2026-07-19)— 各產業/細產業當下偏多還偏空。
@@ -2325,28 +2334,33 @@ function hmSecOf(s,sm){
    舊版 heatmap.json 沒有廣度欄位(a20/a60/bl)時自動退化成只用動能+漲跌幅,不會壞掉。
    ============================================================ */
 const _clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+function _moodOf(arr,hasBreadth){
+  const avg=f=>arr.reduce((a,s)=>a+(isNum(f(s))?f(s):0),0)/arr.length;
+  const chg=avg(s=>s.chg),r20=avg(s=>s.r20);
+  const momc=_clamp(r20/20,-1,1);
+  const mood=hasBreadth
+    ? 50*(0.35*((avg(s=>s.a60)-0.5)*2)+0.25*((avg(s=>s.bl)-0.5)*2)+0.15*((avg(s=>s.a20)-0.5)*2)+0.25*momc)
+    : 50*(0.6*momc+0.4*_clamp(chg/3,-1,1));
+  return {chg,r20,mood};
+}
+/* 依產業鏈分組算氣氛值。一檔股票屬於幾條鏈就計入幾組(鴻海會同時進 電腦及週邊設備、
+   通信網路、連接器…),所以各組家數加總會大於總檔數 —— 這是刻意的,族群本來就重疊。 */
 function moodAgg(stocks,sm,level){
   const hasBreadth=stocks.some(s=>s.a20!=null);
   const g={};
   for(const s of stocks){
-    const {sec,sub}=hmSecOf(s,sm);
-    const k=level==='sub'?sub:sec;
-    if(!k)continue;
-    (g[k]=g[k]||[]).push(s);
+    const seen=new Set();
+    for(const {sec,sub} of hmSecsOf(s,sm)){
+      const k=level==='sub'?sub:sec;
+      if(!k||seen.has(k))continue;                /* 同一檔在同組只算一次 */
+      seen.add(k);
+      (g[k]=g[k]||[]).push(s);
+    }
   }
   const out=[];
   for(const [name,arr] of Object.entries(g)){
     if(arr.length<3)continue;                     /* 家數太少無代表性 */
-    const avg=f=>arr.reduce((a,s)=>a+(isNum(f(s))?f(s):0),0)/arr.length;
-    const chg=avg(s=>s.chg),r20=avg(s=>s.r20);
-    const momc=_clamp(r20/20,-1,1);
-    let mood;
-    if(hasBreadth){
-      const b60=avg(s=>s.a60),bl=avg(s=>s.bl),b20=avg(s=>s.a20);
-      mood=50*(0.35*((b60-0.5)*2)+0.25*((bl-0.5)*2)+0.15*((b20-0.5)*2)+0.25*momc);
-    }else{
-      mood=50*(0.6*momc+0.4*_clamp(chg/3,-1,1));
-    }
+    const {chg,r20,mood}=_moodOf(arr,hasBreadth);
     out.push({name,n:arr.length,chg,r20,mood,
       up:arr.filter(s=>isNum(s.chg)&&s.chg>0).length,stocks:arr});
   }
@@ -2408,8 +2422,10 @@ function renderMood(){
   let rows=moodAgg(_hmData.stocks,_hmSM,level);
   if(_moodTab==='long')rows=rows.filter(r=>r.mood>0);
   else if(_moodTab==='short')rows=rows.slice().reverse().filter(r=>r.mood<0);
-  const all=moodAgg(_hmData.stocks,_hmSM,'sec');
-  const mkt=all.length?all.reduce((a,r)=>a+r.mood*r.n,0)/all.reduce((a,r)=>a+r.n,0):0;
+  /* 大盤氣氛直接用全體個股算,不用各族群加權平均 —— 產業鏈會重疊,
+     跨鏈多的權值股(鴻海、台達電)會被重複計到好幾次而放大。 */
+  const mkt=_hmData.stocks.length
+    ? _moodOf(_hmData.stocks,_hmData.stocks.some(s=>s.a20!=null)).mood : 0;
   const mc=mkt>=0?'var(--up-ink)':'var(--down-ink)';
   const tab=(k,t)=>`<button class="hm-toggle-btn${_moodTab===k?' active':''}" onclick="setMoodTab('${k}')">${t}</button>`;
   el.innerHTML=`<div class="mood-head">
@@ -2417,7 +2433,7 @@ function renderMood(){
         <span style="color:${mc};font-weight:800">${mkt>=8?'偏多':mkt<=-8?'偏空':'中性'}</span></div>
       <div class="hm-toggle">${tab('long','多方')}${tab('short','空方')}${tab('sub','細產業')}</div>
     </div>
-    <div class="mood-note">氣氛值 −50~+50,以廣度為主(站上季線35%+多頭排列25%+站上月線15%+20日動能25%);點一列看領漲股。家數<3 的族群不列。</div>
+    <div class="mood-note">氣氛值 −50~+50,以廣度為主(站上季線35%+多頭排列25%+站上月線15%+20日動能25%);點一列看領漲股。分類為 FinMind 產業鏈,一檔可跨多條鏈,家數<3 的族群不列。</div>
     ${rows.length?rows.map(_moodRow).join(''):'<div class="empty" style="padding:40px 0">此分類目前沒有符合的族群</div>'}`;
 }
 function setHmView(v){

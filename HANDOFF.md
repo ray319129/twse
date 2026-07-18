@@ -432,7 +432,8 @@ GitHub 內建 `schedule` 會延遲 5~30 分,**已移除**;改由 **cron-job.org 
 
 ### 新增檔案
 
-**`docs/sector_map.json`**:族群對照表,兩層結構:
+**`docs/sector_map.json`**:族群對照表,兩層結構
+(⚠️ **2026-07-19 已整包換成 FinMind 產業鏈,以下 `_industry_map`/`_override` 描述僅供考古,見第 24 節**):
 - `_industry_map`:TWSE 官方 46 個產業類別 → `{sector, sub_sector}` 預設映射。
 - `_override`:130 個股 ID → `{sector, sub_sector}` 覆蓋(優先度高於 _industry_map)。
 - **12 個大族群**:半導體、AI/伺服器、電子零組件、光電顯示、終端設備、車用電動車、能源電力、金融、傳產、生技醫療、通訊網路、其他。
@@ -715,3 +716,32 @@ with open(docs_dir/"heatmap.json","w",encoding="utf-8") as f:
 **⚠️ 匯出/匯入改成全帳戶:** `portExport()` 匯出**整個 ACC**(不只目前帳戶)—— 否則使用者會以為備份了卻漏掉另一個帳號。`portImportFile()` 同時相容新版(多帳戶)與舊版(單一 positions,匯入到目前帳戶)。
 
 **驗證:** 瀏覽器實測 —— 舊資料自動遷移(2 檔→預設帳戶、新 key 已寫、舊 key 保留)、新增第二帳戶、**切換後兩邊持倉完全隔離**(預設 2 檔 / 永豐 1 檔互不污染)、重新 load 持久化正確、匯出含全部帳戶、單一帳戶時隱藏刪除鈕。
+
+---
+
+## 24. 族群分類換成 FinMind 產業鏈(2026-07-19)
+
+**動機:** 舊分類是 `docs/sector_map.json` 手工維護的 46 條 `_industry_map` + 306 筆 `_override`,底層是 TWSE 的粗類別(電子零組件業/其他電子業…),每次分類不準就得人工再補 override(見第 15 節那幾輪修正)。改用 **FinMind `TaiwanStockIndustryChain`**:**47 產業 / 483 細產業 / 2344 檔**,而且**一檔可屬於多條產業鏈** —— 鴻海同時在 電腦及週邊設備(伺服器/主機板/機殼/NB…)、通信網路、連接器、電動車輛。這才是台股實際在講的「族群」。
+
+**新檔 `scripts/industry_chain.py`** — `build_sector_map(out_path)` 抓 FinMind 寫出 `docs/sector_map.json`,新 schema(舊的 `_industry_map`/`_override` 已整包淘汰):
+```json
+{"_source":"FinMind TaiwanStockIndustryChain","_built":"2026-07-19",
+ "_stats":{"stocks":2344,"industries":47,"sub_industries":483},
+ "chain":  {"2317":[["電腦及週邊設備","伺服器"],["連接器","連接器設計、組裝及製造"],...]},
+ "primary":{"2317":["電腦及週邊設備","伺服器"]}}
+```
+- `chain` = 全部歸屬,**市場氛圍**用(一檔計入多個族群)。
+- `primary` = 代表性那一條,**treemap** 用(一檔只能放一格,否則成交額重複計)。挑法:先取該檔細產業條數最多的產業(同分取全市場較大者),再取該產業內家數最多、名字非「其他…」的細產業(排「其他」是因為 FinMind 每個產業都有垃圾桶分類,不排的話 treemap 一大票擠在「其他電腦及週邊設備」)。
+- 細產業名常帶一長串舉例(「網路設備(如數據機、網路卡…)」),建檔時把括號整段砍掉。
+- **抓不到就回 None 不動既有檔案** —— 單次 API 掛掉不該讓整頁族群空白。
+- 手動重建:`FINMIND_TOKEN=… python -m scripts.industry_chain`。
+
+**`scripts/main.py`:** 寫完 `heatmap.json` 後呼叫 `build_sector_map(docs_dir/"sector_map.json")`,包在 try 內(失敗只 warning)。分類變動很慢,但跟著批次每天重抓最省事。
+
+**`docs/index.html`:**
+- `hmSecOf(s,sm)` 改讀 `primary`;新增 `hmSecsOf(s,sm)` 回全部歸屬給 `moodAgg` 用。**FinMind 沒收錄的退回 TWSE 原始產業名**(多為 KY 股,掃描池 860 檔中 18 檔,約 2%),不硬塞。
+- `moodAgg`:一檔屬於幾條鏈就計入幾組(同組內去重)。**各組家數加總會大於總檔數,這是刻意的,族群本來就重疊。**
+- 抽出 `_moodOf(arr,hasBreadth)`;**大盤氣氛改用全體個股直接算**,不再用各族群加權平均 —— 產業鏈重疊會讓跨鏈多的權值股(鴻海、台達電)被重複計到而放大。
+
+**驗證(browser preview,7/17 資料 860 檔):** treemap **47 個產業、860 個 leaf(無重複計)**、18 檔 fallback;市場氛圍 47 列,被動元件 47 檔 −50.0、半導體/電腦及週邊設備/印刷電路板/連接器/智慧電網 等新族群正確出現;細產業層可用;無 console 錯誤。
+⚠️ 現有 `heatmap.json` 是 7/17 產的,還沒有 `p`(股價)/`k`(K棒)欄位,所以成分股展開的股價欄顯示「—」、迷你K留白 —— **與本次改動無關**,下次批次跑完就有。
