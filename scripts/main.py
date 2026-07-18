@@ -716,6 +716,16 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     events_cfg = cfg.get("events", {}) or {}
     events = (upcoming_events(today, events_cfg.get("horizon_days", 7))
               if events_cfg.get("enabled", True) else None)
+    # 即時資料源狀態(鐵則二:降級要看得見)。FinMind Sponsor 是按月訂閱,到期後
+    # 全市場即時快照就沒了 —— 網頁必須顯示現在是即時還是昨收、訂閱還剩幾天,
+    # 不能靜默降級讓使用者拿昨收當即時在做決定。查不到一律當「沒有」,不擋批次。
+    try:
+        from .quotes import sponsor_status
+        from .snapshot_archive import archive_stats
+        realtime = {"sponsor": sponsor_status(), "archive": archive_stats()}
+    except Exception as e:
+        log.warning(f"即時資料源狀態查詢失敗(不影響批次):{e}")
+        realtime = None
     with open(docs_dir / "data.json", "w", encoding="utf-8") as f:
         json.dump(_json_safe({
             "date": today.isoformat(),
@@ -728,6 +738,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "watchlist": watchlist_clean,
             "performance": performance,
             "events": events,
+            "realtime": realtime,
             "label": STRATEGY_LABEL,
         }), f, ensure_ascii=False, indent=2, default=str)
 

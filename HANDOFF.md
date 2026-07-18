@@ -745,3 +745,70 @@ with open(docs_dir/"heatmap.json","w",encoding="utf-8") as f:
 
 **驗證(browser preview,7/17 資料 860 檔):** treemap **47 個產業、860 個 leaf(無重複計)**、18 檔 fallback;市場氛圍 47 列,被動元件 47 檔 −50.0、半導體/電腦及週邊設備/印刷電路板/連接器/智慧電網 等新族群正確出現;細產業層可用;無 console 錯誤。
 ⚠️ 現有 `heatmap.json` 是 7/17 產的,還沒有 `p`(股價)/`k`(K棒)欄位,所以成分股展開的股價欄顯示「—」、迷你K留白 —— **與本次改動無關**,下次批次跑完就有。
+
+---
+
+## 25. 即時報價層 + 全市場快照存檔(2026-07-19)
+
+**背景:** 使用者開通 FinMind **Sponsor**(實測 level 3、6000 req/**hour**、訂閱 2026-07-17 ~ **08-17**,按月、隨時可能不續)。實測發現關鍵端點:
+
+```
+GET /api/v4/taiwan_stock_tick_snapshot        ← 不帶 data_id 就是「全市場」
+→ 2852 檔、一次呼叫、0.7 秒、171 KB
+```
+
+帶了三個原本完全沒有的欄位:**均價 `average_price`(VWAP)、量比 `volume_ratio`、最佳一檔委買賣**。
+(對照原本的盤中即時:只有核心 ~5 檔、一天兩個時點、靠 TWSE MIS 非官方 API。)
+
+⚠️ **「盤中是否真即時、有沒有延遲」尚未驗證** —— 建置當天是週日,時間戳為上週五 14:30。**必須在交易日盤中實測一次**才能下結論。
+
+### 瓶頸是儲存不是額度(實測)
+| 存檔頻率 | API 用量 | 儲存 |
+|---|---|---|
+| 每天 1 次 | 0.02% | 3 MB/月 ✅ |
+| 每天 7 檢查點 | 0.1% | **8 MB/月** ✅(實際比估算小,parquet 跨檢查點壓縮字串) |
+| 每分鐘 | 4.5% | 900 MB/月 ❌ |
+| 每 5 秒 | 54% | 10.8 GB/月 ❌ |
+
+**「監控」可高頻(不存檔)、「存檔」一天 7 點。** 別因為額度夠就拉高存檔頻率。
+
+### 三條鐵則(使用者明確要求)
+
+**鐵則一:即時資料絕不進選股/回測層。** 訂閱到期時選股會**安靜地**壞掉(不 raise,只是少一個因子、分數整體偏移),回測結果更會永遠重現不了。
+→ 用程式碼守,不是註解:**`scripts/check_realtime_isolation.py`** 用 AST 檢查 `scoring/indicators/backtest/screener/industry` 有沒有 import `quotes`/`snapshot_archive`,違規 exit 1。**已接進 `daily.yml` 的 `Check realtime isolation` step**。已做反向測試(故意加一行 import → 確實擋下並指出行號)。
+
+**鐵則二:降級要看得見,不准靜默。** 每筆 `Quote` 帶 `source` + `ts`;`main.py` 把 `sponsor_status()` + `archive_stats()` 寫進 `data.json.realtime`;前端 `dataSourceBox()` 在盤中即時頁顯示「即時/降級」、訂閱剩幾天(**≤7 天轉警示色當續訂提醒**)。
+
+**鐵則三:每天存檔。** 存下來的均價/量比在訂閱到期後沒有 API 補得回來。
+
+### 新增檔案
+
+**`scripts/quotes.py`** — 統一報價層,三段降級:
+```
+① Sponsor 全市場快照 2852 檔(含 vwap/量比/委買賣)
+② TWSE MIS 逐檔(原本的作法,50 檔/批)
+③ 本機 parquet 昨收(最後防線)
+```
+- `get_quotes(symbols)` → `{sid: Quote}`,**永遠回得到東西**。`vwap`/`volume_ratio`/`bid`/`ask` 只有 ① 有,呼叫端必須當「可能沒有」處理。
+- `sponsor_status()` 查等級與到期日,查不到一律 `active=False`(保守降級)。
+- `market_snapshot_source()` 給網頁用;**區分「訂閱到期」與「有訂閱但 API 暫時異常」**,免得誤判成該續訂。
+- ⚠️ **踩到的坑:`NaN` 在 Python 是 truthy**,`row.get("close") or None` 擋不掉,停牌股會把 NaN 帶進前端。全部欄位改走 `_num()`。
+- ⚠️ 快照的 `name` 欄實測**只有 3.2% 有值**,用本機月快取 `stock_info` 補(不額外打 API)。
+
+**`scripts/snapshot_archive.py`** — `data/snapshots/YYYY-MM/YYYY-MM-DD.parquet`,一天一檔含當天所有檢查點(`snap_tag` 欄)。
+- **同 tag 重跑會覆蓋該 tag 的列**(補跑安全,實測 5704 列重跑仍是 5704)。
+- **時間戳守門**:快照日期 ≠ 今天(假日/颱風假/尚未更新)就不寫檔,避免污染歷史。
+- `archive_stats()` 給網頁顯示累積量。
+
+**`.github/workflows/snapshot.yml`** — `workflow_dispatch` 帶 `tag`,7 個檢查點見 `SETUP_PREMARKET_CRON.md` 新增章節(0900/0930/1000/1100/1200/1300/1330,只設一條就設 **1330**)。非交易日/無訂閱/API 失敗都乾淨跳過不變紅。
+
+### 驗證
+三層降級全部實跑且**三層價格一致**(2330 都是 2290):① sponsor 拿到 vwap 2351.58/量比 2.7/委買賣;② 模擬快照掛掉 → 落到 MIS(有價無 vwap);③ 再關掉 MIS → 落到本機昨收 `is_live=False`。存檔的 stale 守門、append、同 tag 去重都正確。前端四種狀態(無資料/正常/剩5天/已到期)文案皆正確、無 console 錯誤。
+測試時產生的假存檔(同一份收盤資料被標成兩個檢查點)**已刪除**,不留造假的盤中歷史。
+
+### 還沒做(下一步)
+1. **盤中實測延遲** ← 前提,沒驗證前別把它當即時用
+2. 盤中停損/停利實時觸發(出場層是目前唯一加分的環節,+12.83pp)
+3. 跳空棄單當場決策
+4. 移動停利改用當日盤中高點(現在取日收盤,停利點位一直被低估)
+5. 等存夠資料後驗 VWAP/量比因子(**量比天生是比例,不用再做規模中性化**)

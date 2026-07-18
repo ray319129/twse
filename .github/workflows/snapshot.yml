@@ -1,0 +1,71 @@
+name: Market Snapshot Archive
+
+# 全市場即時快照存檔(鐵則三)。FinMind Sponsor 的 taiwan_stock_tick_snapshot 不帶
+# data_id 就回全市場 2852 檔,**一次呼叫**。存下來的均價/量比/委買賣在訂閱到期後
+# 沒有任何 API 補得回來 —— 今天沒存就永遠沒有。
+#
+# 觸發同 premarket:外部 cron(cron-job.org)→ workflow_dispatch,帶 tag 參數。
+# 建議的檢查點(台北時間)與理由見 scripts/snapshot_archive.py:
+#   0900 開盤缺口 / 0930 開盤半小時強弱 / 1000 1100 1200 盤中 / 1300 尾盤前 / 1330 收盤
+#
+# 成本:一份快照 parquet 約 150 KB,7 個檢查點/日 ≈ 0.4 MB/日、8 MB/月。
+# ⚠️ 不要改成每分鐘跑 —— API 額度撐得住(6000/hr,這只用 7 次),但 repo 撐不住(900 MB/月)。
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "檢查點標籤(0900/0930/1000/1100/1200/1300/1330);留空用當下時間"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot            # 不分 tag:同時只跑一個,避免兩個 job 同時改同一個 parquet
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Archive snapshot
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -n "$TAG" ]; then
+            python -m scripts.snapshot_archive --tag "$TAG"
+          else
+            python -m scripts.snapshot_archive
+          fi
+
+      - name: Commit archive
+        run: |
+          # 非交易日 / 訂閱到期 / API 失敗 → 沒有新檔案,乾淨跳過不讓 job 變紅
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/snapshots 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No snapshot change (holiday / no sponsor / API down)."
+          else
+            git commit -m "snapshot: market archive $(date -u +'%Y-%m-%d %H:%M')Z"
+            git pull --rebase origin main || true
+            git push
+          fi

@@ -2039,6 +2039,7 @@ function renderLive(force){
     const stamp=new Date().toLocaleTimeString('zh-Hant',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     let h=`<div class="live-head"><div class="live-upd"><span class="ld"></span>選股基準日 ${esc(d.date)||'—'} · 資料時間 ${esc(upd)||'—'} · 檢查於 ${stamp} · 每 60 秒自動更新</div><button class="refresh" id="lrefresh" aria-label="重新整理盤中資料"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>重新整理</button></div>`;
     h+=`<div class="note-box">盤前 08:45 自動分類、開盤後 09:25 自動判突破。掛<b>限價單</b>、別市價追。本頁非逐秒即時,於上述時點(與你手動觸發)更新。</div>`;
+    h+=dataSourceBox();
     if(po){h+=gateBox(po.gate);h+=eventsBox(po.events);h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>盤前分類 — 有效 ${isNum(po.valid_count)?po.valid_count:0}/${isNum(po.total)?po.total:0} 檔</div>`;
       h+=(po.rows||[]).map(liveCard).join('')||'<div class="empty">盤前無分類資料</div>';}
     if(orb){h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>開盤 15 分 ORB — 已突破 ${isNum(orb.fired_count)?orb.fired_count:0} 檔</div>`;
@@ -2051,6 +2052,27 @@ function renderLive(force){
     panel.innerHTML='<div class="live-head"><div class="live-upd" style="color:var(--muted)">盤中即時資料尚未產生</div><button class="refresh" id="lrefresh" aria-label="重新整理盤中資料"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>重新整理</button></div><div class="empty"><span class="ei">📡</span>盤中即時資料尚未產生。系統於每交易日 08:45(盤前分類)與 09:25(開盤15分突破)自動更新;需先有當日盤後核心選股。</div>';
     const rb=$('#lrefresh');if(rb)rb.onclick=()=>renderLive(true);
   });
+}
+/* 資料源狀態(鐵則二:降級要看得見)。FinMind Sponsor 是按月訂閱,到期後全市場即時
+   快照就沒了,系統會自動退回 MIS 逐檔 / 昨收 —— 但**絕不能靜默降級**,否則你會拿
+   昨收當即時在做決定。這一條也順便當續訂提醒(剩 ≤7 天轉警示色)。 */
+function dataSourceBox(){
+  const rt=(DATA&&DATA.realtime)||null;
+  if(!rt||!rt.sponsor)return '';
+  const s=rt.sponsor,a=rt.archive||{};
+  const live=!!s.active,dl=s.days_left;
+  const warn=live&&isNum(dl)&&dl<=7;
+  const col=!live?'var(--down-ink)':warn?'var(--warn)':'var(--up-ink)';
+  const label=!live
+    ? '非即時 — 已降級為昨收/MIS 逐檔'
+    : `即時(全市場)· ${esc(s.level_title||'Sponsor')}`;
+  const exp=live&&s.expires
+    ? ` · 訂閱至 ${esc(s.expires)}${isNum(dl)?`(剩 ${dl} 天${warn?',該續訂了':''})`:''}` : '';
+  const arc=a.days?` · 已存 ${a.days} 個交易日快照 ${a.mb} MB`:'';
+  return `<div class="note-box" style="border-left:3px solid ${col}">
+    <b style="color:${col}">資料源:${label}</b>${exp}${arc}
+    ${live?'':'<br>即時快照無法取得(訂閱到期或 API 異常),盤中數字可能是昨收 —— 別當即時用。'}
+  </div>`;
 }
 let liveTimer=null;
 function startLivePoll(){stopLivePoll();renderLive(true);liveTimer=setInterval(()=>renderLive(true),60000);}

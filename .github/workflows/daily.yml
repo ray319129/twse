@@ -40,6 +40,11 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      # 鐵則一:即時報價(Sponsor 訂閱制)絕不可進選股/回測層,否則訂閱到期那天
+      # 選股會安靜地壞掉、回測也再也重現不了。這裡先擋,違規就讓整個批次紅掉。
+      - name: Check realtime isolation
+        run: python -m scripts.check_realtime_isolation
+
       - name: Run daily screener
         env:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
