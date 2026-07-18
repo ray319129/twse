@@ -243,6 +243,11 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
                 "new_stock": bool(s.get("new_stock")), "index_below_ma20": index_below_ma20,
                 "sig_close": round(sig_close, 2), "sig_rets": sig_rets, "bench_rets": bench_rets,
                 "style": _style_of(s), "_pos_master": pos_master, "_pos_d": pos_d,
+                # 信心分「分項」:用來診斷排序為何不單調(哪個分項其實是反指)。
+                # 只是把 compute_conviction 已算好的值帶出來,不影響選股邏輯。
+                "c_trend": s.get("trend"), "c_rs": s.get("rs"), "c_setup": s.get("setup"),
+                "c_quality": s.get("quality"), "c_liquidity": s.get("liquidity"),
+                "c_exhausted": bool(s.get("exhausted")),
             })
 
         if (di + 1) % 20 == 0:

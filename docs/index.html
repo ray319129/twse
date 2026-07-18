@@ -845,8 +845,10 @@ function renderDash(){
   </div>`;
 
   /* ----- confidence distribution ----- */
-  const buckets=[['80+',0],['70–79',0],['60–69',0],['<60',0]];
-  c.forEach(s=>{const v=isNum(s.score)?Number(s.score):0;if(v>=80)buckets[0][1]++;else if(v>=70)buckets[1][1]++;else if(v>=60)buckets[2][1]++;else buckets[3][1]++;});
+  // 分桶依 scoring.weights v3 的新尺度(2026-07-18):rs 轉負權重後分數攤開成 ~5~93、
+  // 已觸發選股中位約 62(舊尺度是 52~97、中位 82.5)。沿用舊分桶會讓所有股看起來像變差。
+  const buckets=[['75+',0],['60–74',0],['45–59',0],['<45',0]];
+  c.forEach(s=>{const v=isNum(s.score)?Number(s.score):0;if(v>=75)buckets[0][1]++;else if(v>=60)buckets[1][1]++;else if(v>=45)buckets[2][1]++;else buckets[3][1]++;});
   const maxB=Math.max(1,...buckets.map(b=>b[1]));
   const distHtml=`<div class="panelcard">
     <div class="pc-h">信心分分布 <span style="font-size:12px;color:var(--muted);font-weight:600">核心 ${c.length} 檔</span></div>
