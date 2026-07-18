@@ -511,3 +511,25 @@ with open(docs_dir/"heatmap.json","w",encoding="utf-8") as f:
 1. 等下次 `main.py` 排程跑完,`heatmap.json` 會自動更新到最新交易日的 ~880 支全市場資料。
 2. 電子零組件/電子零組件 仍剩 56 支低量個股;電子工業/電子工業 仍有 96 支。若要繼續細分,可對低量個股逐一加 override。
 3. 其他/其他 剩 19 支來自 TWSE `其他` 類(真正雜項),難以細分,屬正常殘留。
+
+---
+
+## 16. 補價格史到 2021(含 2022 空頭)+ 修 backtest bug(2026-07-18)
+
+**動機:** 回測與分點因子驗證原本只有 2024-09→2026-07 這段**單一多頭**,證明不了空頭。用 FinMind Sponsor 把價格史往前補到 2021,納入 **2022 台股大空頭**(TWII 18500→12600 −32%),讓回測變多空雙 regime。
+
+**做了什麼:**
+1. **補價格史**:FinMind bulk `TaiwanStockPrice`(raw)+`TaiwanStockPriceAdj`(還原價)**逐日**抓(range 不給 data_id 會回 0 列,只能逐日),1242 交易日 × 2 = ~2484 呼叫 @1.6s(≈37/min,無 ban,~117 分)。`data/prices/*.parquet` 每檔補到 **2021-06-01→2026-07-09**;TWII 用 yfinance ^TWII 補到 2021-05。**adj 覆蓋率 2.7%→100%** → `compute_all` 還原價分支全檔啟用,除息假跳空對「指標」污染徹底解決。FinMind 原始收盤與舊 yfinance 收盤逐檔相等,接縫無虞。
+2. **⚠️ 踩坑 A(資料)**:FinMind 對停牌/零星交易日回 **OHLC 全 0** 但帶微量 volume(4/98/106),`volume>0` 擋不掉 → -100% 及隔天 +數千% 假報酬。修:合併時要求 open/high/low/close 全 >0。清後 >10.5% 跳空 1.0%→0.09%(剩真除權/減資,均值中性)。
+3. **⚠️ 踩坑 B(程式,重要)**:補史令 adj 覆蓋率達標後,`backtest._replay` 的 `sig_close` 誤取 `compute_all` 輸出(=還原價),但前向報酬/出場用原始價 → 選股層假膨脹 **+10.71%**、執行層幾乎全跳空棄單。**修 `scripts/backtest.py`:sig_close 改取 `raws[sid]` 原始收盤**(與報酬/出場同基準)。修後選股層 h=1 回 +0.29%、已實現交易 2375→7407。**線上 `track.py` 無此 bug**(df=load_prices 原始價、sig_close=p["entry"] 原始成交價,已查證)。詳見記憶 `twse-backtest-signal-close-adj-bug`。
+
+**驗證結果(誠實):**
+- **基礎回測**(2021-11→2026-07,~58 個月):選股層仍有溫和 alpha(h=1 +0.29%、30日超額 +1.16%),但**執行層淨 −0.20%/筆(出場規則賠光,老結論跨 regime 依舊成立)**。2022 空頭月份純多動能大失血(1/4/6/9/12 月 −3~−4.5%),證實偏多系統。弱盤(跌破月線)樣本 389→1678,可信度大增。
+- **分點因子多空 regime 驗證**(`branch_validation/validate_regime.py`,TWII 對 60 日均線判強/弱,弱盤樣本 282→**1223** 含整個 2022 空頭):因子**沒完全翻臉但半邊崩**——
+  - `net_breadth` 逆向:**避開擁擠買(Q4 最差)= regime-robust**(強/弱盤 Q4 皆最差);但**買低廣度冷門股(Q1 最佳)是純多頭現象**(強盤 Q1 執行 +1.11%,弱盤 Q1 執行 **−1.66% 最差**)。
+  - `top5_net_conc` 集中:強盤 Q4 +1.12% 成立,弱盤 edge 幾乎歸零。
+  - **接線上時:逆向 Q1 加分要掛大盤 regime(弱盤關掉),Q4 擁擠買不分多空一律扣。**
+
+**產物/可重用:** merge 腳本與每日快取在 scratchpad(`merge_history.py`、`pricecache/`、`prices_backup`=最原始 yfinance 備份);`branch_validation/` 內 `validate_regime.py`、`picks_regime.pkl`(8712 筆重放)、`branch_cache.parquet`(擴到 4472 筆含 2022)。跑腳本需 `.finmind_token`(不留存,需重貼)。
+
+**未解:** 倖存者偏誤(universe=今天還在的股,下市股缺席)——需 point-in-time 上市清單,優先度低,標記待查。

@@ -37,10 +37,14 @@ from .track import _simulate_exit, _style_of, _net_return, HORIZONS
   2. valuation=None:估值快照(PE/殖利率/PB)只有「今天」的值,無歷史時點對齊 → 品質面給中性 0.5(對全檔一致,
      不影響相對排序太多)。線上 quality 權重僅 0.05,影響小。
   3. 倖存者偏誤:universe = 今天還在的 1976 檔 parquet,歷史下市/暫停交易的股已消失(坑#2,無法補,標記)。
-  4. 除權息跳空污染:parquet adj_close 覆蓋率僅 ~3% → compute_all 的還原價分支不啟動,全程用原始價;
-     _simulate_exit 本就吃原始價(與線上一致)。跨除息日的報酬會被自然下跳污染(坑#3,現逢除權息旺季尤甚,標記)。
-  5. 時間段偏誤:資料僅 ~22 個月單一多頭段;「回測賺」可能只是 beta。故一切以「超額報酬 vs TWII」與
-     「弱盤(指數跌破月線)分組」為主軸,絕不看絕對報酬(坑#4)。
+  4. 除權息跳空污染(2026-07-18 大幅改善):價格史用 FinMind 補到 2021-06 後,adj_close 覆蓋率 ~100%
+     → compute_all 的還原價分支已啟動,均線/動能/RSI/KD/布林等「指標」不再被除息假跳空污染。
+     但 _signal_returns / _simulate_exit 的「報酬」仍吃原始價(與線上一致、漲停/停損需真實價);跨除息日
+     報酬仍有自然下跳,不過實測全市場 1 日均值中性(~0.05%)、稀有公司行為跳空(除權/減資/復牌,~0.09%)
+     為已知尾端。→ 指標污染已解,報酬層維持「看超額」的老原則。
+  5. 時間段偏誤(2026-07-18 大幅改善):資料已含 2021-09→2026-07(~58 個月),涵蓋 2022 台股大空頭
+     (TWII 18500→12600、−32%)與多次回檔 = 真正的多空雙 regime。仍以「超額報酬 vs TWII」與
+     「弱盤(指數跌破月線)分組」為主軸,但現在弱盤/空頭樣本已足、可實證(坑#4 大幅緩解)。
 """
 
 WARMUP_BARS = 60          # compute_conviction 的 gate(= min_history_new);同時當暖身:前 60 根不重放
@@ -189,7 +193,13 @@ def _replay(cfg: dict, universe_limit, start, end, use_regime: bool):
                             b_ld += 1
             conv = compute_conviction(sl, None, cfg=score_cfg)
             if conv and conv.get("trigger"):
-                sig_close = float(close_v) if pd.notna(close_v) else None
+                # sig_close 必須取「原始價」:選股層前向報酬(_signal_returns)與出場模擬
+                # (_simulate_exit 的 entry/gap/停損)全吃 raws[sid](原始價,漲停/停損需真實價)。
+                # 補史後 adj 覆蓋率~100% → compute_all 的 ind.close 已是還原價(比原始價低一個累積除息
+                # 因子),若拿它當 sig_close 分母,前向報酬會被同幅膨脹 ~+10%、且 gap 幾乎全 >max_chase
+                # 被誤判跳空棄單。故一律以 raws[sid] 的原始收盤為 sig_close(與報酬/出場同基準)。
+                raw_close_v = raws[sid]["close"].iloc[cut - 1]
+                sig_close = float(raw_close_v) if pd.notna(raw_close_v) else None
                 if sig_close:
                     conv["stock_id"] = sid; conv["sig_close"] = sig_close; conv["_pos_d"] = cut - 1
                     day_scored.append(conv)
@@ -527,8 +537,8 @@ def print_report(rep: dict) -> None:
     _dump_exec("依選股月份", rep.get("execution_by_month"))
 
     print("\n" + "-" * 78)
-    print("誠實邊界:①倖存者偏誤(下市股已消失)②除權息跳空污染(adj 覆蓋率<3%,全程原始價)")
-    print("        ③僅 ~22 個月單一多頭段,證明不了空頭 ④純技術層,不含線上 stage-2 籌碼/基本面/新聞加成")
+    print("誠實邊界:①倖存者偏誤(下市股已消失)②指標已用還原價(adj 覆蓋率~100%);報酬層仍吃原始價(均值中性)")
+    print("        ③已含 2022 空頭(~58 個月多空雙 regime)④純技術層,不含線上 stage-2 籌碼/基本面/新聞加成")
     print("        ⑤估值快照無歷史時點對齊,品質面一律中性。→ 看『超額』與『弱盤分組』,別信絕對報酬。")
     print("-" * 78)
 
@@ -555,7 +565,7 @@ def print_sweep(rep: dict) -> None:
               f"{r['avg_hold_days']:>5} {str(ma)+'%':>8}")
     print("  " + "-" * 88)
     print("  淨報酬/超額為執行層(隔日開盤進場+扣成本);均線停損% = 該出場參數下由均線停損出場的比例。")
-    print("  誠實邊界同單次回測(倖存者/除權息/單一多頭段/純技術層);此掃描僅比『相對高下』,別當絕對保證。")
+    print("  誠實邊界同單次回測(倖存者/純技術層;已含 2022 空頭、指標用還原價);此掃描僅比『相對高下』,別當絕對保證。")
 
 
 # ---------------------------------------------------------------------------
@@ -817,7 +827,7 @@ def print_portfolio(rep: dict) -> None:
               f"{r['rotations_per_year']:>7} {str(r['trade_win_rate'])+'%':>6}{mark}")
     print("  " + "-" * 100)
     print("  CAGR/回撤為『固定資金、最多同時N檔、湊不滿擺現金』的權益曲線;超額 = 策略CAGR - 買TWII抱著CAGR。")
-    print("  ⚠️ 誠實邊界同前:單一多頭段 + 倖存者偏誤 + 純技術層。超額為正也只代表『這段多頭贏過大盤』,非未來保證。")
+    print("  ⚠️ 誠實邊界:倖存者偏誤 + 純技術層(已含 2022 空頭多空雙 regime、指標用還原價)。超額為正代表贏過大盤,非未來保證。")
 
 
 def _json_safe(o):
