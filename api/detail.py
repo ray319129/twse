@@ -45,6 +45,8 @@ log = logging.getLogger("twse.detail_api")
 # 圖表回看的交易日上限(綁 payload 大小)。yfinance period 是日曆天,取多一點再裁。
 _MAX_BARS_DEFAULT = 250
 _CAL_DAYS_FETCH = 400        # ~270 交易日,足夠算 ma60 且裁到 250 根仍滿
+# 分點回看交易日數:反轉分數需 ≥8 天才穩,逐日抓有成本(平行後 ~1.5s),15 天是準確度/延遲的平衡點。
+_BRANCH_DAYS = 15
 
 
 def _json_safe(o):
@@ -230,10 +232,28 @@ def compute_detail(stock_id: str, max_bars: int = _MAX_BARS_DEFAULT) -> dict:
 
     holder = _bucket_holder_pie(holder_raw)
 
+    # 券商分點 + 短沖主力(FinMind Sponsor 級,逐日抓 → 需已知交易日,故得等 price_df 出來才能跑)。
+    # 只取最近 _BRANCH_DAYS 個交易日:①反轉分數需 ≥8 天才穩 ②逐日抓有成本,平行後約 1.5 秒。
+    # 任一步失敗 → branch 給 {},前端該面板不畫,絕不影響其餘圖表。
+    branch = {}
+    try:
+        from scripts.branch import fetch_branch_daily, analyze_branch
+        bdates = dates[-_BRANCH_DAYS:]
+        vol_by_date = {}
+        if "volume" in price_df.columns:
+            vol_by_date = {d.strftime("%Y-%m-%d"): float(v)
+                           for d, v in price_df["volume"].items() if pd.notna(v)}
+        bdf = fetch_branch_daily(stock_id, bdates)
+        if bdf is not None and not bdf.empty:
+            branch = analyze_branch(bdf, volume_by_date=vol_by_date)
+    except Exception as e:
+        log.warning(f"branch 分析失敗({stock_id}),略過該面板:{e}")
+
     return {
         "stock_id": stock_id, "name": name, "industry": industry, "market": market,
         "kline": kline, "ma": ma, "inst": inst,
         "margin": margin, "holding": holding, "revenue": revenue, "holder": holder,
+        "branch": branch,
     }
 
 

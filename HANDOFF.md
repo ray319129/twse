@@ -533,3 +533,27 @@ with open(docs_dir/"heatmap.json","w",encoding="utf-8") as f:
 **產物/可重用:** merge 腳本與每日快取在 scratchpad(`merge_history.py`、`pricecache/`、`prices_backup`=最原始 yfinance 備份);`branch_validation/` 內 `validate_regime.py`、`picks_regime.pkl`(8712 筆重放)、`branch_cache.parquet`(擴到 4472 筆含 2022)。跑腳本需 `.finmind_token`(不留存,需重貼)。
 
 **未解:** 倖存者偏誤(universe=今天還在的股,下市股缺席)——需 point-in-time 上市清單,優先度低,標記待查。
+
+---
+
+## 17. 券商分點 / 短沖主力面板(2026-07-18 新增,個股詳情頁)
+
+**目的:** 使用者要在個股詳情頁看籌碼與分點,並標出**哪些券商是短沖主力**、該股近日有無被主力大買/大賣、隔日倒貨或拉抬的可能。
+
+**檔案:**
+- `scripts/branch.py`(新)— `fetch_branch_daily()` + `analyze_branch()` + `_next_day_alert()`。
+- `api/detail.py` — 回應多一個 `branch` 區塊(`_BRANCH_DAYS=15`);任何失敗回 `{}`,前端該面板不畫,不影響其他圖。
+- `docs/index.html` — `branchAlertCard()`(警示卡)、`drawStNetChart()`(主力每日淨買賣+佔量%)、`drawBranchChart()`(分點排行,🔥=短沖主力)。
+
+**⚠️ 關鍵實作坑:分點資料必須逐日抓。** `TaiwanStockTradingDailyReport` 單日就 ~16000 列(分公司×成交價),**給日期區間會被 FinMind 以 400 (size too large) 拒絕**。故用 ThreadPool 平行逐日抓 15 個交易日(交易日清單取自 price_df),實測 ~1.5 秒、整支 detail API ~6 秒。另需先 `group by securities_trader_id` 把同分點多價位列加總才是該分點當日買賣量。
+
+**短沖主力判定=雙軌(不單靠寫死名單):**
+1. `KNOWN_SHORT_TERM`(11 家公開常被點名的隔日沖分點:美林1440/摩根大通8440/台灣摩根1470/高盛1480/花旗1590/凱基台北9268/凱基三多9275/富邦建國9658/永豐金9A00/日盛1650/國泰8880)—— 僅當**先驗**。
+2. **資料驅動 `reversal` 分數** = 該分點在**這檔**淨額序列的 lag-1 自相關取負值,>0.35 且該分點毛量 ≥ 全體 0.5% 才算。這是隔日沖的**行為定義**、會自我更新(實測抓到不在名單內的「港麥格理」反轉 0.42)。
+   - ⚠️ 調參經驗:未設量門檻 + 只要 5 天序列時,**128/817 家被誤標**;改成 ≥8 天 + 0.5% 毛量後降到 **12~13 家**,合理。
+
+**隔日判讀 `_next_day_alert`:** 依「主力當日淨買佔成交量%」給 **high(≥20%)/ medium(8~20%)/ low** 三級 + 白話依據。**刻意不輸出假精準機率**,並在 UI 明寫「這是風險提示不是預測,主力大買後也可能續拉」。實測 2603 長榮 = high(佔量 51.8%,買方全是名單分點);2330 = low(主力淨賣、壓力已釋放)。
+
+**⚠️ 部署前提:Vercel 的 `FINMIND_TOKEN` 必須是 Sponsor 級**,否則分點 dataset 回 4xx → 面板自動空白(不會壞頁,但看不到)。
+
+**驗證方式:** 已在瀏覽器用 mock 資料實跑 `renderDetail`,確認警示卡文案、🔥 標記、雙序列圖、以及 `branch:{}` 的降級路徑(顯示友善提示、其餘圖表正常)皆正確、無 console 錯誤。

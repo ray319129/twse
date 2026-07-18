@@ -2248,7 +2248,7 @@ fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
    個股詳情頁(MVP:K線+量+MA + 三大法人)— [[twse-stock-detail-page]]
    資料來自 /api/detail?stock=xxxx(serverless 即時查詢);ECharts 畫圖。
    ============================================================ */
-let DETAIL_CACHE={},_detailK=null,_detailInst=null,_detailRev=null,_detailMargin=null,_detailHolding=null,_detailPie=null;
+let DETAIL_CACHE={},_detailK=null,_detailInst=null,_detailRev=null,_detailMargin=null,_detailHolding=null,_detailPie=null,_detailStNet=null,_detailBranch=null;
 const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function ensureDetailOverlay(){
   let ov=$('#detail-overlay');
@@ -2265,8 +2265,8 @@ function ensureDetailOverlay(){
   return ov;
 }
 function _disposeDetailCharts(){
-  [_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie].forEach(c=>{if(c)c.dispose();});
-  _detailK=_detailInst=_detailRev=_detailMargin=_detailHolding=_detailPie=null;
+  [_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie,_detailStNet,_detailBranch].forEach(c=>{if(c)c.dispose();});
+  _detailK=_detailInst=_detailRev=_detailMargin=_detailHolding=_detailPie=_detailStNet=_detailBranch=null;
 }
 function closeDetail(){
   const ov=$('#detail-overlay');if(ov)ov.classList.remove('open');
@@ -2301,6 +2301,7 @@ function renderDetail(d){
   $('#detail-title').innerHTML=`${esc(d.stock_id)} ${esc(d.name||'')}<span class="detail-ind">${esc(d.industry||'')}</span>`;
   body.innerHTML=`
     ${portDetailBanner(d)}
+    ${branchAlertCard(d)}
     <div class="detail-actions"><a href="https://www.cmoney.tw/forum/stock/${esc(d.stock_id)}" target="_blank" rel="noopener">在 CMoney 看更多走勢/討論 ↗</a></div>
     <div class="detail-chart-title">日K線 · 量 · 均線(MA5/20/60)</div>
     <div id="detail-kchart" class="detail-chart"></div>
@@ -2312,9 +2313,100 @@ function renderDetail(d){
     <div id="detail-marginchart" class="detail-chart detail-chart-sm"></div>
     <div class="detail-chart-title">外資持股比率(%)</div>
     <div id="detail-holdingchart" class="detail-chart detail-chart-sm"></div>
+    <div class="detail-chart-title">短沖主力每日淨買賣(張)· 佔成交量%<span class="detail-ind" id="detail-st-note"></span></div>
+    <div id="detail-stnetchart" class="detail-chart detail-chart-sm"></div>
+    <div class="detail-chart-title">券商分點買賣超排行(張)<span class="detail-ind">🔥 = 短沖主力</span></div>
+    <div id="detail-branchchart" class="detail-chart"></div>
     <div class="detail-chart-title">集保股權分散<span id="detail-pie-date" class="detail-ind"></span></div>
     <div id="detail-piechart" class="detail-chart detail-chart-sm"></div>`;
   drawKChart(d);drawInstChart(d);drawRevChart(d);drawMarginChart(d);drawHoldingChart(d);drawPieChart(d);
+  drawStNetChart(d);drawBranchChart(d);
+}
+/* ---------- 券商分點 / 短沖主力(資料來自 FinMind 分點日報,當晚 21:00 更新)---------- */
+const _lots=v=>(v==null||!isFinite(v))?null:Math.round(v/1000);   // 股 → 張
+function branchAlertCard(d){
+  const b=d.branch||{},a=b.alert;
+  if(!a||!b.last_date)return '';
+  const styles={high:['#c0392b','rgba(192,57,43,.10)','rgba(192,57,43,.35)','⚠️'],
+                medium:['#b8860b','rgba(184,134,11,.10)','rgba(184,134,11,.32)','⚡'],
+                low:['#2e8b57','rgba(46,139,87,.10)','rgba(46,139,87,.30)','✓'],
+                none:['var(--muted)','var(--surface-3)','var(--line)','·']};
+  const [ink,bg,bd,icon]=styles[a.level]||styles.none;
+  const hot=(b.top_buy||[]).filter(t=>t.is_short_term&&t.net_recent>0).slice(0,3);
+  const names=hot.map(t=>`${esc(t.trader)}(${_lots(t.net_recent)>0?'+':''}${fmtInt(_lots(t.net_recent))}張)`).join('、');
+  const pct=b.st_net_pct_vol_last;
+  return `<div style="background:${bg};border:1px solid ${bd};border-left:3px solid ${ink};
+      border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+    <div style="font-size:13px;font-weight:800;color:${ink};display:flex;align-items:center;gap:7px;">
+      ${icon} 短沖主力籌碼判讀 · ${esc(b.last_date)}
+      <span style="font-weight:600;color:var(--muted);font-size:11.5px">(近 ${b.recent_days||5} 日 / 共 ${(b.short_term_ids||[]).length} 家主力分點)</span></div>
+    <div style="font-size:12.5px;color:var(--ink-2);margin-top:7px;line-height:1.65;">${esc(a.text)}</div>
+    ${hot.length?`<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">近期買超主力:${names}</div>`:''}
+    <div style="font-size:11px;color:var(--muted-2);margin-top:7px;line-height:1.5;">
+      今日主力淨${_lots(b.st_net_last)>=0?'買':'賣'} <b style="color:${ink}">${fmtInt(Math.abs(_lots(b.st_net_last)))} 張</b>${pct!=null?` · 佔成交量 <b style="color:${ink}">${Math.abs(pct).toFixed(1)}%</b>`:''}
+      　·　判定=公開主力名單 + 該股實際「今買明賣」行為(反轉分數)
+    </div>
+    <div style="font-size:10.5px;color:var(--muted-2);margin-top:5px;">
+      ⚠️ 這是<b>風險提示不是預測</b>:主力大買後隔日賣壓機率高,但也可能續拉;請搭配 K 線與大盤方向判斷。</div>
+  </div>`;
+}
+function drawStNetChart(d){
+  const el=$('#detail-stnetchart');if(!el||!window.echarts)return;
+  const rows=(d.branch||{}).st_by_date||[];
+  if(!rows.length){_emptyPanel(el,'無分點資料(需 FinMind Sponsor 級;當晚 21:00 後更新)');return;}
+  const note=$('#detail-st-note');if(note)note.textContent='　正值=主力買超,負值=主力倒貨';
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  const up=cssVar('--up-ink')||'#c0392b',dn=cssVar('--down-ink')||'#2e8b57';
+  const dates=rows.map(r=>r.date),nets=rows.map(r=>_lots(r.st_net)),pcts=rows.map(r=>r.st_net_pct_vol);
+  _detailStNet=echarts.init(el,null,{renderer:'canvas'});
+  _detailStNet.setOption({
+    animation:false,
+    legend:{data:['主力淨買賣(張)','佔成交量%'],top:0,textStyle:{color:muted,fontSize:11}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:surf,borderColor:line,textStyle:{color:ink,fontSize:12}},
+    grid:{left:58,right:52,top:26,bottom:24},
+    xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:line}},axisLabel:{color:muted,fontSize:10}},
+    yAxis:[{type:'value',name:'張',nameTextStyle:{color:muted,fontSize:10},axisLine:{show:false},
+        axisLabel:{color:muted,fontSize:10},splitLine:{lineStyle:{color:line,opacity:.5}}},
+      {type:'value',name:'%',nameTextStyle:{color:muted,fontSize:10},axisLine:{show:false},
+        axisLabel:{color:muted,fontSize:10},splitLine:{show:false}}],
+    series:[
+      {name:'主力淨買賣(張)',type:'bar',data:nets,barMaxWidth:18,
+        itemStyle:{color:p=>(p.value>=0?up:dn)}},
+      {name:'佔成交量%',type:'line',yAxisIndex:1,data:pcts,smooth:true,symbolSize:5,
+        lineStyle:{width:1.6,color:cssVar('--accent')},itemStyle:{color:cssVar('--accent')}}
+    ]
+  });
+}
+function drawBranchChart(d){
+  const el=$('#detail-branchchart');if(!el||!window.echarts)return;
+  const b=d.branch||{},buy=(b.top_buy||[]).slice(0,8),sell=(b.top_sell||[]).slice(0,8);
+  if(!buy.length&&!sell.length){_emptyPanel(el,'無分點排行資料');return;}
+  // 由賣超最多 → 買超最多,水平長條;短沖主力加 🔥 並用強調色
+  const rows=[...sell.slice().reverse(),...buy.slice().reverse()]
+    .filter((t,i,arr)=>arr.findIndex(x=>x.trader_id===t.trader_id)===i)
+    .sort((a,c)=>a.net_recent-c.net_recent);
+  const ink=cssVar('--ink-2'),line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  const up=cssVar('--up-ink')||'#c0392b',dn=cssVar('--down-ink')||'#2e8b57';
+  const labels=rows.map(t=>(t.is_short_term?'🔥 ':'')+t.trader);
+  const vals=rows.map(t=>_lots(t.net_recent));
+  _detailBranch=echarts.init(el,null,{renderer:'canvas'});
+  _detailBranch.setOption({
+    animation:false,
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:surf,borderColor:line,
+      textStyle:{color:ink,fontSize:12},
+      formatter:p=>{const t=rows[p[0].dataIndex];
+        return `${esc(t.trader)} (${esc(t.trader_id)})<br/>近${b.recent_days||5}日淨:<b>${fmtInt(_lots(t.net_recent))}</b> 張`+
+          `<br/>當日淨:${fmtInt(_lots(t.net_last))} 張`+
+          (t.is_short_term?`<br/><span style="color:#c0392b">🔥 短沖主力(${esc(t.why_short)})</span>`:'')+
+          (t.reversal!=null?`<br/>反轉分數:${t.reversal}(越高=越像今買明賣)`:'');}},
+    grid:{left:104,right:26,top:10,bottom:24},
+    xAxis:{type:'value',axisLine:{show:false},axisLabel:{color:muted,fontSize:10},
+      splitLine:{lineStyle:{color:line,opacity:.5}}},
+    yAxis:{type:'category',data:labels,axisLine:{lineStyle:{color:line}},
+      axisLabel:{color:muted,fontSize:10.5,width:96,overflow:'truncate'}},
+    series:[{type:'bar',data:vals,barMaxWidth:15,
+      itemStyle:{color:p=>(p.value>=0?up:dn),opacity:p=>(rows[p.dataIndex].is_short_term?1:.55)}}]
+  });
 }
 function drawKChart(d){
   const el=$('#detail-kchart');if(!el||!window.echarts)return;
