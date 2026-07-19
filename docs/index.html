@@ -769,6 +769,10 @@
   .q-lim-tag{font-size:11px;font-weight:800;border-radius:20px;padding:2px 9px;letter-spacing:.05em;}
   .q-lim-tag.up{background:var(--up);color:#fff;}
   .q-lim-tag.dn{background:var(--down);color:#fff;}
+  /* 分點連買連賣:天數 + 近 10 日主力淨買超小柱狀(看得出強度是遞增還遞減) */
+  .q-streak{display:inline-flex;align-items:center;gap:6px;}
+  .q-streak-b{display:inline-flex;align-items:center;gap:1px;height:11px;}
+  .q-streak-b i{display:block;width:3px;border-radius:1px;}
   /* 走勢線:40px 高、無座標軸。掃視用,不是分析用 */
   .q-spark{width:100%;height:34px;display:block;margin:9px 0 0;overflow:visible;}
   .q-spark-l{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted-2);margin-top:1px;}
@@ -1392,7 +1396,37 @@ function wlSyncPortfolio(){
   renderWatchlistBox();
   alert(n?`已把 ${n} 檔持倉加入自選池。`:'持倉都已在自選池中。');
 }
-/* 產生 config/watchlist.json 內容供貼上 —— 讓雲端批次也認得 */
+/* 一鍵同步到雲端(2026-07-19):寫回 repo 的 config/watchlist.json,
+   讓盤後籌碼補抓、分點掃描、連買連賣都認得這些股票 —— 不必再手動複製貼上。
+   ⚠️ 只送代號與備註;張數、成本、損益永遠不離開這台瀏覽器(api/watchlist.py 也會再濾一次)。 */
+function wlSecret(){
+  let s=null; try{s=localStorage.getItem('twse-wl-secret');}catch(e){}
+  if(!s){
+    s=prompt('請輸入同步密鑰(對應 Vercel 的 WATCHLIST_SECRET 環境變數)。\n只需輸入一次,之後存在本機。');
+    if(!s)return null;
+    try{localStorage.setItem('twse-wl-secret',s);}catch(e){}
+  }
+  return s;
+}
+function wlSync(){
+  if(!HEALTH_API_ENABLED)return alert('雲端同步需要部署 Vercel API。');
+  const secret=wlSecret(); if(!secret)return;
+  const stocks={}; Object.entries(WL).forEach(([id,v])=>{stocks[id]=v.name||'';});
+  if(!Object.keys(stocks).length)return alert('自選池是空的,沒有東西可以同步。');
+  const btn=$('#wl-sync'); if(btn){btn.disabled=true;btn.textContent='同步中…';}
+  fetch(HEALTH_API_BASE+'/api/watchlist',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({stocks,secret})})
+    .then(r=>r.json().then(j=>({ok:r.ok,j})))
+    .then(({ok,j})=>{
+      if(!ok||j.error){
+        if(String(j.error||'').includes('secret')){try{localStorage.removeItem('twse-wl-secret');}catch(e){}}
+        alert('同步失敗:'+(j.error||'未知錯誤'));
+      }else alert(j.changed?`已同步 ${j.n} 檔到雲端。下次批次就會涵蓋這些股票。`:'雲端內容已是最新,無需變更。');
+    })
+    .catch(e=>alert('同步失敗:'+e))
+    .finally(()=>{if(btn){btn.disabled=false;btn.textContent='同步到雲端';}});
+}
+/* 產生 config/watchlist.json 內容供貼上(離線備援:沒部署 Vercel 時仍可手動同步) */
 function wlExportConfig(){
   const stocks={}; Object.entries(WL).forEach(([id,v])=>{stocks[id]=v.name||'';});
   const txt=JSON.stringify({_comment:"自選股清單。由網頁自選池匯出,貼上後 commit 即可讓批次生效。",stocks},null,2);
@@ -1407,8 +1441,9 @@ const _qvol=v=>isNum(v)?(v>=10000?(v/10000).toFixed(1)+'萬張':num(v,0)+'張'):
 /* meter:一條分成兩段的長條。兩端都有文字標籤 —— 紅綠在色盲下分不開(ΔE 4.3),
    不能只靠顏色。ratio = 左段佔比 0~1。 */
 function qMeter(lLab,rLab,ratio,lVal,rVal){
-  if(!isNum(ratio))return `<div class="q-mtr"><div class="q-mtr-h"><span style="color:var(--muted-2)">${lLab} / ${rLab}</span><b style="color:var(--muted-2)">—</b></div>
-    <div class="q-bar"><i style="width:100%;background:var(--line)"></i></div></div>`;
+  /* 沒資料就整條不畫。截圖檢查發現跌停股(華邦電)兩條 meter 都是空的,
+     卻各佔一條灰底長條 —— 空的視覺元素比沒有更糟,會讓人以為「這裡有東西只是看不懂」。 */
+  if(!isNum(ratio))return '';
   const p=Math.max(0,Math.min(1,ratio)),pc=(p*100).toFixed(0);
   const strong=p>=0.5;
   return `<div class="q-mtr">
@@ -1514,6 +1549,7 @@ function qBody(id,compact){
     <div class="q-fund">
       <span>營收YoY <b style="color:${isNum(q.revenue_yoy)?(q.revenue_yoy>=0?'var(--up-ink)':'var(--down-ink)'):'var(--muted-2)'}">${isNum(q.revenue_yoy)?fmt(q.revenue_yoy)+'%':'—'}</b></span>
       <span>EPS近四季 <b>${_qn(q.eps_ttm)}</b></span>
+      ${streakChip(id)}
       ${chips.join('')}
     </div>`;
 }
@@ -1546,9 +1582,10 @@ function renderWatchlistBox(){
         <input id="wl-in" placeholder="股票代號" style="width:110px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)">
         <button class="refresh" onclick="wlAddFromInput()">加入</button>
         <button class="refresh" onclick="wlSyncPortfolio()">匯入持倉</button>
-        <button class="refresh" onclick="wlExportConfig()">複製設定檔</button>
+        <button class="refresh" id="wl-sync" onclick="wlSync()">同步到雲端</button>
+        <button class="refresh" onclick="wlExportConfig()" title="沒部署 Vercel 時的手動備援">複製設定檔</button>
       </div></div>
-    <div class="note-box" style="font-size:12px;color:var(--muted-2)">網頁自選池存在你的瀏覽器,<b>雲端批次看不到</b>。要讓盤後籌碼/分點掃描也涵蓋這些股票,按「複製設定檔」貼進 <code>config/watchlist.json</code> 再 commit。</div>
+    <div class="note-box" style="font-size:12px;color:var(--muted-2)">按<b>同步到雲端</b>後,盤後籌碼補抓、分點掃描、連買連賣才會涵蓋這些股票(批次跑在雲端,看不到你的瀏覽器)。<b>只上傳代號與備註</b> —— 張數、成本、損益永遠只留在本機。</div>
     ${rows}`;
   const inp=$('#wl-in'); if(inp)inp.onkeydown=e=>{if(e.key==='Enter')wlAddFromInput();};
 }
@@ -2365,6 +2402,30 @@ function loadSeries(){
   fetch('./series.json?'+Date.now()).then(r=>r.ok?r.json():null)
     .then(d=>{SERIES=d;renderWatchlistBox();}).catch(()=>{});
 }
+/* 分點連買連賣(docs/branch_streak.json,盤後 21:30 批次算)。
+   主力淨買超 = 前5大買超分點 + 前5大賣超分點;連買 = 從最近往回數連續為正的天數。 */
+let STREAK=null;
+function loadStreak(){
+  fetch('./branch_streak.json?'+Date.now()).then(r=>r.ok?r.json():null)
+    .then(d=>{STREAK=(d&&d.streaks)||null;renderWatchlistBox();}).catch(()=>{});
+}
+/* 連買連賣 chip + 近 10 日主力淨買超的小柱狀。柱狀讓「連 5 日但金額遞減」這種
+   外強中乾的情況看得出來 —— 只給天數會漏掉強度變化。 */
+function streakChip(id){
+  const s=STREAK&&STREAK[id];
+  if(!s||!s.streak)return '';
+  const buy=s.dir==='buy';
+  const col=buy?'var(--up)':'var(--down)';
+  const ser=s.net_series||[];
+  const mx=Math.max(...ser.map(Math.abs),1);
+  const bars=ser.map(v=>{
+    const h=Math.max(1,Math.round(Math.abs(v)/mx*9));
+    return `<i style="height:${h}px;background:${v>=0?'var(--up)':'var(--down)'};
+      align-self:${v>=0?'flex-end':'flex-start'}"></i>`;}).join('');
+  return `<span class="q-streak" title="主力淨買超近 ${ser.length} 日(前5大買超分點+前5大賣超分點)">
+    <b style="color:${col}">分點連${buy?'買':'賣'} ${s.streak} 日</b>
+    <span class="q-streak-b">${bars}</span></span>`;
+}
 /* 盤前算好的均線/前高/流通股數/產業別/營收EPS(docs/levels.json)。
    ⚠️ 這份**刻意由前端抓**:Vercel 的 Python 函式不會打包 repo 裡的資料檔,
    放 api/quote.py 讀會靜靜讀不到,產業別/換手率/突破/回測全變「—」(踩過)。 */
@@ -2419,8 +2480,10 @@ function startLiveQuotes(sec){
   stopLiveQuotes();
   const tick=()=>liveQuotes(liveIds());
   /* levels 一天只變一次,先載完再開始輪詢 —— 否則第一輪報價會少掉產業別/突破/換手率 */
-  loadLevels().then(tick); loadDeep(); loadSeries(); _liveTimer=setInterval(tick,(sec||20)*1000);
-  /* deep.json / series.json 都是每 10 分鐘才更新,前端 5 分鐘拉一次夠了 */
+  loadLevels().then(tick); loadDeep(); loadSeries(); loadStreak();
+  _liveTimer=setInterval(tick,(sec||20)*1000);
+  /* deep.json / series.json 都是每 10 分鐘才更新,前端 5 分鐘拉一次夠了;
+     連買連賣是盤後才算,盤中不會變,載一次即可。 */
   setInterval(()=>{loadDeep();loadSeries();},300000);
 }
 function stopLiveQuotes(){if(_liveTimer){clearInterval(_liveTimer);_liveTimer=null;}}

@@ -16,6 +16,9 @@
     },
     "api/portfolio_review.py": {
       "maxDuration": 60
+    },
+    "api/watchlist.py": {
+      "maxDuration": 20
     }
   }
 }

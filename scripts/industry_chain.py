@@ -73,7 +73,12 @@ def build_sector_map(out_path=None) -> dict | None:
         top_ind = max(by_ind, key=lambda i: (by_ind[i], ind_count[i]))
         subs = [s for i, s in ps if i == top_ind]
         named = [s for s in subs if not s.startswith("其他")] or subs
-        primary[sid] = [top_ind, max(named, key=lambda s: (sub_count[s], s))]
+        # 取家數的「中位數」那一個,不是最多也不是最少 —— 兩端都會挑錯(2026-07-19 實測 10 檔對照):
+        #   最多(max) 6/10:偏向製程類的通用桶,旺宏→IC封裝測試、華邦電→晶圓製造(兩家其實是記憶體廠)
+        #   最少(min) 6/10:偏向冷門標籤,聯發科→光儲存控制IC、台達電→LED驅動IC
+        #   中位(median) 8/10:華邦電→記憶體IC、台達電→電源管理IC、緯創→筆記型電腦 全對
+        primary[sid] = [top_ind,
+                        sorted(named, key=lambda s: (sub_count[s], s))[len(named) // 2]]
 
     data = {
         "_source": "FinMind TaiwanStockIndustryChain",

@@ -129,9 +129,163 @@ def run(day: str | None = None, limit: int | None = None) -> dict:
     return {"ok": True, "n": len(df), "day": day, "path": str(path)}
 
 
+# ---------- 分點連買/連賣天數 ----------
+#
+# 「主力連買 N 日」是籌碼K線那類軟體的招牌欄位。定義得講清楚,不然只是個看起來厲害的數字:
+#
+#   主力淨買超(當日) = 前 5 大買超分點淨買超 + 前 5 大賣超分點淨買超
+#                      (後者是負值,所以是相減的意思)
+#   連買 N 日 = 從最近一個交易日往回數,主力淨買超連續為正的天數
+#   連賣 N 日 = 同理,連續為負
+#
+# ⚠️ 用「前 5 大」而不是全部分點,是因為全部分點加總恆等於 0(有買必有賣),算出來沒有意義。
+# ⚠️ 需要歷史。`run()` 從執行當天起才有,所以另外提供 `backfill()` 回補。
+
+def _trading_days(n: int, end: str | None = None) -> list[str]:
+    """最近 n 個交易日(用本機價格檔推,不打 API)。"""
+    from .storage import load_prices
+    try:
+        df = load_prices("2330")
+        days = [str(d)[:10] for d in df.index]
+        if end:
+            days = [d for d in days if d <= end]
+        return days[-n:]
+    except Exception:
+        return []
+
+
+def backfill(days: int = 15, limit: int | None = None) -> dict:
+    """回補最近 N 個交易日的分點聚合(連買連賣要有歷史才算得出來)。
+    30 檔 × 15 日 ≈ 450 次呼叫,依安全節奏約 15 分鐘。已存在的日期會跳過。"""
+    from .branch import fetch_branch_daily
+    targets = target_stocks()
+    if limit:
+        targets = dict(list(targets.items())[:limit])
+    dates = _trading_days(days)
+    if not targets or not dates:
+        return {"ok": False, "reason": "no_targets_or_dates", "n": 0}
+    have = {p.stem for p in OUT_DIR.glob("*.parquet")} if OUT_DIR.exists() else set()
+    todo = [d for d in dates if d not in have]
+    log.info(f"分點回補:{len(targets)} 檔 × {len(todo)} 日(已有 {len(dates)-len(todo)} 日)")
+    per_day: dict[str, list] = {d: [] for d in todo}
+    for sid, name in targets.items():
+        if not todo:
+            break
+        try:
+            g = fetch_branch_daily(sid, todo, max_workers=4)   # 節制併發,避免 IP ban
+        except Exception as e:
+            log.warning(f"分點回補 {sid} 失敗:{e}")
+            continue
+        if g is None or g.empty:
+            continue
+        for d, sub in g.groupby("date"):
+            d = str(d)[:10]
+            if d not in per_day:
+                continue
+            agg = _agg_from_long(sub, sid, name, d)
+            if agg:
+                per_day[d].append(agg)
+        time.sleep(_SLEEP)
+    written = 0
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    for d, rows in per_day.items():
+        if not rows:
+            continue
+        pd.DataFrame(rows).to_parquet(OUT_DIR / f"{d}.parquet", compression="zstd", index=False)
+        written += 1
+    log.info(f"分點回補完成:寫入 {written} 個交易日")
+    return {"ok": True, "days": written, "n": len(targets)}
+
+
+def _agg_from_long(sub: pd.DataFrame, sid: str, name: str, day: str) -> dict | None:
+    """`branch.fetch_branch_daily` 的 long 表 → 與 `_aggregate` 相同欄位的一列。"""
+    if sub is None or sub.empty:
+        return None
+    total = float(sub["buy"].sum() + sub["sell"].sum())
+    if total <= 0:
+        return None
+    vol = total / 2
+    s = sub.sort_values("net", ascending=False)
+    top_buy = s.head(5)[["trader", "net"]].values.tolist()
+    top_sell = s.tail(5)[["trader", "net"]].values.tolist()
+    nb = float(s.head(5)["net"].sum())
+    ns = float(s.tail(5)["net"].sum())
+    return {
+        "date": day, "stock_id": sid, "name": name,
+        "n_traders": int(sub["trader_id"].nunique()),
+        "net_top5_buy": round(nb), "net_top5_sell": round(ns),
+        "concentration": round((nb + ns) / vol, 4),
+        "buy_concentration": round(nb / vol, 4),
+        "day_trade_ratio": round(float(sub["churn"].sum()) / vol, 4),
+        "top_buy": json.dumps([{"t": t, "net": round(float(n))} for t, n in top_buy if n > 0], ensure_ascii=False),
+        "top_sell": json.dumps([{"t": t, "net": round(float(n))} for t, n in top_sell if n < 0], ensure_ascii=False),
+    }
+
+
+def compute_streaks() -> dict:
+    """讀所有已存的分點聚合,算每檔的連買/連賣天數,寫 docs/branch_streak.json。
+    回傳 {stock_id: {streak, dir, days_used, last_date, net_series}}。
+    `streak` 恆為正整數,方向看 `dir`('buy'/'sell'/'flat')。"""
+    files = sorted(OUT_DIR.glob("*.parquet")) if OUT_DIR.exists() else []
+    if not files:
+        log.info("沒有分點歷史,連買連賣跳過(先跑 --backfill)。")
+        return {}
+    frames = []
+    for f in files:
+        try:
+            frames.append(pd.read_parquet(f))
+        except Exception:
+            continue
+    if not frames:
+        return {}
+    df = pd.concat(frames, ignore_index=True)
+    df["main_net"] = df["net_top5_buy"] + df["net_top5_sell"]
+    out = {}
+    for sid, sub in df.groupby("stock_id"):
+        sub = sub.sort_values("date")
+        nets = sub["main_net"].tolist()
+        if not nets:
+            continue
+        sign = 1 if nets[-1] > 0 else (-1 if nets[-1] < 0 else 0)
+        streak = 0
+        if sign:
+            for v in reversed(nets):
+                if (v > 0 and sign > 0) or (v < 0 and sign < 0):
+                    streak += 1
+                else:
+                    break
+        out[str(sid)] = {
+            "streak": streak,
+            "dir": "buy" if sign > 0 else ("sell" if sign < 0 else "flat"),
+            "days_used": len(nets),
+            "last_date": str(sub["date"].iloc[-1])[:10],
+            "last_net": round(float(nets[-1])),
+            # 最近 10 日的主力淨買超,給前端畫小柱狀(正負一眼看得出來)
+            "net_series": [round(float(v)) for v in nets[-10:]],
+        }
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    (DOCS_DIR / "branch_streak.json").write_text(
+        json.dumps({"updated": now_tpe().strftime("%Y-%m-%d %H:%M"), "streaks": out},
+                   ensure_ascii=False), encoding="utf-8")
+    log.info(f"分點連買連賣已更新:{len(out)} 檔(歷史 {len(files)} 個交易日)")
+    return out
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="券商分點籌碼(核心+觀察+自選)")
     ap.add_argument("--day", help="日期 YYYY-MM-DD,預設今天")
     ap.add_argument("--limit", type=int, help="只跑前 N 檔(測試用)")
+    ap.add_argument("--backfill", type=int, metavar="DAYS", help="回補最近 N 個交易日")
+    ap.add_argument("--streaks", action="store_true", help="只重算連買連賣")
     a = ap.parse_args()
-    print(json.dumps(run(day=a.day, limit=a.limit), ensure_ascii=False))
+    if a.backfill:
+        print(json.dumps(backfill(a.backfill, limit=a.limit), ensure_ascii=False))
+        compute_streaks()
+    elif a.streaks:
+        s = compute_streaks()
+        for sid, v in list(s.items())[:10]:
+            print(f"  {sid} 連{'買' if v['dir']=='buy' else '賣' if v['dir']=='sell' else '平'} "
+                  f"{v['streak']} 日(歷史 {v['days_used']} 日)")
+    else:
+        print(json.dumps(run(day=a.day, limit=a.limit), ensure_ascii=False))
+        compute_streaks()
