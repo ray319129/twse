@@ -1,0 +1,75 @@
+name: Intraday Signal Scan
+
+# 盤中全市場掃描 + 訊號提醒。對標「起漲K線」那類軟體的自動盯盤,但規則寫在
+# scripts/intraday_scan.py 裡看得見,而且每次觸發都會存進 data/alerts/ 供事後驗證。
+#
+# 觸發同 premarket:外部 cron(cron-job.org)→ workflow_dispatch。
+#   08:50 一次 mode=levels  ← 盤前算好均線/前高快取(必要,否則掃描會跳過)
+#   09:05~13:25 每 5 分鐘 mode=scan
+#
+# **同一檔同一種訊號當日只會通知一次**(去重狀態存 data/alerts/YYYY-MM-DD.json),
+# 所以「每 5 分鐘跑一次」不會變成每 5 分鐘一封信 —— 沒有新訊號時完全不寄、不 commit。
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "levels(盤前建快取)或 scan(盤中掃描)"
+        required: false
+        default: "scan"
+        type: choice
+        options: ["scan", "levels"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: intraday          # 不分 mode:避免兩個 run 同時改 data/alerts
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          MODE="${MODE:-scan}"
+          if [ "$MODE" = "levels" ]; then
+            python -m scripts.intraday_scan --build-levels
+          else
+            python -m scripts.intraday_scan
+          fi
+
+      - name: Commit alerts
+        run: |
+          # 沒有新訊號 → 沒有檔案變動 → 乾淨跳過(不會產生每 5 分鐘一個 commit)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/alerts data/levels.parquet docs/alerts.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No new signals."
+          else
+            git commit -m "intraday: signals $(date -u +'%Y-%m-%d %H:%M')Z"
+            git pull --rebase origin main || true
+            git push
+          fi

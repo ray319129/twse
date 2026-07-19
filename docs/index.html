@@ -2040,6 +2040,8 @@ function renderLive(force){
     let h=`<div class="live-head"><div class="live-upd"><span class="ld"></span>選股基準日 ${esc(d.date)||'—'} · 資料時間 ${esc(upd)||'—'} · 檢查於 ${stamp} · 每 60 秒自動更新</div><button class="refresh" id="lrefresh" aria-label="重新整理盤中資料"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>重新整理</button></div>`;
     h+=`<div class="note-box">盤前 08:45 自動分類、開盤後 09:25 自動判突破。掛<b>限價單</b>、別市價追。本頁非逐秒即時,於上述時點(與你手動觸發)更新。</div>`;
     h+=dataSourceBox();
+    h+='<div id="alerts-box"></div>';
+    loadAlerts();
     if(po){h+=gateBox(po.gate);h+=eventsBox(po.events);h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>盤前分類 — 有效 ${isNum(po.valid_count)?po.valid_count:0}/${isNum(po.total)?po.total:0} 檔</div>`;
       h+=(po.rows||[]).map(liveCard).join('')||'<div class="empty">盤前無分類資料</div>';}
     if(orb){h+=`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>開盤 15 分 ORB — 已突破 ${isNum(orb.fired_count)?orb.fired_count:0} 檔</div>`;
@@ -2053,6 +2055,35 @@ function renderLive(force){
     const rb=$('#lrefresh');if(rb)rb.onclick=()=>renderLive(true);
   });
 }
+/* 今日盤中訊號(docs/alerts.json,由 scripts/intraday_scan.py 每 5 分鐘更新)。
+   ⚠️ 同一檔同一種訊號當日只會出現一次 —— 這是刻意的,價格會在觸發價上下來回穿越,
+   每次都通知等於洗版。所以這裡看到的是「今天第一次觸發的時間」,不是最新狀態。 */
+function alertsBox(d){
+  const a=(d&&d.alerts)||[];
+  if(!a.length)return `<div class="note-box" style="color:var(--muted-2)">今日尚無盤中訊號。掃描於 09:05–13:25 每 5 分鐘執行;<b>同一檔同一種訊號當日只提醒一次</b>。</div>`;
+  const rows=a.map(r=>{
+    const t=r.type==='breakout'?'var(--up-ink)':'var(--accent)';
+    return `<div class="mk-row" style="grid-template-columns:52px 1fr auto auto">
+      <div style="color:var(--muted-2);font-size:12px">${esc(r.fired_at||'')}</div>
+      <div class="mk-nm"><b>${esc(r.name||'')}</b><span class="mk-id">${slink(r.stock_id)}</span>
+        <div style="font-size:11px;color:var(--muted-2);margin-top:2px">${esc(r.reason||'')}</div></div>
+      <div class="num">${r.price==null?'—':num(r.price)}</div>
+      <div class="num ${cls(r.change_rate)}">${fmt(r.change_rate)}%</div>
+      <div style="grid-column:1/-1;margin-top:-2px"><span style="font-size:11px;color:${t};font-weight:700">${esc(r.label||'')}</span></div>
+    </div>`;}).join('');
+  return `<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>今日盤中訊號 — ${a.length} 筆(更新 ${esc(d.updated||'')})</div>
+    <div class="note-box" style="font-size:12px;color:var(--muted-2)">同一檔同一種訊號當日只提醒一次,顯示的是<b>首次觸發</b>時間與當時價格。條件觸發≠買進建議;動能型訊號在本系統台帳的歷史超額為負。</div>
+    ${rows}`;
+}
+function loadAlerts(){
+  fetch('./alerts.json?'+Date.now()).then(r=>r.ok?r.json():null).then(d=>{
+    const el=$('#alerts-box');if(!el)return;
+    const today=(DATA&&DATA.date)||'';
+    /* 只顯示當天的;隔天沒跑到就不要拿昨天的訊號騙人 */
+    el.innerHTML=(d&&d.date&&(!today||d.date>=today))?alertsBox(d):alertsBox(null);
+  }).catch(()=>{const el=$('#alerts-box');if(el)el.innerHTML=alertsBox(null);});
+}
+
 /* 資料源狀態(鐵則二:降級要看得見)。FinMind Sponsor 是按月訂閱,到期後全市場即時
    快照就沒了,系統會自動退回 MIS 逐檔 / 昨收 —— 但**絕不能靜默降級**,否則你會拿
    昨收當即時在做決定。這一條也順便當續訂提醒(剩 ≤7 天轉警示色)。 */
