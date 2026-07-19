@@ -359,6 +359,60 @@ def _notify(day: str, new: list[dict]) -> None:
 # (見 `--measure-freshness`)。上游若 60 秒才換一次,你每 5 秒問一次也只是拿到
 # 同一份資料 —— 快的是你問的頻率,不是資料。量完再定 interval。
 
+def intraday_series(stock_ids: list[str], day: str | None = None,
+                    step: int = 3, max_pts: int = 100) -> dict:
+    """當日走勢線資料(給卡片上的迷你走勢圖)。
+
+    用 `TaiwanStockKBar` 1 分 K —— 2330 實測一天 266 筆完整 OHLCV,一檔一次呼叫。
+    **刻意不用「自己每 20 秒累積」**:盯盤 job 中途重啟或晚開,自累的線就會缺一段;
+    KBar 是回溯完整的,任何時候抓都拿得到 09:00 到現在的全部。
+
+    輸出每檔 `{t:[分鐘], c:[收盤], v:[均價], prev:昨收}`,降頻到每 `step` 分鐘、
+    最多 `max_pts` 點 —— 卡片上的圖只有 40px 高,270 個點畫上去是浪費也看不出差別。
+
+    均價線 v 用累計成交額 ÷ 累計量算(等同當日 VWAP),用來判斷「站上均價沒」。
+    """
+    from .fetchers import fetch_finmind
+    day = day or now_tpe().strftime("%Y-%m-%d")
+    out = {}
+    for sid in stock_ids:
+        try:
+            rows = fetch_finmind("TaiwanStockKBar", data_id=sid,
+                                 start_date=day, end_date=day) or []
+            if len(rows) < 2:
+                continue
+            rows.sort(key=lambda r: str(r.get("minute") or ""))
+            ts, cs, vs = [], [], []
+            cum_amt = cum_vol = 0.0
+            for i, r in enumerate(rows):
+                c = float(r.get("close") or 0)
+                vol = float(r.get("volume") or 0)
+                if c <= 0:
+                    continue
+                cum_amt += c * vol
+                cum_vol += vol
+                if i % step and i != len(rows) - 1:
+                    continue                      # 降頻,但最後一點一定保留(=最新價)
+                ts.append(str(r.get("minute") or "")[:5])
+                cs.append(round(c, 2))
+                vs.append(round(cum_amt / cum_vol, 2) if cum_vol else None)
+            if len(cs) < 2:
+                continue
+            if len(cs) > max_pts:                 # 太長就等距抽樣,保留頭尾
+                idx = [round(i * (len(cs) - 1) / (max_pts - 1)) for i in range(max_pts)]
+                ts, cs, vs = [ts[i] for i in idx], [cs[i] for i in idx], [vs[i] for i in idx]
+            out[sid] = {"t": ts, "c": cs, "v": vs}
+        except Exception as e:
+            log.warning(f"走勢線 {sid} 失敗(略過):{e}")
+    if out:
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        (DOCS_DIR / "series.json").write_text(
+            json.dumps({"date": day, "updated": now_tpe().strftime("%H:%M"), "series": out},
+                       ensure_ascii=False), encoding="utf-8")
+        log.info(f"走勢線已更新:{len(out)} 檔")
+    return out
+
+
 _deep_last = [0.0]      # 內外盤上次計算時間(list 是為了在 loop 裡可變)
 
 
@@ -469,10 +523,15 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
             # 內外盤比走逐筆資料(一檔 2 萬多筆),太重不能每輪跑 → 每 10 分鐘一次
             if polls == 1 or (time.time() - _deep_last[0]) >= 600:
                 _deep_last[0] = time.time()
+                tgt = _deep_targets()
                 try:
-                    deep_metrics(_deep_targets())
+                    deep_metrics(tgt)
                 except Exception as e:
                     log.warning(f"內外盤比更新失敗(不影響盯盤):{e}")
+                try:
+                    intraday_series(tgt)
+                except Exception as e:
+                    log.warning(f"走勢線更新失敗(不影響盯盤):{e}")
             if r.get("new_alerts"):
                 fired_total += r["new_alerts"]
                 if publish:
