@@ -1,0 +1,71 @@
+name: Branch Chips (nightly)
+
+# 券商分點籌碼 + 連買連賣天數。**分點資料當晚 21:00 才發布**,所以只能盤後跑。
+#
+# 與盤中那條一樣用 GitHub 內建 schedule:這支對「準時」不敏感(晚十幾分鐘沒差),
+# 所以排程延遲無害,使用者不必到 cron-job.org 設定。
+# cron 是 UTC,台北 = UTC+8。13:40 UTC = 21:40 台北(比 21:00 發布晚 40 分,留餘裕)。
+#
+# 範圍只有「核心 + 觀察 + 自選」約 30~40 檔(全市場要 71 分鐘且存不下),
+# 且只存聚合指標不存原始列 —— 2330 單日就 16,067 列。
+on:
+  schedule:
+    - cron: "40 13 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "回補最近 N 個交易日(留空=只跑今天)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chips
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60          # 回補 30 檔 × 15 日約 15 分鐘,留餘裕
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+        run: |
+          BF="${{ github.event.inputs.backfill }}"
+          if [ -n "$BF" ]; then
+            python -m scripts.branch_chips --backfill "$BF"
+          else
+            python -m scripts.branch_chips
+          fi
+
+      - name: Commit
+        run: |
+          # 非交易日 / 未到發布時間 / 無訂閱 → 沒有檔案變動,乾淨跳過不讓 job 變紅
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/chips_branch docs/branch_streak.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No chip changes (holiday / not published yet)."
+          else
+            git commit -m "chips: branch data $(date -u +'%Y-%m-%d')"
+            git pull --rebase origin main || true
+            git push
+          fi

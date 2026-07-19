@@ -44,6 +44,7 @@ import pandas as pd
 
 from .config import DATA_DIR, now_tpe
 from .quotes import fetch_snapshot_all, sponsor_status
+from .snapshot_archive import CHECKPOINTS, archive_snapshot
 from .storage import load_prices, price_path
 from .utils import log
 
@@ -489,13 +490,65 @@ def _git_publish(msg: str) -> None:
         log.warning(f"alerts 發布失敗(不影響盯盤):{e}")
 
 
-def loop(interval: float, until: str, notify: bool = True, publish: bool = False) -> dict:
-    """常駐輪詢到 until(HH:MM,台北時間)。任何單次失敗都吞掉繼續跑 ——
-    盯盤中途掛掉比慢一點嚴重得多。"""
+def _levels_fresh() -> bool:
+    """levels 是不是今天建的。跨日的均線/前高會讓突破判斷整個歪掉。"""
+    p = DOCS_DIR / "levels.json"
+    if not p.exists():
+        return False
+    try:
+        return json.loads(p.read_text(encoding="utf-8")).get("date") == now_tpe().strftime("%Y-%m-%d")
+    except Exception:
+        return False
+
+
+def _sleep_until(hhmm: str) -> None:
+    """睡到台北時間 hhmm。已經過了就不睡。
+
+    **這是「GitHub 內建 schedule 會延遲 5~30 分」的解法**:與其要求準時觸發,
+    不如讓 job 自己等 —— 早觸發就等,晚觸發就直接開始,延遲變成無害。
+    這樣使用者完全不必手動點,也不必去 cron-job.org 設定。
+    """
     import time
+    h, m = (int(x) for x in hhmm.split(":"))
+    while True:
+        now = now_tpe()
+        if (now.hour, now.minute) >= (h, m):
+            return
+        wait = min(60.0, ((h * 60 + m) - (now.hour * 60 + now.minute)) * 60 - now.second)
+        if wait <= 0:
+            return
+        log.info(f"等待開盤:現在 {now.strftime('%H:%M:%S')},{hhmm} 才開始")
+        time.sleep(max(1.0, wait))
+
+
+def loop(interval: float, until: str, notify: bool = True, publish: bool = False,
+         start: str | None = None, archive: bool = True) -> dict:
+    """常駐輪詢到 until(HH:MM,台北時間)。任何單次失敗都吞掉繼續跑 ——
+    盯盤中途掛掉比慢一點嚴重得多。
+
+    `start` 有給就先睡到那個時間(見 `_sleep_until`)。
+    levels 不是今天的會**自動重建** —— 這樣整個盤中只需要一個排程,
+    不必再另外設一條 08:50 的 build-levels。
+    `archive=True` 時順便在 7 個檢查點存全市場快照(取代獨立的 snapshot 排程)。
+    """
+    import time
+    if start:
+        # 先建 levels 再等開盤:建檔要 1~2 分鐘,放在等待前面才不會吃掉開盤後的時間
+        if not _levels_fresh():
+            log.info("levels 不是今天的,先重建。")
+            try:
+                build_levels()
+            except Exception as e:
+                log.warning(f"levels 自動重建失敗:{e}")
+        _sleep_until(start)
+    elif not _levels_fresh():
+        log.warning("⚠️ levels 不是今天的,突破判斷會失準;建議加 --start 讓它自動重建。")
+
     end_h, end_m = (int(x) for x in until.split(":"))
     polls = fired_total = errors = 0
-    log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止")
+    done_tags: set[str] = set()
+    log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止"
+             + ("(含快照存檔)" if archive else ""))
 
     # 開盤後先自動量一次上游更新頻率 —— 使用者不必記得手動跑,而且這是唯一能量的時機
     # (只有盤中資料才會變)。量完寫進 docs/freshness.json,網頁與下次調 interval 的依據。
@@ -532,6 +585,17 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
                     intraday_series(tgt)
                 except Exception as e:
                     log.warning(f"走勢線更新失敗(不影響盯盤):{e}")
+            # 檢查點快照存檔:併進盯盤迴圈,這樣整天只需要一個排程
+            if archive:
+                tag = now.strftime("%H%M")
+                due = [t for t in CHECKPOINTS if t <= tag and t not in done_tags]
+                if due:
+                    t = due[-1]                      # 只補最後一個,不要一次補一串
+                    done_tags.update(due)
+                    try:
+                        archive_snapshot(tag=t)
+                    except Exception as e:
+                        log.warning(f"快照存檔 {t} 失敗(不影響盯盤):{e}")
             if r.get("new_alerts"):
                 fired_total += r["new_alerts"]
                 if publish:
@@ -579,6 +643,8 @@ if __name__ == "__main__":
     ap.add_argument("--interval", type=float, default=20.0, help="輪詢間隔秒數(預設 20)")
     ap.add_argument("--until", default="13:35", help="跑到幾點停(HH:MM 台北時間)")
     ap.add_argument("--publish", action="store_true", help="有新訊號就 git commit/push")
+    ap.add_argument("--start", help="睡到這個時間才開始(HH:MM 台北);同時自動重建過期的 levels")
+    ap.add_argument("--no-archive", action="store_true", help="不要在檢查點存全市場快照")
     ap.add_argument("--measure-freshness", type=int, metavar="SEC",
                     help="量上游快照更新頻率(秒),決定 interval 用")
     a = ap.parse_args()
@@ -587,7 +653,8 @@ if __name__ == "__main__":
     elif a.measure_freshness:
         print(json.dumps(measure_freshness(a.measure_freshness), ensure_ascii=False, indent=1))
     elif a.loop:
-        print(json.dumps(loop(a.interval, a.until, not a.no_notify, a.publish), ensure_ascii=False))
+        print(json.dumps(loop(a.interval, a.until, not a.no_notify, a.publish,
+                              start=a.start, archive=not a.no_archive), ensure_ascii=False))
     else:
         r = scan(dry_run=a.dry_run, notify=not a.no_notify)
         print(json.dumps({k: v for k, v in r.items() if k != "alerts"}, ensure_ascii=False))
