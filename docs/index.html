@@ -3119,7 +3119,8 @@ fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
    個股詳情頁(MVP:K線+量+MA + 三大法人)— [[twse-stock-detail-page]]
    資料來自 /api/detail?stock=xxxx(serverless 即時查詢);ECharts 畫圖。
    ============================================================ */
-let DETAIL_CACHE={},_detailK=null,_detailInst=null,_detailRev=null,_detailMargin=null,_detailHolding=null,_detailPie=null,_detailStNet=null,_detailBranch=null;
+let DETAIL_CACHE={},_detailSid=null,_detailK=null,_detailInst=null,_detailRev=null,_detailMargin=null,_detailHolding=null,_detailPie=null,_detailStNet=null,_detailBranch=null,_detailIntra=null;
+let INTRA_CACHE={};
 const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function ensureDetailOverlay(){
   let ov=$('#detail-overlay');
@@ -3136,8 +3137,8 @@ function ensureDetailOverlay(){
   return ov;
 }
 function _disposeDetailCharts(){
-  [_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie,_detailStNet,_detailBranch].forEach(c=>{if(c)c.dispose();});
-  _detailK=_detailInst=_detailRev=_detailMargin=_detailHolding=_detailPie=_detailStNet=_detailBranch=null;
+  [_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie,_detailStNet,_detailBranch,_detailIntra].forEach(c=>{if(c)c.dispose();});
+  _detailK=_detailInst=_detailRev=_detailMargin=_detailHolding=_detailPie=_detailStNet=_detailBranch=_detailIntra=null;
 }
 function closeDetail(){
   const ov=$('#detail-overlay');if(ov)ov.classList.remove('open');
@@ -3147,6 +3148,7 @@ function closeDetail(){
 function openDetail(sid){
   sid=String(sid||'').trim();if(!sid)return;
   const ov=ensureDetailOverlay();ov.classList.add('open');
+  _detailSid=sid;                      /* 分K 按鈕要知道現在看的是哪一檔 */
   $('#detail-title').textContent=sid;
   if(location.hash!=='#stock='+sid)history.replaceState(null,'','#stock='+sid);
   if(DETAIL_CACHE[sid]){renderDetail(DETAIL_CACHE[sid]);return;}
@@ -3174,8 +3176,15 @@ function renderDetail(d){
     ${portDetailBanner(d)}
     ${branchAlertCard(d)}
     <div class="detail-actions"><a href="https://www.cmoney.tw/forum/stock/${esc(d.stock_id)}" target="_blank" rel="noopener">在 CMoney 看更多走勢/討論 ↗</a></div>
-    <div class="detail-chart-title">日K線 · 量 · 均線(MA5/20/60)</div>
+    <div class="detail-chart-title">
+      <span id="dk-title">日K線 · 量 · 均線(MA5/20/60)</span>
+      <span class="hm-toggle" style="margin-left:10px">
+        <button class="hm-toggle-btn active" id="dk-btn-d" onclick="setDetailK('d')">日K</button>
+        <button class="hm-toggle-btn" id="dk-btn-i" onclick="setDetailK('i')">分K</button>
+      </span></div>
     <div id="detail-kchart" class="detail-chart"></div>
+    <div id="detail-ichart" class="detail-chart" style="display:none"></div>
+    <div class="detail-ind" id="dk-note"></div>
     <div class="detail-chart-title">三大法人買賣超(張)</div>
     <div id="detail-instchart" class="detail-chart detail-chart-sm"></div>
     <div class="detail-chart-title">月營收(億)· 年增率 YoY(%)</div>
@@ -3191,6 +3200,7 @@ function renderDetail(d){
     <div class="detail-chart-title">集保股權分散<span id="detail-pie-date" class="detail-ind"></span></div>
     <div id="detail-piechart" class="detail-chart detail-chart-sm"></div>`;
   drawKChart(d);drawInstChart(d);drawRevChart(d);drawMarginChart(d);drawHoldingChart(d);drawPieChart(d);
+  setDetailK('d');   /* 換股後回到日K,不要停在上一檔的分K 檢視 */
   drawStNetChart(d);drawBranchChart(d);
 }
 /* ---------- 券商分點 / 短沖主力(資料來自 FinMind 分點日報,當晚 21:00 更新)---------- */
@@ -3278,6 +3288,76 @@ function drawBranchChart(d){
     series:[{type:'bar',data:vals,barMaxWidth:15,
       itemStyle:{color:p=>(p.value>=0?up:dn),opacity:p=>(rows[p.dataIndex].is_short_term?1:.55)}}]
   });
+}
+/* ---------- 盤中分K(2026-07-19)----------
+   放在詳情頁而不是卡片上,是因為這裡是「專心看一檔」的地方,值得完整的圖;
+   卡片是掃視用的,一條走勢線就夠(見 sparkline 註解)。
+   **點了「分K」才去抓** —— 主 detail 已經要 5~15 秒,不該為了沒人看的圖再加成本。 */
+function setDetailK(mode){
+  const dEl=$('#detail-kchart'),iEl=$('#detail-ichart');
+  if(!dEl||!iEl)return;
+  const isD=mode!=='i';
+  dEl.style.display=isD?'':'none'; iEl.style.display=isD?'none':'';
+  $('#dk-btn-d').classList.toggle('active',isD);
+  $('#dk-btn-i').classList.toggle('active',!isD);
+  $('#dk-title').textContent=isD?'日K線 · 量 · 均線(MA5/20/60)':'盤中 1 分K · 量 · 均價線';
+  if(isD){if(_detailK)_detailK.resize();return;}
+  const sid=(_detailSid||'');
+  if(INTRA_CACHE[sid]){drawIntraChart(INTRA_CACHE[sid]);return;}
+  iEl.innerHTML='<div class="empty">載入分K中…</div>';
+  fetch(HEALTH_API_BASE+'/api/detail?intraday=1&stock='+encodeURIComponent(sid))
+    /* 路由不存在時回的是 HTML,r.json() 會噴「Unexpected token '<'」這種看不懂的錯 ——
+       跟 openDetail 一樣先攔下來,講人話。 */
+    .then(r=>r.json().catch(()=>{throw new Error('API 未部署或無回應(http '+r.status+')');}))
+    .then(d=>{
+      if(!d||d.error)throw new Error(d&&d.error||'無資料');
+      INTRA_CACHE[sid]=d; drawIntraChart(d);
+    }).catch(e=>{iEl.innerHTML=`<div class="err">分K 載入失敗:${esc(e&&e.message||e)}</div>`;});
+}
+function drawIntraChart(d){
+  const el=$('#detail-ichart');if(!el||!window.echarts)return;
+  const bars=d.bars||[];
+  if(bars.length<2){el.innerHTML='<div class="empty">無分K資料</div>';return;}
+  el.innerHTML='';
+  const t=bars.map(r=>r[0]);
+  const ohlc=bars.map(r=>[r[1],r[4],r[3],r[2]]);      // ECharts 順序:開,收,低,高
+  const up=cssVar('--up'),down=cssVar('--down'),ink=cssVar('--ink-2'),
+        line=cssVar('--line'),muted=cssVar('--muted'),surf=cssVar('--surface');
+  const vols=bars.map(r=>({value:r[5],itemStyle:{color:(r[4]>=r[1]?up:down),opacity:.55}}));
+  if(_detailIntra)_detailIntra.dispose();
+  _detailIntra=echarts.init(el,null,{renderer:'canvas'});
+  _detailIntra.setOption({
+    animation:false,
+    legend:{data:['均價'],top:0,textStyle:{color:muted,fontSize:11},itemWidth:16,itemHeight:2},
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'},backgroundColor:surf,borderColor:line,
+      textStyle:{color:ink,fontSize:12}},
+    axisPointer:{link:[{xAxisIndex:'all'}]},
+    grid:[{left:58,right:16,top:26,height:'62%'},{left:58,right:16,top:'74%',height:'16%'}],
+    xAxis:[{type:'category',data:t,boundaryGap:true,axisLine:{lineStyle:{color:line}},
+        axisLabel:{color:muted,fontSize:10,interval:Math.floor(t.length/6)},splitLine:{show:false}},
+      {type:'category',gridIndex:1,data:t,boundaryGap:true,axisLine:{lineStyle:{color:line}},
+        axisLabel:{show:false},axisTick:{show:false}}],
+    yAxis:[{scale:true,position:'right',axisLine:{show:false},axisLabel:{color:muted,fontSize:10},
+        splitLine:{lineStyle:{color:line,opacity:.5}}},
+      {scale:true,gridIndex:1,axisLine:{show:false},axisLabel:{show:false},splitLine:{show:false}}],
+    dataZoom:[{type:'inside',xAxisIndex:[0,1]},{type:'slider',xAxisIndex:[0,1],height:16,bottom:4,
+      borderColor:line,fillerColor:'rgba(120,130,160,.15)',handleStyle:{color:muted},
+      textStyle:{color:muted,fontSize:9}}],
+    series:[
+      {name:'分K',type:'candlestick',data:ohlc,
+        itemStyle:{color:up,color0:down,borderColor:up,borderColor0:down},
+        /* 昨收基準線:判斷「今天是紅盤還黑盤」的錨點,沒有它只看得出形狀看不出強弱 */
+        markLine:isNum(d.prev_close)?{silent:true,symbol:'none',
+          lineStyle:{color:muted,type:'dashed',width:1},
+          label:{formatter:'昨收 '+num(d.prev_close),color:muted,fontSize:10,position:'insideEndTop'},
+          data:[{yAxis:d.prev_close}]}:undefined},
+      {name:'均價',type:'line',data:d.vwap||[],smooth:false,showSymbol:false,
+        lineStyle:{width:1.3,color:cssVar('--accent')},z:3},
+      {name:'量',type:'bar',xAxisIndex:1,yAxisIndex:1,data:vols,barWidth:'70%'}
+    ]
+  });
+  const n=$('#dk-note');
+  if(n)n.textContent=`${d.date} · ${bars.length} 根 · 均價線＝當日累計成交額÷成交量`;
 }
 function drawKChart(d){
   const el=$('#detail-kchart');if(!el||!window.echarts)return;
@@ -3433,7 +3513,7 @@ function drawPieChart(d){
       label:{color:ink,fontSize:10,formatter:'{d}%'},labelLine:{length:6,length2:6}}]
   });
 }
-window.addEventListener('resize',()=>{[_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie].forEach(c=>{if(c)c.resize();});});
+window.addEventListener('resize',()=>{[_detailK,_detailInst,_detailRev,_detailMargin,_detailHolding,_detailPie,_detailIntra].forEach(c=>{if(c)c.resize();});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#detail-overlay')&&$('#detail-overlay').classList.contains('open'))closeDetail();});
 /* 深連結:網址帶 #stock=2330 時自動開啟 */
 (function initDetailHash(){

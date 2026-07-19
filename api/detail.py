@@ -49,6 +49,76 @@ _CAL_DAYS_FETCH = 400        # ~270 交易日,足夠算 ma60 且裁到 250 根�
 _BRANCH_DAYS = 15
 
 
+def compute_intraday(stock_id: str, day: str | None = None) -> dict:
+    """當日 1 分K(FinMind `TaiwanStockKBar`,一檔一次呼叫,2330 實測 266 筆)。
+
+    回傳 {stock_id, date, bars:[[HH:MM, open, high, low, close, volume], ...],
+          vwap:[...], prev_close}
+
+    `vwap` 是**累計**均價(累計成交額 ÷ 累計量),不是移動平均 —— 台股看盤軟體的
+    「均價線」就是這個,判斷「當下站上均價沒」用它。實測末值與官方均價差 0.04%。
+
+    `prev_close` 給前端畫昨收基準線,從本機日線 parquet 取(不另外打 API)。
+    抓不到資料回 {error},前端該面板不畫。
+    """
+    from scripts.fetchers import fetch_finmind
+    from scripts.config import now_tpe
+
+    day = day or now_tpe().strftime("%Y-%m-%d")
+    rows = fetch_finmind("TaiwanStockKBar", data_id=stock_id,
+                         start_date=day, end_date=day) or []
+    if not rows:
+        # 當天沒有(假日/尚未開盤)→ 往回找最近有資料的交易日,最多回看 7 天。
+        # 不這樣做的話,週末點開分K 永遠是空的,使用者會以為壞掉。
+        from datetime import date as _d, timedelta
+        try:
+            base = _d.fromisoformat(day)
+        except ValueError:
+            base = now_tpe().date()
+        for back in range(1, 8):
+            day = (base - timedelta(days=back)).isoformat()
+            rows = fetch_finmind("TaiwanStockKBar", data_id=stock_id,
+                                 start_date=day, end_date=day) or []
+            if rows:
+                break
+    if not rows:
+        return {"error": f"{stock_id} 近 7 日無分K資料"}
+
+    rows.sort(key=lambda r: str(r.get("minute") or ""))
+    bars, vwap = [], []
+    cum_amt = cum_vol = 0.0
+    for r in rows:
+        try:
+            o, h, l, c = (float(r[k]) for k in ("open", "high", "low", "close"))
+        except (KeyError, TypeError, ValueError):
+            continue
+        if c <= 0:
+            continue
+        v = float(r.get("volume") or 0)
+        cum_amt += c * v
+        cum_vol += v
+        bars.append([str(r.get("minute") or "")[:5], _round(o), _round(h), _round(l),
+                     _round(c), int(v)])
+        vwap.append(_round(cum_amt / cum_vol) if cum_vol else None)
+    if not bars:
+        return {"error": f"{stock_id} 分K資料格式異常"}
+
+    prev_close = None
+    try:
+        from scripts.storage import load_prices
+        import pandas as _pd
+        df = load_prices(stock_id)
+        if df is not None and not df.empty:
+            before = df[_pd.to_datetime(df.index) < _pd.Timestamp(day)]
+            if not before.empty:
+                prev_close = _round(float(before["close"].iloc[-1]))
+    except Exception:
+        pass
+
+    return _json_safe({"stock_id": stock_id, "date": day, "bars": bars,
+                       "vwap": vwap, "prev_close": prev_close, "n": len(bars)})
+
+
 def _json_safe(o):
     import numpy as np
     if isinstance(o, dict):
@@ -286,6 +356,17 @@ class handler(BaseHTTPRequestHandler):
         stock_id = (qs.get("stock") or [""])[0].strip()
         if not stock_id:
             self._send_json(400, {"error": "缺少 stock 參數,例如 /api/detail?stock=2330"})
+            return
+        # 盤中分K:獨立的快路徑(1 次 API 呼叫)。**刻意不併進主 payload** ——
+        # 主 detail 已經要 5~15 秒(多個 dataset + yfinance),再加一份會更慢,
+        # 而且分K只有點開「分K」頁籤時才需要。使用者沒看就不該付這個成本。
+        if (qs.get("intraday") or [""])[0] in ("1", "true"):
+            try:
+                self._send_json(200, compute_intraday(stock_id,
+                                                      (qs.get("date") or [""])[0].strip() or None))
+            except Exception as e:
+                log.exception(f"compute_intraday({stock_id}) 失敗")
+                self._send_json(500, {"error": f"分K 取得失敗:{e}"})
             return
         try:
             max_bars = int((qs.get("days") or [_MAX_BARS_DEFAULT])[0])
