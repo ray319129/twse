@@ -1250,3 +1250,36 @@ JSON(data.json / premarket.json / alerts.json),永遠是上一次批次的快照
 
 ### 驗證
 連買 chip 與 6 根柱狀正確渲染、空 meter 已隱藏、走勢線 2 條、同步鈕存在、無 console 錯誤。
+
+---
+
+## 34. Vercel 環境變數要重新部署才生效(2026-07-19 踩到)
+
+**症狀:** 使用者在 Vercel 設好 `WATCHLIST_SECRET` / `GITHUB_TOKEN` / `GITHUB_REPO`
+(截圖確認三個都在、Production and Preview),網頁按「同步到雲端」仍回
+「伺服器未設定 WATCHLIST_SECRET,拒絕寫入」。
+
+**原因:Vercel 的環境變數只對「之後的部署」生效。** 變數是 1 分鐘前加的,
+線上跑的還是加變數之前那份部署,函式 `os.environ.get()` 讀到空值。
+→ **解法:Deployments 點最新一筆 Redeploy,或推任何一個 commit。**
+
+**做了什麼避免下次再猜:**
+- `GET /api/watchlist?check=1` 設定自檢,回 `{env:{各變數 true/false}, ready, hint}`。
+  **只回布林,絕不回值**(實測輸出不含任何變數內容)。
+- 403 的錯誤訊息直接寫明「環境變數要重新部署才生效」+ 指向自檢端點,
+  不要只說「未設定」讓人以為是自己打錯。
+
+## 34.1 同一輪的另一個教訓:改了規則沒重跑資料 = 沒改
+
+第 33 節把 `industry_chain.py` 的 primary 規則改成中位數,但**沒有重新產生
+`docs/sector_map.json` 與 `docs/levels.json`** —— 使用者截圖裡旺宏依然是「IC封裝測試」。
+程式修好、線上沒變。
+
+**凡是改了「產生資料的規則」,一定要在同一輪重跑對應的產生器並確認輸出。**
+重跑後:華邦電→記憶體IC ✓、台達電→電源管理IC ✓、緯創→筆記型電腦 ✓、
+仁寶→伺服器、旺宏→晶圓製造(FinMind 分類本身沒有「記憶體」以外更精確的桶,已知限制)。
+
+## 34.2 ⚠️ secret 已在對話中外洩
+使用者把 `WATCHLIST_SECRET` 的值貼進聊天視窗。已請他到 Vercel 換一組新值
+(只保護自選池、不涉及金錢,但沒有理由留著)。網頁端 localStorage 存的舊值
+在第一次同步失敗後會自動清除並重問。

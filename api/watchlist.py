@@ -66,6 +66,22 @@ def _clean(stocks: dict) -> dict:
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
+            qs = parse_qs(urlparse(self.path).query)
+            if qs.get("check"):
+                # 設定自檢:只回「有沒有設」,**絕不回值**。
+                # 這支存在的理由:2026-07-19 使用者在 Vercel 設好了變數卻仍被拒絕,
+                # 原因是 **Vercel 環境變數要重新部署才生效**,舊部署讀到的是空值。
+                # 沒有自檢就只能猜「是我打錯還是沒生效」。
+                env = {k: bool(os.environ.get(k))
+                       for k in ("WATCHLIST_SECRET", "GITHUB_TOKEN", "GITHUB_REPO")}
+                return self._send(200, {
+                    "env": env,
+                    "ready": all(env.values()),
+                    "hint": ("全部就緒。" if all(env.values()) else
+                             "缺少變數。若你在 Vercel 已經設好卻仍顯示 false,"
+                             "那是**環境變數需要重新部署才生效** —— 到 Vercel "
+                             "Deployments 點最新一筆的 Redeploy,或推一個 commit。"),
+                })
             cur, _ = self._read()
             self._send(200, {"stocks": cur.get("stocks", {}), "source": "repo"})
         except Exception as e:
@@ -81,7 +97,11 @@ class handler(BaseHTTPRequestHandler):
         secret = os.environ.get("WATCHLIST_SECRET", "")
         if not secret:
             # fail closed:寧可不能用,也不要變成任何人都能改 repo
-            return self._send(403, {"error": "伺服器未設定 WATCHLIST_SECRET,拒絕寫入"})
+            return self._send(403, {"error":
+                "伺服器讀不到 WATCHLIST_SECRET,拒絕寫入。"
+                "若你在 Vercel 已經設好 —— **環境變數要重新部署才生效**,"
+                "請到 Deployments 點最新一筆的 Redeploy。"
+                "可用 /api/watchlist?check=1 確認變數是否已被讀到。"})
         if body.get("secret") != secret:
             return self._send(403, {"error": "secret 不正確"})
 
