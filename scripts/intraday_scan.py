@@ -270,14 +270,104 @@ def _notify(day: str, new: list[dict]) -> None:
         log.warning(f"盤中訊號通知寄送失敗(不影響掃描):{e}")
 
 
+# ---------- 常駐輪詢(取代「每 5 分鐘開一個新 job」) ----------
+#
+# 為什麼要常駐:每 5 分鐘開一個 GitHub Actions run,光 checkout + pip install 就要
+# 40~90 秒,**大部分時間在裝環境不是在掃描**,而且開太密會排隊。改成一個 job 從
+# 08:55 跑到 13:35(4.5 小時 < Actions 單一 job 6 小時上限),環境只裝一次,
+# 之後純粹輪詢 —— 間隔想多短就多短。
+#
+# ⚠️ 真正的上限不是 API 額度,是**上游快照多久更新一次**。這個還沒量過
+# (見 `--measure-freshness`)。上游若 60 秒才換一次,你每 5 秒問一次也只是拿到
+# 同一份資料 —— 快的是你問的頻率,不是資料。量完再定 interval。
+
+def _git_publish(msg: str) -> None:
+    """有新訊號時把 alerts 推上去(網頁才看得到)。失敗只記 log —— 推不上去
+    不該中斷盯盤,Email 才是主要通知管道。"""
+    import subprocess
+    try:
+        subprocess.run(["git", "add", "data/alerts", "docs/alerts.json"], check=False)
+        r = subprocess.run(["git", "diff", "--cached", "--quiet"])
+        if r.returncode == 0:
+            return                                  # 沒變動
+        subprocess.run(["git", "commit", "-m", msg], check=False)
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
+        subprocess.run(["git", "push"], check=False)
+    except Exception as e:
+        log.warning(f"alerts 發布失敗(不影響盯盤):{e}")
+
+
+def loop(interval: float, until: str, notify: bool = True, publish: bool = False) -> dict:
+    """常駐輪詢到 until(HH:MM,台北時間)。任何單次失敗都吞掉繼續跑 ——
+    盯盤中途掛掉比慢一點嚴重得多。"""
+    import time
+    end_h, end_m = (int(x) for x in until.split(":"))
+    polls = fired_total = errors = 0
+    log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止")
+    while True:
+        now = now_tpe()
+        if (now.hour, now.minute) >= (end_h, end_m):
+            break
+        t0 = time.time()
+        try:
+            r = scan(notify=notify)
+            polls += 1
+            if r.get("new_alerts"):
+                fired_total += r["new_alerts"]
+                if publish:
+                    _git_publish(f"intraday: {r['new_alerts']} signals {now.strftime('%H:%M')}")
+            elif not r.get("ok") and r.get("reason") in ("no_sponsor", "no_levels"):
+                log.warning(f"停止盯盤:{r['reason']}")   # 這兩種再輪也不會好
+                break
+        except Exception as e:
+            errors += 1
+            log.warning(f"單次掃描失敗(繼續):{e}")
+        time.sleep(max(0.0, interval - (time.time() - t0)))
+    log.info(f"盯盤結束:輪詢 {polls} 次、觸發 {fired_total} 筆、錯誤 {errors} 次")
+    return {"polls": polls, "fired": fired_total, "errors": errors}
+
+
+def measure_freshness(seconds: int = 120, interval: float = 2.0) -> dict:
+    """量上游快照到底多久更新一次 —— 決定 interval 該設多少的唯一依據。
+    盤中跑。回傳 {samples, distinct, median_gap_s, stamps}。"""
+    import time
+    seen, order = {}, []
+    t_end = time.time() + seconds
+    while time.time() < t_end:
+        df = fetch_snapshot_all(force=True)
+        if not df.empty and "date" in df.columns:
+            s = str(df["date"].iloc[0])
+            if s not in seen:
+                seen[s] = time.time()
+                order.append(s)
+        time.sleep(interval)
+    gaps = [round(seen[order[i + 1]] - seen[order[i]], 1) for i in range(len(order) - 1)]
+    med = sorted(gaps)[len(gaps) // 2] if gaps else None
+    out = {"samples": int(seconds / interval), "distinct": len(order),
+           "gaps_s": gaps, "median_gap_s": med, "stamps": order[:10]}
+    log.info(f"上游更新頻率:{seconds}s 內看到 {len(order)} 個不同時間戳,"
+             f"中位間隔 {med}s → interval 設得比這個小沒有意義")
+    return out
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="盤中全市場掃描 + 訊號提醒")
     ap.add_argument("--build-levels", action="store_true", help="盤前建立均線/前高快取")
     ap.add_argument("--dry-run", action="store_true", help="只顯示不寫檔不寄信")
     ap.add_argument("--no-notify", action="store_true", help="寫檔但不寄信")
+    ap.add_argument("--loop", action="store_true", help="常駐輪詢(建議用法)")
+    ap.add_argument("--interval", type=float, default=20.0, help="輪詢間隔秒數(預設 20)")
+    ap.add_argument("--until", default="13:35", help="跑到幾點停(HH:MM 台北時間)")
+    ap.add_argument("--publish", action="store_true", help="有新訊號就 git commit/push")
+    ap.add_argument("--measure-freshness", type=int, metavar="SEC",
+                    help="量上游快照更新頻率(秒),決定 interval 用")
     a = ap.parse_args()
     if a.build_levels:
         build_levels()
+    elif a.measure_freshness:
+        print(json.dumps(measure_freshness(a.measure_freshness), ensure_ascii=False, indent=1))
+    elif a.loop:
+        print(json.dumps(loop(a.interval, a.until, not a.no_notify, a.publish), ensure_ascii=False))
     else:
         r = scan(dry_run=a.dry_run, notify=not a.no_notify)
         print(json.dumps({k: v for k, v in r.items() if k != "alerts"}, ensure_ascii=False))
