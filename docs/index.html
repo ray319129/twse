@@ -715,6 +715,47 @@
   .mk-head{display:grid;grid-template-columns:16px 1fr 68px 74px;gap:8px;font-size:10.5px;
     color:var(--muted-2);font-weight:700;padding:0 2px 5px;border-bottom:1px solid var(--line);}
   .mk-head .r{text-align:right;}
+  /* ── 即時報價卡(2026-07-19 改版)────────────────────────────────
+     原本把 17 個欄位平鋪成同樣大小的灰字,使用者反映「眼花撩亂、單色、字小密集」。
+     改用美股/加密貨幣交易軟體的分層作法:
+       1. 價格是 hero(28px),其餘一律降級 —— 一眼先看到最重要的數字
+       2. 兩個比率(委買賣、內外盤)畫成 meter 長條,失衡程度用看的不用讀數字
+       3. 量能四項做成 KPI 格,數字大、標籤小
+       4. 狀態(突破/回測)只在成立時出現 chip,不成立就不佔版面(原本印一堆 ✗)
+     ⚠️ 紅綠在色盲下 ΔE 僅 4.3(驗證器實測,正常視覺 32.2)→ meter 兩端一律附文字標籤,
+        絕不只靠顏色分辨買賣方。條間留 2px 縫也是為了在單色/高對比模式下仍看得出分界。 */
+  .q-card{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;
+    background:var(--surface);}
+  .q-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .q-nm{font-weight:800;font-size:15px;color:var(--ink);}
+  .q-id{font-size:12px;color:var(--muted-2);font-variant-numeric:tabular-nums;}
+  .q-ind{font-size:11px;color:var(--muted);background:var(--line-soft);border-radius:20px;
+    padding:2px 9px;margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46%;}
+  .q-x{border:none;background:none;color:var(--muted-2);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;}
+  .q-x:hover{color:var(--down-ink);}
+  .q-hero{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .q-px{font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .q-dl{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .q-ctx{margin-top:5px;font-size:11.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;
+    font-variant-numeric:tabular-nums;}
+  .q-mtr{margin-top:11px;}
+  .q-mtr-h{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;}
+  .q-mtr-h b{font-variant-numeric:tabular-nums;font-weight:700;}
+  .q-bar{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px;background:var(--line-soft);}
+  .q-bar i{display:block;border-radius:3px;}
+  .q-kpi{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+  .q-kpi>div{min-width:0;}
+  .q-kl{font-size:10.5px;color:var(--muted-2);letter-spacing:.02em;}
+  .q-kv{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .q-fund{margin-top:11px;padding-top:9px;border-top:1px solid var(--line-soft);
+    display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);
+    font-variant-numeric:tabular-nums;align-items:center;}
+  .q-fund b{color:var(--ink-2);font-weight:700;}
+  .q-chip{font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 9px;
+    background:var(--up-bg);color:var(--up-ink);border:1px solid var(--up-line);}
+  .q-chip.warn{background:var(--warn-bg);color:var(--warn-ink);border-color:var(--warn-line);}
+  @media(max-width:520px){.q-kpi{grid-template-columns:repeat(2,1fr);}.q-px{font-size:24px;}}
   .mk-row{display:grid;grid-template-columns:16px 1fr 68px 74px;gap:8px;align-items:center;
     padding:5px 2px;border-bottom:1px solid var(--line-soft);}
   .mk-row:last-child{border-bottom:none;}
@@ -1328,43 +1369,69 @@ function wlExportConfig(){
     ()=>alert('已複製。貼進 config/watchlist.json 後 commit,雲端批次就會一起處理這些股票。'),
     ()=>prompt('複製以下內容貼進 config/watchlist.json:',txt));
 }
-/* 完整即時欄位(2026-07-19 使用者指定)。缺的一律顯示「—」不假裝有值。
-   標示資料來源等級,免得把「盤前算好的靜態值」誤當成即時: 即時=快照 / 盤前=levels / 逐筆=tick */
-function wlDetail(id){
-  const q=LIVE[id]||{},dp=(DEEP&&DEEP.metrics&&DEEP.metrics[id])||null;
-  const n=(v,d)=>isNum(v)?num(v,d==null?2:d):'—';
-  const pct=v=>isNum(v)?fmt(v)+'%':'—';        /* 有正負意義的(YoY)保留 +/− 號 */
-  const pct0=v=>isNum(v)?v.toFixed(2)+'%':'—'; /* 換手率恆為正,加 + 號會很怪 */
-  const amt=v=>isNum(v)?(v>=1e8?(v/1e8).toFixed(2)+'億':(v/1e4).toFixed(0)+'萬'):'—';
-  const cell=(k,v)=>`<span style="color:var(--muted-2)">${k}</span> ${v}`;
-  const flag=(on,t)=>on?`<span style="color:var(--up-ink);font-weight:700">${t}</span>`:`<span style="color:var(--muted-2)">${t}✗</span>`;
-  return `<div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:2px 10px;font-size:11px;margin-top:3px;padding-top:3px;border-top:1px solid var(--line)">
-    ${cell('單量',n(q.tick_volume,0))}${cell('總量',n(q.total_volume,0)+'張')}
-    ${cell('成交額',amt(q.total_amount))}${cell('換手率',pct0(q.turnover_rate))}
-    ${cell('最高',n(q.high))}${cell('最低',n(q.low))}
-    ${cell('均價',n(q.vwap))}${cell('量比',n(q.volume_ratio,2))}
-    ${cell('委買',n(q.bid)+'×'+n(q.bid_volume,0))}${cell('委賣',n(q.ask)+'×'+n(q.ask_volume,0))}
-    ${cell('委買賣比',isNum(q.bid_ask_ratio)?(q.bid_ask_ratio*100).toFixed(0)+'%':'—')}
-    ${cell('外盤比',dp?dp.outer_ratio+'%':'—')}
-    ${cell('營收YoY',pct(q.revenue_yoy))}${cell('EPS近四季',n(q.eps_ttm))}
-    ${cell('產業',esc(q.industry||'—'))}
-    <span>${flag(q.breakout,'突破20日高')} ${flag(q.at_ma5,'回測5日線')}</span>
+/* 即時報價卡。分層原則見上方 CSS 註解。缺值一律「—」,不假裝有數字。 */
+const _qn=(v,d)=>isNum(v)?num(v,d==null?2:d):'—';
+const _qamt=v=>isNum(v)?(v>=1e8?(v/1e8).toFixed(1)+'億':(v/1e4).toFixed(0)+'萬'):'—';
+const _qvol=v=>isNum(v)?(v>=10000?(v/10000).toFixed(1)+'萬張':num(v,0)+'張'):'—';
+/* meter:一條分成兩段的長條。兩端都有文字標籤 —— 紅綠在色盲下分不開(ΔE 4.3),
+   不能只靠顏色。ratio = 左段佔比 0~1。 */
+function qMeter(lLab,rLab,ratio,lVal,rVal){
+  if(!isNum(ratio))return `<div class="q-mtr"><div class="q-mtr-h"><span style="color:var(--muted-2)">${lLab} / ${rLab}</span><b style="color:var(--muted-2)">—</b></div>
+    <div class="q-bar"><i style="width:100%;background:var(--line)"></i></div></div>`;
+  const p=Math.max(0,Math.min(1,ratio)),pc=(p*100).toFixed(0);
+  const strong=p>=0.5;
+  return `<div class="q-mtr">
+    <div class="q-mtr-h">
+      <span style="color:var(--up-ink);font-weight:700">${lLab} ${lVal!=null?lVal:''}</span>
+      <b style="color:${strong?'var(--up-ink)':'var(--down-ink)'}">${strong?pc:(100-pc)}% ${strong?lLab:rLab}佔優</b>
+      <span style="color:var(--down-ink);font-weight:700">${rVal!=null?rVal:''} ${rLab}</span>
+    </div>
+    <div class="q-bar"><i style="width:${pc}%;background:var(--up)"></i><i style="flex:1;background:var(--down)"></i></div>
+  </div>`;
+}
+function wlCard(id){
+  const q=LIVE[id]||{},v=WL[id]||{},dp=(DEEP&&DEEP.metrics&&DEEP.metrics[id])||null;
+  const up=isNum(q.change_pct)&&q.change_pct>=0;
+  const col=isNum(q.change_pct)?(up?'var(--up-ink)':'var(--down-ink)'):'var(--muted)';
+  const chips=[];
+  if(q.breakout)chips.push('<span class="q-chip">突破 20 日高</span>');
+  if(q.at_ma5)chips.push('<span class="q-chip warn">回測 5 日線</span>');
+  return `<div class="q-card">
+    <div class="q-head">
+      <span class="q-nm">${esc(v.name||q.name||id)}</span><span class="q-id">${slink(id)}</span>
+      ${q.industry?`<span class="q-ind">${esc(q.industry)}</span>`:'<span style="margin-left:auto"></span>'}
+      <button class="q-x" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button>
+    </div>
+    <div class="q-hero">
+      <span class="q-px" style="color:${col}">${_qn(q.price)}</span>
+      <span class="q-dl" style="color:${col}">${isNum(q.change_price)?(up?'▲':'▼')+' '+Math.abs(q.change_price).toFixed(2):'—'}
+        &nbsp;${isNum(q.change_pct)?fmt(q.change_pct)+'%':''}</span>
+    </div>
+    <div class="q-ctx">
+      <span>高 ${_qn(q.high)}</span><span>低 ${_qn(q.low)}</span>
+      <span>均價 ${_qn(q.vwap)}</span>
+      <span>單量 ${_qn(q.tick_volume,0)}</span>
+    </div>
+    ${qMeter('委買','委賣',q.bid_ask_ratio,_qn(q.bid_volume,0),_qn(q.ask_volume,0))}
+    ${qMeter('外盤','內盤',dp?dp.outer_ratio/100:null,dp?_qvol(dp.outer):null,dp?_qvol(dp.inner):null)}
+    <div class="q-kpi">
+      <div><div class="q-kl">總量</div><div class="q-kv">${_qvol(q.total_volume)}</div></div>
+      <div><div class="q-kl">成交額</div><div class="q-kv">${_qamt(q.total_amount)}</div></div>
+      <div><div class="q-kl">換手率</div><div class="q-kv">${isNum(q.turnover_rate)?q.turnover_rate.toFixed(2)+'%':'—'}</div></div>
+      <div><div class="q-kl">量比</div><div class="q-kv">${_qn(q.volume_ratio,2)}${isNum(q.volume_ratio)?'×':''}</div></div>
+    </div>
+    <div class="q-fund">
+      <span>營收YoY <b style="color:${isNum(q.revenue_yoy)?(q.revenue_yoy>=0?'var(--up-ink)':'var(--down-ink)'):'var(--muted-2)'}">${isNum(q.revenue_yoy)?fmt(q.revenue_yoy)+'%':'—'}</b></span>
+      <span>EPS近四季 <b>${_qn(q.eps_ttm)}</b></span>
+      ${chips.join('')}
+    </div>
   </div>`;
 }
 function renderWatchlistBox(){
   const el=$('#wl-box'); if(!el)return;
   const ids=Object.keys(WL);
-  const rows=ids.length?ids.map(id=>{
-    const q=LIVE[id]||{},v=WL[id];
-    const px=isNum(q.price)?num(q.price):'—';
-    const chg=isNum(q.change_price)?`<span class="${cls(q.change_price)}">${fmt(q.change_price)}</span>`:'—';
-    const ch=isNum(q.change_pct)?`<span class="${cls(q.change_pct)}">${fmt(q.change_pct)}%</span>`:'—';
-    return `<div class="mk-row" style="grid-template-columns:1fr auto auto auto 28px">
-      <div class="mk-nm"><b>${esc(v.name||q.name||'')}</b><span class="mk-id">${slink(id)}</span></div>
-      <div class="num">${px}</div><div class="num">${chg}</div><div class="num">${ch}</div>
-      <button class="mp-b" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button>
-      ${wlDetail(id)}</div>`;
-  }).join(''):'<div class="empty" style="padding:20px 0">自選池是空的。輸入代號加入,或從持倉一鍵匯入。</div>';
+  const rows=ids.length?ids.map(wlCard).join('')
+    :'<div class="empty" style="padding:20px 0">自選池是空的。輸入代號加入,或從持倉一鍵匯入。</div>';
   el.innerHTML=`<div class="live-head"><div class="live-upd">自選池 ${ids.length} 檔</div>
       <div style="display:flex;gap:6px">
         <input id="wl-in" placeholder="股票代號" style="width:110px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)">
