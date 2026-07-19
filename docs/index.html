@@ -1188,8 +1188,14 @@ function renderWatch(){
    ============================================================ */
 function renderWatchlist(){
   const w=DATA.watchlist||[];
-  if(!w.length){$('#p-watchlist').innerHTML='<div class="empty"><span class="ei">🔔</span>自選池是空的,請編輯 config/watchlist.json</div>';return;}
-  $('#p-watchlist').innerHTML=`<div class="lead">自訂關注標的 + 命中訊號與新聞(<b>${w.length}</b> 檔)。</div>`+w.map(s=>{
+  /* 上半:網頁自選池(即時、可直接加減);下半:批次算好的訊號卡(來自 config/watchlist.json)。
+     兩份清單來源不同是刻意的 —— 見 wlAdd 上方註解。 */
+  const head='<div id="wl-box"></div>';
+  if(!w.length){
+    $('#p-watchlist').innerHTML=head+'<div class="empty" style="padding:30px 0"><span class="ei">🔔</span>批次尚未對自選股算訊號。加入自選池後按「複製設定檔」貼進 config/watchlist.json,隔日批次就會產生訊號卡與新聞。</div>';
+    renderWatchlistBox();return;
+  }
+  $('#p-watchlist').innerHTML=head+`<div class="lead">自訂關注標的 + 命中訊號與新聞(<b>${w.length}</b> 檔)。</div>`+w.map(s=>{
     const tags=(s.hits||[]).map(h=>`<span class="chip-tag">${esc(lbl(h))}</span>`).join('');
     const combos=(s.combos||[]).map(c=>`<span class="chip-tag chip-combo">${esc(c)}</span>`).join('');
     const news=(s.news||[]).slice(0,3).filter(n=>n&&n.title).map(n=>{const safe=/^https?:\/\//i.test(n.link||'');return `<li style="margin:3px 0">${safe?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a>`:esc(n.title)}</li>`;}).join('');
@@ -1205,6 +1211,7 @@ function renderWatchlist(){
       ${news?`<ul style="margin:11px 0 0;padding-left:18px;font-size:13px;color:var(--ink-2)">${news}</ul>`:''}
     </div>`;
   }).join('');
+  renderWatchlistBox();
 }
 
 /* ============================================================
@@ -1283,10 +1290,82 @@ function portUpsert(o){
   const id=String(o.id),ex=portGet(id);
   if(ex){ex.name=o.name||ex.name;ex.shares=o.shares;ex.cost=o.cost;if(isNum(o.price))ex.price=o.price;if(o.note!=null)ex.note=o.note;ex.ts=new Date().toISOString();}
   else PORT.positions.push({id,name:o.name||'',shares:o.shares,cost:o.cost,price:(isNum(o.price)?o.price:null),note:o.note||'',ts:new Date().toISOString()});
+  wlAdd(id,o.name||'',true);      /* 加持倉自動進自選池(2026-07-19 使用者要求) */
 }
+
+/* ============================================================
+   自選池(2026-07-19 改成網頁直接加)
+   ⚠️ 重要限制:這裡存 localStorage,**雲端批次讀不到**。
+   批次(盤後補抓籌碼/財報、分點掃描)跑在 GitHub Actions 上,只看得到
+   repo 裡的 config/watchlist.json。所以:
+     · 網頁自選池 → 立即生效於「網頁上的即時報價/顯示」
+     · 要讓批次也認得 → 用「複製設定檔」把 JSON 貼進 config/watchlist.json 再 commit
+   兩者刻意分開:localStorage 不上傳(和持倉一致的隱私原則),而批次沒有你的瀏覽器。
+   ============================================================ */
+const WL_KEY='twse-watchlist';
+let WL={};
+function wlLoad(){try{WL=JSON.parse(localStorage.getItem(WL_KEY)||'{}')||{};}catch(e){WL={};}}
+function wlSave(){try{localStorage.setItem(WL_KEY,JSON.stringify(WL));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
+function wlAdd(id,name,silent){
+  id=String(id||'').trim(); if(!id)return false;
+  if(WL[id]!==undefined&&silent)return false;      /* 已在池中,持倉重複匯入不覆蓋備註 */
+  WL[id]={name:name||'',note:WL[id]&&WL[id].note||'',ts:new Date().toISOString()};
+  wlSave(); if(!silent)renderWatchlistBox();
+  return true;
+}
+function wlDel(id){delete WL[String(id)];wlSave();renderWatchlistBox();}
+/* 一鍵把目前持倉全部併進自選池(補上在此功能之前就存在的持倉) */
+function wlSyncPortfolio(){
+  let n=0; (PORT.positions||[]).forEach(p=>{if(wlAdd(p.id,p.name,true))n++;});
+  renderWatchlistBox();
+  alert(n?`已把 ${n} 檔持倉加入自選池。`:'持倉都已在自選池中。');
+}
+/* 產生 config/watchlist.json 內容供貼上 —— 讓雲端批次也認得 */
+function wlExportConfig(){
+  const stocks={}; Object.entries(WL).forEach(([id,v])=>{stocks[id]=v.name||'';});
+  const txt=JSON.stringify({_comment:"自選股清單。由網頁自選池匯出,貼上後 commit 即可讓批次生效。",stocks},null,2);
+  navigator.clipboard?.writeText(txt).then(
+    ()=>alert('已複製。貼進 config/watchlist.json 後 commit,雲端批次就會一起處理這些股票。'),
+    ()=>prompt('複製以下內容貼進 config/watchlist.json:',txt));
+}
+function renderWatchlistBox(){
+  const el=$('#wl-box'); if(!el)return;
+  const ids=Object.keys(WL);
+  const rows=ids.length?ids.map(id=>{
+    const q=LIVE[id],v=WL[id];
+    const px=q&&isNum(q.price)?num(q.price):'—';
+    const ch=q&&isNum(q.change_pct)?`<span class="${cls(q.change_pct)}">${fmt(q.change_pct)}%</span>`:'—';
+    return `<div class="mk-row" style="grid-template-columns:1fr auto auto 28px">
+      <div class="mk-nm"><b>${esc(v.name||'')}</b><span class="mk-id">${slink(id)}</span></div>
+      <div class="num">${px}</div><div class="num">${ch}</div>
+      <button class="mp-b" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button></div>`;
+  }).join(''):'<div class="empty" style="padding:20px 0">自選池是空的。輸入代號加入,或從持倉一鍵匯入。</div>';
+  el.innerHTML=`<div class="live-head"><div class="live-upd">自選池 ${ids.length} 檔</div>
+      <div style="display:flex;gap:6px">
+        <input id="wl-in" placeholder="股票代號" style="width:110px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)">
+        <button class="refresh" onclick="wlAddFromInput()">加入</button>
+        <button class="refresh" onclick="wlSyncPortfolio()">匯入持倉</button>
+        <button class="refresh" onclick="wlExportConfig()">複製設定檔</button>
+      </div></div>
+    <div class="note-box" style="font-size:12px;color:var(--muted-2)">網頁自選池存在你的瀏覽器,<b>雲端批次看不到</b>。要讓盤後籌碼/分點掃描也涵蓋這些股票,按「複製設定檔」貼進 <code>config/watchlist.json</code> 再 commit。</div>
+    ${rows}`;
+  const inp=$('#wl-in'); if(inp)inp.onkeydown=e=>{if(e.key==='Enter')wlAddFromInput();};
+}
+function wlAddFromInput(){
+  const inp=$('#wl-in'); if(!inp)return;
+  const id=inp.value.trim(); if(!id)return;
+  const nm=(LIVE[id]&&LIVE[id].name)||'';
+  wlAdd(id,nm); inp.value='';
+  liveQuotes(wlIds());                              /* 立刻補一次報價 */
+}
+const wlIds=()=>Object.keys(WL);
 /* 現價:先 data.json 批次,再 detail API 快取 */
 function portPriceOf(id){
   id=String(id);const d=DATA||{};
+  /* 即時優先(2026-07-19):有 /api/quote 的報價就用它,否則才退回批次收盤 →
+     detail API。以前只有後兩者,所以持倉損益永遠是昨收、而且要點進去等 5~15 秒。 */
+  const lq=LIVE[id];
+  if(lq&&isNum(lq.price))return {close:Number(lq.price),name:lq.name,live:true,src:lq.source};
   for(const arr of [d.core,d.watch,d.watchlist]){
     if(Array.isArray(arr)){const s=arr.find(x=>x&&String(x.stock_id)===id);
       if(s&&isNum(s.close))return {close:Number(s.close),name:s.name,industry:s.industry};}
@@ -1859,7 +1938,22 @@ let MYPICK={};
 function mpLoad(){try{const r=localStorage.getItem(MYPICK_KEY);if(r)MYPICK=JSON.parse(r)||{};}catch(e){MYPICK={};}}
 function mpSave(){try{localStorage.setItem(MYPICK_KEY,JSON.stringify(MYPICK));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
 const mpKey=r=>`${r.date}|${r.stock_id}`;
-const mpGet=r=>MYPICK[mpKey(r)]||null;
+/* 「只點我買的」(2026-07-19 使用者要求):以前要每檔都點買或跳,操作成本太高、
+   樣本累積很慢。改成 —— **只要你當天點過任何一檔「買」,同一天其餘沒點的自動視為「跳過」**。
+   這樣你只需要標記實際買進的,其餘系統自己推論。
+   注意:沒點過任何「買」的日子維持「未標記」,不會把你根本沒看的日子當成全部跳過。 */
+function mpDaysWithBuy(){
+  const s=new Set();
+  for(const [k,v] of Object.entries(MYPICK))if(v==='bought')s.add(k.split('|')[0]);
+  return s;
+}
+let _mpBuyDays=null;
+function mpGet(r){
+  const v=MYPICK[mpKey(r)];
+  if(v)return v;
+  if(_mpBuyDays===null)_mpBuyDays=mpDaysWithBuy();
+  return _mpBuyDays.has(r.date)?'skipped':null;   /* 該日有買過 → 其餘自動算跳過 */
+}
 /* 核心精選卡片上的買/跳(2026-07-19 加):使用者每天第一個看的就是這裡,在這標記最自然。
    key 與台帳共用同一組(選股日|代號),所以兩邊標記互通、統計一致。 */
 function mpCardBtns(s){
@@ -1888,6 +1982,7 @@ function mpBindBtns(root){
 }
 function mpSet(k,v){
   if(MYPICK[k]===v)delete MYPICK[k]; else MYPICK[k]=v;
+  _mpBuyDays=null;                                 /* 買進日集合失效,下次 mpGet 重算 */
   mpSave(); mpSyncBtns(k);
   if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();  /* 同步更新台帳上方的三組對照 */
 }
@@ -2055,6 +2150,43 @@ function renderLive(force){
     const rb=$('#lrefresh');if(rb)rb.onclick=()=>renderLive(true);
   });
 }
+/* ============================================================
+   即時報價客戶端(2026-07-19)
+   在這之前網頁完全不即時 —— 只讀批次 commit 的靜態 JSON,永遠是上一次批次的快照;
+   持倉價格是點進去才現抓 yfinance(延遲報價,實測要等 5~15 秒)。
+   現在改打 /api/quote(FinMind Sponsor 全市場快照,一次呼叫換整份),
+   所以查 1 檔和查 50 檔一樣快,可以整頁一起輪詢。
+   拿不到就靜靜沿用靜態資料 —— 即時掛掉不該讓整頁壞掉。
+   ============================================================ */
+let LIVE={},LIVE_SRC=null,_liveTimer=null;
+function liveQuotes(ids){
+  ids=(ids||[]).map(String).filter(Boolean);
+  if(!ids.length||!HEALTH_API_ENABLED)return Promise.resolve(null);
+  return fetch(HEALTH_API_BASE+'/api/quote?ids='+encodeURIComponent(ids.join(',')))
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      if(!d||!d.quotes)return null;
+      Object.assign(LIVE,d.quotes);
+      LIVE_SRC={source:d.source,label:d.source_label,days_left:d.sponsor_days_left};
+      renderWatchlistBox();
+      if(typeof renderPortfolio==='function'&&$('#p-port')&&$('#p-port').classList.contains('active'))renderPortfolio();
+      return d;
+    }).catch(()=>null);
+}
+/* 目前畫面上值得即時更新的:自選池 + 持倉 + 今日核心。合成一份去重清單一次要回來。 */
+function liveIds(){
+  const s=new Set(wlIds());
+  (PORT.positions||[]).forEach(p=>s.add(String(p.id)));
+  ((DATA&&DATA.core)||[]).forEach(x=>x&&x.stock_id&&s.add(String(x.stock_id)));
+  return [...s];
+}
+function startLiveQuotes(sec){
+  stopLiveQuotes();
+  const tick=()=>liveQuotes(liveIds());
+  tick(); _liveTimer=setInterval(tick,(sec||20)*1000);
+}
+function stopLiveQuotes(){if(_liveTimer){clearInterval(_liveTimer);_liveTimer=null;}}
+
 /* 今日盤中訊號(docs/alerts.json,由 scripts/intraday_scan.py 每 5 分鐘更新)。
    ⚠️ 同一檔同一種訊號當日只會出現一次 —— 這是刻意的,價格會在觸發價上下來回穿越,
    每次都通知等於洗版。所以這裡看到的是「今天第一次觸發的時間」,不是最新狀態。 */
@@ -2667,9 +2799,11 @@ function loadDay(dt){
 }
 portLoad();renderPortfolio();   /* 持倉獨立於 data.json,先渲染一次,即使 data.json 失敗也可用 */
 mpLoad();                        /* 我的實戰紀錄(買/跳標記),同樣只存本機 */
+wlLoad();                        /* 網頁自選池(2026-07-19),同樣只存本機 */
 fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
   LATEST=d;DATA=d;LABEL=d.label||{};
   setSub();renderDash();renderCore();renderWatch();renderWatchlist();renderPortfolio();renderPerf();
+  startLiveQuotes(20);           /* 即時報價輪詢:自選池 + 持倉 + 今日核心 */
   fetch('./dates.json?'+Date.now()).then(r=>r.json()).then(dates=>{
     if(!dates||dates.length<2)return;
     const sel=document.createElement('select');sel.className='sel';

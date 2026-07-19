@@ -304,6 +304,22 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
     end_h, end_m = (int(x) for x in until.split(":"))
     polls = fired_total = errors = 0
     log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止")
+
+    # 開盤後先自動量一次上游更新頻率 —— 使用者不必記得手動跑,而且這是唯一能量的時機
+    # (只有盤中資料才會變)。量完寫進 docs/freshness.json,網頁與下次調 interval 的依據。
+    try:
+        fr = measure_freshness(seconds=90, interval=3.0)
+        fr["measured_at"] = now_tpe().strftime("%Y-%m-%d %H:%M")
+        fr["interval_used"] = interval
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        (DOCS_DIR / "freshness.json").write_text(
+            json.dumps(fr, ensure_ascii=False), encoding="utf-8")
+        med = fr.get("median_gap_s")
+        if med and interval < med * 0.8:
+            log.warning(f"⚠️ interval={interval:g}s 比上游更新間隔 {med}s 還密 —— "
+                        f"多問的那幾次拿到的是同一份資料,建議調到 {med:g}s 左右")
+    except Exception as e:
+        log.warning(f"上游更新頻率量測失敗(不影響盯盤):{e}")
     while True:
         now = now_tpe()
         if (now.hour, now.minute) >= (end_h, end_m):
