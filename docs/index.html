@@ -1328,17 +1328,42 @@ function wlExportConfig(){
     ()=>alert('已複製。貼進 config/watchlist.json 後 commit,雲端批次就會一起處理這些股票。'),
     ()=>prompt('複製以下內容貼進 config/watchlist.json:',txt));
 }
+/* 完整即時欄位(2026-07-19 使用者指定)。缺的一律顯示「—」不假裝有值。
+   標示資料來源等級,免得把「盤前算好的靜態值」誤當成即時: 即時=快照 / 盤前=levels / 逐筆=tick */
+function wlDetail(id){
+  const q=LIVE[id]||{},dp=(DEEP&&DEEP.metrics&&DEEP.metrics[id])||null;
+  const n=(v,d)=>isNum(v)?num(v,d==null?2:d):'—';
+  const pct=v=>isNum(v)?fmt(v)+'%':'—';        /* 有正負意義的(YoY)保留 +/− 號 */
+  const pct0=v=>isNum(v)?v.toFixed(2)+'%':'—'; /* 換手率恆為正,加 + 號會很怪 */
+  const amt=v=>isNum(v)?(v>=1e8?(v/1e8).toFixed(2)+'億':(v/1e4).toFixed(0)+'萬'):'—';
+  const cell=(k,v)=>`<span style="color:var(--muted-2)">${k}</span> ${v}`;
+  const flag=(on,t)=>on?`<span style="color:var(--up-ink);font-weight:700">${t}</span>`:`<span style="color:var(--muted-2)">${t}✗</span>`;
+  return `<div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:2px 10px;font-size:11px;margin-top:3px;padding-top:3px;border-top:1px solid var(--line)">
+    ${cell('單量',n(q.tick_volume,0))}${cell('總量',n(q.total_volume,0)+'張')}
+    ${cell('成交額',amt(q.total_amount))}${cell('換手率',pct0(q.turnover_rate))}
+    ${cell('最高',n(q.high))}${cell('最低',n(q.low))}
+    ${cell('均價',n(q.vwap))}${cell('量比',n(q.volume_ratio,2))}
+    ${cell('委買',n(q.bid)+'×'+n(q.bid_volume,0))}${cell('委賣',n(q.ask)+'×'+n(q.ask_volume,0))}
+    ${cell('委買賣比',isNum(q.bid_ask_ratio)?(q.bid_ask_ratio*100).toFixed(0)+'%':'—')}
+    ${cell('外盤比',dp?dp.outer_ratio+'%':'—')}
+    ${cell('營收YoY',pct(q.revenue_yoy))}${cell('EPS近四季',n(q.eps_ttm))}
+    ${cell('產業',esc(q.industry||'—'))}
+    <span>${flag(q.breakout,'突破20日高')} ${flag(q.at_ma5,'回測5日線')}</span>
+  </div>`;
+}
 function renderWatchlistBox(){
   const el=$('#wl-box'); if(!el)return;
   const ids=Object.keys(WL);
   const rows=ids.length?ids.map(id=>{
-    const q=LIVE[id],v=WL[id];
-    const px=q&&isNum(q.price)?num(q.price):'—';
-    const ch=q&&isNum(q.change_pct)?`<span class="${cls(q.change_pct)}">${fmt(q.change_pct)}%</span>`:'—';
-    return `<div class="mk-row" style="grid-template-columns:1fr auto auto 28px">
-      <div class="mk-nm"><b>${esc(v.name||'')}</b><span class="mk-id">${slink(id)}</span></div>
-      <div class="num">${px}</div><div class="num">${ch}</div>
-      <button class="mp-b" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button></div>`;
+    const q=LIVE[id]||{},v=WL[id];
+    const px=isNum(q.price)?num(q.price):'—';
+    const chg=isNum(q.change_price)?`<span class="${cls(q.change_price)}">${fmt(q.change_price)}</span>`:'—';
+    const ch=isNum(q.change_pct)?`<span class="${cls(q.change_pct)}">${fmt(q.change_pct)}%</span>`:'—';
+    return `<div class="mk-row" style="grid-template-columns:1fr auto auto auto 28px">
+      <div class="mk-nm"><b>${esc(v.name||q.name||'')}</b><span class="mk-id">${slink(id)}</span></div>
+      <div class="num">${px}</div><div class="num">${chg}</div><div class="num">${ch}</div>
+      <button class="mp-b" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button>
+      ${wlDetail(id)}</div>`;
   }).join(''):'<div class="empty" style="padding:20px 0">自選池是空的。輸入代號加入,或從持倉一鍵匯入。</div>';
   el.innerHTML=`<div class="live-head"><div class="live-upd">自選池 ${ids.length} 檔</div>
       <div style="display:flex;gap:6px">
@@ -2158,7 +2183,13 @@ function renderLive(force){
    所以查 1 檔和查 50 檔一樣快,可以整頁一起輪詢。
    拿不到就靜靜沿用靜態資料 —— 即時掛掉不該讓整頁壞掉。
    ============================================================ */
-let LIVE={},LIVE_SRC=null,_liveTimer=null;
+let LIVE={},LIVE_SRC=null,_liveTimer=null,DEEP=null;
+/* 內外盤比走逐筆資料(一檔兩萬多筆),由盤中盯盤每 10 分鐘算一次寫成 deep.json,
+   前端只讀不算 —— 塞進每 20 秒的報價輪詢會太重。 */
+function loadDeep(){
+  fetch('./deep.json?'+Date.now()).then(r=>r.ok?r.json():null)
+    .then(d=>{DEEP=d;renderWatchlistBox();}).catch(()=>{});
+}
 function liveQuotes(ids){
   ids=(ids||[]).map(String).filter(Boolean);
   if(!ids.length||!HEALTH_API_ENABLED)return Promise.resolve(null);
@@ -2183,7 +2214,8 @@ function liveIds(){
 function startLiveQuotes(sec){
   stopLiveQuotes();
   const tick=()=>liveQuotes(liveIds());
-  tick(); _liveTimer=setInterval(tick,(sec||20)*1000);
+  tick(); loadDeep(); _liveTimer=setInterval(tick,(sec||20)*1000);
+  setInterval(loadDeep,300000);          /* deep.json 每 10 分鐘才更新,前端 5 分鐘拉一次夠了 */
 }
 function stopLiveQuotes(){if(_liveTimer){clearInterval(_liveTimer);_liveTimer=null;}}
 

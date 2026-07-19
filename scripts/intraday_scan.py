@@ -63,9 +63,64 @@ PULLBACK_NEAR = 0.03      # 回檔買點:距月線 3% 內算「回到均線附�
 
 # ---------- 盤前:算好均線/前高 ----------
 
+def _static_extras() -> dict[str, dict]:
+    """慢變動欄位:產業別、流通股數(換手率的分母)、月營收 YoY、EPS(近四季)。
+    這些一天變不了幾次,盤前算一次存進 levels,`/api/quote` 直接 join —— 即時端點
+    就不必為了顯示產業別去打 API,維持「一次呼叫換整份」的速度。
+
+    流通股數用 **市值 ÷ 收盤價** 反推(TaiwanStockMarketValue 可 bulk,2717 檔一次呼叫)。
+    2330 實測反推 259.3 億股,與公開股本相符。"""
+    out: dict[str, dict] = {}
+    # 產業別:用已經建好的 FinMind 產業鏈 primary
+    try:
+        sm = json.loads((DOCS_DIR / "sector_map.json").read_text(encoding="utf-8"))
+        for sid, p in (sm.get("primary") or {}).items():
+            out.setdefault(sid, {})["industry"] = f"{p[0]}／{p[1]}"
+    except Exception as e:
+        log.warning(f"產業別載入失敗:{e}")
+    # 流通股數(bulk 一次)。⚠️ 假日/盤前查「今天」會回空 → 往回找最近一個有資料的交易日,
+    # 否則週一盤前建檔時換手率會整批算不出來(踩過)。
+    try:
+        from datetime import timedelta
+        from .fetchers import fetch_finmind
+        d0 = now_tpe().date()
+        for back in range(0, 7):
+            rows = fetch_finmind("TaiwanStockMarketValue",
+                                 start_date=(d0 - timedelta(days=back)).isoformat()) or []
+            if rows:
+                for r in rows:
+                    sid = str(r.get("stock_id") or "")
+                    mv = r.get("market_value")
+                    if sid and mv:
+                        out.setdefault(sid, {})["market_value"] = float(mv)
+                log.info(f"市值取自 {(d0 - timedelta(days=back)).isoformat()}:{len(rows)} 檔")
+                break
+    except Exception as e:
+        log.warning(f"市值載入失敗(換手率將無法計算):{e}")
+    # 營收 / EPS:只有補抓過的股票有(核心+自選),沒有就留空,前端顯示「—」
+    for sid_dir, key in (("revenue", "rev"), ("eps", "eps")):
+        for f in (DATA_DIR / sid_dir).glob("*.parquet"):
+            try:
+                df = pd.read_parquet(f)
+                if df.empty:
+                    continue
+                last = df.iloc[-1]
+                d = out.setdefault(f.stem, {})
+                if key == "rev":
+                    d["revenue_yoy"] = round(float(last["revenue_yoy"]) * 100, 1) if pd.notna(last.get("revenue_yoy")) else None
+                else:
+                    d["eps_ttm"] = round(float(df["eps"].tail(4).sum()), 2) if len(df) >= 4 else None
+                    d["eps_last"] = round(float(last["eps"]), 2) if pd.notna(last.get("eps")) else None
+            except Exception:
+                continue
+    return out
+
+
 def build_levels(min_turnover: float = MIN_TURNOVER) -> pd.DataFrame:
     """從本機 parquet 算每檔的均線/前高/均量,存成 data/levels.parquet。
-    盤前跑一次即可(約 1~2 分鐘),盤中掃描直接 join,不必重讀 parquet。"""
+    盤前跑一次即可(約 1~2 分鐘),盤中掃描直接 join,不必重讀 parquet。
+    同時併入產業別/流通股數/營收/EPS(見 _static_extras)供即時報價顯示。"""
+    extras = _static_extras()
     rows = []
     files = sorted(DATA_DIR.glob("prices/*.parquet"))
     for f in files:
@@ -81,6 +136,8 @@ def build_levels(min_turnover: float = MIN_TURNOVER) -> pd.DataFrame:
         turnover = float((c.iloc[-20:] * vol.iloc[-20:]).mean()) if vol is not None else 0.0
         if turnover < min_turnover:
             continue
+        ex = extras.get(sid, {})
+        mv = ex.get("market_value")
         rows.append({
             "stock_id": sid,
             "prev_close": float(c.iloc[-1]),
@@ -91,6 +148,12 @@ def build_levels(min_turnover: float = MIN_TURNOVER) -> pd.DataFrame:
             # 前高不含今天(今天還在動),所以取到 -1 為止
             "high20": float(df["high"].iloc[-HIGH_LOOKBACK:].max()),
             "avg_turnover": turnover,
+            "industry": ex.get("industry"),
+            # 流通股數 = 市值 ÷ 收盤價(股)。換手率 = 成交張數×1000 ÷ 流通股數
+            "shares": (mv / float(c.iloc[-1])) if mv else None,
+            "revenue_yoy": ex.get("revenue_yoy"),
+            "eps_ttm": ex.get("eps_ttm"),
+            "eps_last": ex.get("eps_last"),
         })
     out = pd.DataFrame(rows)
     if out.empty:
@@ -281,6 +344,66 @@ def _notify(day: str, new: list[dict]) -> None:
 # (見 `--measure-freshness`)。上游若 60 秒才換一次,你每 5 秒問一次也只是拿到
 # 同一份資料 —— 快的是你問的頻率,不是資料。量完再定 interval。
 
+_deep_last = [0.0]      # 內外盤上次計算時間(list 是為了在 loop 裡可變)
+
+
+def deep_metrics(stock_ids: list[str], day: str | None = None) -> dict:
+    """**真正的內外盤比** —— 只有逐筆資料算得出來,快照給不了。
+
+    快照的 `TickType` 只是「最後一筆」的方向,不是全日累計;要算內外盤比得把
+    `TaiwanStockPriceTick` 的每一筆按方向加總(TickType 1=內盤/賣方成交、2=外盤/買方成交)。
+
+    ⚠️ 成本很不一樣:一檔一天 2 萬多筆(2330 實測 20,922),**不能塞進 20 秒的輪詢**,
+    所以只對「你真的在看的股票」每隔幾分鐘算一次。
+
+    驗證:2330 7/17 外盤 53,567 / 內盤 21,248 = 外盤比 71.6%,
+    兩者相加 74,815 張 **與快照的 total_volume 完全一致** → 方向判定沒算錯。
+    """
+    from .fetchers import fetch_finmind
+    day = day or now_tpe().strftime("%Y-%m-%d")
+    out = {}
+    for sid in stock_ids:
+        try:
+            rows = fetch_finmind("TaiwanStockPriceTick", data_id=sid,
+                                 start_date=day, end_date=day) or []
+            if not rows:
+                continue
+            outer = sum(float(r.get("volume") or 0) for r in rows if str(r.get("TickType")) == "2")
+            inner = sum(float(r.get("volume") or 0) for r in rows if str(r.get("TickType")) == "1")
+            tot = outer + inner
+            if tot <= 0:
+                continue
+            out[sid] = {"outer": outer, "inner": inner,
+                        "outer_ratio": round(outer / tot * 100, 1), "ticks": len(rows)}
+        except Exception as e:
+            log.warning(f"內外盤 {sid} 失敗(略過):{e}")
+    if out:
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        (DOCS_DIR / "deep.json").write_text(
+            json.dumps({"date": day, "updated": now_tpe().strftime("%H:%M"), "metrics": out},
+                       ensure_ascii=False), encoding="utf-8")
+        log.info(f"內外盤比已更新:{len(out)} 檔")
+    return out
+
+
+def _deep_targets() -> list[str]:
+    """要算內外盤的股票 = 自選池 + 今日核心。刻意不是全市場 —— 逐筆資料太重。"""
+    ids = set()
+    try:
+        wl = json.loads((DATA_DIR.parent / "config" / "watchlist.json").read_text(encoding="utf-8"))
+        ids |= set((wl.get("stocks") or {}).keys())
+    except Exception:
+        pass
+    try:
+        data = json.loads((DOCS_DIR / "data.json").read_text(encoding="utf-8"))
+        for s in (data.get("core") or []):
+            if s.get("stock_id"):
+                ids.add(str(s["stock_id"]))
+    except Exception:
+        pass
+    return sorted(ids)
+
+
 def _git_publish(msg: str) -> None:
     """有新訊號時把 alerts 推上去(網頁才看得到)。失敗只記 log —— 推不上去
     不該中斷盯盤,Email 才是主要通知管道。"""
@@ -328,6 +451,13 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
         try:
             r = scan(notify=notify)
             polls += 1
+            # 內外盤比走逐筆資料(一檔 2 萬多筆),太重不能每輪跑 → 每 10 分鐘一次
+            if polls == 1 or (time.time() - _deep_last[0]) >= 600:
+                _deep_last[0] = time.time()
+                try:
+                    deep_metrics(_deep_targets())
+                except Exception as e:
+                    log.warning(f"內外盤比更新失敗(不影響盯盤):{e}")
             if r.get("new_alerts"):
                 fired_total += r["new_alerts"]
                 if publish:
