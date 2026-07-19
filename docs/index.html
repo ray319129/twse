@@ -755,6 +755,16 @@
   .q-chip{font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 9px;
     background:var(--up-bg);color:var(--up-ink);border:1px solid var(--up-line);}
   .q-chip.warn{background:var(--warn-bg);color:var(--warn-ink);border-color:var(--warn-line);}
+  /* 核心/觀察/盤中卡片裡的即時區塊:淡底 + 左側標線,和「批次算好的分析」視覺上分開 ——
+     上面是昨日收盤的判斷,這一塊是現在的市況,兩者不該長得一樣。 */
+  .q-strip{background:var(--surface-2);border-left:3px solid var(--accent);border-radius:8px;
+    padding:10px 12px;margin:10px 0;}
+  .q-strip .q-kpi{margin-top:9px;}
+  .q-strip .q-fund{margin-top:9px;}
+  /* 觀察清單:點列展開的即時細節,預設收合 */
+  tr.wl-d>td{padding:0!important;border:none!important;}
+  tr.wl-d:not(.open)>td{display:none;}
+  tr.wl-r:hover{background:var(--surface-3);}
   @media(max-width:520px){.q-kpi{grid-template-columns:repeat(2,1fr);}.q-px{font-size:24px;}}
   .mk-row{display:grid;grid-template-columns:16px 1fr 68px 74px;gap:8px;align-items:center;
     padding:5px 2px;border-bottom:1px solid var(--line-soft);}
@@ -1191,7 +1201,7 @@ function coreCard(s,i){
       </div>
       <div class="score"><div class="v">${iv(s.score)}</div><div class="l">信心分</div>${bonusHtml}${mpCardBtns(s)}</div>
     </div>
-    ${kbars(s)}${bars(s)}${planBox(s.plan,s.position)}${cat}${tp}${rf}${chip}${val}${fund2}${whyPanel(s)}
+    ${kbars(s)}${bars(s)}${qStrip(s.stock_id)}${planBox(s.plan,s.position)}${cat}${tp}${rf}${chip}${val}${fund2}${whyPanel(s)}
   </div>`;
 }
 function renderCore(){
@@ -1208,7 +1218,8 @@ function renderCore(){
 function renderWatch(){
   const w=DATA.watch||[];
   if(!w.length){$('#p-watch').innerHTML=`<div class="lead">高信心分但還沒觸發,放口袋盯。</div><div class="empty"><span class="ei">👀</span>今日無醞釀中標的。</div>`;return;}
-  const rows=w.map((r,i)=>`<tr>
+  /* 表格保持可掃視,即時細節做成「點一列展開」——每列都塞一整塊會失去表格的意義 */
+  const rows=w.map((r,i)=>`<tr class="wl-r" onclick="if(!event.target.closest('a'))this.nextElementSibling.classList.toggle('open')" style="cursor:pointer">
     <td class="num" style="color:var(--muted-2)">${i+1}</td>
     <td class="tk">${r.hot_industry?'🔥 ':''}${slink(r.stock_id)}${heldTag(r.stock_id)}</td>
     <td>${esc(r.name)}</td>
@@ -1217,7 +1228,8 @@ function renderWatch(){
     <td class="r num ${cls(r.change_pct)}">${fmt(r.change_pct)}%</td>
     <td class="r num ${cls(r.ret20_pct)}">${fmt(r.ret20_pct,1)}%</td>
     <td>${badge(r.profile)}</td>
-    <td class="r num" style="font-weight:800;color:var(--accent-ink)">${iv(r.score)}</td></tr>`).join('');
+    <td class="r num" style="font-weight:800;color:var(--accent-ink)">${iv(r.score)}</td></tr>
+    <tr class="wl-d"><td colspan="9">${qStrip(r.stock_id)||'<div class="q-ctx">尚無即時報價</div>'}</td></tr>`).join('');
   $('#p-watch').innerHTML=`<div class="lead">高信心分但還沒觸發(蓄勢 / 相對強度剛轉強),放口袋盯(<b>${w.length}</b> 檔)。</div>
     <div class="tbl-wrap"><table class="t"><thead><tr>
       <th>#</th><th>代號</th><th>名稱</th><th>產業</th><th class="r">收盤</th><th class="r">漲跌%</th><th class="r">20日%</th><th>型態</th><th class="r">信心</th>
@@ -1389,28 +1401,29 @@ function qMeter(lLab,rLab,ratio,lVal,rVal){
     <div class="q-bar"><i style="width:${pc}%;background:var(--up)"></i><i style="flex:1;background:var(--down)"></i></div>
   </div>`;
 }
-function wlCard(id){
-  const q=LIVE[id]||{},v=WL[id]||{},dp=(DEEP&&DEEP.metrics&&DEEP.metrics[id])||null;
+/* 報價本體(不含標題列)。抽出來是為了讓「自選池 / 核心精選 / 觀察清單 / 盤中即時」
+   共用同一份即時區塊 —— 使用者要求四個地方都要這樣顯示,不該複製四次。
+   `compact=true` 給已經有自己標題與價格的卡片用(核心/觀察),省掉 hero 價格避免重複。 */
+function qBody(id,compact){
+  const q=LIVE[id]||{},dp=(DEEP&&DEEP.metrics&&DEEP.metrics[id])||null;
   const up=isNum(q.change_pct)&&q.change_pct>=0;
   const col=isNum(q.change_pct)?(up?'var(--up-ink)':'var(--down-ink)'):'var(--muted)';
   const chips=[];
   if(q.breakout)chips.push('<span class="q-chip">突破 20 日高</span>');
   if(q.at_ma5)chips.push('<span class="q-chip warn">回測 5 日線</span>');
-  return `<div class="q-card">
-    <div class="q-head">
-      <span class="q-nm">${esc(v.name||q.name||id)}</span><span class="q-id">${slink(id)}</span>
-      ${q.industry?`<span class="q-ind">${esc(q.industry)}</span>`:'<span style="margin-left:auto"></span>'}
-      <button class="q-x" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button>
-    </div>
-    <div class="q-hero">
+  /* 沒有任何即時資料就整塊不畫,不要留一堆「—」佔版面 */
+  if(!isNum(q.price)&&!isNum(q.total_volume))return '';
+  const hero=compact?'':`<div class="q-hero">
       <span class="q-px" style="color:${col}">${_qn(q.price)}</span>
       <span class="q-dl" style="color:${col}">${isNum(q.change_price)?(up?'▲':'▼')+' '+Math.abs(q.change_price).toFixed(2):'—'}
         &nbsp;${isNum(q.change_pct)?fmt(q.change_pct)+'%':''}</span>
-    </div>
+    </div>`;
+  return `${hero}
     <div class="q-ctx">
       <span>高 ${_qn(q.high)}</span><span>低 ${_qn(q.low)}</span>
       <span>均價 ${_qn(q.vwap)}</span>
       <span>單量 ${_qn(q.tick_volume,0)}</span>
+      ${compact&&q.industry?`<span>${esc(q.industry)}</span>`:''}
     </div>
     ${qMeter('委買','委賣',q.bid_ask_ratio,_qn(q.bid_volume,0),_qn(q.ask_volume,0))}
     ${qMeter('外盤','內盤',dp?dp.outer_ratio/100:null,dp?_qvol(dp.outer):null,dp?_qvol(dp.inner):null)}
@@ -1424,7 +1437,25 @@ function wlCard(id){
       <span>營收YoY <b style="color:${isNum(q.revenue_yoy)?(q.revenue_yoy>=0?'var(--up-ink)':'var(--down-ink)'):'var(--muted-2)'}">${isNum(q.revenue_yoy)?fmt(q.revenue_yoy)+'%':'—'}</b></span>
       <span>EPS近四季 <b>${_qn(q.eps_ttm)}</b></span>
       ${chips.join('')}
+    </div>`;
+}
+/* 核心/觀察/盤中的卡片已有自己的標題與收盤價 → 用 compact 版包一層淡底,
+   視覺上跟「批次算好的內容」區隔開:上面是昨日收盤的分析,這一塊是現在的市況。 */
+function qStrip(id){
+  const b=qBody(id,true);
+  if(!b)return '';
+  return `<div class="q-strip">${b}</div>`;
+}
+function wlCard(id){
+  const q=LIVE[id]||{},v=WL[id]||{};
+  const body=qBody(id,false);
+  return `<div class="q-card">
+    <div class="q-head">
+      <span class="q-nm">${esc(v.name||q.name||id)}</span><span class="q-id">${slink(id)}</span>
+      ${q.industry?`<span class="q-ind">${esc(q.industry)}</span>`:'<span style="margin-left:auto"></span>'}
+      <button class="q-x" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button>
     </div>
+    ${body||'<div class="q-ctx">尚無即時報價(未開盤或資料源降級)</div>'}
   </div>`;
 }
 function renderWatchlistBox(){
@@ -2214,7 +2245,7 @@ function orbCard(r){
   } else if(st==='pending') body=`<span style="color:var(--warn)">⏸ 尚未突破</span> · 區間 ${num(r.orl)}~${num(r.orh)} · 現價 <b class="num">${num(r.last)}</b>`;
   else if(st==='below_orl') body=`<span style="color:var(--down)">❌ 跌破開盤區間低 ${num(r.orl)}</span>(現價 ${num(r.last)})→ 今日略過`;
   else body=`<span style="color:var(--muted-2)">1 分K 未到(yfinance 未供或休市)→ 自行確認</span>`;
-  return `<div class="lcard ${k}"><div class="lt"><div class="tkr" style="font-size:15px">${slink(r.stock_id)}<span class="nm2">${esc(r.name)||''}</span> ${r.profile?badge(r.profile):''}</div>${isNum(r.score)?`<div class="scen" style="color:var(--accent-ink)">信心 ${iv(r.score)}</div>`:''}</div><div class="act">${body}</div></div>`;
+  return `<div class="lcard ${k}"><div class="lt"><div class="tkr" style="font-size:15px">${slink(r.stock_id)}<span class="nm2">${esc(r.name)||''}</span> ${r.profile?badge(r.profile):''}</div>${isNum(r.score)?`<div class="scen" style="color:var(--accent-ink)">信心 ${iv(r.score)}</div>`:''}</div><div class="act">${body}</div>${qStrip(r.stock_id)}</div>`;
 }
 function renderLive(force){
   /* only render into the live panel if it's still the active tab (avoid stale writes from a fired interval) */
@@ -2250,7 +2281,29 @@ function renderLive(force){
    所以查 1 檔和查 50 檔一樣快,可以整頁一起輪詢。
    拿不到就靜靜沿用靜態資料 —— 即時掛掉不該讓整頁壞掉。
    ============================================================ */
-let LIVE={},LIVE_SRC=null,_liveTimer=null,DEEP=null;
+let LIVE={},LIVE_SRC=null,_liveTimer=null,DEEP=null,LEVELS=null;
+/* 盤前算好的均線/前高/流通股數/產業別/營收EPS(docs/levels.json)。
+   ⚠️ 這份**刻意由前端抓**:Vercel 的 Python 函式不會打包 repo 裡的資料檔,
+   放 api/quote.py 讀會靜靜讀不到,產業別/換手率/突破/回測全變「—」(踩過)。 */
+function loadLevels(){
+  return fetch('./levels.json?'+Date.now()).then(r=>r.ok?r.json():null)
+    .then(d=>{LEVELS=(d&&d.levels)||null;return LEVELS;}).catch(()=>null);
+}
+/* 把 levels 併進即時報價並算衍生欄位。算法寫在這裡是唯一一份,不與後端重複。
+     換手率   = 成交張數×1000 ÷ 流通股數
+     是否突破 = 現價 > 20日高 × 1.003(與盤中掃描 intraday_scan 同一條規則)
+     回測五日線 = |現價/MA5 − 1| ≤ 1.5% 且現價 ≥ MA5×0.985 */
+function applyLevels(q){
+  if(!q||!LEVELS)return q;
+  const L=LEVELS[q.stock_id];if(!L)return q;
+  const px=q.price,tv=q.total_volume;
+  q.industry=L.industry;q.revenue_yoy=L.revenue_yoy;q.eps_ttm=L.eps_ttm;q.eps_last=L.eps_last;
+  q.ma5=L.ma5;q.ma20=L.ma20;q.high20=L.high20;
+  q.turnover_rate=(isNum(tv)&&isNum(L.shares)&&L.shares>0)?(tv*1000/L.shares*100):null;
+  q.breakout=!!(isNum(px)&&isNum(L.high20)&&px>L.high20*1.003);
+  q.at_ma5=!!(isNum(px)&&isNum(L.ma5)&&Math.abs(px/L.ma5-1)<=0.015&&px>=L.ma5*0.985);
+  return q;
+}
 /* 內外盤比走逐筆資料(一檔兩萬多筆),由盤中盯盤每 10 分鐘算一次寫成 deep.json,
    前端只讀不算 —— 塞進每 20 秒的報價輪詢會太重。 */
 function loadDeep(){
@@ -2264,6 +2317,7 @@ function liveQuotes(ids){
     .then(r=>r.ok?r.json():null)
     .then(d=>{
       if(!d||!d.quotes)return null;
+      Object.values(d.quotes).forEach(applyLevels);   /* 併入盤前靜態欄位 + 算衍生 */
       Object.assign(LIVE,d.quotes);
       LIVE_SRC={source:d.source,label:d.source_label,days_left:d.sponsor_days_left};
       renderWatchlistBox();
@@ -2281,7 +2335,8 @@ function liveIds(){
 function startLiveQuotes(sec){
   stopLiveQuotes();
   const tick=()=>liveQuotes(liveIds());
-  tick(); loadDeep(); _liveTimer=setInterval(tick,(sec||20)*1000);
+  /* levels 一天只變一次,先載完再開始輪詢 —— 否則第一輪報價會少掉產業別/突破/換手率 */
+  loadLevels().then(tick); loadDeep(); _liveTimer=setInterval(tick,(sec||20)*1000);
   setInterval(loadDeep,300000);          /* deep.json 每 10 分鐘才更新,前端 5 分鐘拉一次夠了 */
 }
 function stopLiveQuotes(){if(_liveTimer){clearInterval(_liveTimer);_liveTimer=null;}}

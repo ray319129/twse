@@ -161,7 +161,22 @@ def build_levels(min_turnover: float = MIN_TURNOVER) -> pd.DataFrame:
         return out
     LEVELS_PATH.parent.mkdir(parents=True, exist_ok=True)
     out.to_parquet(LEVELS_PATH, index=False)
-    log.info(f"levels 已建立:{len(out)} 檔(成交額門檻 {min_turnover/1e6:.0f}M)→ {LEVELS_PATH}")
+
+    # ⚠️ 也寫一份 docs/levels.json 給前端 —— **Vercel 的 Python 函式不會自動打包
+    # repo 裡的資料檔**,`api/quote.py` 讀 data/levels.parquet 會靜靜讀不到,
+    # 於是產業別/換手率/突破/回測/營收EPS 全部變成「—」(2026-07-19 實際踩到)。
+    # 改成靜態檔由瀏覽器抓 + 前端 join:沒有打包問題,也不必依賴 Vercel 才能顯示。
+    web = {}
+    for r in out.to_dict("records"):
+        sid = r["stock_id"]
+        web[sid] = {k: (None if pd.isna(v) else (round(v, 4) if isinstance(v, float) else v))
+                    for k, v in r.items() if k != "stock_id"}
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    p = DOCS_DIR / "levels.json"
+    with open(p, "w", encoding="utf-8") as f:
+        json.dump({"date": now_tpe().strftime("%Y-%m-%d"), "levels": web}, f, ensure_ascii=False)
+    log.info(f"levels 已建立:{len(out)} 檔(成交額門檻 {min_turnover/1e6:.0f}M)"
+             f"→ {LEVELS_PATH} + {p}({p.stat().st_size/1024:.0f} KB)")
     return out
 
 
