@@ -1500,3 +1500,40 @@ token 有效但**缺 Contents 寫入權**。GitHub 的原文完全沒說要開�
 
 ### 39.4 Gmail 容量:採用方案 D(使用者選擇)
 不改程式。Gmail 建立過濾器自動清理,見下方使用者說明。
+
+---
+
+## 40. ⚠️ vercel.json 的 ignoreCommand 造成部署失敗(2026-07-20)
+
+**症狀:** 加入 `ignoreCommand` 後,Vercel Production 部署開始失敗
+(GitHub 的 checks 顯示 "Deployment has failed")。
+
+**判定依據(⚠️ 是推論,不是從 Vercel 日誌確認的 —— 我讀不到建置日誌):**
+- 失敗的 commit `ab6939ef4` **只改了 `docs/index.html` 與 `HANDOFF.md`**(純前端)
+- 6 支 `api/*.py` 全部 `ast.parse` 通過
+- 同期唯一的結構性改動就是 `vercel.json` 的 `ignoreCommand`
+
+**兩個可能的原因,解法相同:**
+1. `ignoreCommand` 不是 `vercel.json` 支援的鍵 → schema 驗證失敗
+2. **Vercel 是淺層 clone**,`HEAD^` 不存在 → `git diff HEAD^ HEAD` 出錯
+
+→ **已從 vercel.json 移除。**
+
+### 正確作法:用 Vercel UI 的 Ignored Build Step
+
+Settings → Git → **Ignored Build Step** → Custom,貼:
+
+```bash
+if echo "$VERCEL_GIT_COMMIT_MESSAGE" | grep -qE '^(intraday|snapshot|chips|watchlist):'; then exit 0; else exit 1; fi
+```
+
+(exit 0 = 略過建置)
+
+**為什麼改用 commit message 比對而不是 git diff:**
+機器人的 commit 訊息是固定前綴(`intraday:` / `snapshot:` / `chips:` / `watchlist:`),
+比對字串**不需要 git 歷史**,淺層 clone 也能用 —— 這正是 `HEAD^` 那個作法的死穴。
+
+### 教訓
+**改動建置設定要單獨一個 commit 推,不要跟功能混在一起。**
+這次 `ignoreCommand` 跟「內外盤修正 + 信件改版」同一個 commit 進去,
+之後三個 commit 的部署全掛掉,而失敗訊號要到使用者截圖才發現。
