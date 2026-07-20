@@ -1439,7 +1439,9 @@ const _qn=(v,d)=>isNum(v)?num(v,d==null?2:d):'—';
 const _qamt=v=>isNum(v)?(v>=1e8?(v/1e8).toFixed(1)+'億':(v/1e4).toFixed(0)+'萬'):'—';
 const _qvol=v=>isNum(v)?(v>=10000?(v/10000).toFixed(1)+'萬張':num(v,0)+'張'):'—';
 /* meter:一條分成兩段的長條。兩端都有文字標籤 —— 紅綠在色盲下分不開(ΔE 4.3),
-   不能只靠顏色。ratio = 左段佔比 0~1。 */
+   不能只靠顏色。ratio = 左段佔比 0~1。
+   ⚠️ 「買一/賣一」是**最佳一檔的委託量**,不是券商軟體那種總委買/總委賣(五檔加總),
+      數字對不起來是正常的 —— 快照只給得到最佳一檔(2026-07-20 使用者反映後正名)。 */
 function qMeter(lLab,rLab,ratio,lVal,rVal){
   /* 沒資料就整條不畫。截圖檢查發現跌停股(華邦電)兩條 meter 都是空的,
      卻各佔一條灰底長條 —— 空的視覺元素比沒有更糟,會讓人以為「這裡有東西只是看不懂」。 */
@@ -1538,7 +1540,7 @@ function qBody(id,compact){
       <span>單量 ${_qn(q.tick_volume,0)}</span>
       ${compact&&q.industry?`<span>${esc(q.industry)}</span>`:''}
     </div>
-    ${qMeter('委買','委賣',q.bid_ask_ratio,_qn(q.bid_volume,0),_qn(q.ask_volume,0))}
+    ${qMeter('買一','賣一',q.bid_ask_ratio,_qn(q.bid_volume,0),_qn(q.ask_volume,0))}
     ${qMeter('外盤','內盤',dp?dp.outer_ratio/100:null,dp?_qvol(dp.outer):null,dp?_qvol(dp.inner):null)}
     <div class="q-kpi">
       <div><div class="q-kl">總量</div><div class="q-kv">${_qvol(q.total_volume)}</div></div>
@@ -2397,17 +2399,30 @@ function renderLive(force){
    拿不到就靜靜沿用靜態資料 —— 即時掛掉不該讓整頁壞掉。
    ============================================================ */
 let LIVE={},LIVE_SRC=null,_liveTimer=null,DEEP=null,LEVELS=null,SERIES=null;
+/* ---------- 盤中資料的取得路徑(2026-07-20 改)----------
+   盤中每 3 分鐘會有一次 data-only commit。原本每次 commit 都觸發 Vercel 重新部署,
+   造成通知洗版(使用者反映)。現在 vercel.json 的 ignoreCommand 會**跳過**這類建置 ——
+   但這也表示「部署上的 alerts.json 不會再更新」。
+   所以這些盤中檔案改成**直接抓 GitHub raw**(commit 完就有,不必等部署),
+   抓不到才退回部署上的靜態檔。
+   ⚠️ raw 有約 5 分鐘 CDN 快取,所以網頁上的訊號可能比 Email 晚幾分鐘 ——
+   **Email 才是即時通知管道**,網頁是回顧用的。即時報價不走這條(走 /api/quote,無此問題)。 */
+const RAW_BASE='https://raw.githubusercontent.com/ray319129/twse/main/docs/';
+function loadLive(name){
+  const bust='?t='+Date.now();
+  return fetch(RAW_BASE+name+bust).then(r=>r.ok?r.json():Promise.reject())
+    .catch(()=>fetch('./'+name+bust).then(r=>r.ok?r.json():null))
+    .catch(()=>null);
+}
 /* 當日走勢線(docs/series.json,盯盤迴圈每 10 分鐘用 1分K 重算)。前端只畫不算。 */
 function loadSeries(){
-  fetch('./series.json?'+Date.now()).then(r=>r.ok?r.json():null)
-    .then(d=>{SERIES=d;renderWatchlistBox();}).catch(()=>{});
+  loadLive('series.json').then(d=>{SERIES=d;renderWatchlistBox();});
 }
 /* 分點連買連賣(docs/branch_streak.json,盤後 21:30 批次算)。
    主力淨買超 = 前5大買超分點 + 前5大賣超分點;連買 = 從最近往回數連續為正的天數。 */
 let STREAK=null;
 function loadStreak(){
-  fetch('./branch_streak.json?'+Date.now()).then(r=>r.ok?r.json():null)
-    .then(d=>{STREAK=(d&&d.streaks)||null;renderWatchlistBox();}).catch(()=>{});
+  loadLive('branch_streak.json').then(d=>{STREAK=(d&&d.streaks)||null;renderWatchlistBox();});
 }
 /* 連買連賣 chip + 近 10 日主力淨買超的小柱狀。柱狀讓「連 5 日但金額遞減」這種
    外強中乾的情況看得出來 —— 只給天數會漏掉強度變化。 */
@@ -2430,8 +2445,7 @@ function streakChip(id){
    ⚠️ 這份**刻意由前端抓**:Vercel 的 Python 函式不會打包 repo 裡的資料檔,
    放 api/quote.py 讀會靜靜讀不到,產業別/換手率/突破/回測全變「—」(踩過)。 */
 function loadLevels(){
-  return fetch('./levels.json?'+Date.now()).then(r=>r.ok?r.json():null)
-    .then(d=>{LEVELS=(d&&d.levels)||null;return LEVELS;}).catch(()=>null);
+  return loadLive('levels.json').then(d=>{LEVELS=(d&&d.levels)||null;return LEVELS;});
 }
 /* 把 levels 併進即時報價並算衍生欄位。算法寫在這裡是唯一一份,不與後端重複。
      換手率   = 成交張數×1000 ÷ 流通股數
@@ -2451,8 +2465,7 @@ function applyLevels(q){
 /* 內外盤比走逐筆資料(一檔兩萬多筆),由盤中盯盤每 10 分鐘算一次寫成 deep.json,
    前端只讀不算 —— 塞進每 20 秒的報價輪詢會太重。 */
 function loadDeep(){
-  fetch('./deep.json?'+Date.now()).then(r=>r.ok?r.json():null)
-    .then(d=>{DEEP=d;renderWatchlistBox();}).catch(()=>{});
+  loadLive('deep.json').then(d=>{DEEP=d;renderWatchlistBox();});
 }
 function liveQuotes(ids){
   ids=(ids||[]).map(String).filter(Boolean);
@@ -2509,12 +2522,12 @@ function alertsBox(d){
     ${rows}`;
 }
 function loadAlerts(){
-  fetch('./alerts.json?'+Date.now()).then(r=>r.ok?r.json():null).then(d=>{
+  loadLive('alerts.json').then(d=>{
     const el=$('#alerts-box');if(!el)return;
     const today=(DATA&&DATA.date)||'';
     /* 只顯示當天的;隔天沒跑到就不要拿昨天的訊號騙人 */
     el.innerHTML=(d&&d.date&&(!today||d.date>=today))?alertsBox(d):alertsBox(null);
-  }).catch(()=>{const el=$('#alerts-box');if(el)el.innerHTML=alertsBox(null);});
+  });
 }
 
 /* 資料源狀態(鐵則二:降級要看得見)。FinMind Sponsor 是按月訂閱,到期後全市場即時

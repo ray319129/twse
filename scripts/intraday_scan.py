@@ -71,6 +71,9 @@ VOL_MULT_PULLBACK = 1.3   # 回檔:同上(回檔本來就不該爆量,門檻低�
 VOL_FLOOR = 0.5           # 絕對下限:市場再冷,量比低於此就是真的沒人交易
 MAX_ALERTS_PER_POLL = 8   # 單輪上限(見 scan 內註解:防冷啟動一次噴一整天的累積)
 
+# 訊號信裡「開圖表」連結的網站位址。改網域就改這裡。
+WEB_BASE = "https://twse-main.vercel.app"
+
 
 # ---------- 盤前:算好均線/前高 ----------
 
@@ -388,22 +391,75 @@ def _notify(day: str, new: list[dict]) -> None:
     except Exception as e:
         log.warning(f"通知模組載入失敗:{e}")
         return
-    rows = "".join(
-        f"<tr><td><b>{r['name']}</b> {r['stock_id']}</td>"
-        f"<td>{r['label']}</td>"
-        f"<td align='right'>{r['price']}</td>"
-        f"<td align='right'>{r['change_rate']:+.2f}%</td>"
-        f"<td style='color:#666'>{r['reason']}</td></tr>"
-        for r in new
-    )
-    html = (f"<p>盤中訊號 {day} {now_tpe().strftime('%H:%M')} —— 新觸發 {len(new)} 筆"
-            f"(同一檔同一種訊號當日只通知一次)</p>"
-            f"<table cellpadding='6' style='border-collapse:collapse;font-size:14px'>"
-            f"<tr style='background:#f0f0f0'><th>個股</th><th>訊號</th><th>現價</th>"
-            f"<th>漲幅</th><th>理由</th></tr>{rows}</table>"
-            f"<p style='color:#888;font-size:12px'>提醒:這是條件觸發,不是買進建議。"
-            f"動能型訊號在本系統台帳的歷史超額為負(見 HANDOFF 第 26 節),"
-            f"請自行判斷後再決定。</p>")
+    # 每檔補上「決策要用到的背景」:產業、量能、法人/分點、基本面、與均線的距離。
+    # 使用者反映原本的信「資訊不太夠」—— 只給代號和理由,還要自己去查是誰、做什麼、貴不貴。
+    lv = load_levels()
+    lvmap = {str(r["stock_id"]): r for r in lv.to_dict("records")} if not lv.empty else {}
+    streaks = {}
+    try:
+        streaks = json.loads((DOCS_DIR / "branch_streak.json").read_text(encoding="utf-8")).get("streaks", {})
+    except Exception:
+        pass
+
+    def _card(r: dict) -> str:
+        sid = r["stock_id"]
+        L = lvmap.get(sid, {})
+        px = r.get("price")
+        up = (r.get("change_rate") or 0) >= 0
+        col = "#0b7a44" if up else "#c42a30"
+        bits = []
+        ind = L.get("industry")
+        if ind and ind == ind:
+            bits.append(f"<b>{ind}</b>")
+        for lab, key, fmt in (("營收YoY", "revenue_yoy", "{:+.1f}%"),
+                              ("EPS近四季", "eps_ttm", "{:.2f}")):
+            v = L.get(key)
+            if v is not None and v == v:
+                bits.append(f"{lab} {fmt.format(v)}")
+        st = streaks.get(sid)
+        if st and st.get("streak"):
+            bits.append(f"分點連{'買' if st['dir']=='buy' else '賣'} {st['streak']} 日")
+        # 與均線的相對位置 —— 判斷「這是起漲還是追高」的關鍵脈絡
+        mas = []
+        for lab, key in (("月線", "ma20"), ("季線", "ma60")):
+            m = L.get(key)
+            if m and m == m and px:
+                mas.append(f"{lab} {m:.2f}({px/m-1:+.1%})")
+        h20 = L.get("high20")
+        if h20 and h20 == h20 and px:
+            mas.append(f"20日高 {h20:.2f}({px/h20-1:+.1%})")
+        vwap, vr = r.get("vwap"), r.get("volume_ratio")
+        vol = []
+        if vwap:
+            vol.append(f"均價 {vwap:.2f}")
+        if vr:
+            vol.append(f"量比 {vr:.2f}")
+        return (
+            f"<div style='border:1px solid #e6eaf0;border-left:3px solid {col};"
+            f"border-radius:10px;padding:12px 14px;margin:10px 0'>"
+            f"<div style='font-size:15px;font-weight:800'>{r['name'] or sid} "
+            f"<span style='color:#888;font-weight:500;font-size:13px'>{sid}</span>"
+            f"<span style='background:#eef0ff;color:#4a52e6;border-radius:20px;"
+            f"padding:2px 9px;font-size:11px;margin-left:8px'>{r['label']}</span></div>"
+            f"<div style='font-size:20px;font-weight:800;color:{col};margin:5px 0'>"
+            f"{px} <span style='font-size:14px'>{r['change_rate']:+.2f}%</span></div>"
+            + (f"<div style='font-size:12px;color:#555'>{' ・ '.join(bits)}</div>" if bits else "")
+            + (f"<div style='font-size:12px;color:#555;margin-top:3px'>{' ・ '.join(mas)}</div>" if mas else "")
+            + (f"<div style='font-size:12px;color:#555;margin-top:3px'>{' ・ '.join(vol)}</div>" if vol else "")
+            + f"<div style='font-size:12px;color:#888;margin-top:5px'>{r['reason']}</div>"
+            f"<div style='margin-top:8px;font-size:12px'>"
+            f"<a href='{WEB_BASE}/#stock={sid}' style='color:#4a52e6;text-decoration:none'>"
+            f"開圖表 / 分K →</a>"
+            f"<a href='https://tw.stock.yahoo.com/quote/{sid}' style='color:#888;"
+            f"text-decoration:none;margin-left:12px'>Yahoo 股市 ↗</a></div></div>")
+
+    html = (f"<div style='font-family:-apple-system,\"Segoe UI\",sans-serif;max-width:620px'>"
+            f"<p style='font-size:13px;color:#555'>盤中訊號 {day} {now_tpe().strftime('%H:%M')}"
+            f" —— 新觸發 <b>{len(new)}</b> 筆(同一檔同一種訊號當日只通知一次)</p>"
+            + "".join(_card(r) for r in new)
+            + f"<p style='color:#888;font-size:11.5px;line-height:1.6'>提醒:這是條件觸發,"
+            f"不是買進建議。動能型訊號在本系統台帳的歷史超額為負(見 HANDOFF 第 26 節),"
+            f"請自行判斷後再決定。</p></div>")
     try:
         send_email(f"[盤中訊號] {len(new)} 筆 · {now_tpe().strftime('%H:%M')}", html)
         log.info(f"已寄出盤中訊號通知({len(new)} 筆)")
@@ -490,8 +546,13 @@ def deep_metrics(stock_ids: list[str], day: str | None = None) -> dict:
     ⚠️ 成本很不一樣:一檔一天 2 萬多筆(2330 實測 20,922),**不能塞進 20 秒的輪詢**,
     所以只對「你真的在看的股票」每隔幾分鐘算一次。
 
-    驗證:2330 7/17 外盤 53,567 / 內盤 21,248 = 外盤比 71.6%,
-    兩者相加 74,815 張 **與快照的 total_volume 完全一致** → 方向判定沒算錯。
+    ⚠️⚠️ **方向定義(2026-07-20 修正,原本是反的)**:
+    `TickType=1 → 外盤(買方主動)`、`TickType=2 → 內盤(賣方主動)`。
+
+    驗證方法:取 7/17(全面下跌日)6 檔股票,比對「TickType 佔比」與「價格上行成交量佔比」——
+    6 檔**全部**是 TickType=2 佔多數(57~75%),若 2 是外盤就等於「全市場下跌但買方主導」,
+    不合理;且 TickType=1 的佔比與價漲量佔比明顯同向(2330 28.4% vs 25.3%、
+    2603 42.7% vs 42.0%)。原本寫反會讓外盤比整個顛倒,使用者盤中看到的都是錯的。
     """
     from .fetchers import fetch_finmind
     day = day or now_tpe().strftime("%Y-%m-%d")
@@ -502,8 +563,8 @@ def deep_metrics(stock_ids: list[str], day: str | None = None) -> dict:
                                  start_date=day, end_date=day) or []
             if not rows:
                 continue
-            outer = sum(float(r.get("volume") or 0) for r in rows if str(r.get("TickType")) == "2")
-            inner = sum(float(r.get("volume") or 0) for r in rows if str(r.get("TickType")) == "1")
+            outer = sum(float(r.get("volume") or 0) for r in rows if str(r.get("TickType")) == "1")
+            inner = sum(float(r.get("volume") or 0) for r in rows if str(r.get("TickType")) == "2")
             tot = outer + inner
             if tot <= 0:
                 continue
@@ -764,7 +825,9 @@ if __name__ == "__main__":
     ap.add_argument("--dry-run", action="store_true", help="只顯示不寫檔不寄信")
     ap.add_argument("--no-notify", action="store_true", help="寫檔但不寄信")
     ap.add_argument("--loop", action="store_true", help="常駐輪詢(建議用法)")
-    ap.add_argument("--interval", type=float, default=20.0, help="輪詢間隔秒數(預設 20)")
+    # 預設 5 秒:實測上游約 11 秒才換一份資料、單次呼叫 0.63 秒,低於 5 秒只是重複拿同一份;
+    # 額度 6000/hr 換算 interval < 2.7 秒會在盤中用滿。
+    ap.add_argument("--interval", type=float, default=5.0, help="輪詢間隔秒數(預設 5)")
     ap.add_argument("--until", default="13:35", help="跑到幾點停(HH:MM 台北時間)")
     ap.add_argument("--publish", action="store_true", help="有新訊號就 git commit/push")
     ap.add_argument("--start", help="睡到這個時間才開始(HH:MM 台北);同時自動重建過期的 levels")

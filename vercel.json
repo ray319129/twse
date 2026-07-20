@@ -20,5 +20,6 @@
     "api/watchlist.py": {
       "maxDuration": 20
     }
-  }
+  },
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- ':!data/**' ':!docs/alerts.json' ':!docs/deep.json' ':!docs/series.json' ':!docs/freshness.json' ':!docs/levels.json' ':!docs/branch_streak.json'"
 }
