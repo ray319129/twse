@@ -71,7 +71,10 @@ def archive_snapshot(tag: str | None = None, day: str | None = None) -> dict:
 
     # 快照的 date 欄是資料本身的時間戳。若它的日期不是今天,代表市場沒開(假日/颱風假)
     # 或資料還沒更新 —— 存進去只會污染歷史,直接跳過。
-    stamp = str(df["date"].iloc[0])[:10] if "date" in df.columns else ""
+    # 取眾數不取第一列 —— 每檔的時間戳是它自己的最後成交時間,冷門股可能停在幾小時前
+    # (2026-07-20 實測第一列是 11:00 但全市場眾數是 12:36)。
+    from .intraday_scan import snapshot_date
+    stamp = snapshot_date(df)
     if stamp and stamp != day:
         log.info(f"快照時間戳為 {stamp} 而非 {day}(非交易日或尚未更新),略過存檔。")
         return {"ok": False, "reason": f"stale:{stamp}", "tag": tag, "day": day, "rows": 0}

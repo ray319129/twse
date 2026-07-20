@@ -55,11 +55,21 @@ DOCS_DIR = DATA_DIR.parent / "docs"
 # ---- 訊號參數(想調就改這裡;每一條都有理由,別亂鬆) ----
 HIGH_LOOKBACK = 20        # 前高回看天數
 BREAKOUT_BUFFER = 0.003   # 要超過前高 0.3% 才算突破(防貼著前高來回磨)
-MIN_VOL_RATIO = 1.5       # 量比門檻:沒量的突破多半是假的
 MAX_CHG = 8.0             # 漲超過這個就不提醒了 —— 追不到,而且是過熱區
-MIN_CHG = 1.0             # 漲不到 1% 的「突破」通常只是雜訊
+MIN_CHG = 1.0             # 突破:漲不到 1% 通常只是雜訊
+MIN_CHG_PB = 0.5          # 回檔買點:至少要漲 0.5% 才算「翻紅」
 MIN_TURNOVER = 20_000_000 # 日均成交額門檻(元):太小的股票買不進也賣不掉
 PULLBACK_NEAR = 0.03      # 回檔買點:距月線 3% 內算「回到均線附近」
+
+# 量比門檻改成「**相對當日全市場中位數**」而非固定值(2026-07-20 實測後修正)。
+# 原因:7/20 全市場量比中位數只有 0.65(低量日),固定門檻 1.5 幾乎不可能觸發 ——
+# 當天 30 筆回檔買點裡有 27 筆量比 < 1.0,等於完全沒有量能過濾,才會一次噴 25 封信。
+# 用市場中位數當基準,低量日自動降門檻、爆量日自動升,同一套規則在不同盤況都成立。
+# (這與專案既有的「因子驗證要先規模中性化」是同一個原則。)
+VOL_MULT_BREAKOUT = 1.5   # 突破:量比 ≥ 市場中位數 × 此值
+VOL_MULT_PULLBACK = 1.3   # 回檔:同上(回檔本來就不該爆量,門檻低一點)
+VOL_FLOOR = 0.5           # 絕對下限:市場再冷,量比低於此就是真的沒人交易
+MAX_ALERTS_PER_POLL = 8   # 單輪上限(見 scan 內註解:防冷啟動一次噴一整天的累積)
 
 
 # ---------- 盤前:算好均線/前高 ----------
@@ -215,41 +225,68 @@ def save_alerts(day: str, data: dict) -> None:
 
 # ---------- 訊號判定 ----------
 
-def _signals(row: dict) -> list[dict]:
+def _f(v):
+    """→ float | None。**NaN 在 Python 是 truthy**,`x or None` 擋不掉,
+    這個坑在 quotes.py 踩過一次、2026-07-20 又在這裡踩第二次
+    (訊號信的個股名稱全變成 "nan")。所有外部欄位一律走這裡。"""
+    try:
+        if v is None:
+            return None
+        f = float(v)
+        return None if f != f else f          # NaN != NaN
+    except (TypeError, ValueError):
+        return None
+
+
+def _s(v) -> str:
+    """→ 乾淨字串。NaN / None / 'nan' 一律回空字串。"""
+    if v is None or (isinstance(v, float) and v != v):
+        return ""
+    s = str(v).strip()
+    return "" if s.lower() == "nan" else s
+
+
+def _signals(row: dict, vol_base: float) -> list[dict]:
     """單檔 → 觸發的訊號清單。回傳空 list 代表沒事。
+    `vol_base` = 當日全市場量比中位數,量能門檻相對它而定(見參數區註解)。
     每個訊號帶 reason(給人看的理由),不要只給一個代號讓使用者猜。"""
     out = []
-    px = row.get("close")
-    vwap = row.get("average_price")
-    vr = row.get("volume_ratio")
-    chg = row.get("change_rate")
-    if px is None or not px:
+    px = _f(row.get("close"))
+    vwap = _f(row.get("average_price"))
+    vr = _f(row.get("volume_ratio"))
+    chg = _f(row.get("change_rate"))
+    if not px:
         return out
 
     above_vwap = vwap is not None and vwap > 0 and px > vwap
-    vol_ok = vr is not None and vr >= MIN_VOL_RATIO
-    chg_ok = chg is not None and MIN_CHG <= chg <= MAX_CHG
+    thr_bo = max(VOL_FLOOR, vol_base * VOL_MULT_BREAKOUT)
+    thr_pb = max(VOL_FLOOR, vol_base * VOL_MULT_PULLBACK)
 
-    # ① 量增突破:突破前高 + 量增 + 站上均價 + 漲幅未過熱
-    h20 = row.get("high20")
-    if h20 and px > h20 * (1 + BREAKOUT_BUFFER) and vol_ok and above_vwap and chg_ok:
+    # ① 量增突破:突破前高 + 相對放量 + 站上均價 + 漲幅未過熱
+    h20 = _f(row.get("high20"))
+    if (h20 and px > h20 * (1 + BREAKOUT_BUFFER) and above_vwap
+            and vr is not None and vr >= thr_bo
+            and chg is not None and MIN_CHG <= chg <= MAX_CHG):
         out.append({
             "type": "breakout",
             "label": "量增突破",
             "reason": (f"突破 {HIGH_LOOKBACK} 日高 {h20:.2f}(現價 {px:.2f},"
-                       f"高出 {(px/h20-1)*100:.1f}%)・量比 {vr:.1f} 倍・站上均價 {vwap:.2f}"),
+                       f"高出 {(px/h20-1)*100:.1f}%)・量比 {vr:.2f}"
+                       f"(市場中位 {vol_base:.2f})・站上均價 {vwap:.2f}"),
         })
 
-    # ② 多頭回檔買點:多頭排列 + 回到月線附近 + 當日翻紅站回均價
-    ma5, ma20, ma60 = row.get("ma5"), row.get("ma20"), row.get("ma60")
-    if all(v for v in (ma5, ma20, ma60)) and ma5 > ma20 > ma60:
-        near_ma20 = abs(px / ma20 - 1) <= PULLBACK_NEAR
-        if near_ma20 and above_vwap and chg is not None and chg > 0:
+    # ② 多頭回檔買點:多頭排列 + 回到月線附近 + 當日翻紅站回均價 + 有量
+    ma5, ma20, ma60 = _f(row.get("ma5")), _f(row.get("ma20")), _f(row.get("ma60"))
+    if ma5 and ma20 and ma60 and ma5 > ma20 > ma60:
+        if (abs(px / ma20 - 1) <= PULLBACK_NEAR and above_vwap
+                and chg is not None and chg >= MIN_CHG_PB
+                and vr is not None and vr >= thr_pb):
             out.append({
                 "type": "pullback",
                 "label": "回檔買點",
                 "reason": (f"多頭排列(5>20>60)・回到月線 {ma20:.2f} 附近"
-                           f"(距 {(px/ma20-1)*100:+.1f}%)・當日翻紅站回均價"),
+                           f"(距 {(px/ma20-1)*100:+.1f}%)・翻紅 {chg:+.2f}% 站回均價"
+                           f"・量比 {vr:.2f}(市場中位 {vol_base:.2f})"),
             })
     return out
 
@@ -269,7 +306,7 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
     if snap.empty:
         return {"ok": False, "reason": "no_snapshot", "checked": 0, "new_alerts": 0, "alerts": []}
 
-    stamp = str(snap["date"].iloc[0])[:10] if "date" in snap.columns else ""
+    stamp = snapshot_date(snap)
     if stamp and stamp != day:
         log.info(f"快照時間戳 {stamp} ≠ 今天 {day}(非交易日或未開盤),掃描跳過。")
         return {"ok": False, "reason": f"stale:{stamp}", "checked": 0, "new_alerts": 0, "alerts": []}
@@ -280,23 +317,48 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
         return {"ok": False, "reason": "no_levels", "checked": 0, "new_alerts": 0, "alerts": []}
 
     df = snap.merge(levels, on="stock_id", how="inner")
+    # 當日全市場量比中位數:量能門檻的基準(見參數區)。抓不到就退回 1.0(等同固定門檻)。
+    try:
+        vol_base = float(pd.to_numeric(df["volume_ratio"], errors="coerce").median())
+        if vol_base != vol_base or vol_base <= 0:
+            vol_base = 1.0
+    except Exception:
+        vol_base = 1.0
+
+    names = _name_map()
     fired = load_alerts(day)
+    first_poll = not fired            # 今天還沒有任何紀錄 = 這是第一輪
     new = []
     for row in df.to_dict("records"):
-        for sig in _signals(row):
+        for sig in _signals(row, vol_base):
             key = f"{row['stock_id']}|{sig['type']}"
             if key in fired:
                 continue                       # ← 當日去重:同一檔同一種訊號只提醒一次
+            sid = str(row["stock_id"])
             rec = {
-                "stock_id": row["stock_id"],
-                "name": row.get("name") or "",
+                "stock_id": sid,
+                # ⚠️ 快照的 name 欄實測只有 3.2% 有值,其餘是 **NaN(truthy!)** ——
+                # 原本 `row.get("name") or ""` 擋不掉,7/20 信裡個股名稱全變 "nan"。
+                "name": _s(row.get("name")) or names.get(sid, ""),
                 "type": sig["type"], "label": sig["label"], "reason": sig["reason"],
-                "price": row.get("close"), "change_rate": row.get("change_rate"),
-                "volume_ratio": row.get("volume_ratio"), "vwap": row.get("average_price"),
+                "price": _f(row.get("close")), "change_rate": _f(row.get("change_rate")),
+                "volume_ratio": _f(row.get("volume_ratio")), "vwap": _f(row.get("average_price")),
                 "fired_at": now.strftime("%H:%M"),
             }
             fired[key] = rec
             new.append(rec)
+
+    # 冷啟動保護:job 若在盤中才啟動(排程延遲、手動觸發、中途重啟),第一輪會把
+    # 「整個上午累積下來、當下仍符合條件」的股票一次全部觸發 —— 7/20 就一次寄了 25 筆。
+    # 那不是 25 個新機會,是 3 小時的存量。所以只留當下最強的幾檔(依漲幅),
+    # 其餘仍寫入去重表(避免稍後又逐筆補寄),但不通知。
+    skipped = 0
+    if len(new) > MAX_ALERTS_PER_POLL:
+        new.sort(key=lambda r: -(r.get("change_rate") or -99))
+        skipped = len(new) - MAX_ALERTS_PER_POLL
+        new = new[:MAX_ALERTS_PER_POLL]
+        log.info(f"單輪觸發 {skipped + len(new)} 筆超過上限"
+                 f"{'(冷啟動:累積存量)' if first_poll else ''},只通知漲幅最強的 {len(new)} 筆")
 
     if new and not dry_run:
         save_alerts(day, fired)
@@ -415,6 +477,8 @@ def intraday_series(stock_ids: list[str], day: str | None = None,
 
 
 _deep_last = [0.0]      # 內外盤上次計算時間(list 是為了在 loop 裡可變)
+_pub_last = [0.0]       # 上次 git push 時間(發布節流用)
+PUBLISH_EVERY = 180.0   # 最快每 3 分鐘 push 一次(每次 push = 一次 Vercel 部署)
 
 
 def deep_metrics(stock_ids: list[str], day: str | None = None) -> dict:
@@ -475,11 +539,17 @@ def _deep_targets() -> list[str]:
 
 
 def _git_publish(msg: str) -> None:
-    """有新訊號時把 alerts 推上去(網頁才看得到)。失敗只記 log —— 推不上去
-    不該中斷盯盤,Email 才是主要通知管道。"""
+    """把 alerts / 走勢線 / 內外盤 / freshness 推上去(網頁才看得到)。失敗只記 log ——
+    推不上去不該中斷盯盤,Email 才是主要通知管道。
+
+    ⚠️ **每次 push 都會觸發一次 Vercel 重新部署**。7/20 實測 20 分鐘內推了 8 次
+    = 8 次部署,既浪費也可能撞到平台限制 → 改由呼叫端節流(見 loop 的 _pub_last)。
+    """
     import subprocess
     try:
-        subprocess.run(["git", "add", "data/alerts", "docs/alerts.json"], check=False)
+        subprocess.run(["git", "add", "data/alerts", "docs/alerts.json",
+                        "docs/deep.json", "docs/series.json", "docs/freshness.json"],
+                       check=False)
         r = subprocess.run(["git", "diff", "--cached", "--quiet"])
         if r.returncode == 0:
             return                                  # 沒變動
@@ -488,6 +558,52 @@ def _git_publish(msg: str) -> None:
         subprocess.run(["git", "push"], check=False)
     except Exception as e:
         log.warning(f"alerts 發布失敗(不影響盯盤):{e}")
+
+
+def snapshot_date(snap) -> str:
+    """快照的「資料日期」。
+
+    ⚠️ **不能用 `snap['date'].iloc[0]`** —— 每檔股票的時間戳是它自己的**最後成交時間**,
+    冷門股可能好幾小時沒成交。2026-07-20 12:35 實測:第一列是 11:00(那檔冷門股),
+    但全市場有 1321 種不同時間戳,最多數落在 12:36(落後真實時間僅 6~12 秒)。
+    我因此一度誤判「全市場快照延遲 95 分鐘」。取眾數才是對的。
+    """
+    if snap is None or getattr(snap, "empty", True) or "date" not in snap.columns:
+        return ""
+    try:
+        return str(snap["date"].astype(str).str[:10].mode().iloc[0])
+    except Exception:
+        return str(snap["date"].iloc[0])[:10]
+
+
+def snapshot_lag_seconds(snap) -> float | None:
+    """快照落後現在幾秒(用時間戳眾數)。給網頁顯示「這份資料多新」。"""
+    if snap is None or getattr(snap, "empty", True) or "date" not in snap.columns:
+        return None
+    try:
+        m = str(snap["date"].astype(str).str[:19].mode().iloc[0])
+        return (now_tpe().replace(tzinfo=None) - datetime.strptime(m, "%Y-%m-%d %H:%M:%S")).total_seconds()
+    except Exception:
+        return None
+
+
+_NAME_MAP_CACHE: dict = {}
+
+
+def _name_map() -> dict[str, str]:
+    """代號 → 名稱。快照的 name 欄實測只有 3.2% 有值,用本機月快取 stock_info 補。"""
+    global _NAME_MAP_CACHE
+    if _NAME_MAP_CACHE:
+        return _NAME_MAP_CACHE
+    try:
+        from .fetchers import fetch_stock_info
+        info = fetch_stock_info()
+        if info is not None and not info.empty:
+            _NAME_MAP_CACHE = dict(zip(info["stock_id"].astype(str),
+                                       info["stock_name"].astype(str)))
+    except Exception as e:
+        log.warning(f"名稱對照載入失敗(訊號仍會發,只是沒名稱):{e}")
+    return _NAME_MAP_CACHE
 
 
 def _levels_fresh() -> bool:
@@ -545,8 +661,9 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
         log.warning("⚠️ levels 不是今天的,突破判斷會失準;建議加 --start 讓它自動重建。")
 
     end_h, end_m = (int(x) for x in until.split(":"))
-    polls = fired_total = errors = 0
+    polls = fired_total = errors = pending = 0
     done_tags: set[str] = set()
+    _pub_last[0] = 0.0            # 讓第一批訊號立刻發布,不必等節流窗
     log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止"
              + ("(含快照存檔)" if archive else ""))
 
@@ -598,8 +715,13 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
                         log.warning(f"快照存檔 {t} 失敗(不影響盯盤):{e}")
             if r.get("new_alerts"):
                 fired_total += r["new_alerts"]
-                if publish:
-                    _git_publish(f"intraday: {r['new_alerts']} signals {now.strftime('%H:%M')}")
+                pending += r["new_alerts"]
+            # 發布節流:每次 push 都會觸發一次 Vercel 重新部署,7/20 實測 20 分鐘內
+            # 推了 8 次。Email 已經即時送達,網頁晚 3 分鐘完全可以接受。
+            if publish and pending and (time.time() - _pub_last[0]) >= PUBLISH_EVERY:
+                _pub_last[0] = time.time()
+                _git_publish(f"intraday: {pending} signals {now.strftime('%H:%M')}")
+                pending = 0
             elif not r.get("ok") and r.get("reason") in ("no_sponsor", "no_levels"):
                 log.warning(f"停止盯盤:{r['reason']}")   # 這兩種再輪也不會好
                 break
@@ -607,6 +729,8 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
             errors += 1
             log.warning(f"單次掃描失敗(繼續):{e}")
         time.sleep(max(0.0, interval - (time.time() - t0)))
+    if publish and pending:
+        _git_publish(f"intraday: {pending} signals (final)")   # 收盤前補推殘留的
     log.info(f"盯盤結束:輪詢 {polls} 次、觸發 {fired_total} 筆、錯誤 {errors} 次")
     return {"polls": polls, "fired": fired_total, "errors": errors}
 

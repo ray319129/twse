@@ -296,9 +296,17 @@ def market_snapshot_source() -> dict:
     st = sponsor_status()
     snap = fetch_snapshot_all()
     if not snap.empty:
-        ts = str(snap["date"].iloc[0]) if "date" in snap else ""
+        # ⚠️ 取眾數不取第一列:每檔的時間戳是它自己的最後成交時間,冷門股會停在幾小時前。
+        # 用 iloc[0] 會讓網頁顯示「資料時間 11:00」而其實是即時的(2026-07-20 踩到)。
+        ts, lag = "", None
+        try:
+            ts = str(snap["date"].astype(str).str[:19].mode().iloc[0])
+            lag = (now_tpe().replace(tzinfo=None)
+                   - datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")).total_seconds()
+        except Exception:
+            pass
         return {"source": SRC_SPONSOR, "label": "即時(全市場)", "ts": ts,
-                "n": len(snap), "sponsor": st}
+                "lag_s": None if lag is None else round(lag), "n": len(snap), "sponsor": st}
     if st.get("active"):
         # 有訂閱卻拿不到 → API 端出事,不是到期。講清楚差別,免得誤判成該續訂。
         return {"source": SRC_MIS, "label": "降級:即時快照暫時無法取得", "ts": "", "n": 0, "sponsor": st}

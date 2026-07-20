@@ -125,6 +125,15 @@ class handler(BaseHTTPRequestHandler):
                       "content": base64.b64encode(content.encode()).decode(),
                       **({"sha": sha} if sha else {})},
                 timeout=25)
+            if r.status_code == 403 and "not accessible by personal access token" in r.text:
+                # 2026-07-20 實際踩到:token 有效但缺 Contents 寫入權。
+                # GitHub 的原文訊息完全沒說要開哪個權限,所以這裡直接寫清楚。
+                return self._send(403, {"error":
+                    "GitHub token 權限不足(缺 Contents 寫入權)。"
+                    "若用 Fine-grained token:Repository access 選這個 repo,"
+                    "Permissions → Repository permissions → **Contents 設為 Read and write**,"
+                    "存檔後把新 token 更新到 Vercel 並 Redeploy。"
+                    "若用 Classic token:勾選 **repo** 這個 scope。"})
             if r.status_code not in (200, 201):
                 return self._send(502, {"error": f"GitHub 寫入失敗 {r.status_code}: {r.text[:200]}"})
             self._send(200, {"ok": True, "changed": True, "n": len(stocks)})
