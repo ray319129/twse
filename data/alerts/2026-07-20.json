@@ -442,5 +442,17 @@
   "volume_ratio": 0.32,
   "vwap": 20.63,
   "fired_at": "12:33"
+ },
+ "6919|pullback": {
+  "stock_id": "6919",
+  "name": NaN,
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 104.76 附近(距 +2.6%)・當日翻紅站回均價",
+  "price": 107.5,
+  "change_rate": 3.86,
+  "volume_ratio": 0.43,
+  "vwap": 107.33,
+  "fired_at": "12:37"
  }
 }
