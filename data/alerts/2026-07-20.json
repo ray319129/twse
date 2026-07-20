@@ -466,5 +466,17 @@
   "volume_ratio": 0.46,
   "vwap": 9.33,
   "fired_at": "12:38"
+ },
+ "2206|breakout": {
+  "stock_id": "2206",
+  "name": NaN,
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 64.70(現價 64.90,高出 0.3%)・量比 1.7 倍・站上均價 63.84",
+  "price": 64.9,
+  "change_rate": 2.2,
+  "volume_ratio": 1.68,
+  "vwap": 63.84,
+  "fired_at": "12:39"
  }
 }
