@@ -334,5 +334,17 @@
   "volume_ratio": 0.86,
   "vwap": 23.85,
   "fired_at": "12:12"
+ },
+ "2836|pullback": {
+  "stock_id": "2836",
+  "name": NaN,
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 12.39 附近(距 +2.1%)・當日翻紅站回均價",
+  "price": 12.65,
+  "change_rate": 0.39,
+  "volume_ratio": 0.6,
+  "vwap": 12.55,
+  "fired_at": "12:15"
  }
 }
