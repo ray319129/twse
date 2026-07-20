@@ -769,6 +769,15 @@
   .q-lim-tag{font-size:11px;font-weight:800;border-radius:20px;padding:2px 9px;letter-spacing:.05em;}
   .q-lim-tag.up{background:var(--up);color:#fff;}
   .q-lim-tag.dn{background:var(--down);color:#fff;}
+  /* 名詞解釋泡泡(2026-07-20)。用 fixed+JS 定位而非 CSS ::after —— 卡片有 overflow,
+     純 CSS 的 tooltip 會被裁掉。可被 hover(桌機)或點擊(手機)觸發。 */
+  [data-tip]{cursor:help;border-bottom:1px dotted var(--muted-2);}
+  [data-tip]:hover,[data-tip]:focus{color:var(--accent-ink);outline:none;}
+  .tip-pop{position:absolute;z-index:9999;background:var(--surface);color:var(--ink-2);
+    border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;
+    font-size:12px;line-height:1.65;box-shadow:0 8px 28px rgba(0,0,0,.18);
+    font-weight:400;letter-spacing:0;text-align:left;pointer-events:none;}
+  .tip-pop b{color:var(--ink);font-size:12.5px;}
   /* 分點連買連賣:天數 + 近 10 日主力淨買超小柱狀(看得出強度是遞增還遞減) */
   .q-streak{display:inline-flex;align-items:center;gap:6px;}
   .q-streak-b{display:inline-flex;align-items:center;gap:1px;height:11px;}
@@ -1442,7 +1451,7 @@ const _qvol=v=>isNum(v)?(v>=10000?(v/10000).toFixed(1)+'萬張':num(v,0)+'張'):
    不能只靠顏色。ratio = 左段佔比 0~1。
    ⚠️ 「買一/賣一」是**最佳一檔的委託量**,不是券商軟體那種總委買/總委賣(五檔加總),
       數字對不起來是正常的 —— 快照只給得到最佳一檔(2026-07-20 使用者反映後正名)。 */
-function qMeter(lLab,rLab,ratio,lVal,rVal){
+function qMeter(lLab,rLab,ratio,lVal,rVal,tipKey){
   /* 沒資料就整條不畫。截圖檢查發現跌停股(華邦電)兩條 meter 都是空的,
      卻各佔一條灰底長條 —— 空的視覺元素比沒有更糟,會讓人以為「這裡有東西只是看不懂」。 */
   if(!isNum(ratio))return '';
@@ -1451,12 +1460,100 @@ function qMeter(lLab,rLab,ratio,lVal,rVal){
   return `<div class="q-mtr">
     <div class="q-mtr-h">
       <span style="color:var(--up-ink);font-weight:700">${lLab} ${lVal!=null?lVal:''}</span>
-      <b style="color:${strong?'var(--up-ink)':'var(--down-ink)'}">${strong?pc:(100-pc)}% ${strong?lLab:rLab}佔優</b>
+      <b style="color:${strong?'var(--up-ink)':'var(--down-ink)'}"${tipKey?tip(tipKey):''}>${strong?pc:(100-pc)}% ${strong?lLab:rLab}佔優</b>
       <span style="color:var(--down-ink);font-weight:700">${rVal!=null?rVal:''} ${rLab}</span>
     </div>
     <div class="q-bar"><i style="width:${pc}%;background:var(--up)"></i><i style="flex:1;background:var(--down)"></i></div>
   </div>`;
 }
+/* ============================================================
+   名詞解釋(2026-07-20)
+   使用者:「在每個資訊上都要能讓使用者點下去或是將游標放在上面後,顯示該資訊的詳細意思」。
+   每一則寫三段:**是什麼 / 高代表什麼 / 低代表什麼** —— 只解釋名詞而不講「高低各代表什麼」
+   等於沒幫助,使用者要的是「看到這個數字該怎麼想」。
+   桌機 hover、手機點一下(touch 沒有 hover,只做 hover 等於手機完全用不到)。
+   ============================================================ */
+const TIP={
+  price:['成交價','最近一筆成交的價格。','',''],
+  chg:['漲跌幅','相對「昨天收盤價」的漲跌百分比。','漲多代表今天買方積極,但漲太多(>8%)追進的風險報酬比通常已經不划算。','跌深可能是利空,也可能是錯殺 —— 要配合量能與均線位置判斷。'],
+  high:['當日最高','今天成交過的最高價。','現價貼近最高 = 收在高檔,買盤守得住。',''],
+  low:['當日最低','今天成交過的最低價。','','現價貼近最低 = 一路走弱,承接力道不足。'],
+  vwap:['均價(VWAP)','今天所有成交的平均價格(成交金額÷成交量)。**這是判斷多空最實用的一條線**:今天進場的人平均買在這裡。',
+        '股價站在均價**之上** = 今天進場的人平均是賺的,買方主導。','股價跌破均價 = 今天進場的人平均是套的,容易引發停損賣壓。'],
+  tickvol:['單量','最近一筆成交的張數。','單量突然放大 = 有大單進場。','單量小 = 零星成交。'],
+  totvol:['總量','今天累計成交幾張(1 張 = 1000 股)。','量大代表關注度高、流動性好,買賣都容易成交。','量太小的股票買得進去卻可能賣不掉,滑價會吃掉獲利。'],
+  amount:['成交額','今天累計成交金額(股數×價格)。比「張數」更能跨股比較 —— 一張 2000 元的股票和一張 20 元的,張數一樣但金額差 100 倍。',
+          '金額大 = 大資金在裡面玩。','金額小 = 主力不會進場,容易被少數人操控價格。'],
+  turnover:['換手率','今天成交張數 ÷ 流通在外股數。代表「今天有幾成股票換了主人」。',
+            '高(>5%)= 籌碼大幅換手,常見於發動或出貨,要配合股價方向判斷。','低(<0.5%)= 沒什麼人在交易,盤整或乏人問津。'],
+  volratio:['量比','今天到目前的成交量 ÷ 昨天同時段的成交量。**這是「今天有沒有異常」最直接的指標**,而且是比例、不受股本大小影響。',
+            '>1.5 = 明顯放量,有人在動。突破配大量才可信。','<0.8 = 比昨天冷,盤整或觀望;此時的「突破」多半是假的。'],
+  bidask:['買一 / 賣一','**最佳一檔**的委託張數:想用最高買價買的量 vs 想用最低賣價賣的量。⚠️ 券商軟體的「委買量/委賣量」通常是**五檔加總**,所以數字會不一樣,不是錯誤。',
+          '買一 > 賣一 = 眼前買盤較積極(但掛單可隨時取消,參考性低於實際成交)。','賣一 > 買一 = 眼前賣壓較重。'],
+  innerouter:['外盤 / 內盤','用「成交」分主動方:以賣方掛價成交=外盤(買方主動追價);以買方掛價成交=內盤(賣方主動殺出)。比掛單更真實,因為是真的成交了。',
+              '外盤佔比高(>55%)= 買方積極追價,通常伴隨上漲。','內盤佔比高 = 賣方急著出貨。'],
+  revyoy:['營收年增率(YoY)','最新月營收與「去年同月」相比的成長率。用年比而非月比,是為了避開淡旺季干擾。',
+          '正且持續擴大 = 本業在成長。','負值代表衰退;連續數月negative 要小心。'],
+  eps:['EPS(近四季)','每股盈餘,最近四季加總。代表「一股一年幫你賺多少錢」。股價 ÷ EPS = 本益比。',
+       '高 = 賺錢能力強。','低或負 = 獲利差或虧損。'],
+  breakout:['突破 20 日高','現價超過過去 20 個交易日的最高價(且高出 0.3% 以上,避免貼著前高來回)。',
+            '成立代表創短期新高,壓力區被消化。**但要配大量才有意義** —— 無量突破常常隔天就打回。',''],
+  atma5:['回測 5 日線','股價拉回到 5 日均線附近(±1.5%)但沒有跌破。','','多頭走勢中的正常回檔,常被視為相對低風險的加碼點;但若同時跌破均價與大量下殺,就不是回檔而是轉弱。'],
+  streak:['分點連買 / 連賣','主力淨買超 = 前 5 大買超分點 + 前 5 大賣超分點。連續為正的天數就是「連買」。用前 5 大是因為全部分點加總恆等於 0。',
+          '連買天數多 = 特定券商分點持續吃貨,籌碼往少數人集中。','連賣 = 主力在出。'],
+  industry:['產業鏈分類','來自 FinMind 產業鏈(47 產業/483 細產業)。一檔股票可能同時屬於多條產業鏈,這裡顯示最具代表性的一條。','',''],
+  ma20:['月線(MA20)','過去 20 個交易日的收盤均價,代表「這個月進場的人的平均成本」。',
+        '股價在月線之上 = 中期偏多。','跌破月線常被視為中期轉弱訊號。'],
+  ma60:['季線(MA60)','過去 60 個交易日的均價,中期趨勢的分水嶺。','站上季線 = 中期趨勢向上。','跌破季線代表趨勢轉弱,反彈通常會遇到壓力。'],
+  prevclose:['昨收','昨天的收盤價,今天漲跌幅的計算基準。','',''],
+  limit:['漲停 / 跌停','台股單日漲跌幅上限 ±10%(依股價分級取檔位計算)。鎖死在漲停 = 想買買不到;鎖死跌停 = 想賣賣不掉。','',''],
+  score:['信心分','系統依趨勢、相對強度、短線時機量能、品質、流動性算出的 0~100 綜合分。⚠️ 實測顯示它在**核心名單內部**的排序與後續超額報酬幾乎無關(相關 −0.06),請當作「有沒有入選」的篩子,不要當作「哪一檔比較好」的排名。','',''],
+  kline:['日K線','每一根代表一天的開高低收。紅(實心)=收盤高於開盤,綠(空心)=收低於開。','',''],
+  intraday:['盤中分K','每一根代表一分鐘。搭配均價線看「當下是誰主導」。','',''],
+  inst:['三大法人','外資、投信、自營商的買賣超張數。','持續買超代表法人認同。','賣超代表法人在調節。'],
+  margin:['融資 / 融券','融資=借錢買股(看多),融券=借股賣出(看空)。','融資大增代表散戶追價,籌碼變亂。','融券高代表看空者多,若股價反漲可能出現軋空。'],
+  holding:['外資持股比率','外資持有的股數佔總股數的比例。','持續上升代表外資在買。','下降代表外資撤退。'],
+};
+/* 內文用 **粗體** 標關鍵句 —— 先 escape 再把 ** 轉成 <b>,順序不能反(否則會 XSS)。 */
+const _tipMd=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+function tipHtml(k){
+  const t=TIP[k]; if(!t)return '';
+  const [title,what,hi,lo]=t;
+  return `<b>${esc(title)}</b><br>${_tipMd(what)}`
+    +(hi?`<br><span style="color:var(--up-ink)">▲ 高:</span>${_tipMd(hi)}`:'')
+    +(lo?`<br><span style="color:var(--down-ink)">▼ 低:</span>${_tipMd(lo)}`:'');
+}
+/* 用法:把 tip('volratio') 塞進元素的屬性裡 */
+const tip=k=>TIP[k]?` data-tip="${k}" tabindex="0" role="button" aria-label="${esc(TIP[k][0])} 說明"`:'';
+let _tipEl=null;
+function _tipShow(el){
+  const k=el.getAttribute('data-tip'); if(!k||!TIP[k])return;
+  _tipHide();
+  const d=document.createElement('div');
+  d.className='tip-pop'; d.innerHTML=tipHtml(k);
+  document.body.appendChild(d);
+  const r=el.getBoundingClientRect(),w=Math.min(300,innerWidth-24);
+  d.style.width=w+'px';
+  let left=r.left+r.width/2-w/2;
+  left=Math.max(12,Math.min(left,innerWidth-w-12));
+  d.style.left=left+'px';
+  /* 空間不夠就翻到下方 —— 卡片上緣的欄位若一律往上開會被切掉 */
+  const h=d.offsetHeight;
+  d.style.top=(r.top-h-8>8 ? r.top-h-8 : r.bottom+8)+window.scrollY+'px';
+  _tipEl=d;
+}
+function _tipHide(){if(_tipEl){_tipEl.remove();_tipEl=null;}}
+/* 事件委派:卡片會不斷重繪,逐一綁定會漏掉新元素也會累積監聽器 */
+document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-tip]');if(t)_tipShow(t);});
+document.addEventListener('mouseout',e=>{if(e.target.closest('[data-tip]'))_tipHide();});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tip]');
+  if(t){e.stopPropagation();_tipEl&&_tipEl.dataset.k===t.getAttribute('data-tip')?_tipHide():_tipShow(t);}
+  else _tipHide();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')_tipHide();});
+window.addEventListener('scroll',_tipHide,{passive:true});
+
 /* ---------- 漲跌停 ----------
    台股漲跌停不是單純 ±10%,是「昨收 ×1.1 後往下取到最近的檔位」,而檔位隨股價分級。
    用門檻近似會誤判:7/17 實測用 ±9.8% 會抓到 199 檔,精算檔位法只有 137 檔(8漲停/129跌停),
@@ -1517,16 +1614,16 @@ function qBody(id,compact){
   const up=isNum(q.change_pct)&&q.change_pct>=0;
   const col=isNum(q.change_pct)?(up?'var(--up-ink)':'var(--down-ink)'):'var(--muted)';
   const chips=[];
-  if(q.breakout)chips.push('<span class="q-chip">突破 20 日高</span>');
-  if(q.at_ma5)chips.push('<span class="q-chip warn">回測 5 日線</span>');
+  if(q.breakout)chips.push(`<span class="q-chip"${tip('breakout')}>突破 20 日高</span>`);
+  if(q.at_ma5)chips.push(`<span class="q-chip warn"${tip('atma5')}>回測 5 日線</span>`);
   /* 沒有任何即時資料就整塊不畫,不要留一堆「—」佔版面 */
   if(!isNum(q.price)&&!isNum(q.total_volume))return '';
   /* 漲停綠底 / 跌停紅底(使用者要求)。鎖死在漲跌停是「今天沒得買/沒得賣」的強訊號,
      不該只是一個顏色稍深的數字 —— 用整塊底色讓它在一排卡片裡跳出來。 */
   const lim=limitState(q);
   const pxCls=lim==='up'?' q-lim-up':lim==='dn'?' q-lim-dn':'';
-  const limTag=lim==='up'?'<span class="q-lim-tag up">漲停</span>'
-             :lim==='dn'?'<span class="q-lim-tag dn">跌停</span>':'';
+  const limTag=lim==='up'?`<span class="q-lim-tag up"${tip('limit')}>漲停</span>`
+             :lim==='dn'?`<span class="q-lim-tag dn"${tip('limit')}>跌停</span>`:'';
   const hero=compact?'':`<div class="q-hero">
       <span class="q-px${pxCls}" style="${pxCls?'':'color:'+col}">${_qn(q.price)}</span>
       <span class="q-dl" style="color:${col}">${isNum(q.change_price)?(up?'▲':'▼')+' '+Math.abs(q.change_price).toFixed(2):'—'}
@@ -1535,22 +1632,22 @@ function qBody(id,compact){
   return `${hero}${compact&&limTag?`<div style="margin-bottom:4px">${limTag}</div>`:''}
     ${sparkline(id)}
     <div class="q-ctx">
-      <span>高 ${_qn(q.high)}</span><span>低 ${_qn(q.low)}</span>
-      <span>均價 ${_qn(q.vwap)}</span>
-      <span>單量 ${_qn(q.tick_volume,0)}</span>
+      <span${tip('high')}>高 ${_qn(q.high)}</span><span${tip('low')}>低 ${_qn(q.low)}</span>
+      <span${tip('vwap')}>均價 ${_qn(q.vwap)}</span>
+      <span${tip('tickvol')}>單量 ${_qn(q.tick_volume,0)}</span>
       ${compact&&q.industry?`<span>${esc(q.industry)}</span>`:''}
     </div>
-    ${qMeter('買一','賣一',q.bid_ask_ratio,_qn(q.bid_volume,0),_qn(q.ask_volume,0))}
-    ${qMeter('外盤','內盤',dp?dp.outer_ratio/100:null,dp?_qvol(dp.outer):null,dp?_qvol(dp.inner):null)}
+    ${qMeter('買一','賣一',q.bid_ask_ratio,_qn(q.bid_volume,0),_qn(q.ask_volume,0),'bidask')}
+    ${qMeter('外盤','內盤',dp?dp.outer_ratio/100:null,dp?_qvol(dp.outer):null,dp?_qvol(dp.inner):null,'innerouter')}
     <div class="q-kpi">
-      <div><div class="q-kl">總量</div><div class="q-kv">${_qvol(q.total_volume)}</div></div>
-      <div><div class="q-kl">成交額</div><div class="q-kv">${_qamt(q.total_amount)}</div></div>
-      <div><div class="q-kl">換手率</div><div class="q-kv">${isNum(q.turnover_rate)?q.turnover_rate.toFixed(2)+'%':'—'}</div></div>
-      <div><div class="q-kl">量比</div><div class="q-kv">${_qn(q.volume_ratio,2)}${isNum(q.volume_ratio)?'×':''}</div></div>
+      <div><div class="q-kl"${tip('totvol')}>總量</div><div class="q-kv">${_qvol(q.total_volume)}</div></div>
+      <div><div class="q-kl"${tip('amount')}>成交額</div><div class="q-kv">${_qamt(q.total_amount)}</div></div>
+      <div><div class="q-kl"${tip('turnover')}>換手率</div><div class="q-kv">${isNum(q.turnover_rate)?q.turnover_rate.toFixed(2)+'%':'—'}</div></div>
+      <div><div class="q-kl"${tip('volratio')}>量比</div><div class="q-kv">${_qn(q.volume_ratio,2)}${isNum(q.volume_ratio)?'×':''}</div></div>
     </div>
     <div class="q-fund">
-      <span>營收YoY <b style="color:${isNum(q.revenue_yoy)?(q.revenue_yoy>=0?'var(--up-ink)':'var(--down-ink)'):'var(--muted-2)'}">${isNum(q.revenue_yoy)?fmt(q.revenue_yoy)+'%':'—'}</b></span>
-      <span>EPS近四季 <b>${_qn(q.eps_ttm)}</b></span>
+      <span><span${tip('revyoy')}>營收YoY</span> <b style="color:${isNum(q.revenue_yoy)?(q.revenue_yoy>=0?'var(--up-ink)':'var(--down-ink)'):'var(--muted-2)'}">${isNum(q.revenue_yoy)?fmt(q.revenue_yoy)+'%':'—'}</b></span>
+      <span><span${tip('eps')}>EPS近四季</span> <b>${_qn(q.eps_ttm)}</b></span>
       ${streakChip(id)}
       ${chips.join('')}
     </div>`;
@@ -1568,7 +1665,7 @@ function wlCard(id){
   return `<div class="q-card">
     <div class="q-head">
       <span class="q-nm">${esc(v.name||q.name||id)}</span><span class="q-id">${slink(id)}</span>
-      ${q.industry?`<span class="q-ind">${esc(q.industry)}</span>`:'<span style="margin-left:auto"></span>'}
+      ${q.industry?`<span class="q-ind"${tip('industry')}>${esc(q.industry)}</span>`:'<span style="margin-left:auto"></span>'}
       <button class="q-x" onclick="wlDel('${esc(id)}')" title="從自選池移除">✕</button>
     </div>
     ${body||'<div class="q-ctx">尚無即時報價(未開盤或資料源降級)</div>'}
@@ -2438,7 +2535,7 @@ function streakChip(id){
     return `<i style="height:${h}px;background:${v>=0?'var(--up)':'var(--down)'};
       align-self:${v>=0?'flex-end':'flex-start'}"></i>`;}).join('');
   return `<span class="q-streak" title="主力淨買超近 ${ser.length} 日(前5大買超分點+前5大賣超分點)">
-    <b style="color:${col}">分點連${buy?'買':'賣'} ${s.streak} 日</b>
+    <b style="color:${col}"${tip('streak')}>分點連${buy?'買':'賣'} ${s.streak} 日</b>
     <span class="q-streak-b">${bars}</span></span>`;
 }
 /* 盤前算好的均線/前高/流通股數/產業別/營收EPS(docs/levels.json)。
@@ -2787,11 +2884,56 @@ async function initHeatmap(){
     const lbl=$('#hm-date-label');
     if(lbl&&hm.date)lbl.textContent='資料日期 '+hm.date;
     renderHeatmap();
+    hmLive();                       /* 用即時報價覆蓋當日漲跌,見下方註解 */
+    if(!_hmLiveTimer)_hmLiveTimer=setInterval(hmLive,30000);
   }catch(e){
     if(panel)panel.innerHTML='<div class="hm-toolbar"></div><div class="empty" style="padding:60px 0;font-size:14px">族群熱力圖尚無資料，請先執行每日掃描以產生 heatmap.json</div>';
   }
 }
 
+/* ---------- 熱力圖 / 市場氛圍即時化(2026-07-20)----------
+   使用者:「熱力圖和市場氛圍是否即時?目前看是沒有」—— 沒錯,它們讀的是盤後批次產生的
+   heatmap.json(顯示的是上一個交易日)。
+
+   完全即時的作法是每 30 秒重算全部 860 檔的**廣度**(站上月線/季線/多頭排列),
+   但那需要每檔的均線 —— 我們有 levels.json(1022 檔),所以做得到:
+     · 漲跌幅 chg → 直接用即時價 vs 昨收
+     · 20 日動能 r20 → 用即時價 vs 20 日前收盤(levels 沒存,退回批次值)
+     · 廣度 a20/a60/bl → 用即時價與 levels 的 ma20/ma60/ma5 現算
+   算完就地改寫 _hmData.stocks,再重畫。批次那份的欄位當作 fallback。
+
+   ⚠️ 只覆蓋 levels.json 有的股票(1022 檔,以成交額篩過);其餘沿用批次值。
+   所以標題會標明「即時(N 檔)」讓使用者知道涵蓋範圍。 */
+let _hmLiveTimer=null,_hmLiveN=0;
+async function hmLive(){
+  if(!_hmData||!_hmData.stocks)return;
+  if(!LEVELS)await loadLevels();
+  if(!LEVELS)return;
+  const ids=_hmData.stocks.map(s=>String(s.id)).filter(id=>LEVELS[id]);
+  if(!ids.length)return;
+  const d=await fetch(HEALTH_API_BASE+'/api/quote?ids='+encodeURIComponent(ids.slice(0,200).join(',')))
+    .then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!d||!d.quotes)return;
+  let n=0;
+  for(const s of _hmData.stocks){
+    const q=d.quotes[String(s.id)],L=LEVELS[String(s.id)];
+    if(!q||!isNum(q.price)||!L)continue;
+    const px=q.price;
+    s.p=px;
+    if(isNum(q.change_pct))s.chg=q.change_pct;
+    /* 廣度三項現算 —— 市場氛圍的權重 75% 在這裡,不更新等於整頁都是昨天的 */
+    if(isNum(L.ma20))s.a20=px>L.ma20?1:0;
+    if(isNum(L.ma60))s.a60=px>L.ma60?1:0;
+    if(isNum(L.ma5)&&isNum(L.ma20)&&isNum(L.ma60))s.bl=(L.ma5>L.ma20&&L.ma20>L.ma60&&px>L.ma5)?1:0;
+    n++;
+  }
+  _hmLiveN=n;
+  const lbl=$('#hm-date-label');
+  if(lbl)lbl.textContent=`即時 ${n} 檔・其餘為 ${_hmData.date} 收盤`;
+  if($('#p-heatmap')&&$('#p-heatmap').classList.contains('active')){
+    if($('#heatmap-chart').style.display!=='none')renderHeatmap(); else renderMood();
+  }
+}
 function _hmLerp(a,b,t){
   const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
   const [ar,ag,ab]=p(a),[br,bg,bb]=p(b);
@@ -3190,7 +3332,7 @@ function renderDetail(d){
     ${branchAlertCard(d)}
     <div class="detail-actions"><a href="https://www.cmoney.tw/forum/stock/${esc(d.stock_id)}" target="_blank" rel="noopener">在 CMoney 看更多走勢/討論 ↗</a></div>
     <div class="detail-chart-title">
-      <span id="dk-title">日K線 · 量 · 均線(MA5/20/60)</span>
+      <span id="dk-title"${tip('kline')}>日K線 · 量 · 均線(MA5/20/60)</span>
       <span class="hm-toggle" style="margin-left:10px">
         <button class="hm-toggle-btn active" id="dk-btn-d" onclick="setDetailK('d')">日K</button>
         <button class="hm-toggle-btn" id="dk-btn-i" onclick="setDetailK('i')">分K</button>
@@ -3198,13 +3340,13 @@ function renderDetail(d){
     <div id="detail-kchart" class="detail-chart"></div>
     <div id="detail-ichart" class="detail-chart" style="display:none"></div>
     <div class="detail-ind" id="dk-note"></div>
-    <div class="detail-chart-title">三大法人買賣超(張)</div>
+    <div class="detail-chart-title"><span${tip('inst')}>三大法人買賣超(張)</span></div>
     <div id="detail-instchart" class="detail-chart detail-chart-sm"></div>
-    <div class="detail-chart-title">月營收(億)· 年增率 YoY(%)</div>
+    <div class="detail-chart-title"><span${tip('revyoy')}>月營收(億)· 年增率 YoY(%)</span></div>
     <div id="detail-revchart" class="detail-chart detail-chart-sm"></div>
-    <div class="detail-chart-title">融資 / 融券餘額(張)</div>
+    <div class="detail-chart-title"><span${tip('margin')}>融資 / 融券餘額(張)</span></div>
     <div id="detail-marginchart" class="detail-chart detail-chart-sm"></div>
-    <div class="detail-chart-title">外資持股比率(%)</div>
+    <div class="detail-chart-title"><span${tip('holding')}>外資持股比率(%)</span></div>
     <div id="detail-holdingchart" class="detail-chart detail-chart-sm"></div>
     <div class="detail-chart-title">短沖主力每日淨買賣(張)· 佔成交量%<span class="detail-ind" id="detail-st-note"></span></div>
     <div id="detail-stnetchart" class="detail-chart detail-chart-sm"></div>
@@ -3313,7 +3455,8 @@ function setDetailK(mode){
   dEl.style.display=isD?'':'none'; iEl.style.display=isD?'none':'';
   $('#dk-btn-d').classList.toggle('active',isD);
   $('#dk-btn-i').classList.toggle('active',!isD);
-  $('#dk-title').textContent=isD?'日K線 · 量 · 均線(MA5/20/60)':'盤中 1 分K · 量 · 均價線';
+  $('#dk-title').innerHTML=isD?`<span${tip('kline')}>日K線 · 量 · 均線(MA5/20/60)</span>`
+                             :`<span${tip('intraday')}>盤中 1 分K</span> · 量 · <span${tip('vwap')}>均價線</span>`;
   if(isD){if(_detailK)_detailK.resize();return;}
   const sid=(_detailSid||'');
   if(INTRA_CACHE[sid]){drawIntraChart(INTRA_CACHE[sid]);return;}
