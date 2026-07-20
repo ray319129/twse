@@ -430,5 +430,17 @@
   "volume_ratio": 0.67,
   "vwap": 42.1,
   "fired_at": "12:30"
+ },
+ "4167|pullback": {
+  "stock_id": "4167",
+  "name": NaN,
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 20.37 附近(距 +1.6%)・當日翻紅站回均價",
+  "price": 20.7,
+  "change_rate": 0.24,
+  "volume_ratio": 0.32,
+  "vwap": 20.63,
+  "fired_at": "12:33"
  }
 }
