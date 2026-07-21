@@ -1214,11 +1214,25 @@ if __name__ == "__main__":
         if not discord_enabled():
             print("未設定 DISCORD_WEBHOOK_URL —— 通知仍會走 Email。")
             raise SystemExit(1)
+        # ⚠️ 價位**由真實資料推導**,不要寫死(2026-07-21 修)。
+        # 原本寫死 1125,但本機 2330 昨收是 2320 —— 圖上就多出一根從 2320 直插 1125
+        # 的假崩盤 K 棒,測試卡看起來像出了大事。測試卡要長得像真的訊號才有意義。
+        _lv = {}
+        try:
+            _lv = (json.loads((DOCS_DIR / "levels.json").read_text(encoding="utf-8"))
+                   .get("levels") or {}).get("2330") or {}
+        except Exception:
+            pass
+        _prev = _lv.get("prev_close") or 1000.0
+        _px = round(_prev * 1.0321, 2)
+        _h20 = _lv.get("high20") or _prev
         demo = {"stock_id": "2330", "name": "台積電", "type": "breakout",
-                "label": "量增突破(測試)", "price": 1125.0, "change_rate": 3.21,
-                "volume_ratio": 2.31, "vwap": 1118.4, "fired_at": now_tpe().strftime("%H:%M"),
-                "reason": "這是一則測試訊息,用來確認 Discord webhook 設定正確。"
-                          "收到這則就表示盤中訊號會送到這個頻道。"}
+                "label": "量增突破(測試)", "price": _px, "change_rate": 3.21,
+                "volume_ratio": 2.31, "vwap": round(_prev * 1.024, 2),
+                "fired_at": now_tpe().strftime("%H:%M"),
+                "reason": f"這是一則測試訊息,用來確認 Discord webhook 設定正確。"
+                          f"收到這則就表示盤中訊號會送到這個頻道。"
+                          f"(價位取自本機最新資料:昨收 {_prev}、20日高 {_h20})"}
         # 走**完整的**卡片組裝路徑(補產業/基本面/新聞 + 畫日K),不是只發一張空卡 ——
         # 這樣這個測試才真的能驗到「使用者盤中會看到什麼」。
         embeds, files = _build_cards([demo])

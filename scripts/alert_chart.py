@@ -27,6 +27,7 @@ import io
 from .utils import log
 
 BARS = 60                 # 顯示幾根日K(約一季)
+LIMIT_UP_GUARD = 0.11     # 台股漲跌幅上限 10%,留 1% 餘裕;超過就是壞資料不是行情
 _UP = "#ef4444"           # 台股習慣:紅漲綠跌(與歐美相反,別改)
 _DOWN = "#22c55e"
 _BG = "#2b2d31"           # Discord 深色主題的卡片底色
@@ -59,15 +60,25 @@ def daily_k_png(stock_id: str, name: str = "", live_price: float | None = None,
 
         # parquet 最新只到昨天(盤後批次才寫)。把今天這根用即時價補上,
         # 否則圖上根本看不到剛剛觸發的那一根 —— 那是使用者最想看的。
+        #
+        # ⚠️ **必須先檢查合理性**(2026-07-21 修):台股有 ±10% 漲跌幅限制,
+        # 所以「今天的價格」不可能偏離昨收超過一成。偏離超過就一定是壞資料
+        # (測試用的假價、對到錯的股票、上游給了未還原價),硬畫上去會生出一根
+        # 從 2320 直插 1125 的假崩盤 K 棒,整張圖的比例尺全毀 —— 測試卡就是這樣。
+        # 寧可少畫今天這根,也不要畫一根騙人的。
         if live_price:
             try:
                 today = pd.Timestamp(__import__("datetime").date.today())
-                if len(df) and pd.Timestamp(df.index[-1]).date() != today.date():
-                    prev = float(df["close"].iloc[-1])
+                prev = float(df["close"].iloc[-1]) if len(df) else 0.0
+                sane = prev > 0 and abs(live_price / prev - 1) <= LIMIT_UP_GUARD
+                if len(df) and pd.Timestamp(df.index[-1]).date() != today.date() and sane:
                     df.loc[today] = {"open": prev, "high": max(prev, live_price),
                                      "low": min(prev, live_price), "close": live_price,
                                      "volume": float("nan"),
                                      "adj_close": live_price}
+                elif not sane:
+                    log.info(f"日K {stock_id}:即時價 {live_price} 偏離昨收 {prev} 超過 "
+                             f"{LIMIT_UP_GUARD:.0%}(台股漲跌幅上限 10%),不補今日K棒。")
             except Exception:
                 pass
 
