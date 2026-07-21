@@ -1841,3 +1841,50 @@ webhook = 一個 URL + POST JSON。沒有 token 生命週期、沒有簽章驗�
 **估值那段是打樁測的**(本機無 FINMIND_TOKEN),`TaiwanStockPER` 的實際欄位名
 (`PER`/`PBR`/`dividend_yield`)還沒對真實回應驗過 —— 第一個交易日看卡片上有沒有「估值」那行。
 
+
+---
+
+## 45. ⚠️ Discord 400:embed 總字數上限 6000(2026-07-21)
+
+第一批帶背景資料的通知**全部退回 Email**。log 只有一行:
+
+```
+Discord 發送失敗:400 Client Error: Bad Request for url: ***?wait=true&with_components=true
+```
+
+### 根因
+
+**Discord 一則訊息裡所有 embed 的文字加總不能超過 6000 字。** 實測 8 張卡 = **8583 字**。
+
+真正的元兇是**新聞的超連結**:Google News RSS 的 `link` 是 base64 轉址網址,
+**一條就約 380 字**。三條新聞光網址就 1150 字,乘以 8 張卡 = 9200 字 —— 卡片上看起來
+只有三行標題,實際上超標的是看不見的網址。
+
+### 修法
+
+1. **新聞標題不再做超連結**,改成純標題 + 一條短的「更多 <代號> 新聞 →」搜尋連結。
+   標題本來就是拿來掃的,想看內文再點。**8583 → 3540 字。**
+2. `notify.fit_embeds()` 當最後一道保險:超過 `MAX_TOTAL_CHARS=5500`(對 6000 留餘裕)
+   時**先砍新聞欄位、由後往前**(前面的卡是最強的訊號),真的還是超標才整張卡不送。
+   驗證:9 張刻意灌大的卡 8253 字 → 壓到 5213 字,卡數全保留、現價欄全保留、
+   後 5 張的新聞被砍。卡片被砍時對應的圖也不上傳。
+
+### ⚠️ 這次真正的教訓:**沒印 response body**
+
+`raise_for_status()` 只給「400 Bad Request」,而 **Discord 的回應 body 會明講是哪個欄位超限**。
+沒有那行就只能猜。已在 `_post` 加 `log.warning(f"Discord {method} {r.status_code}:{r.text[:600]}")`。
+**日後接任何 HTTP API,錯誤處理一律要印回應內容,不要只印狀態碼。**
+
+另外 `_discord_notify` 送失敗時原本只是 `return False` 靜靜改寄 Email ——
+現在會先 log 一行,不然「怎麼又變成 Email」得去翻 Actions。
+
+### 45.1 怎麼測 Discord(使用者問的)
+
+**webhook 密鑰只存在 GitHub secret,本機沒有** —— 所以必須有一個能從 Actions 點的入口。
+之前只加了 CLI 的 `--test-discord` 卻沒接到 workflow,等於叫使用者用他沒有的東西測。已補:
+
+**Actions → Intraday Signal Scan → Run workflow → mode 選 `test-discord`**
+
+會走**完整的**卡片組裝路徑(產業/估值/基本面/新聞 + 日K圖)發一張 2330 的測試卡,
+**收盤、假日都能跑**。收到就是通了;沒收到就看 log 裡 `Discord POST 4xx:` 那行。
+

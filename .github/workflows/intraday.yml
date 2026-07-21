@@ -24,11 +24,13 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "levels(盤前建快取)/ watch(常駐盯盤,建議)/ scan(單次)/ freshness(量上游更新頻率)"
+        description: "watch(常駐盯盤,建議)/ scan(單次)/ levels(盤前建快取)/ freshness / test-discord(發測試卡驗通知)"
         required: false
         default: "watch"
         type: choice
-        options: ["watch", "levels", "scan", "freshness"]
+        # test-discord:**收盤/假日也能跑**。webhook 密鑰只存在 GitHub secret,
+        # 本機沒有,所以驗證通知管道一定要有一個能從 Actions 點的入口(2026-07-21 補)。
+        options: ["watch", "levels", "scan", "freshness", "test-discord"]
       interval:
         description: "watch 模式的輪詢間隔秒數(預設 10 = 上游更新頻率)"
         required: false
@@ -80,9 +82,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           case "$MODE" in
-            levels)    python -m scripts.intraday_scan --build-levels ;;
-            scan)      python -m scripts.intraday_scan ;;
-            freshness) python -m scripts.intraday_scan --measure-freshness 120 ;;
+            levels)       python -m scripts.intraday_scan --build-levels ;;
+            scan)         python -m scripts.intraday_scan ;;
+            freshness)    python -m scripts.intraday_scan --measure-freshness 120 ;;
+            test-discord) python -m scripts.intraday_scan --test-discord ;;
             # 常駐:環境只裝一次,之後純輪詢。--publish 讓有新訊號時當場推上去,
             # 網頁不用等到收盤才看得到。
             # --start 09:00:自己等到開盤,順便自動重建過期的 levels(不必另設 08:50 排程)

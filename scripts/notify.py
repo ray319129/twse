@@ -65,9 +65,46 @@ def send_email(subject: str, html: str, text_fallback: str = "") -> None:
 discord_enabled = lambda: bool(DISCORD_WEBHOOK_URL)      # noqa: E731
 
 # Discord 硬上限:一則訊息最多 10 個 embed、每個 embed 最多 25 個 field、
-# description 4096 字、整則訊息所有文字加總 6000 字。超過會直接 400。
+# description 4096 字、**整則訊息所有 embed 的文字加總 6000 字**。超過直接 400。
+#
+# ⚠️ 那個 6000 是最容易踩到的一條(2026-07-21 就是死在這):單張卡看起來不長,
+# 但 8 張一起送就爆了。而且錯誤訊息不看 response body 根本看不出來。
 MAX_EMBEDS = 10
 MAX_DESC = 4000          # 留 96 字餘裕給截斷標記
+MAX_TOTAL_CHARS = 5500   # 對 6000 留 500 餘裕(content 與 footer 也算在某些情況)
+
+
+def _embed_chars(e: dict) -> int:
+    n = (len(e.get("title") or "") + len(e.get("description") or "")
+         + len((e.get("author") or {}).get("name") or "")
+         + len((e.get("footer") or {}).get("text") or ""))
+    for f in e.get("fields") or []:
+        n += len(f.get("name") or "") + len(f.get("value") or "")
+    return n
+
+
+def fit_embeds(embeds: list[dict], drop_fields: tuple[str, ...] = ()) -> list[dict]:
+    """把整批 embed 壓進 Discord 的 6000 字總量限制。
+
+    **降級順序是刻意的**:先砍 `drop_fields` 指定的次要欄位(通常是新聞),
+    因為訊號本身的價格/量比/理由才是決策要的;真的還是超標才整張卡不送。
+    寧可少幾行新聞,也不要整批訊號變成一封 Email。
+    """
+    out = [dict(e) for e in embeds[:MAX_EMBEDS]]
+    if sum(_embed_chars(e) for e in out) <= MAX_TOTAL_CHARS:
+        return out
+    # ① 由後往前砍次要欄位(先保住最前面那幾張,那是最強的訊號)
+    for name in drop_fields:
+        for e in reversed(out):
+            if sum(_embed_chars(x) for x in out) <= MAX_TOTAL_CHARS:
+                break
+            fs = [f for f in (e.get("fields") or []) if not (f.get("name") or "").startswith(name)]
+            if len(fs) != len(e.get("fields") or []):
+                e["fields"] = fs
+    # ② 還是超標就整張丟掉(從最後一張開始)
+    while out and sum(_embed_chars(e) for e in out) > MAX_TOTAL_CHARS:
+        out.pop()
+    return out
 
 
 def _post(url: str, payload: dict, method: str = "POST",
@@ -96,6 +133,12 @@ def _post(url: str, payload: dict, method: str = "POST",
         if r.status_code == 404:
             # 訊息被手動刪掉了 —— 呼叫端要據此重發一則新的,不是無限重試
             log.info("Discord 訊息不存在(可能已被刪除)。")
+            return None
+        if r.status_code >= 400:
+            # ⚠️ **一定要把回應內容印出來。** 2026-07-21 踩到:只印 "400 Bad Request"
+            # 完全看不出哪裡錯,而 Discord 的回應 body 會明講是哪個欄位超限。
+            # 沒有這行就只能猜,那次猜了很久。
+            log.warning(f"Discord {method} {r.status_code}:{r.text[:600]}")
             return None
         r.raise_for_status()
         return r.json() if r.content else {}

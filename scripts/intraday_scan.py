@@ -567,13 +567,14 @@ def _embed(r: dict, ex: dict | None = None, chart_name: str | None = None) -> di
 
     news = ex.get("news") or []
     if news:
-        # 標題做成超連結,點了直接開原文。日期讓「這是今天的還是上週的」一眼可辨。
-        lines = []
-        for n in news:
-            t = (n.get("title") or "").replace("[", "(").replace("]", ")")[:70]
-            d = (n.get("date") or "")[5:]
-            src = n.get("source") or ""
-            lines.append(f"· [{t}]({n.get('link')})　`{d}{' ' + src if src else ''}`")
+        # ⚠️ **標題不做超連結。** Google News RSS 的 link 是 base64 轉址網址,
+        # 一條就 ~380 字 —— 三條新聞光網址就 1150 字,8 張卡直接撞爆 Discord 的
+        # 6000 字總量上限(2026-07-21 實測 8583 字被回 400)。
+        # 改成「純標題 + 一條短的搜尋連結」:標題本來就是用來掃的,想看內文再點進去。
+        lines = [f"· {(n.get('title') or '')[:52]}"
+                 + (f"　`{(n.get('date') or '')[5:]}`" if n.get("date") else "")
+                 for n in news]
+        lines.append(f"[更多 {sid} 新聞 →](https://news.google.com/search?q={sid}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant)")
         fields.append({"name": f"近 {ALERT_NEWS_DAYS} 日新聞", "value": "\n".join(lines)[:1024],
                        "inline": False})
 
@@ -642,6 +643,14 @@ def _build_cards(batch: list[dict]) -> tuple[list[dict], list[tuple[str, bytes]]
             except Exception as e:
                 log.info(f"日K圖 {sid} 略過:{e}")
         embeds.append(_embed(r, ex, name))
+    # 最後一道保險:壓進 Discord 的 6000 字總量上限。超標時先砍新聞欄位
+    # (訊號本身的價格/量比/理由才是決策要的),真的還是超標才整張卡不送。
+    from .notify import fit_embeds
+    embeds = fit_embeds(embeds, drop_fields=("近 ",))
+    # 卡片被砍掉的話,對應的圖也不要上傳(附件對不到 embed 只是白佔頻寬)
+    kept = {e.get("image", {}).get("url", "").replace("attachment://", "")
+            for e in embeds if e.get("image")}
+    files = [f for f in files if f[0] in kept]
     return embeds, files
 
 
@@ -679,6 +688,9 @@ def _discord_notify(day: str, new: list[dict], total_today: int) -> bool:
         # 編輯失敗(訊息被刪)→ 掉下去發新的
     mid = send_discord(embeds, head, btns, files=files)
     if not mid:
+        # 有設 webhook 卻送不出去 = 真的有問題,不能只是安靜地改寄 Email。
+        # 上面 _post 已經把 Discord 回應的 body 印出來了,對照那行就知道是哪個欄位。
+        log.warning(f"Discord 送出失敗({len(embeds)} 張卡、{len(files)} 張圖),改用 Email。")
         return False
     _save_state(day, {"msg_id": mid, "msg_ts": now_s, "batch": batch})
     log.info(f"Discord 已推送盤中訊號({len(new)} 筆)")
