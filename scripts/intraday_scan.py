@@ -37,6 +37,7 @@ FinMind Sponsor 的全市場即時快照(2852 檔 / 一次呼叫),而且規則�
 from __future__ import annotations
 import argparse
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -375,7 +376,7 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
         save_alerts(day, fired)
         _write_web(day, fired)
         if notify:
-            _notify(day, new)
+            _notify(day, new, len(fired))
 
     log.info(f"盤中掃描 {now.strftime('%H:%M')}:比對 {len(df)} 檔,新觸發 {len(new)} 筆"
              f"(當日累計 {len(fired)} 筆)")
@@ -469,13 +470,125 @@ def _write_web(day: str, fired: dict) -> None:
                    "alerts": items}, f, ensure_ascii=False)
 
 
-def _notify(day: str, new: list[dict]) -> None:
-    """寄信。只寄「這一輪新觸發」的,不重複整份清單 —— 否則等於又在洗版。"""
+# ---------- Discord 盤中通知(2026-07-21) ----------
+#
+# ⚠️ **編輯訊息不會推播。** 這是設計這段時最重要的一件事:Discord 的 PATCH 會把畫面
+# 更新掉,但**不會發手機通知**。所以「整天只維護一則就地更新的訊息」聽起來很美,
+# 實際上等於訊號全部靜音 —— 對盯盤來說是致命的。
+#
+# 所以採**合併視窗**:
+#   · 新訊號距離上一則訊息超過 COALESCE_S → **發新訊息**(會推播,這是通知本身)
+#   · 在視窗內 → **就地編輯上一則**,把新的併進去(不推播,但你剛剛才被通知過)
+# 這樣既保住通知,又不會 12:31/12:32/12:33 連噴三則。
+#
+# 也刻意**不做「今日總覽」那則常駐訊息** —— 全天清單網頁已經有了(docs/alerts.json),
+# 在 Discord 再維護一份只是兩處會不一致。
+COALESCE_S = 150.0          # 合併視窗:2.5 分鐘內的新訊號併進上一則
+DISCORD_MAX_CARDS = 8       # 一則訊息最多幾張卡(Discord 硬上限 10)
+_COLORS = {"breakout": 0x22C55E, "pullback": 0x3B82F6}
+_DEFAULT_COLOR = 0x6366F1
+
+
+def _state_path(day: str) -> Path:
+    """Discord 訊息狀態。**不能塞進 alerts/{day}.json** —— 那個檔是
+    `{訊號key: 紀錄}` 的扁平 dict,`.values()` 會被 _write_web 直接迭代,
+    混一個 _meta 進去會變成一張壞掉的卡片。"""
+    return ALERT_DIR / f"state-{day}.json"
+
+
+def _load_state(day: str) -> dict:
+    p = _state_path(day)
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _save_state(day: str, st: dict) -> None:
+    p = _state_path(day)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+
+
+def _embed(r: dict) -> dict:
+    """一筆訊號 → 一張 Discord embed 卡。左側色條編碼訊號類型。"""
+    sid = r.get("stock_id") or ""
+    chg = r.get("change_rate")
+    px = r.get("price")
+    fields = []
+    if px is not None:
+        fields.append({"name": "現價", "value": f"**{px:.2f}**"
+                       + (f"  ({chg:+.2f}%)" if chg is not None else ""), "inline": True})
+    if r.get("volume_ratio") is not None:
+        fields.append({"name": "量比", "value": f"{r['volume_ratio']:.2f}", "inline": True})
+    if r.get("vwap") is not None:
+        fields.append({"name": "均價", "value": f"{r['vwap']:.2f}", "inline": True})
+    return {
+        "title": f"{r.get('name') or sid}  {sid}",
+        "url": f"{WEB_BASE}/#stock={sid}",
+        "description": (r.get("reason") or "")[:500],
+        "color": _COLORS.get(r.get("type"), _DEFAULT_COLOR),
+        "author": {"name": r.get("label") or "訊號"},
+        "fields": fields,
+        "footer": {"text": f"首次觸發 {r.get('fired_at') or ''}"},
+    }
+
+
+def _discord_notify(day: str, new: list[dict], total_today: int) -> bool:
+    """回傳 True 代表已由 Discord 通知(呼叫端就不必再寄 Email)。"""
+    from .notify import send_discord, edit_discord, link_buttons, discord_enabled
+    if not discord_enabled() or not new:
+        return False
+    st = _load_state(day)
+    now_s = time.time()
+    within = (st.get("msg_id") and (now_s - float(st.get("msg_ts") or 0)) < COALESCE_S)
+
+    # 合併視窗內:把上一則的內容一起帶出來重畫(Discord 的 PATCH 是整包覆蓋,不是追加)
+    batch = (st.get("batch") or []) + new if within else list(new)
+    batch = batch[-DISCORD_MAX_CARDS:]
+    embeds = [_embed(r) for r in batch]
+    more = len(new) + len(st.get("batch") or []) - len(batch) if within else len(new) - len(batch)
+    head = (f"**盤中訊號 · {now_tpe().strftime('%H:%M')}** —— 新觸發 **{len(new)}** 筆"
+            f"(今日累計 {total_today} 筆)")
+    if more > 0:
+        head += f"　_另有 {more} 筆未顯示,見網頁_"
+    head += "\n-# 條件觸發 ≠ 買進建議。動能型訊號在本系統台帳的歷史超額為負。"
+    btns = link_buttons([("📊 開網頁看全部", f"{WEB_BASE}/#live")])
+
+    if within:
+        if edit_discord(st["msg_id"], embeds, head, btns):
+            # ⚠️ 刻意不更新 msg_ts —— 否則連續有訊號時視窗會無限延後,
+            # 變成整個下午都在編輯同一則、完全不再推播。
+            st["batch"] = batch
+            _save_state(day, st)
+            log.info(f"Discord 訊號已併入上一則({len(new)} 筆,不重複推播)")
+            return True
+        # 編輯失敗(訊息被刪)→ 掉下去發新的
+    mid = send_discord(embeds, head, btns)
+    if not mid:
+        return False
+    _save_state(day, {"msg_id": mid, "msg_ts": now_s, "batch": batch})
+    log.info(f"Discord 已推送盤中訊號({len(new)} 筆)")
+    return True
+
+
+def _notify(day: str, new: list[dict], total_today: int = 0) -> None:
+    """通知。**優先走 Discord**(2026-07-21 起),沒設 webhook 才退回 Email。
+    只通知「這一輪新觸發」的,不重複整份清單 —— 否則等於又在洗版。"""
     try:
         from .notify import send_email
     except Exception as e:
         log.warning(f"通知模組載入失敗:{e}")
         return
+    # Discord 成功就結束;失敗(沒設 webhook / API 掛掉)自動掉到下面的 Email。
+    # 通知管道是「有比沒有好」,不該因為換管道就變成完全收不到。
+    try:
+        if _discord_notify(day, new, total_today or len(new)):
+            return
+    except Exception as e:
+        log.warning(f"Discord 通知失敗,改用 Email:{e}")
     # 每檔補上「決策要用到的背景」:產業、量能、法人/分點、基本面、與均線的距離。
     # 使用者反映原本的信「資訊不太夠」—— 只給代號和理由,還要自己去查是誰、做什麼、貴不貴。
     lv = load_levels()
@@ -969,7 +1082,24 @@ if __name__ == "__main__":
     ap.add_argument("--no-archive", action="store_true", help="不要在檢查點存全市場快照")
     ap.add_argument("--measure-freshness", type=int, metavar="SEC",
                     help="量上游快照更新頻率(秒),決定 interval 用")
+    ap.add_argument("--test-discord", action="store_true",
+                    help="發一則假訊號到 Discord 驗證 webhook(休市也能跑,不寫任何檔)")
     a = ap.parse_args()
+    if a.test_discord:
+        # 收盤後也能驗管道 —— 不碰快照、不碰 alerts 檔,純粹確認 webhook 通不通。
+        from .notify import discord_enabled, send_discord, link_buttons
+        if not discord_enabled():
+            print("未設定 DISCORD_WEBHOOK_URL —— 通知仍會走 Email。")
+            raise SystemExit(1)
+        demo = {"stock_id": "2330", "name": "台積電", "type": "breakout",
+                "label": "量增突破(測試)", "price": 1125.0, "change_rate": 3.21,
+                "volume_ratio": 2.31, "vwap": 1118.4, "fired_at": now_tpe().strftime("%H:%M"),
+                "reason": "這是一則測試訊息,用來確認 Discord webhook 設定正確。"
+                          "收到這則就表示盤中訊號會送到這個頻道。"}
+        mid = send_discord([_embed(demo)], "**Discord 通知測試**",
+                           link_buttons([("📊 開網頁", f"{WEB_BASE}/#live")]))
+        print(f"已送出,message_id={mid}" if mid else "送出失敗 —— 檢查 webhook URL 是否正確。")
+        raise SystemExit(0 if mid else 1)
     if a.build_levels:
         build_levels()
     elif a.measure_freshness:

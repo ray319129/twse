@@ -25,6 +25,10 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")   # 選用:新聞事
 GMAIL_USER = os.environ.get("GMAIL_USER", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 MAIL_TO = os.environ.get("MAIL_TO") or GMAIL_USER
+# Discord 盤中通知(2026-07-21)。沒設就自動退回 Email —— 通知管道壞掉不該讓盯盤壞掉。
+# 取得方式:Discord 頻道 → 編輯頻道 → 整合 → Webhook → 新增 → 複製 Webhook 網址。
+# 這是一條「知道網址就能發文」的密鑰,**務必存成 GitHub secret,不要進 repo**。
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
 TZ_TPE = pytz.timezone("Asia/Taipei")
 

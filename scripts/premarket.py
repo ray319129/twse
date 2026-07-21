@@ -301,6 +301,87 @@ def _picks_and_market(cfg: dict):
     return core, mkt, symbols, snap, pm
 
 
+# ---------- Discord(2026-07-21)----------
+#
+# 盤前/ORB 改推 Discord,Email 只當 webhook 沒設時的退路。
+# 這兩份跟盤中訊號不同,是**一天一次的定時報告**,所以不做合併視窗、不編輯 ——
+# 每次就發一則新的,本來就該推播。
+#
+# 版面刻意**只給決策要的那幾行**(劇本 + 價位),完整表格去網頁看。
+# Discord embed 一則 6000 字上限,把整份 HTML 表格搬過來只會變成一坨沒人讀的字。
+WEB_BASE = "https://twse-main.vercel.app"
+_SCEN_COLOR = {"A": 0x22C55E, "B": 0xF59E0B, "C": 0x3B82F6}
+_GATE_COLOR = {"risk-on": 0x22C55E, "risk-off": 0xEF4444}
+
+
+def _discord_preopen(subject: str, gate: dict, rows: list, valid: list, events: dict) -> bool:
+    try:
+        from .notify import send_discord, link_buttons, discord_enabled
+        if not discord_enabled():
+            return False
+        lines = []
+        for r in rows[:12]:
+            sc = r.get("scenario", "")
+            if sc not in ("A", "B", "C"):
+                continue
+            p = r.get("plan") or {}
+            bits = [f"停損 {p['init_stop']:.2f}" if p.get("init_stop") else "",
+                    f"TP1 {p['tp1']:.2f}" if p.get("tp1") else ""]
+            lines.append(f"`{sc}` **{r.get('name') or r['stock_id']}** {r['stock_id']}"
+                         + (f" — {r.get('scenario_label')}" if r.get("scenario_label") else "")
+                         + ("　" + " · ".join(b for b in bits if b) if any(bits) else ""))
+        body = "\n".join(lines) or "_今日無 A/B/C 有效劇本_"
+        ev = ""
+        high = [e for e in (events or {}).get("events", []) if e.get("impact") == "high"]
+        if high:
+            ev = "\n\n⚠️ **近期重大事件**　" + "　".join(
+                f"{e.get('date','')} {e.get('title','')}" for e in high[:3])
+        embed = {
+            "title": subject,
+            "url": f"{WEB_BASE}/#live",
+            "description": (f"**大盤閘門:{gate.get('label','—')}**　"
+                            f"有效 {len(valid)}/{len(rows)} 檔\n\n{body}{ev}")[:4000],
+            "color": _GATE_COLOR.get(gate.get("label"), 0x6366F1),
+            "footer": {"text": "完整價位表與理由請開網頁"},
+        }
+        return bool(send_discord([embed], "", link_buttons(
+            [("📊 開網頁", f"{WEB_BASE}/#live")])))
+    except Exception as e:
+        log.warning(f"Discord 盤前推送失敗,改用 Email:{e}")
+        return False
+
+
+def _discord_orb(subject: str, results: list, fired: list) -> bool:
+    try:
+        from .notify import send_discord, link_buttons, discord_enabled
+        if not discord_enabled():
+            return False
+        lines = []
+        for r in results[:12]:
+            st = r.get("status")
+            sid, nm = r["stock_id"], (r.get("name") or "")
+            if st == "breakout":
+                b = r.get("breakout") or {}
+                lines.append(f"✅ **{nm}** {sid} — 突破開盤區間高 {r.get('orh')}"
+                             + (f"(於 {b['time']})" if b.get("time") else ""))
+            elif st == "below_orl":
+                lines.append(f"❌ **{nm}** {sid} — 跌破區間低 {r.get('orl')},今日略過")
+            elif st == "pending":
+                lines.append(f"⏸ **{nm}** {sid} — 尚未突破,區間 {r.get('orl')}~{r.get('orh')}")
+        embed = {
+            "title": subject,
+            "url": f"{WEB_BASE}/#live",
+            "description": ("\n".join(lines) or "_1分K 未到,自行確認_")[:4000],
+            "color": 0x22C55E if fired else 0x6366F1,
+            "footer": {"text": "ORB 是 09:25 的一次性判定;網頁上的狀態會用即時價重算"},
+        }
+        return bool(send_discord([embed], "", link_buttons(
+            [("📊 開網頁", f"{WEB_BASE}/#live")])))
+    except Exception as e:
+        log.warning(f"Discord ORB 推送失敗,改用 Email:{e}")
+        return False
+
+
 def run_preopen(test_mode: bool = False) -> None:
     cfg = load_screeners()
     core, mkt, symbols, snap, pm = _picks_and_market(cfg)
@@ -352,11 +433,12 @@ def run_preopen(test_mode: bool = False) -> None:
         "gate": gate, "rows": rows, "events": events,
         "valid_count": len(valid), "total": len(rows),
     }, snap.get("date", ""))
-    html = render_email("premarket_email.html", ctx)
     prefix = "[測試] " if test_mode else ""
     subject = f"{prefix}🌅 盤前快報 {today.strftime('%m/%d')} · 大盤{gate['label']} · 有效 {len(valid)}/{len(rows)} 檔"
-    send_email(subject, html)
-    log.info(f"盤前快報已寄:{gate['label']} · 有效 {len(valid)}/{len(rows)}")
+    if not _discord_preopen(subject, gate, rows, valid, events):
+        html = render_email("premarket_email.html", ctx)
+        send_email(subject, html)
+    log.info(f"盤前快報已送:{gate['label']} · 有效 {len(valid)}/{len(rows)}")
 
 
 def run_orb(test_mode: bool = False) -> None:
@@ -407,11 +489,12 @@ def run_orb(test_mode: bool = False) -> None:
         "generated_at": today.strftime("%Y-%m-%d %H:%M"),
         "rows": results, "fired_count": len(fired), "orb_cfg": orb_cfg,
     }, snap.get("date", ""))
-    html = render_email("premarket_email.html", ctx)
     prefix = "[測試] " if test_mode else ""
     subject = f"{prefix}🔔 開盤15分 ORB {today.strftime('%m/%d')} · 已突破 {len(fired)} 檔"
-    send_email(subject, html)
-    log.info(f"ORB 報告已寄:已突破 {len(fired)} 檔")
+    if not _discord_orb(subject, results, fired):
+        html = render_email("premarket_email.html", ctx)
+        send_email(subject, html)
+    log.info(f"ORB 報告已送:已突破 {len(fired)} 檔")
 
 
 def parse_args():

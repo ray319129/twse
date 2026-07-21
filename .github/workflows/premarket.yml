@@ -45,6 +45,8 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
+          # 盤中/盤前通知改推 Discord;沒設這個 secret 會自動退回 Email。
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           PHASE="${{ github.event.inputs.phase }}"
           PHASE="${PHASE:-preopen}"

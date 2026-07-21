@@ -1688,3 +1688,88 @@ FinMind 資料集總覽把 **`TaiwanStockKBar` 的「更新時間」列為平日
 - `TaiwanStockEvery5SecondsIndex`(產業別指數 5 秒級,Backer/Sponsor)沒接 ——
   可以做「盤中最強族群」,但更新時間也寫 17:30,同樣要先驗。
 
+
+---
+
+## 43. 通知改推 Discord(2026-07-21)
+
+使用者:「我不想用 Email 通知了」。評估 WhatsApp / Telegram / LINE / Discord 後選 **Discord**
+(使用者本來就每天開著)。**盤後長報告(daily.yml)維持 Email** —— 多欄 HTML 表格在信箱的
+可讀性遠勝聊天視窗,這是使用者自己選的。
+
+### 43.1 為什麼不是 WhatsApp(使用者原本問的)
+
+- Cloud API 要 **Meta business verification**(稅籍/公司登記文件,2~10 工作天)—— 個人散戶難過。
+- **主動推的訊息按則計費**(2025/7/1 起 per-message;utility 約 USD 0.004~0.0456/則),
+  且**必須用事先核准的範本**,變數只能填空格 —— 我們的訊號內容全是變動文字,塞不進去。
+- 有免費路(使用者先發訊息開 24 小時視窗,視窗內可自由格式免費回),但忘記那天就靜默失效。
+  對盯盤系統來說太脆。
+
+Discord/Telegram 都免費免驗證。Discord 勝出的點:webhook 設定更簡單(只有一個 URL,
+沒有 token 生命週期)、embed 排版更好、**PATCH 可以就地編輯已發出的訊息**、頻道可分流。
+
+### 43.2 ⚠️ 最重要的設計限制:**編輯訊息不會推播**
+
+原本的構想是「整天只維護一則就地更新的訊息 → 零洗版」。實作時才確認:
+Discord 的 PATCH 會更新畫面但**不發手機通知** —— 那等於訊號全部靜音,對盯盤是致命的。
+
+→ 改成**合併視窗**(`COALESCE_S = 150` 秒):
+- 新訊號距上一則訊息超過 150 秒 → **發新訊息**(推播,這就是通知本身)
+- 在視窗內 → **PATCH 上一則**把新的併進去(不推播,但你剛剛才被通知過)
+
+這樣既保住通知,又不會 12:31/12:32/12:33 連噴三則。
+
+⚠️ **合併時刻意不更新 `msg_ts`** —— 否則連續有訊號時視窗會無限往後延,
+變成整個下午都在編輯同一則、完全不再推播。
+
+也刻意**不做「今日總覽」常駐訊息** —— 全天清單網頁已經有(docs/alerts.json),
+在 Discord 再維護一份只會兩處不一致。
+
+### 43.3 只用 webhook,不做 bot
+
+webhook = 一個 URL + POST JSON。沒有 token 生命週期、沒有簽章驗證、沒有 3 秒回應死線。
+代價:**webhook 可以「顯示」按鈕但收不到點擊**,所以目前只發**連結型按鈕**(style 5)。
+
+**「我買了/我跳過」按鈕是階段二**,要接 Interactions Endpoint + **Ed25519 驗簽**,
+而且 Discord 會定期發假簽章測試,驗不過會直接拔掉 endpoint 並寄信警告。
+值不值得那個複雜度再說 —— 但那是目前系統最大的量測盲區(人工挑選是加分還是扣分),
+而且能把「買/跳」標記從 localStorage(換裝置就沒了)搬到 repo。
+
+### 43.4 檔案地圖
+
+- `scripts/notify.py` — 新增 `send_discord()` / `edit_discord()` / `link_buttons()` /
+  `discord_enabled()`。⚠️ `send_discord` 的 URL **一定要帶 `?wait=true`**,
+  否則 Discord 回 204 空 body、拿不到 message_id,整個就地編輯的設計就垮了。
+  發 components 時還要帶 `with_components=true`,否則按鈕會被**靜默忽略**。
+- `scripts/intraday_scan.py` — `_discord_notify()` + `_embed()`;`_notify()` 改成
+  「先試 Discord,失敗才寄 Email」。訊息狀態存 `data/alerts/state-{day}.json`
+  ⚠️ **不能塞進 `alerts/{day}.json`** —— 那是 `{訊號key: 紀錄}` 扁平 dict,
+  `_write_web` 會直接迭代 `.values()`,混一個 meta 進去會變成一張壞掉的卡片。
+- `scripts/premarket.py` — `_discord_preopen()` / `_discord_orb()`,同樣 Discord 優先、
+  Email 當退路。這兩份是一天一次的定時報告,**不做合併視窗也不編輯**,本來就該推播。
+- `scripts/config.py` — `DISCORD_WEBHOOK_URL`(沒設就整套自動退回 Email)。
+- `intraday.yml` / `premarket.yml` — 加 `DISCORD_WEBHOOK_URL` secret。
+
+### 43.5 使用者要做的事(一次性,約 3 分鐘)
+
+1. Discord 開一個伺服器(或用現有的)→ 建一個頻道,例如 `#台股訊號`
+2. 頻道右鍵 → **編輯頻道** → **整合** → **Webhook** → **新增 Webhook** → **複製 Webhook 網址**
+3. GitHub → repo → Settings → Secrets and variables → Actions → **New repository secret**
+   - Name: `DISCORD_WEBHOOK_URL`
+   - Secret: 剛剛複製的網址
+4. 驗證(**收盤也能跑**):Actions → Intraday Signal Scan → Run workflow → mode 選 `scan`
+   —— 或本機 `DISCORD_WEBHOOK_URL=... python -m scripts.intraday_scan --test-discord`,
+   會發一則假訊號卡到頻道。收到就是通了。
+
+> ⚠️ Webhook 網址等同「知道就能在你頻道發文」的密鑰,**只放 GitHub secret,不要進 repo**。
+> 另外記得確認該頻道**沒有被靜音**,否則手機不會響 —— Discord 是逐頻道設定的。
+
+### 43.6 離線驗證過的路徑
+
+用假的 requests 打樁跑過五條路:①第一批發新訊息(POST + `wait=true`)②視窗內併入
+(PATCH 到 `/messages/{id}`,卡數累加)③視窗過期重發新訊息(卡數重置)
+④訊息被手動刪除時 PATCH 收 404 → 自動改發新的並更新 msg_id ⑤沒設 webhook 回 False
+讓呼叫端退回 Email。premarket 的兩種 embed 也都渲染驗證過。
+
+**都還沒對真實 Discord 端點跑過** —— 使用者設好 secret 後用 `--test-discord` 確認。
+
