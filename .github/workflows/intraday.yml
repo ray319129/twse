@@ -30,9 +30,12 @@ on:
         type: choice
         options: ["watch", "levels", "scan", "freshness"]
       interval:
-        description: "watch 模式的輪詢間隔秒數(預設 20)"
+        description: "watch 模式的輪詢間隔秒數(預設 10 = 上游更新頻率)"
         required: false
-        default: "20"
+        # 10 秒:FinMind 官方文件寫明 tick_snapshot「約 10 秒更新一次」,本專案實測
+        # 中位間隔約 11 秒 —— 兩邊對得上。原本設 20 等於只取樣一半,訊號白白晚 10 秒。
+        # 額度:10 秒 → 4.5 小時約 1620 次,上限 6000/hr,用掉不到 7%。
+        default: "10"
         type: string
 
 permissions:
@@ -71,7 +74,7 @@ jobs:
           MAIL_TO: ${{ secrets.MAIL_TO }}
         run: |
           MODE="${{ github.event.inputs.mode }}"; MODE="${MODE:-watch}"
-          IV="${{ github.event.inputs.interval }}"; IV="${IV:-20}"
+          IV="${{ github.event.inputs.interval }}"; IV="${IV:-10}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           case "$MODE" in
@@ -90,7 +93,7 @@ jobs:
           # 沒有新訊號 → 沒有檔案變動 → 乾淨跳過(不會產生每 5 分鐘一個 commit)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/alerts data/levels.parquet data/snapshots                   docs/alerts.json docs/levels.json docs/deep.json docs/series.json                   docs/freshness.json 2>/dev/null || true
+          git add data/alerts data/levels.parquet data/snapshots                   docs/alerts.json docs/levels.json docs/deep.json docs/series.json                   docs/freshness.json docs/pulse.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No new signals."
           else

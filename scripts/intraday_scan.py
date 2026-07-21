@@ -328,6 +328,14 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
     except Exception:
         vol_base = 1.0
 
+    # 大盤即時:用 merge 前的原始快照(merge 是 inner join levels,會把指數列濾掉)。
+    # 每輪都算、每輪都寫檔 —— 這樣網頁上的大盤條跟訊號是同一個時間點的。
+    if not dry_run:
+        try:
+            _write_pulse(day, market_pulse(snap))
+        except Exception as e:
+            log.warning(f"大盤即時寫檔失敗(不影響盯盤):{e}")
+
     names = _name_map()
     fired = load_alerts(day)
     first_poll = not fired            # 今天還沒有任何紀錄 = 這是第一輪
@@ -373,6 +381,83 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
              f"(當日累計 {len(fired)} 筆)")
     return {"ok": True, "checked": len(df), "new_alerts": len(new),
             "alerts": new, "total_today": len(fired), "reason": ""}
+
+
+# ---------- 盤中大盤即時(2026-07-21 加) ----------
+#
+# 在這之前**盤中完全沒有大盤資訊** —— 網頁上的市場氛圍/位階全來自 21:30 的盤後批次,
+# 盤中看到的是昨天的。但台帳早就證明「動能是 beta 不是 alpha」
+# (見專案記憶 abc-shipped-and-ceiling),所以盤中最該先看的其實是大盤方向與廣度。
+#
+# **關鍵:這一切零額外 API 呼叫。** 全市場快照本來每輪就抓回來了,
+# ① FinMind 文件寫明 `data_id` 除了 4 碼個股也支援 **91 個 3 碼指數代號**
+#    (`001`=加權指數、`101`=櫃買加權),不帶 data_id 的全市場回應裡本來就該有這些列;
+# ② 漲跌家數/成交金額/量比中位數都是同一份 DataFrame 直接算得出來的。
+INDEX_IDS = {"001": "加權指數", "101": "櫃買指數"}
+_pulse_warned = [False]
+
+
+def market_pulse(snap) -> dict:
+    """大盤即時脈搏:指數 + 全市場廣度。純從既有快照算,不打任何 API。
+
+    ⚠️ **指數列是否真的出現在「不帶 data_id」的回應裡,尚未實測**(2026-07-21 收盤後
+    寫的,本機無 token)。沒有就只是 `indices` 為空、廣度照常顯示 —— 不會壞,
+    但會 log 一次警告,方便第一個交易日確認。真的沒有的話改用免費的
+    `TaiwanVariousIndicators5Seconds`(加權指數 5 秒級,免 Sponsor)。
+    """
+    out: dict = {"indices": {}, "breadth": {}}
+    if snap is None or getattr(snap, "empty", True):
+        return out
+    try:
+        ids = snap["stock_id"].astype(str)
+        for code, label in INDEX_IDS.items():
+            rows = snap[ids == code]
+            if rows.empty:
+                continue
+            r = rows.iloc[0].to_dict()
+            out["indices"][code] = {
+                "name": label,
+                "price": _f(r.get("close")),
+                "change_rate": _f(r.get("change_rate")),
+                "change_price": _f(r.get("change_price")),
+                "total_amount": _f(r.get("total_amount")),
+            }
+        if not out["indices"] and not _pulse_warned[0]:
+            _pulse_warned[0] = True
+            log.warning("全市場快照裡找不到指數列(001/101)—— 大盤即時只會有廣度,"
+                        "沒有指數。若要指數請改接 TaiwanVariousIndicators5Seconds。")
+        # 廣度只算個股(4 碼),把指數列排除掉才不會污染家數
+        stocks = snap[ids.str.len() >= 4]
+        chg = pd.to_numeric(stocks.get("change_rate"), errors="coerce")
+        up = int((chg > 0).sum())
+        down = int((chg < 0).sum())
+        flat = int((chg == 0).sum())
+        vr = pd.to_numeric(stocks.get("volume_ratio"), errors="coerce").median()
+        amt = pd.to_numeric(stocks.get("total_amount"), errors="coerce").sum()
+        strong = int((chg >= 5).sum())
+        weak = int((chg <= -5).sum())
+        out["breadth"] = {
+            "up": up, "down": down, "flat": flat, "total": up + down + flat,
+            # 上漲家數占比:>55% 偏多、<45% 偏空。比指數漲跌更能看出「有沒有普漲」——
+            # 權值股拉指數但多數股票在跌是很常見的陷阱。
+            "up_pct": round(up / (up + down) * 100, 1) if (up + down) else None,
+            "strong": strong,           # 漲逾 5%
+            "weak": weak,               # 跌逾 5%
+            "vol_ratio_median": None if vr != vr else round(float(vr), 2),
+            "amount_100m": None if amt != amt else round(float(amt) / 1e8, 1),   # 億元
+        }
+    except Exception as e:
+        log.warning(f"大盤即時計算失敗(不影響盯盤):{e}")
+    return out
+
+
+def _write_pulse(day: str, pulse: dict) -> None:
+    """docs/pulse.json —— 網頁「盤中即時」頂端的大盤條讀這一包。
+    每輪都寫(算它幾乎不花時間),但發布仍走 _git_publish 的 3 分鐘節流。"""
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    with open(DOCS_DIR / "pulse.json", "w", encoding="utf-8") as f:
+        json.dump({"date": day, "updated": now_tpe().strftime("%H:%M:%S"), **pulse},
+                  f, ensure_ascii=False)
 
 
 def _write_web(day: str, fired: dict) -> None:
@@ -523,10 +608,29 @@ def intraday_series(stock_ids: list[str], day: str | None = None,
             out[sid] = {"t": ts, "c": cs, "v": vs}
         except Exception as e:
             log.warning(f"走勢線 {sid} 失敗(略過):{e}")
+    # ⚠️ **KBar 在盤中到底更不更新,尚未實測**(2026-07-21)。
+    # FinMind 官方文件把 TaiwanStockKBar 的「更新時間」寫成**平日 15:50**(收盤後),
+    # 若真的是收盤後才更新,盤中的走勢線會整條停在前一天 —— 而網頁上完全看不出來,
+    # 只會覺得「線很短」。所以這裡自己驗:最後一根 K 的時間比現在落後超過 15 分鐘
+    # 就記警告,並把落後秒數寫進 series.json 給前端標示。
+    lag_min = None
     if out:
+        try:
+            last = max((v["t"][-1] for v in out.values() if v.get("t")), default="")
+            if last:
+                hh, mm = (int(x) for x in last.split(":")[:2])
+                n = now_tpe()
+                lag_min = (n.hour * 60 + n.minute) - (hh * 60 + mm)
+                if 0 <= (n.hour * 60 + n.minute) - 540 and lag_min > 15:
+                    log.warning(f"⚠️ 走勢線最後一根 K 是 {last},落後 {lag_min} 分鐘 —— "
+                                f"KBar 很可能盤中不更新(官方文件寫更新時間 15:50)。"
+                                f"若確認如此,走勢線要改用自己累積快照的方式。")
+        except Exception:
+            pass
         DOCS_DIR.mkdir(parents=True, exist_ok=True)
         (DOCS_DIR / "series.json").write_text(
-            json.dumps({"date": day, "updated": now_tpe().strftime("%H:%M"), "series": out},
+            json.dumps({"date": day, "updated": now_tpe().strftime("%H:%M"),
+                        "lag_min": lag_min, "series": out},
                        ensure_ascii=False), encoding="utf-8")
         log.info(f"走勢線已更新:{len(out)} 檔")
     return out
@@ -605,10 +709,18 @@ def _git_publish(msg: str) -> None:
 
     ⚠️ **每次 push 都會觸發一次 Vercel 重新部署**。7/20 實測 20 分鐘內推了 8 次
     = 8 次部署,既浪費也可能撞到平台限制 → 改由呼叫端節流(見 loop 的 _pub_last)。
+
+    ⚠️ **`data/snapshots` 一定要在這份清單裡**(2026-07-21 修)。原本只有 workflow
+    的最後一步會 commit 它 —— 意思是 job 被取消 / timeout / runner 掛掉,**整天 7 個
+    檢查點的快照就永遠沒了**。而鐵則三說得很清楚:這種資料訂閱到期後沒有任何 API
+    補得回來,今天沒存就是沒有。所以改成「存一個推一個」,不等 job 結束。
+    `docs/levels.json` 同理:盤中自動重建的 levels 不推上去,網頁整天拿不到
+    產業別/換手率/突破判斷。
     """
     import subprocess
     try:
-        subprocess.run(["git", "add", "data/alerts", "docs/alerts.json",
+        subprocess.run(["git", "add", "data/alerts", "data/snapshots",
+                        "docs/alerts.json", "docs/levels.json", "docs/pulse.json",
                         "docs/deep.json", "docs/series.json", "docs/freshness.json"],
                        check=False)
         r = subprocess.run(["git", "diff", "--cached", "--quiet"])
@@ -785,6 +897,10 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
                     done_tags.update(due)
                     try:
                         archive_snapshot(tag=t)
+                        # 快照是**不可重建**的資料(鐵則三),不能讓它在 runner 的
+                        # 磁碟上等 3 分鐘節流窗 —— job 這時候掛掉就永遠沒了。
+                        # 歸零節流計時器,讓下面那段當場推上去。
+                        _pub_last[0] = 0.0
                     except Exception as e:
                         log.warning(f"快照存檔 {t} 失敗(不影響盯盤):{e}")
             if r.get("new_alerts"):

@@ -54,7 +54,10 @@ USER_INFO_API = "https://api.web.finmindtrade.com/v2/user_info"
 # 全市場快照在同一秒內可能被多處呼叫(持倉頁 + 熱力圖 + 出場監控),
 # 這個 TTL 讓它們共用同一份,避免無謂地打 API。監控要更即時就把 ttl 調小。
 _SNAP_CACHE: dict = {"ts": 0.0, "df": None}
-_DEFAULT_TTL = 20.0
+# 10 秒 = 上游更新頻率(FinMind 文件寫明 tick_snapshot 約 10 秒換一次,本專案實測中位 11 秒)。
+# 原本設 20 秒表示網頁最壞會拿到 20 秒前的快取 + 上游本身 10 秒 = 落後 30 秒。
+# 設成 10 之後,快取永遠不會比上游還舊 —— 也不會因此多打 API,因為前端輪詢間隔比它長。
+_DEFAULT_TTL = 10.0
 
 SRC_SPONSOR = "sponsor"      # FinMind Sponsor 全市場即時快照
 SRC_MIS = "mis"              # TWSE MIS 非官方即時
