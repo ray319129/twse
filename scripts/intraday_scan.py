@@ -751,6 +751,19 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
         try:
             r = scan(notify=notify)
             polls += 1
+            # 心跳:寫進 docs/freshness.json。沒有這個就分不出「今天沒訊號」和「job 根本沒跑」——
+            # 2026-07-21 就是因為沒有痕跡,只能靠「有沒有 commit」猜,猜不準。
+            try:
+                hb = {}
+                fp = DOCS_DIR / "freshness.json"
+                if fp.exists():
+                    hb = json.loads(fp.read_text(encoding="utf-8"))
+                hb.update({"heartbeat": now.strftime("%Y-%m-%d %H:%M:%S"),
+                           "polls": polls, "fired_today": fired_total,
+                           "interval": interval, "checked": r.get("checked", 0)})
+                fp.write_text(json.dumps(hb, ensure_ascii=False), encoding="utf-8")
+            except Exception:
+                pass
             # 內外盤比走逐筆資料(一檔 2 萬多筆),太重不能每輪跑 → 每 10 分鐘一次
             if polls == 1 or (time.time() - _deep_last[0]) >= 600:
                 _deep_last[0] = time.time()
@@ -779,9 +792,15 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
                 pending += r["new_alerts"]
             # 發布節流:每次 push 都會觸發一次 Vercel 重新部署,7/20 實測 20 分鐘內
             # 推了 8 次。Email 已經即時送達,網頁晚 3 分鐘完全可以接受。
-            if publish and pending and (time.time() - _pub_last[0]) >= PUBLISH_EVERY:
+            # ⚠️ 發布條件**不能綁在「有新訊號」上**(2026-07-21 修):
+            # 走勢線 / 內外盤 / freshness 是每 10 分鐘算好的,但原本只有在有訊號時才 push
+            # → 沒訊號的日子這些檔案整天不會上去,網頁永遠看不到走勢線。
+            # 而且「job 到底有沒有在跑」也完全沒有痕跡,只能猜。
+            if publish and (time.time() - _pub_last[0]) >= PUBLISH_EVERY:
                 _pub_last[0] = time.time()
-                _git_publish(f"intraday: {pending} signals {now.strftime('%H:%M')}")
+                msg = (f"intraday: {pending} signals {now.strftime('%H:%M')}" if pending
+                       else f"intraday: live data {now.strftime('%H:%M')}")
+                _git_publish(msg)
                 pending = 0
             elif not r.get("ok") and r.get("reason") in ("no_sponsor", "no_levels"):
                 log.warning(f"停止盯盤:{r['reason']}")   # 這兩種再輪也不會好

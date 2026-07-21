@@ -173,3 +173,35 @@ Request body:
 ### 台灣假日
 沒有內建假日行事曆,但**不需要**:快照的時間戳不是今天時 `scan` 會自己跳過、
 不寄信、不 commit,job 乾淨結束。
+
+---
+
+## ⚠️ 盤中掃描請「加設」外部 cron(2026-07-21 補)
+
+`intraday.yml` 用了 GitHub 內建 `schedule: "20 0 * * 1-5"`(台北 08:20),
+但 **2026-07-20、07-21 連續兩天都沒有自動觸發** —— 同一天 premarket(走外部 cron)
+卻準時跑了 08:45 與 09:25。
+
+**GitHub 內建 schedule 在高負載時會延遲甚至整個略過**,這正是本專案當初把
+daily / premarket 改走外部 cron 的原因。我原本以為「job 自己等開盤」就能免疫,
+但那隻解決「延遲」,**解決不了「根本沒觸發」**。
+
+→ **在 cron-job.org 加一條**(內建 schedule 保留當備援,兩者同時觸發也沒關係,
+`concurrency: intraday` 會擋掉重複執行):
+
+| 台北時間 | Workflow | Request body |
+|---|---|---|
+| 每個工作日 **08:20** | `intraday.yml` | `{"ref":"main","inputs":{"mode":"watch"}}` |
+| 每個工作日 **21:40** | `chips.yml` | `{"ref":"main","inputs":{}}` |
+
+URL 與 Header 與 premarket 那條相同,只是把 workflow 檔名換掉:
+```
+https://api.github.com/repos/ray319129/twse/actions/workflows/intraday.yml/dispatches
+```
+
+### 怎麼確認它有在跑
+盤中開 `docs/freshness.json`(或 GitHub 上的該檔案),裡面有 **`heartbeat`** 欄位:
+```json
+{"heartbeat":"2026-07-21 10:32:15","polls":389,"fired_today":3,"checked":866}
+```
+時間戳在幾分鐘內 = job 活著。**沒有這個欄位或時間很舊 = job 沒在跑**,不是「今天沒訊號」。
