@@ -186,6 +186,24 @@
   .mp-b.on-s{background:var(--surface-3);color:var(--ink-2);border-color:var(--muted-2);}
   @media(max-width:640px){.mp-grid{grid-template-columns:1fr;}}
 
+  /* 台帳未出場部位的即時損益(2026-07-21)。綠點 = 這一列的價格是即時報價,
+     不是批次收盤 —— 不標的話使用者分不出哪些數字是活的。 */
+  .led-live{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;margin-bottom:12px;}
+  .led-live .ll-h{font-size:12.5px;font-weight:800;color:var(--ink-2);display:flex;
+    align-items:center;gap:7px;flex-wrap:wrap;}
+  .led-live .ll-src{font-size:10.5px;font-weight:600;color:var(--muted-2);}
+  .led-live .ll-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:9px;}
+  .led-live .ll-g>div{display:flex;flex-direction:column;gap:3px;}
+  .led-live .ll-g b{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1;}
+  .led-live .ll-g i{font-size:10.5px;color:var(--muted-2);font-style:normal;}
+  .led-live .ll-n{font-size:10.5px;color:var(--muted-2);margin-top:9px;line-height:1.55;}
+  .led-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--up);
+    margin-left:5px;vertical-align:middle;animation:ledpulse 2.4s ease-in-out infinite;}
+  @keyframes ledpulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media(prefers-reduced-motion:reduce){.led-dot{animation:none}}
+  @media(max-width:640px){.led-live .ll-g{grid-template-columns:1fr 1fr;}}
+
   /* market regime hero */
   .regime{display:flex;align-items:center;gap:16px;}
   .regime .ring{width:74px;height:74px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;position:relative;}
@@ -2248,7 +2266,8 @@ function renderPerf(){
   }
 
   const histNote=isHist?'<span class="tag-latest">最新</span> 績效統計與台帳恆顯示最新資料,不隨上方選股日切換。':'';
-  $('#p-perf').innerHTML=`<div class="lead">每天自動更新過去所有核心選股後續走勢(以每日收盤計)。共追蹤 <b>${isNum(p.total_tracked)?p.total_tracked:0}</b> 檔。${histNote}</div>`+stats+htab+edge+ledArea;
+  $('#p-perf').innerHTML=`<div class="lead">每天自動更新過去所有核心選股後續走勢。共追蹤 <b>${isNum(p.total_tracked)?p.total_tracked:0}</b> 檔。
+    <span style="color:var(--muted-2);font-size:12px">上方統計以每日收盤計;下方台帳<b>未出場</b>的部位盤中會用即時報價重算(標 <span class="led-dot" style="animation:none"></span> 者)。</span>${histNote}</div>`+stats+htab+edge+ledArea;
 
   if(LED.length){
     /* chip clicks only update state + redraw rows; rebuild the chip bar's active state in place
@@ -2358,8 +2377,54 @@ function mpSummaryHtml(rows){
       報酬率用台帳的「選股日成本 → 最新收盤」,與你實際進出價可能不同;這是衡量<b>挑選能力</b>,不是你的真實損益。</div>
   </div>`;
 }
+/* ============================================================
+   台帳即時化(2026-07-21)
+   批次算的 latest_close 是「上一個收盤」,所以盤中看整個績效分頁等於落後一天 ——
+   使用者反映「歷史追蹤與績效也要即時」。
+   規則:**只有還沒出場的列**(持有中 / 待隔日進場)才用即時價重算;
+   已模擬出場的列是歷史成交,重算會竄改台帳、破壞勝率統計,絕對不能動。
+   拿不到即時價就原樣沿用批次值 —— 即時掛掉不該讓台帳變空白。
+   ============================================================ */
+const LED_OPEN=['持有中','待隔日進場'];
+function ledIsOpen(r){return !r.exit_reason||LED_OPEN.includes(r.exit_reason);}
+function ledLive(r){
+  if(!ledIsOpen(r))return r;
+  const lq=LIVE[String(r.stock_id)];
+  const px=lq&&isNum(lq.price)?lq.price:null;
+  if(px==null||!isNum(r.entry)||r.entry<=0)return r;
+  const o=Object.assign({},r);
+  o.latest_close=px;
+  o.ret_pct=Math.round((px/r.entry-1)*10000)/100;
+  /* 期間最高漲幅:即時價創新高才更新,否則沿用批次算的波段高 */
+  if(isNum(r.peak_price)&&px>r.peak_price)o.peak_gain_pct=Math.round((px/r.entry-1)*10000)/100;
+  o._live=true;o._lts=lq.ts;o._lsrc=lq.source;
+  return o;
+}
+/* 未出場列的即時彙總。放在 #ledtable 內,才能跟著每 20 秒的報價輪詢一起更新,
+   不必重繪整個分頁(會跳掉捲動位置、吃掉搜尋框焦點)。 */
+function ledLiveSummary(rows){
+  const op=rows.filter(r=>ledIsOpen(r));
+  if(!op.length)return '';
+  const live=op.filter(r=>r._live);
+  const rs=op.map(r=>r.ret_pct).filter(isNum);
+  if(!rs.length)return '';
+  const avg=rs.reduce((a,b)=>a+b,0)/rs.length;
+  const win=rs.filter(v=>v>0).length;
+  const src=live.length?(LIVE_SRC&&LIVE_SRC.label?esc(LIVE_SRC.label):'即時')
+                       :'批次收盤(即時報價未取得)';
+  const dot=live.length?'<span class="led-dot"></span>':'';
+  return `<div class="led-live">
+    <div class="ll-h">${dot}未出場部位即時損益 <span class="ll-src">${live.length}/${op.length} 檔為${src}</span></div>
+    <div class="ll-g">
+      <div><b class="${cls(avg)}">${fmt(avg)}%</b><i>平均報酬</i></div>
+      <div><b>${win}/${rs.length}</b><i>目前獲利檔數</i></div>
+      <div><b>${op.length}</b><i>仍未出場</i></div>
+    </div>
+    <div class="ll-n">已模擬出場的列是歷史成交價,不受即時報價影響;上方勝率/已實現統計同理,仍為每日批次結果。</div>
+  </div>`;
+}
 function drawLedger(){
-  let rows=LED.slice();
+  let rows=LED.map(ledLive);
   if(fStatus==='win')rows=rows.filter(r=>r.ret_pct>0);
   else if(fStatus==='loss')rows=rows.filter(r=>r.ret_pct<0);
   else if(['止損','移動停利','均線停損','到期','持有中'].includes(fStatus))rows=rows.filter(r=>r.exit_reason===fStatus);
@@ -2374,7 +2439,7 @@ function drawLedger(){
     {k:'name',t:'名稱',f:r=>esc(r.name)},
     {k:'profile',t:'型態',f:r=>badge(r.profile)},
     {k:'entry',t:'成本',r:1,f:r=>`<span class="num">${num(r.entry)}</span>`},
-    {k:'latest_close',t:'最新',r:1,f:r=>`<span class="num">${num(r.latest_close)}</span>`},
+    {k:'latest_close',t:'最新',r:1,f:r=>`<span class="num">${num(r.latest_close)}</span>${r._live?`<span class="led-dot" title="即時報價 ${esc(r._lts||'')}"></span>`:''}`},
     {k:'days',t:'天',r:1,f:r=>`<span class="num" style="color:var(--muted-2)">${isNum(r.days)?r.days:'-'}</span>`},
     {k:'ret_pct',t:'報酬率',r:1,f:r=>`<span class="num ${cls(r.ret_pct)}" style="font-weight:800">${fmt(r.ret_pct)}%</span>`},
     {k:'peak_gain_pct',t:'最高漲幅',r:1,f:r=>`<span class="num" style="color:var(--warn)">${isNum(r.peak_gain_pct)?fmt(r.peak_gain_pct)+'%':'-'}</span>`},
@@ -2385,7 +2450,7 @@ function drawLedger(){
   ];
   const head=cols.map(c=>`<th class="${c.r?'r':''}" data-k="${c.k}">${c.t}${arrow(c.k)}</th>`).join('');
   const body=rows.map(r=>'<tr>'+cols.map(c=>`<td class="${c.r?'r':''}">${c.f(r)}</td>`).join('')+'</tr>').join('');
-  $('#ledtable').innerHTML=mpSummaryHtml(LED)+
+  $('#ledtable').innerHTML=ledLiveSummary(LED.map(ledLive))+mpSummaryHtml(LED)+
     `<div class="tbl-wrap"><table class="t"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
     <div class="hint">顯示 ${rows.length} 檔 · 點欄位標題可排序 · 「我的」欄按買/跳做標記(只存本機,再按一次取消)</div>`;
   // 「我的」欄不參與排序(非資料欄位);其餘照舊
@@ -2591,6 +2656,9 @@ function liveQuotes(ids){
       LIVE_SRC={source:d.source,label:d.source_label,days_left:d.sponsor_days_left};
       renderWatchlistBox();
       if(typeof renderPortfolio==='function'&&$('#p-port')&&$('#p-port').classList.contains('active'))renderPortfolio();
+      /* 績效分頁:只重畫台帳表格,不重繪整個分頁 —— 整頁重繪會跳掉捲動位置、
+         吃掉搜尋框焦點,而且上方的統計是批次結果本來就不會變。 */
+      if($('#p-perf')&&$('#p-perf').classList.contains('active')&&$('#ledtable')&&LED&&LED.length)drawLedger();
       return d;
     }).catch(()=>null);
 }
@@ -2599,26 +2667,73 @@ function liveIds(){
   const s=new Set(wlIds());
   (PORT.positions||[]).forEach(p=>s.add(String(p.id)));
   ((DATA&&DATA.core)||[]).forEach(x=>x&&x.stock_id&&s.add(String(x.stock_id)));
+  /* 台帳裡**還沒出場**的部位(持有中/待隔日進場)—— 讓績效分頁也即時。
+     只加未出場的:已出場的列用歷史成交價,查即時價毫無意義還會撐大 payload
+     (api/quote 的 MAX_IDS=200)。實測未出場約 10 檔,加進來成本可忽略。 */
+  (LED||[]).forEach(r=>{if(r&&r.stock_id&&ledIsOpen(r))s.add(String(r.stock_id));});
   return [...s];
+}
+/* 盤中時段(台北 09:00–13:35,週一~五)。用使用者本機時間判斷 —— 使用者在台灣,
+   而且判斷錯的代價只是「多輪詢/少輪詢」,不值得為此多打一支 API。 */
+function inSession(){
+  const d=new Date(),m=d.getHours()*60+d.getMinutes(),w=d.getDay();
+  return w>=1&&w<=5&&m>=9*60&&m<=13*60+35;
 }
 function startLiveQuotes(sec){
   stopLiveQuotes();
-  const tick=()=>liveQuotes(liveIds());
+  /* 輪詢節流(2026-07-21 加):原本開著網頁就每 20 秒打一次 /api/quote,**24 小時不停**,
+     連分頁切到背景、半夜、週末都在打。收盤後價格根本不會變,那些呼叫是純浪費
+     (Vercel 函式呼叫數 + FinMind 額度)。
+     → 收盤後與分頁隱藏時跳過;切回前景時立刻補一次,使用者不會看到過期價格。 */
+  const tick=()=>{
+    if(document.hidden)return;
+    if(!inSession()&&LIVE_SRC)return;      /* 非盤中:已經有過一次報價就不再打 */
+    return liveQuotes(liveIds());
+  };
+  if(!startLiveQuotes._vis){
+    startLiveQuotes._vis=true;
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden&&_liveTimer)tick();});
+  }
   /* levels 一天只變一次,先載完再開始輪詢 —— 否則第一輪報價會少掉產業別/突破/換手率 */
-  loadLevels().then(tick); loadDeep(); loadSeries(); loadStreak();
+  loadLevels().then(tick); loadDeep(); loadSeries(); loadStreak(); loadFresh();
   _liveTimer=setInterval(tick,(sec||20)*1000);
   /* deep.json / series.json 都是每 10 分鐘才更新,前端 5 分鐘拉一次夠了;
-     連買連賣是盤後才算,盤中不會變,載一次即可。 */
-  setInterval(()=>{loadDeep();loadSeries();},300000);
+     連買連賣是盤後才算,盤中不會變,載一次即可。心跳跟著一起拉。 */
+  setInterval(()=>{loadDeep();loadSeries();loadFresh();},300000);
 }
 function stopLiveQuotes(){if(_liveTimer){clearInterval(_liveTimer);_liveTimer=null;}}
 
 /* 今日盤中訊號(docs/alerts.json,由 scripts/intraday_scan.py 每 5 分鐘更新)。
    ⚠️ 同一檔同一種訊號當日只會出現一次 —— 這是刻意的,價格會在觸發價上下來回穿越,
    每次都通知等於洗版。所以這裡看到的是「今天第一次觸發的時間」,不是最新狀態。 */
+/* 盯盤 job 心跳(docs/freshness.json)。
+   2026-07-21 加:內建 schedule 連兩天沒觸發,但網頁上「今日尚無盤中訊號」跟
+   「job 根本沒跑」長得一模一樣 —— 沒有心跳就分不出來,只能去翻 GitHub Actions。 */
+let FRESH=null;
+function loadFresh(){loadLive('freshness.json').then(d=>{FRESH=d;renderLive();});}
+function heartbeatBox(){
+  const hb=FRESH&&FRESH.heartbeat;
+  const today=new Date().toISOString().slice(0,10);
+  if(!hb||String(hb).slice(0,10)!==today){
+    /* 非交易時段本來就不該有心跳,別誤報 */
+    const now=new Date(),hhmm=now.getHours()*60+now.getMinutes(),wd=now.getDay();
+    const inSession=wd>=1&&wd<=5&&hhmm>=9*60+5&&hhmm<=13*60+35;
+    if(!inSession)return '';
+    return `<div class="note-box" style="border-color:var(--down-line);background:var(--down-bg);color:var(--down-ink)">
+      ⚠️ <b>盯盤程式今天沒有心跳</b> — 現在是盤中時段,但 <code>freshness.json</code> 沒有今日時間戳,
+      表示 Intraday Signal Scan 沒被觸發(GitHub 內建 schedule 會漏跑)。
+      到 Actions → Intraday Signal Scan → Run workflow(mode=watch)手動補,並確認 cron-job.org 那條有設。</div>`;
+  }
+  const age=Math.round((Date.now()-new Date(String(hb).replace(' ','T')+'+08:00').getTime())/60000);
+  const stale=age>10;
+  return `<div class="note-box" style="color:var(--muted-2)">
+    ${stale?'⚠️':'<span class="led-dot"></span>'} 盯盤程式${stale?`最後心跳在 ${age} 分鐘前(可能已結束或卡住)`:'運行中'} ·
+    ${esc(hb)} · 已掃 ${isNum(FRESH.polls)?FRESH.polls:'-'} 輪 · 今日觸發 ${isNum(FRESH.fired_today)?FRESH.fired_today:0} 則
+    ${isNum(FRESH.checked)?` · 監控 ${FRESH.checked} 檔`:''}</div>`;
+}
 function alertsBox(d){
   const a=(d&&d.alerts)||[];
-  if(!a.length)return `<div class="note-box" style="color:var(--muted-2)">今日尚無盤中訊號。掃描於 09:05–13:25 每 5 分鐘執行;<b>同一檔同一種訊號當日只提醒一次</b>。</div>`;
+  if(!a.length)return heartbeatBox()+`<div class="note-box" style="color:var(--muted-2)">今日尚無盤中訊號。掃描於 09:00–13:35 每 20 秒執行;<b>同一檔同一種訊號當日只提醒一次</b>。</div>`;
   const rows=a.map(r=>{
     const t=r.type==='breakout'?'var(--up-ink)':'var(--accent)';
     return `<div class="mk-row" style="grid-template-columns:52px 1fr auto auto">
@@ -2629,7 +2744,7 @@ function alertsBox(d){
       <div class="num ${cls(r.change_rate)}">${fmt(r.change_rate)}%</div>
       <div style="grid-column:1/-1;margin-top:-2px"><span style="font-size:11px;color:${t};font-weight:700">${esc(r.label||'')}</span></div>
     </div>`;}).join('');
-  return `<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>今日盤中訊號 — ${a.length} 筆(更新 ${esc(d.updated||'')})</div>
+  return heartbeatBox()+`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>今日盤中訊號 — ${a.length} 筆(更新 ${esc(d.updated||'')})</div>
     <div class="note-box" style="font-size:12px;color:var(--muted-2)">同一檔同一種訊號當日只提醒一次,顯示的是<b>首次觸發</b>時間與當時價格。條件觸發≠買進建議;動能型訊號在本系統台帳的歷史超額為負。</div>
     ${rows}`;
 }

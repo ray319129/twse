@@ -1537,3 +1537,72 @@ if echo "$VERCEL_GIT_COMMIT_MESSAGE" | grep -qE '^(intraday|snapshot|chips|watch
 **改動建置設定要單獨一個 commit 推,不要跟功能混在一起。**
 這次 `ignoreCommand` 跟「內外盤修正 + 信件改版」同一個 commit 進去,
 之後三個 commit 的部署全掛掉,而失敗訊號要到使用者截圖才發現。
+
+---
+
+## 41. 績效台帳即時化 + 心跳可視化 + 輪詢節流(2026-07-21)
+
+使用者三個要求:①盤中到底該跑哪些排程 ②「歷史追蹤與績效」也要即時 ③整站體檢。
+
+### 41.1 台帳即時化(`docs/index.html`)
+
+**問題:** 績效分頁全部來自 `data.json` → 21:30 盤後批次才更新。盤中看「持有中」
+那幾檔,`latest_close` 是**昨天的收盤**,報酬率等於落後一整天。
+
+**做法:** 前端疊加,後端不動。
+- `ledIsOpen(r)` — 只有 `exit_reason` 為空 / `持有中` / `待隔日進場` 算未出場。
+- `ledLive(r)` — 未出場列改用 `LIVE[stock_id].price` 重算 `ret_pct`;
+  `peak_gain_pct` 只在即時價**創新高**時才更新(否則沿用批次算的波段高)。
+- **已模擬出場的列絕對不碰** —— 那是歷史成交價,重算會竄改台帳、破壞勝率統計。
+- `liveIds()` 加入未出場的代號(實測 11 檔),`/api/quote` 是全市場一次呼叫,成本不變。
+- `liveQuotes()` 回來時只呼叫 `drawLedger()`,**不重繪整個分頁** —— 整頁重繪會跳掉
+  捲動位置、吃掉搜尋框焦點。
+- `#ledtable` 頂端加 `ledLiveSummary()`:未出場部位的即時平均報酬 / 獲利檔數 / 檔數,
+  並標明「上方勝率與已實現統計仍是批次結果」。
+- 即時的列在「最新」欄有 `.led-dot` 綠點(hover 顯示報價時間戳)。
+
+**驗證:** 本機注入模擬報價(每檔 +3%),6505 entry 66.2 → 即時 80.03 → 20.89%(數學正確),
+已出場列數值不變,綠點 11 個。`node --check` 通過。
+
+### 41.2 盯盤心跳搬到網頁上(`heartbeatBox()`)
+
+`docs/freshness.json` 的 `heartbeat` 欄位本來只能去 GitHub 上開檔案看。
+網頁上「今日尚無盤中訊號」和「job 根本沒跑」長得一模一樣 —— 這正是 7/20、7/21
+兩天沒發現內建 schedule 沒觸發的原因。
+
+現在「盤中即時」分頁頂端固定顯示:
+- 心跳是今天且 10 分鐘內 → 綠點「盯盤程式運行中 · 已掃 N 輪 · 今日觸發 M 則」
+- 心跳超過 10 分鐘 → ⚠️ 提示可能已結束或卡住
+- **盤中時段卻完全沒有今日心跳 → 紅框警告 + 直接寫出補救步驟**(去 Actions 手動 run)
+- 非盤中時段不顯示(不誤報)
+
+⚠️ `freshness.json` 目前 repo 裡還沒有 —— 心跳寫入是上一個 commit(14268c4e8)才加的,
+還沒真的跑過一次盤中。**第一個交易日跑完要確認這個檔案有被 commit 上去。**
+
+### 41.3 即時報價輪詢節流
+
+原本 `startLiveQuotes(20)` 一載入就每 20 秒打一次 `/api/quote`,**24 小時不停**,
+分頁切到背景、半夜、週末照打。收盤後價格根本不會變,那些呼叫是純浪費
+(Vercel 函式呼叫數 + FinMind 額度)。
+
+現在 `tick()` 開頭兩道閘:`document.hidden` 就跳過;非盤中時段(台北週一~五 09:00–13:35)
+且已經取得過一次報價就跳過。切回前景時 `visibilitychange` 立刻補一次,不會看到過期價格。
+粗估省掉八成以上的呼叫。
+
+### 41.4 體檢時發現、**尚未處理**的問題
+
+1. **`docs/_qall.json`(384 KB)是誤 commit 的除錯 dump。**
+   它在 14268c4e8 被加進來,但 repo 裡**沒有任何程式寫它、也沒有任何程式讀它**
+   (`grep -rn _qall scripts/ api/ docs/index.html` 全空),內容是全市場報價快照。
+   → 建議 `git rm docs/_qall.json`。留著每次 clone 都多背 384 KB。
+
+2. **`data/snapshots/` 目前是空的(目錄不存在)。**
+   盯盤迴圈的 7 個檢查點快照只在 **job 結束時**由 workflow 的最後一步 commit,
+   迴圈內的 `_git_publish()` 並沒有 `git add data/snapshots`。
+   → job 被取消 / timeout / runner 掛掉,**整天的快照就永遠沒了**(鐵則三說這種資料
+   訂閱到期後補不回來)。建議把 `data/snapshots` 加進 `_git_publish` 的 add 清單,
+   存一個就推一個。
+
+3. **`docs/levels.json` 同樣沒在 `_git_publish` 的清單裡**(只在 workflow 最後一步),
+   所以盤中自動重建的 levels 要等 job 結束網頁才拿得到。
+
