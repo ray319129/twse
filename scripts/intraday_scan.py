@@ -487,6 +487,11 @@ COALESCE_S = 150.0          # 合併視窗:2.5 分鐘內的新訊號併進上一
 DISCORD_MAX_CARDS = 8       # 一則訊息最多幾張卡(Discord 硬上限 10)
 _COLORS = {"breakout": 0x22C55E, "pullback": 0x3B82F6}
 _DEFAULT_COLOR = 0x6366F1
+ALERT_NEWS_DAYS = 14
+# 日K圖:一張約 40 KB,Discord 單則訊息附件上限 8 MB,理論上 8 張綽綽有餘。
+# 真正的限制是**時間** —— 每張約 0.3~0.6 秒,8 張就是 5 秒,而輪詢間隔只有 10 秒。
+# 所以只給前 CHART_TOP 檔(依漲幅排序後的最強幾檔)畫圖,其餘只有文字。
+CHART_TOP = 4
 
 
 def _state_path(day: str) -> Path:
@@ -512,11 +517,23 @@ def _save_state(day: str, st: dict) -> None:
     p.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
 
 
-def _embed(r: dict) -> dict:
-    """一筆訊號 → 一張 Discord embed 卡。左側色條編碼訊號類型。"""
+def _fmt_cap(v) -> str:
+    """市值:破千億就用「兆」,否則「億」。1234.5 億讀起來不如 1.23 兆直觀。"""
+    if v is None:
+        return ""
+    return f"{v/10000:.2f} 兆" if v >= 10000 else f"{v:,.0f} 億"
+
+
+def _embed(r: dict, ex: dict | None = None, chart_name: str | None = None) -> dict:
+    """一筆訊號 → 一張 Discord embed 卡。左側色條編碼訊號類型。
+
+    `ex` 是 alert_enrich.enrich() 的產出(產業/基本面/新聞),沒有就只顯示訊號本身。
+    `chart_name` 是同一則訊息裡的日K附件檔名,用 `attachment://` 引用。
+    """
     sid = r.get("stock_id") or ""
     chg = r.get("change_rate")
     px = r.get("price")
+    ex = ex or {}
     fields = []
     if px is not None:
         fields.append({"name": "現價", "value": f"**{px:.2f}**"
@@ -525,15 +542,107 @@ def _embed(r: dict) -> dict:
         fields.append({"name": "量比", "value": f"{r['volume_ratio']:.2f}", "inline": True})
     if r.get("vwap") is not None:
         fields.append({"name": "均價", "value": f"{r['vwap']:.2f}", "inline": True})
-    return {
+
+    # 估值:三個數擠一格,省 embed 的欄位配額(一列最多 3 個 inline field)
+    val = []
+    if ex.get("pe"):
+        val.append(f"本益比 {ex['pe']:.1f}")
+    if ex.get("pb"):
+        val.append(f"股價淨值比 {ex['pb']:.2f}")
+    if ex.get("yield"):
+        val.append(f"殖利率 {ex['yield']:.2f}%")
+    if val:
+        fields.append({"name": "估值", "value": " · ".join(val), "inline": False})
+
+    grow = []
+    if ex.get("eps_ttm") is not None:
+        grow.append(f"EPS(近四季) {ex['eps_ttm']:.2f}")
+    if ex.get("revenue_yoy") is not None:
+        grow.append(f"月營收年增 {ex['revenue_yoy']:+.1f}%")
+    cap = _fmt_cap(ex.get("market_cap"))
+    if cap:
+        grow.append(f"市值 {cap}")
+    if grow:
+        fields.append({"name": "基本面", "value": " · ".join(grow), "inline": False})
+
+    news = ex.get("news") or []
+    if news:
+        # 標題做成超連結,點了直接開原文。日期讓「這是今天的還是上週的」一眼可辨。
+        lines = []
+        for n in news:
+            t = (n.get("title") or "").replace("[", "(").replace("]", ")")[:70]
+            d = (n.get("date") or "")[5:]
+            src = n.get("source") or ""
+            lines.append(f"· [{t}]({n.get('link')})　`{d}{' ' + src if src else ''}`")
+        fields.append({"name": f"近 {ALERT_NEWS_DAYS} 日新聞", "value": "\n".join(lines)[:1024],
+                       "inline": False})
+
+    desc = r.get("reason") or ""
+    if ex.get("business"):
+        # 「這家在做什麼」放最前面 —— 使用者反映看到代號還要自己去查是誰
+        desc = f"**{ex['business']}**\n{desc}"
+    out = {
         "title": f"{r.get('name') or sid}  {sid}",
         "url": f"{WEB_BASE}/#stock={sid}",
-        "description": (r.get("reason") or "")[:500],
+        "description": desc[:900],
         "color": _COLORS.get(r.get("type"), _DEFAULT_COLOR),
         "author": {"name": r.get("label") or "訊號"},
         "fields": fields,
         "footer": {"text": f"首次觸發 {r.get('fired_at') or ''}"},
     }
+    if chart_name:
+        out["image"] = {"url": f"attachment://{chart_name}"}
+    return out
+
+
+def _build_cards(batch: list[dict]) -> tuple[list[dict], list[tuple[str, bytes]]]:
+    """整批訊號 → (embeds, 附件檔案)。
+
+    補背景資料與畫圖都可能失敗(沒網路 / 沒 matplotlib / 缺 parquet),
+    **任何一步壞掉都只是少一段內容**,訊號本身照發 —— 這是通知,不是交易指令。
+    """
+    embeds, files = [], []
+    # 只有最強的幾檔畫圖(見 CHART_TOP)。這裡排序只為決定「誰有圖」,
+    # 卡片本身的顯示順序仍照觸發順序,不要打亂使用者的時間感。
+    ranked = sorted(batch, key=lambda r: -(r.get("change_rate") or -99))
+    with_chart = {id(r) for r in ranked[:CHART_TOP]}
+
+    # ⚠️ **補資料一定要平行跑。** 每檔要打一次 Google News + 一次估值,序列跑 8 檔實測
+    # 7.5 秒 —— 而輪詢間隔只有 10 秒,等於一個批次就吃掉一整輪。改成執行緒池後降到
+    # 1~2 秒。這裡是純 I/O 等待,GIL 不影響。
+    exmap: dict[str, dict] = {}
+    try:
+        from concurrent.futures import ThreadPoolExecutor
+        from .alert_enrich import enrich
+        with ThreadPoolExecutor(max_workers=min(8, max(1, len(batch)))) as pool:
+            futs = {str(r.get("stock_id") or ""):
+                    pool.submit(enrich, str(r.get("stock_id") or ""),
+                                r.get("name") or "", r.get("price"))
+                    for r in batch}
+            for sid, f in futs.items():
+                try:
+                    exmap[sid] = f.result(timeout=12)
+                except Exception as e:
+                    log.info(f"訊號背景資料 {sid} 略過:{e}")
+    except Exception as e:
+        log.info(f"訊號背景資料整批略過:{e}")
+
+    for r in batch:
+        sid = str(r.get("stock_id") or "")
+        ex = exmap.get(sid) or {}
+        name = None
+        if id(r) in with_chart:
+            try:
+                from .alert_chart import daily_k_png
+                png = daily_k_png(sid, r.get("name") or "", live_price=r.get("price"),
+                                  high20=ex.get("high20"))
+                if png:
+                    name = f"k_{sid}.png"
+                    files.append((name, png))
+            except Exception as e:
+                log.info(f"日K圖 {sid} 略過:{e}")
+        embeds.append(_embed(r, ex, name))
+    return embeds, files
 
 
 def _discord_notify(day: str, new: list[dict], total_today: int) -> bool:
@@ -548,7 +657,7 @@ def _discord_notify(day: str, new: list[dict], total_today: int) -> bool:
     # 合併視窗內:把上一則的內容一起帶出來重畫(Discord 的 PATCH 是整包覆蓋,不是追加)
     batch = (st.get("batch") or []) + new if within else list(new)
     batch = batch[-DISCORD_MAX_CARDS:]
-    embeds = [_embed(r) for r in batch]
+    embeds, files = _build_cards(batch)
     more = len(new) + len(st.get("batch") or []) - len(batch) if within else len(new) - len(batch)
     head = (f"**盤中訊號 · {now_tpe().strftime('%H:%M')}** —— 新觸發 **{len(new)}** 筆"
             f"(今日累計 {total_today} 筆)")
@@ -558,7 +667,9 @@ def _discord_notify(day: str, new: list[dict], total_today: int) -> bool:
     btns = link_buttons([("📊 開網頁看全部", f"{WEB_BASE}/#live")])
 
     if within:
-        if edit_discord(st["msg_id"], embeds, head, btns):
+        # 編輯時把整批的圖重新上傳,並用 attachments 宣告「現在只有這些」——
+        # 舊附件會被移除,正好對應「整批重畫」的語意。
+        if edit_discord(st["msg_id"], embeds, head, btns, files=files):
             # ⚠️ 刻意不更新 msg_ts —— 否則連續有訊號時視窗會無限延後,
             # 變成整個下午都在編輯同一則、完全不再推播。
             st["batch"] = batch
@@ -566,7 +677,7 @@ def _discord_notify(day: str, new: list[dict], total_today: int) -> bool:
             log.info(f"Discord 訊號已併入上一則({len(new)} 筆,不重複推播)")
             return True
         # 編輯失敗(訊息被刪)→ 掉下去發新的
-    mid = send_discord(embeds, head, btns)
+    mid = send_discord(embeds, head, btns, files=files)
     if not mid:
         return False
     _save_state(day, {"msg_id": mid, "msg_ts": now_s, "batch": batch})
@@ -1096,8 +1207,11 @@ if __name__ == "__main__":
                 "volume_ratio": 2.31, "vwap": 1118.4, "fired_at": now_tpe().strftime("%H:%M"),
                 "reason": "這是一則測試訊息,用來確認 Discord webhook 設定正確。"
                           "收到這則就表示盤中訊號會送到這個頻道。"}
-        mid = send_discord([_embed(demo)], "**Discord 通知測試**",
-                           link_buttons([("📊 開網頁", f"{WEB_BASE}/#live")]))
+        # 走**完整的**卡片組裝路徑(補產業/基本面/新聞 + 畫日K),不是只發一張空卡 ——
+        # 這樣這個測試才真的能驗到「使用者盤中會看到什麼」。
+        embeds, files = _build_cards([demo])
+        mid = send_discord(embeds, "**Discord 通知測試**",
+                           link_buttons([("📊 開網頁", f"{WEB_BASE}/#live")]), files=files)
         print(f"已送出,message_id={mid}" if mid else "送出失敗 —— 檢查 webhook URL 是否正確。")
         raise SystemExit(0 if mid else 1)
     if a.build_levels:

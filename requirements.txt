@@ -22,3 +22,7 @@ pytz>=2024.1
 
 # 新聞事件 AI 分類(Claude Haiku;無 ANTHROPIC_API_KEY 時自動略過,不影響其餘流程)
 anthropic>=0.40
+
+# Discord 通知裡的日K縮圖(scripts/alert_chart.py)。
+# 只在盤中通知時用到,且 import 失敗會自動略過畫圖 —— 不會讓盯盤壞掉。
+matplotlib>=3.8

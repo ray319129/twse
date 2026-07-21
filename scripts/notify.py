@@ -70,9 +70,29 @@ MAX_EMBEDS = 10
 MAX_DESC = 4000          # 留 96 字餘裕給截斷標記
 
 
-def _post(url: str, payload: dict, method: str = "POST") -> dict | None:
+def _post(url: str, payload: dict, method: str = "POST",
+          files: list[tuple[str, bytes]] | None = None) -> dict | None:
+    """`files` = [(檔名, PNG bytes), ...]。
+
+    ⚠️ **圖片一律用附件上傳,不要用外部 URL。** 圖床方案(commit 到 repo 再引用
+    raw.githubusercontent)有約 5 分鐘 CDN 快取 —— 訊號都過期了圖才出現。
+    附件是隨訊息一起送的,沒有這個問題,也不需要任何 hosting。
+
+    embed 用 `attachment://<檔名>` 引用同一則訊息裡的附件。
+    編輯時要帶 `attachments` 陣列宣告「這則訊息現在有哪些附件」;
+    只列新的 = 舊的會被移除,正好是我們要的(整批重畫)。
+    """
     try:
-        r = requests.request(method, url, json=payload, timeout=20)
+        if files:
+            payload = dict(payload)
+            payload["attachments"] = [{"id": i, "filename": fn}
+                                      for i, (fn, _) in enumerate(files)]
+            fd = {f"files[{i}]": (fn, b, "image/png")
+                  for i, (fn, b) in enumerate(files)}
+            r = requests.request(method, url, data={"payload_json": json.dumps(payload)},
+                                 files=fd, timeout=45)
+        else:
+            r = requests.request(method, url, json=payload, timeout=20)
         if r.status_code == 404:
             # 訊息被手動刪掉了 —— 呼叫端要據此重發一則新的,不是無限重試
             log.info("Discord 訊息不存在(可能已被刪除)。")
@@ -85,7 +105,8 @@ def _post(url: str, payload: dict, method: str = "POST") -> dict | None:
 
 
 def send_discord(embeds: list[dict], content: str = "",
-                 components: list[dict] | None = None) -> str | None:
+                 components: list[dict] | None = None,
+                 files: list[tuple[str, bytes]] | None = None) -> str | None:
     """發一則新訊息。回傳 message_id(之後要就地編輯它就靠這個),失敗回 None。
 
     `?wait=true` 是**必要的** —— 沒有它 Discord 回 204 空 body,拿不到 message_id,
@@ -99,12 +120,13 @@ def send_discord(embeds: list[dict], content: str = "",
     payload = {"embeds": embeds[:MAX_EMBEDS], "content": content[:2000]}
     if components:
         payload["components"] = components
-    j = _post(url, payload)
+    j = _post(url, payload, files=files)
     return (j or {}).get("id")
 
 
 def edit_discord(message_id: str, embeds: list[dict], content: str = "",
-                 components: list[dict] | None = None) -> bool:
+                 components: list[dict] | None = None,
+                 files: list[tuple[str, bytes]] | None = None) -> bool:
     """就地更新已發出的訊息 —— 這是整個「零洗版」設計的關鍵。
     回 False 代表訊息不在了(被刪),呼叫端應該重發一則新的。"""
     if not DISCORD_WEBHOOK_URL or not message_id:
@@ -115,7 +137,7 @@ def edit_discord(message_id: str, embeds: list[dict], content: str = "",
     payload = {"embeds": embeds[:MAX_EMBEDS], "content": content[:2000]}
     if components:
         payload["components"] = components
-    return _post(url, payload, method="PATCH") is not None
+    return _post(url, payload, method="PATCH", files=files) is not None
 
 
 def link_buttons(items: list[tuple[str, str]]) -> list[dict]:
