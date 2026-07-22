@@ -964,39 +964,50 @@ def _git_publish(msg: str) -> None:
     #   fetch → reset --soft origin/main(把分支指標移到遠端最新,working tree 不動)
     #   → add → commit → push。我們的資料檔永遠是單一 commit 疊在最新 main 上,
     #   即使遠端在這期間又前進,下一輪 fetch 會再接上,不累積、不卡死。
+    # ⚠️ **絕不用 capture_output 把 git 輸出吞掉**(2026-07-22 第二次踩,教訓同 Discord 400)。
+    # 上一版把 git stdout/stderr 都 capture 起來、只在失敗時 log —— 結果 7/22 整天沒發布
+    # 卻**一行錯誤都沒有**,完全無法診斷。這版每一步的 returncode + stderr 都主動 log 出來
+    # (errors='replace' 防 locale 解碼炸掉),寧可吵一點也不要再瞎。
     import subprocess
 
-    def _git(*args, **kw):
-        return subprocess.run(["git", *args], check=False,
-                              capture_output=True, text=True, **kw)
+    def _git(*args):
+        r = subprocess.run(["git", *args], check=False, capture_output=True,
+                           text=True, errors="replace")
+        if r.returncode != 0 and args[0] not in ("rebase", "merge", "diff"):
+            # rebase/merge --abort 沒東西可 abort 會非零,是預期的;diff --quiet 用 returncode 當訊號
+            log.info(f"git {args[0]} rc={r.returncode}: {(r.stderr or r.stdout or '').strip()[:180]}")
+        return r
 
     try:
         files = ["data/alerts", "data/snapshots", "docs/alerts.json", "docs/levels.json",
                  "docs/pulse.json", "docs/deep.json", "docs/series.json", "docs/freshness.json"]
-        # 先看有沒有東西要發(staged 前的快速判斷)
-        _git("add", *files)
-        if _git("diff", "--cached", "--quiet").returncode == 0:
-            return                                          # 沒變動
-        # 萬一上一輪殘留了 rebase/merge 狀態,先清乾淨(防禦性,新寫法本來不會產生)
+        # 萬一上一輪殘留了 rebase/merge 狀態,先清乾淨(防禦性)
         _git("rebase", "--abort")
         _git("merge", "--abort")
         for attempt in range(3):
-            _git("fetch", "origin", "main")
-            # 用 FETCH_HEAD 不用 origin/main:`git fetch origin main` 一定會設 FETCH_HEAD,
-            # 但不保證更新 refs/remotes/origin/main 追蹤參照。
+            f = _git("fetch", "origin", "main")
+            if f.returncode != 0:
+                log.warning(f"發布 fetch 失敗(第 {attempt+1} 次):{(f.stderr or '').strip()[:180]}")
+                continue
             # --mixed 移動分支指標到遠端最新、保留 working tree 的資料檔改動。
+            # 用 FETCH_HEAD:`git fetch origin main` 一定設它,但不保證更新 origin/main 追蹤參照。
             _git("reset", "--mixed", "FETCH_HEAD")
             _git("add", *files)
             if _git("diff", "--cached", "--quiet").returncode == 0:
+                log.info("發布:相對遠端最新沒有新內容,略過(正常)。")
                 return
-            _git("commit", "-m", msg)
+            c = _git("commit", "-m", msg)
+            if c.returncode != 0:
+                log.warning(f"發布 commit 失敗(第 {attempt+1} 次):{(c.stderr or c.stdout or '').strip()[:180]}")
+                _git("merge", "--abort"); _git("rebase", "--abort")
+                continue
             p = _git("push", "origin", "HEAD:main")
             if p.returncode == 0:
+                log.info(f"發布成功:docs 已更新到 main（{msg}）")
                 return
-            # push 失敗多半是這 3 分鐘內遠端又前進了(race)→ 下一輪 fetch 重接再推
-            log.info(f"發布 push 未成功(第 {attempt+1} 次,通常是遠端前進):"
-                     f"{(p.stderr or '').strip()[:200]}")
-        log.warning("發布連續 3 次未推成功,這輪先跳過(不影響盯盤,下輪再試)。")
+            # push 失敗多半是這幾秒內遠端又前進了(race)→ 下一輪 fetch 重接再推
+            log.warning(f"發布 push 未成功(第 {attempt+1} 次):{(p.stderr or '').strip()[:180]}")
+        log.warning("發布連續 3 次未成功,這輪先跳過(不影響盯盤,下輪再試)。")
     except Exception as e:
         log.warning(f"alerts 發布失敗(不影響盯盤):{e}")
 
@@ -1106,7 +1117,8 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
     done_tags: set[str] = set()
     _pub_last[0] = 0.0            # 讓第一批訊號立刻發布,不必等節流窗
     log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止"
-             + ("(含快照存檔)" if archive else ""))
+             + ("(含快照存檔)" if archive else "")
+             + f" · 發布={'開' if publish else '關'} · 節流 {PUBLISH_EVERY:g}s")
 
     # 開盤後先自動量一次上游更新頻率 —— 使用者不必記得手動跑,而且這是唯一能量的時機
     # (只有盤中資料才會變)。量完寫進 docs/freshness.json,網頁與下次調 interval 的依據。
@@ -1239,7 +1251,28 @@ if __name__ == "__main__":
                     help="量上游快照更新頻率(秒),決定 interval 用")
     ap.add_argument("--test-discord", action="store_true",
                     help="發一則假訊號到 Discord 驗證 webhook(休市也能跑,不寫任何檔)")
+    ap.add_argument("--test-publish", action="store_true",
+                    help="寫一個測試 heartbeat 到 freshness.json 並跑 _git_publish 一次(休市也能跑,驗證發布管道)")
     a = ap.parse_args()
+    if a.test_publish:
+        # 收盤後驗「發布到網頁」這條管道 —— 7/22 盤中它整天靜默失敗、又被 capture 吞掉輸出。
+        # 寫一個真實但無害的 heartbeat(下次真掃描會覆蓋),跑一次 _git_publish,看它到底
+        # 卡在哪一步(fetch/commit/push/early-return)。新版每步都會 log。
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        fp = DOCS_DIR / "freshness.json"
+        hb = {}
+        try:
+            if fp.exists():
+                hb = json.loads(fp.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        hb.update({"heartbeat": now_tpe().strftime("%Y-%m-%d %H:%M:%S"),
+                   "publish_test": True, "note": "test-publish 驗證用,下次真掃描會覆蓋"})
+        fp.write_text(json.dumps(hb, ensure_ascii=False), encoding="utf-8")
+        print(f"已寫 {fp};呼叫 _git_publish …")
+        _git_publish(f"intraday: publish-channel test {now_tpe().strftime('%H:%M')}")
+        print("done — 看上面的 git 步驟 log 判斷成功與否。")
+        raise SystemExit(0)
     if a.test_discord:
         # 收盤後也能驗管道 —— 不碰快照、不碰 alerts 檔,純粹確認 webhook 通不通。
         from .notify import discord_enabled, send_discord, link_buttons

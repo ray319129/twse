@@ -30,7 +30,7 @@ on:
         type: choice
         # test-discord:**收盤/假日也能跑**。webhook 密鑰只存在 GitHub secret,
         # 本機沒有,所以驗證通知管道一定要有一個能從 Actions 點的入口(2026-07-21 補)。
-        options: ["watch", "levels", "scan", "freshness", "test-discord"]
+        options: ["watch", "levels", "scan", "freshness", "test-discord", "test-publish"]
       interval:
         description: "watch 模式的輪詢間隔秒數(預設 10 = 上游更新頻率)"
         required: false
@@ -86,6 +86,7 @@ jobs:
             scan)         python -m scripts.intraday_scan ;;
             freshness)    python -m scripts.intraday_scan --measure-freshness 120 ;;
             test-discord) python -m scripts.intraday_scan --test-discord ;;
+            test-publish) python -m scripts.intraday_scan --test-publish ;;
             # 常駐:環境只裝一次,之後純輪詢。--publish 讓有新訊號時當場推上去,
             # 網頁不用等到收盤才看得到。
             # --start 09:00:自己等到開盤,順便自動重建過期的 levels(不必另設 08:50 排程)
