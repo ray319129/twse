@@ -3279,12 +3279,17 @@ function renderMood(){
     ? _moodOf(_hmData.stocks,_hmData.stocks.some(s=>s.a20!=null)).mood : 0;
   const mc=mkt>=0?'var(--up-ink)':'var(--down-ink)';
   const tab=(k,t)=>`<button class="hm-toggle-btn${_moodTab===k?' active':''}" onclick="setMoodTab('${k}')">${t}</button>`;
+  /* 單層分類(CMoney 類股)時不顯示「細產業」切換 —— sub===sec,點了會是同一份,徒增困惑。 */
+  const single=!!(_hmSM&&_hmSM._stats&&_hmSM._stats.single_level);
+  const noteSrc=single
+    ?`分類為 CMoney 產業類股(${(_hmSM._stats.industries)||''} 類股),一檔一類,家數<3 的族群不列。`
+    :`分類為 FinMind 產業鏈,一檔可跨多條鏈,家數<3 的族群不列。`;
   el.innerHTML=`<div class="mood-head">
       <div class="mood-mkt">市場氛圍 <b style="color:${mc}">${mkt>=0?'+':''}${mkt.toFixed(1)}</b>
         <span style="color:${mc};font-weight:800">${mkt>=8?'偏多':mkt<=-8?'偏空':'中性'}</span></div>
-      <div class="hm-toggle">${tab('long','多方')}${tab('short','空方')}${tab('sub','細產業')}</div>
+      <div class="hm-toggle">${tab('long','多方')}${tab('short','空方')}${single?'':tab('sub','細產業')}</div>
     </div>
-    <div class="mood-note">氣氛值 −50~+50,以廣度為主(站上季線35%+多頭排列25%+站上月線15%+20日動能25%);點一列看領漲股。分類為 FinMind 產業鏈,一檔可跨多條鏈,家數<3 的族群不列。</div>
+    <div class="mood-note">氣氛值 −50~+50,以廣度為主(站上季線35%+多頭排列25%+站上月線15%+20日動能25%);點一列看領漲股。${noteSrc}</div>
     ${rows.length?rows.map(_moodRow).join(''):'<div class="empty" style="padding:40px 0">此分類目前沒有符合的族群</div>'}`;
 }
 function setHmView(v){
@@ -3316,13 +3321,21 @@ function _buildHmTree(stocks,sm,mode){
   const sortV=c=>c.reduce((s,x)=>s+x.value,0);
   const result=[];
   for(const[sec,subs]of Object.entries(secs)){
-    const children=Object.entries(subs)
+    const subEntries=Object.entries(subs);
+    /* 單層模式(CMoney 類股:sub===sec)—— 直接把個股掛在類股底下,不要多一層同名方塊。
+       舊的 FinMind 產業鏈(sub!==sec)維持 產業→細產業→個股 兩層。 */
+    if(subEntries.length===1&&subEntries[0][0]===sec){
+      result.push({name:sec,children:subEntries[0][1].sort((a,b)=>b.value-a.value)});
+      continue;
+    }
+    const children=subEntries
       .map(([sub,items])=>({name:sub,children:items.sort((a,b)=>b.value-a.value)}))
       .sort((a,b)=>sortV(b.children)-sortV(a.children));
     result.push({name:sec,children});
   }
   return result.sort((a,b)=>{
-    const v=x=>x.children.reduce((s,c)=>s+sortV(c.children),0);
+    /* 單層模式 sec 的 children 直接是個股(有 .value);兩層模式是細產業組(有 .children)。兩者都要能加總 */
+    const v=x=>x.children.reduce((s,c)=>s+(c.children?sortV(c.children):(c.value||0)),0);
     return v(b)-v(a);
   });
 }

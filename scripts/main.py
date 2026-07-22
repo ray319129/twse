@@ -28,7 +28,7 @@ from .indicators import compute_all, reference_levels, compute_relative_strength
 from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
-from .industry_chain import build_sector_map
+from .sector_cmoney import build_sector_map   # 2026-07-22 由 FinMind 產業鏈改用 CMoney 類股
 from .market import compute_market_regime, compute_risk_gate
 from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
