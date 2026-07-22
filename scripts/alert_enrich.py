@@ -85,7 +85,9 @@ def _business(sid: str, sector: dict, lv: dict) -> str:
 
     parts = []
     if primary and len(primary) >= 2:
-        parts.append(f"{_short(primary[0])} · {_short(primary[1])}")
+        a, b = _short(primary[0]), _short(primary[1])
+        # CMoney 分類是單層(sec==sub==類股)→ 只顯示一次,不要「IC-代工 · IC-代工」
+        parts.append(a if a == b else f"{a} · {b}")
     subs = [c[1] for c in chain if len(c) >= 2 and (not primary or c[1] != primary[1])]
     # 排掉 FinMind 每個產業都有的「其他…」垃圾桶分類,那個講了等於沒講
     subs = [_short(s) for s in subs if not str(s).startswith("其他")][:2]
