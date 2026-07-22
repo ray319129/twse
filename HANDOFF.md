@@ -1993,3 +1993,59 @@ Discord 發送失敗:400 Client Error: Bad Request for url: ***?wait=true&with_c
 * **倖存者偏誤**:universe = 今天還在的 1979 檔 parquet。
 * **純技術層**:不含 stage-2 加成(無 point-in-time 歷史快照),與 backtest 同一邊界。
 
+
+---
+
+## 47. CMoney 類股熱力圖 + 盤中發布真兇(git add 原子性)+ 盤前雙送(2026-07-22)
+
+### 47.1 熱力圖/市場氛圍改用 CMoney 產業類股(§46 之外的獨立工作)
+
+使用者自抓 CMoney「產業類股總覽」(87 類股 / 6 大分類 / 一檔一類 / 掃描池 100%),
+取代 FinMind 產業鏈。**使用者選「只用 87 類股一層,不要細產業」。**
+- `data/cmoney_categories.json`(committed 來源)、`scripts/sector_cmoney.py`(builder)、
+  main.py 改 import、前端 treemap 收合單層 + 隱藏細產業鈕。
+- ⚠️「其他」跨 4 大分類 170 檔 → 大分類消歧義,避免併成巨桶。
+- 已瀏覽器驗證、上線 7c7d1e942。細節見 memory/twse-heatmap-cmoney。
+
+### 47.2 ⚠️⚠️ 盤中整天沒發布的真兇:`git add` 是原子的
+
+**症狀:** 7/22(及回溯 7/20 加 freshness、7/21 加 snapshots 後)盤中 watch 掃描/Discord/
+快照存檔全部正常,但 `docs/*.json` 整天推不上 main、網頁停在昨天。**而且一行錯誤都沒有。**
+
+**兩層原因:**
+1. **真兇:`git add A B C` 只要有任一 pathspec 對不到檔案就整批 fatal(rc=128)、
+   一個檔都不 stage。** `data/snapshots` 在當日第一個檢查點(1200)前不存在、
+   `docs/deep.json`/`series.json` 在第一次內外盤計算前不存在 → git add 全批失敗 →
+   diff 空 → 靜默 early-return。**這個坑在 7/21 把 `data/snapshots` 加進清單那刻埋下**
+   (7/20 能發是因為當時清單裡每個路徑都存在)。
+2. **為什麼查了很久:** 我把 `_git_publish` 的 git 輸出 `capture_output` 起來、只在
+   失敗時 log —— 結果連 rc=128 都被吞掉,完全無法診斷。**與 Discord 400 同一個教訓
+   (§45.2):接任何外部命令/API,錯誤處理一律要把輸出印出來,不要只看有沒有例外。**
+
+**修法(已上線 f45956c6e,並在 CI 上用 test-publish 驗證「發布成功」):**
+- `_git_publish` 每輪先 `Path.exists()` 過濾掉不存在的路徑再 add;每一步 returncode+stderr
+  都主動 log;成功印「發布成功」。
+- workflow「Commit alerts」端步驟同樣的原子坑 → 改逐一 `[ -e ] && git add`。
+- 發布邏輯本身(§46 的 fetch→reset --mixed→push)是對的,錯的是餵給 git add 的清單。
+
+**診斷工具(留著):** `python -m scripts.intraday_scan --test-publish`(或 workflow
+mode=test-publish)—— 寫個無害 heartbeat 到 freshness.json、跑一次 _git_publish,
+**休市也能觸發**,直接看發布卡在哪一步。這次就是它一跑就抓到 rc=128。
+
+**還原:** rebase 卡死那條(§43/§46 講的 pull --rebase 會 wedge)也一併解決了 ——
+新版沒有 rebase。兩個問題(rebase wedge + git add 原子)是不同的;後者才是 7/22 的主因。
+
+### 47.3 盤前快報 + ORB 改雙送(Email + Discord)
+
+使用者要求。與盤中高頻訊號不同,盤前一天一次,兩邊並存不洗版 → 不再是「Discord 失敗
+才退 Email」,而是**兩邊都送**。見 premarket.py run_preopen / run_orb。
+
+### 47.4 今日(7/22)實際損失與狀態
+
+- ✅ Discord 盤中訊號**有正常送達**(9 筆),使用者有收到。
+- ✅ 快照存檔在 runner 磁碟(1200/1300),但因發布壞掉 + 我 cancel 了 salvage run →
+  **今日快照沒進 repo**(可接受,早上本來就是 write-off)。
+- ✅ 發布管道已修好並 CI 驗證;**明天 08:20 watch 會正常發布**(freshness heartbeat
+  也終於會上線,網頁的心跳框才有資料)。
+- levels.json 之前停在 07-19,明天正常發布後會恢復每日更新。
+
