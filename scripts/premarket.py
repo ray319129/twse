@@ -435,10 +435,13 @@ def run_preopen(test_mode: bool = False) -> None:
     }, snap.get("date", ""))
     prefix = "[測試] " if test_mode else ""
     subject = f"{prefix}🌅 盤前快報 {today.strftime('%m/%d')} · 大盤{gate['label']} · 有效 {len(valid)}/{len(rows)} 檔"
-    if not _discord_preopen(subject, gate, rows, valid, events):
-        html = render_email("premarket_email.html", ctx)
-        send_email(subject, html)
-    log.info(f"盤前快報已送:{gate['label']} · 有效 {len(valid)}/{len(rows)}")
+    # 盤前快報**兩邊都送**(2026-07-22 使用者要求):Discord 即時、Email 保留完整表格。
+    # 與盤中訊號不同 —— 盤中是高頻、Email 會洗版,所以只在 Discord 失敗時退回;
+    # 盤前一天一次,兩邊並存不會洗版,而 Email 的多欄表格可讀性仍勝聊天視窗。
+    _discord_preopen(subject, gate, rows, valid, events)
+    html = render_email("premarket_email.html", ctx)
+    send_email(subject, html)
+    log.info(f"盤前快報已送(Discord + Email):{gate['label']} · 有效 {len(valid)}/{len(rows)}")
 
 
 def run_orb(test_mode: bool = False) -> None:
@@ -491,10 +494,11 @@ def run_orb(test_mode: bool = False) -> None:
     }, snap.get("date", ""))
     prefix = "[測試] " if test_mode else ""
     subject = f"{prefix}🔔 開盤15分 ORB {today.strftime('%m/%d')} · 已突破 {len(fired)} 檔"
-    if not _discord_orb(subject, results, fired):
-        html = render_email("premarket_email.html", ctx)
-        send_email(subject, html)
-    log.info(f"ORB 報告已送:已突破 {len(fired)} 檔")
+    # 同盤前:ORB 也是一天一次的定時報告,兩邊都送(見 run_preopen 的說明)。
+    _discord_orb(subject, results, fired)
+    html = render_email("premarket_email.html", ctx)
+    send_email(subject, html)
+    log.info(f"ORB 報告已送(Discord + Email):已突破 {len(fired)} 檔")
 
 
 def parse_args():

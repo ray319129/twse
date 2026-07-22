@@ -953,18 +953,50 @@ def _git_publish(msg: str) -> None:
     `docs/levels.json` 同理:盤中自動重建的 levels 不推上去,網頁整天拿不到
     產業別/換手率/突破判斷。
     """
+    # ⚠️ **絕對不要用 `git pull --rebase`**(2026-07-22 修,踩了一整個上午)。
+    # 舊版:commit → pull --rebase → push,每步 check=False。當**別的來源**在盤中
+    # 推了 main(我自己的開發 push、premarket 的 snapshot commit),watch 的 rebase 會
+    # 撞到衝突並**停在 conflicted 狀態**。之後每一次 `git commit` 都會失敗
+    # (「cannot commit during a rebase」)→ 從第一次衝突起整個 job 就 git-死了,
+    # 還在掃描但再也發不出去。7/22 實測:freshness.json 整天 404、網頁全程停在昨天。
+    #
+    # 新版用「軟重置到遠端頂點再重新 parent」的機器人附加寫法,**結構上不可能衝突**:
+    #   fetch → reset --soft origin/main(把分支指標移到遠端最新,working tree 不動)
+    #   → add → commit → push。我們的資料檔永遠是單一 commit 疊在最新 main 上,
+    #   即使遠端在這期間又前進,下一輪 fetch 會再接上,不累積、不卡死。
     import subprocess
+
+    def _git(*args, **kw):
+        return subprocess.run(["git", *args], check=False,
+                              capture_output=True, text=True, **kw)
+
     try:
-        subprocess.run(["git", "add", "data/alerts", "data/snapshots",
-                        "docs/alerts.json", "docs/levels.json", "docs/pulse.json",
-                        "docs/deep.json", "docs/series.json", "docs/freshness.json"],
-                       check=False)
-        r = subprocess.run(["git", "diff", "--cached", "--quiet"])
-        if r.returncode == 0:
-            return                                  # 沒變動
-        subprocess.run(["git", "commit", "-m", msg], check=False)
-        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
-        subprocess.run(["git", "push"], check=False)
+        files = ["data/alerts", "data/snapshots", "docs/alerts.json", "docs/levels.json",
+                 "docs/pulse.json", "docs/deep.json", "docs/series.json", "docs/freshness.json"]
+        # 先看有沒有東西要發(staged 前的快速判斷)
+        _git("add", *files)
+        if _git("diff", "--cached", "--quiet").returncode == 0:
+            return                                          # 沒變動
+        # 萬一上一輪殘留了 rebase/merge 狀態,先清乾淨(防禦性,新寫法本來不會產生)
+        _git("rebase", "--abort")
+        _git("merge", "--abort")
+        for attempt in range(3):
+            _git("fetch", "origin", "main")
+            # 用 FETCH_HEAD 不用 origin/main:`git fetch origin main` 一定會設 FETCH_HEAD,
+            # 但不保證更新 refs/remotes/origin/main 追蹤參照。
+            # --mixed 移動分支指標到遠端最新、保留 working tree 的資料檔改動。
+            _git("reset", "--mixed", "FETCH_HEAD")
+            _git("add", *files)
+            if _git("diff", "--cached", "--quiet").returncode == 0:
+                return
+            _git("commit", "-m", msg)
+            p = _git("push", "origin", "HEAD:main")
+            if p.returncode == 0:
+                return
+            # push 失敗多半是這 3 分鐘內遠端又前進了(race)→ 下一輪 fetch 重接再推
+            log.info(f"發布 push 未成功(第 {attempt+1} 次,通常是遠端前進):"
+                     f"{(p.stderr or '').strip()[:200]}")
+        log.warning("發布連續 3 次未推成功,這輪先跳過(不影響盯盤,下輪再試)。")
     except Exception as e:
         log.warning(f"alerts 發布失敗(不影響盯盤):{e}")
 
