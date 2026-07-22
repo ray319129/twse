@@ -96,10 +96,16 @@ jobs:
 
       - name: Commit alerts
         run: |
-          # 沒有新訊號 → 沒有檔案變動 → 乾淨跳過(不會產生每 5 分鐘一個 commit)
+          # 收盤後的最終補推(盤中已由 _git_publish 持續發布,這步是安全網)。
+          # ⚠️ **逐一 add**:`git add A B C` 只要有一個路徑不存在就會 fatal 且整批不 stage
+          # (2026-07-22 盤中整天沒發布的真兇);拆成一檔一 add,缺的自己跳過。
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/alerts data/levels.parquet data/snapshots                   docs/alerts.json docs/levels.json docs/deep.json docs/series.json                   docs/freshness.json docs/pulse.json 2>/dev/null || true
+          for p in data/alerts data/levels.parquet data/snapshots \
+                   docs/alerts.json docs/levels.json docs/deep.json \
+                   docs/series.json docs/freshness.json docs/pulse.json; do
+            [ -e "$p" ] && git add "$p" 2>/dev/null || true
+          done
           if git diff --cached --quiet; then
             echo "No new signals."
           else

@@ -979,8 +979,18 @@ def _git_publish(msg: str) -> None:
         return r
 
     try:
-        files = ["data/alerts", "data/snapshots", "docs/alerts.json", "docs/levels.json",
-                 "docs/pulse.json", "docs/deep.json", "docs/series.json", "docs/freshness.json"]
+        # ⚠️ **只 add 存在的路徑**(2026-07-22 這就是整天沒發布的真兇)。
+        # `git add A B C` 是**原子**的:只要有任何一個 pathspec 對不到檔案(例如
+        # data/snapshots 在第一個檢查點前還不存在、docs/deep.json 在第一次內外盤計算前
+        # 還沒生成),整個 git add 會 fatal rc=128 且**一個檔都不 stage** → diff 空 → 靜默略過。
+        # 這個坑在 7/21 把 data/snapshots 加進清單那刻就埋下了(7/20 能發是因為當時清單裡
+        # 每個路徑都存在)。所以每輪先過濾掉不存在的路徑。
+        _all = ["data/alerts", "data/snapshots", "docs/alerts.json", "docs/levels.json",
+                "docs/pulse.json", "docs/deep.json", "docs/series.json", "docs/freshness.json"]
+        _root = DATA_DIR.parent
+        files = [f for f in _all if (_root / f).exists()]
+        if not files:
+            return                                          # 還沒有任何可發布的檔
         # 萬一上一輪殘留了 rebase/merge 狀態,先清乾淨(防禦性)
         _git("rebase", "--abort")
         _git("merge", "--abort")
