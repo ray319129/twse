@@ -106,5 +106,17 @@
   "volume_ratio": 0.52,
   "vwap": 19.92,
   "fired_at": "09:27"
+ },
+ "6414|breakout": {
+  "stock_id": "6414",
+  "name": "樺漢",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 490.00(現價 495.00,高出 1.0%)・量比 0.54(市場中位 0.17)・站上均價 486.12",
+  "price": 495.0,
+  "change_rate": 1.02,
+  "volume_ratio": 0.54,
+  "vwap": 486.12,
+  "fired_at": "09:33"
  }
 }
