@@ -142,5 +142,17 @@
   "volume_ratio": 1.12,
   "vwap": 2232.74,
   "fired_at": "12:25"
+ },
+ "6245|breakout": {
+  "stock_id": "6245",
+  "name": "立端",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 83.80(現價 84.40,高出 0.7%)・量比 1.68(市場中位 0.65)・站上均價 82.93",
+  "price": 84.4,
+  "change_rate": 3.68,
+  "volume_ratio": 1.68,
+  "vwap": 82.93,
+  "fired_at": "12:50"
  }
 }
