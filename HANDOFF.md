@@ -2144,6 +2144,61 @@ score_validate 框架驗過才談。定位是幫人工混合型使用者省開�
 
 ---
 
+## 51. 個股健檢資料 Bug 修正 + 誠實覆蓋率(2026-07-24)
+
+### 問題
+健檢 `scripts/health/` 模組 2026-06-30 上線時，標註「未用真實 FinMind 驗證」：三個指標
+（利息保障倍數/自由現金流/EV/EBITDA）長期顯示 0% 覆蓋率，且整體覆蓋率顯示值虛報（總是 100%）。
+
+### A. 三個資料 Bug（已修）
+
+**根因**：直接對線上 FinMind API 無 token 查詢確認，`_CF_TYPES` 的候選欄位名稱一個都沒命中：
+
+| 指標 | 舊候選（全錯） | 實際欄位名 |
+|------|------|------|
+| 資本支出 | `AcquisitionOfPropertyPlantAndEquipment` | **`PropertyAndPlantAndEquipment`** |
+| 折舊攤銷 | `DepreciationAmortizationExpense`（單欄） | **`Depreciation`** + `AmortizationExpense`（分兩列） |
+| 利息費用 | 去損益表找（根本沒這欄） | **`InterestExpense`** 在**現金流量表** |
+
+**關鍵陷阱**：現金流量表是 YTD **累計**，損益表是**單季**，相除基期不一致（Q4 差最多）。
+- 新增 `scripts/health/quarterly.py`：`ttm()`（單季→滾動4季）、`ttm_flow()`（YTD去累計→滾動4季）、`_to_single_quarter()`。
+- `financial_engine.py`：利息保障倍數、自由現金流改用 TTM。
+- `value_engine.py`：EV/EBITDA 改 TTM；順帶修 DCF（capex 修好後會自動啟動，原「最新季×4」年化對累計數字嚴重高估）。
+- `industry_benchmark.py`：同業利息保障倍數改從現金流表用 TTM 算（否則同業均值恆空）。
+- `scripts/fetchers.py`：`_CF_TYPES` 補上實際欄位名、利息費用從損益表移到現金流表。
+
+**沒動**：共用 `fetch_cashflow` 的 `op_cashflow`（餵 live 選股 `fundamental_bonus`，不可擾動）。
+
+**煙霧測試結果（無 token，本機直打 FinMind raw API）**：
+- 台積電：財務 14/14（100%）、利息保障 176 倍、FCF 1.056 兆（TTM）、EV/EBITDA 21.2。
+- 鴻海 8.2 倍、台塑 −2.6 倍（營益虧損，正確）、中華電信折舊高（電信本色）。
+
+⚠️ 本機無 token，欄位名以線上 raw API 驗証；**正式生效要等下次 daily.yml 跑（有 token 重抓現金流 parquet）**。
+
+### B. 誠實覆蓋率（已修）
+
+**問題**：舊 `covered_weight_pct` = 面向層級；只要面向有分數就顯示 100%，把「面向內一半指標其實抓不到」藏起來。
+
+- `scripts/health/metric.py`：新增 `metric_coverage()`（指標層級，`not_applicable` 不計分母）。
+- `scripts/health/engine.py`：每面向附 `coverage{present,total,pct}`，各風格加 `data_coverage_pct`（按面向權重加權的真實證據密度）。
+- `docs/index.html`：每面向標題加「資料 N/M」chip（只在有缺口時顯示）+ 總分區「實際資料覆蓋率 XX%」說明。
+- `docs/health/*.json`（15 檔）：已回填 `coverage` + `data_coverage_pct`，發布即生效。
+
+**實測 2330**：short_term 覆蓋率 73.9%（舊顯示 100%）。風險面向 7/11（董監質押/違約/減資/重編無免費公開源）已誠實呈現。
+
+### 已修改檔案（9 個）
+`scripts/fetchers.py` / `scripts/health/quarterly.py` / `scripts/health/financial_engine.py` /
+`scripts/health/value_engine.py` / `scripts/health/industry_benchmark.py` /
+`scripts/health/metric.py` / `scripts/health/engine.py` / `docs/index.html` / `docs/health/*.json`（15 檔）
+
+### 還沒做 / 已知限制
+- **C（牛熊 regime 對應）**：把既有 `market_regime.risk_gate` 接進健檢分數（熊市降價值陷阱/動能加分）；使用者同意「先討論設計」，本次未實作。
+- **籌碼大戶比/股東數**：`TaiwanStockHoldingSharesPer` 無 token 回 HTTP 400，疑需 Sponsor 階層；下次 daily 跑後驗。
+- **Risk Tier2 四旗標**：董監質押/違約/減資/重編無免費源，誠實顯示即可。
+- **正式驗收**：下次 daily.yml 跑完後看 `docs/health/` 幾檔，財務/估值面向是否真補到 100%。
+
+---
+
 ## 50. 買/跳標記跨裝置同步(2026-07-23)
 
 使用者:「買/跳不要只存本機,不同裝置用完全沒辦法統一數據。」

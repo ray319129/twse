@@ -118,6 +118,27 @@ def engine_result(score: float | None, metrics: list[dict], *, notes: list[str] 
     }
 
 
+def metric_coverage(metrics: list[dict] | None) -> dict:
+    """一個 Engine 內部的「指標層級」覆蓋率 = 有值的指標數 ÷ 應有的指標數。
+    誠實度重點:面向層級的 covered_weight_pct 只要 Engine 有分數就算 100%,會把
+    「Engine 裡一半指標其實是資料不足」這件事藏起來。這裡回真正的證據密度。
+
+    分母排除 missing_reason=='not_applicable'(該指標本就不適用,如成長為負時的 PEG),
+    但保留 api_unavailable / stale_cache 等「本該有卻缺」的(如籌碼大戶比、Tier2 風險旗標)
+    —— 這些正是要誠實讓使用者看到的缺口。"""
+    present = 0
+    total = 0
+    for m in (metrics or []):
+        has_value = m.get("value") is not None
+        if not has_value and m.get("missing_reason") == "not_applicable":
+            continue
+        total += 1
+        if has_value:
+            present += 1
+    pct = round(present / total * 100, 0) if total else 100.0
+    return {"present": present, "total": total, "pct": pct}
+
+
 def avg_score(parts: list[float]) -> float | None:
     """多個 0~1 子分平均成一個 0~1 分;沒有任何子分回 None(全缺資料)。"""
     parts = [p for p in parts if p is not None and not (isinstance(p, float) and math.isnan(p))]

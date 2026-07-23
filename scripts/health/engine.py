@@ -15,6 +15,7 @@ from . import technical_engine, chip_engine, news_engine
 from . import ai_summary
 from . import industry_benchmark as ib
 from . import scoring as health_scoring
+from . import metric
 from ..utils import log
 
 ENGINES = {
@@ -52,17 +53,29 @@ def compute_stock_health(ctx: dict, *, styles: list[str] | None = None, health_c
     risk_level = risk_result.get("level")
     engine_scores = {k: engine_results.get(k, {}).get("score") for k in health_scoring.ENGINE_KEYS}
 
+    # 指標層級覆蓋率:每個 Engine 內部「有值指標數 ÷ 應有指標數」,附回 engine dict 供前端顯示,
+    # 並據以算「誠實」的整體資料覆蓋率(見下 data_coverage_pct),取代只看 Engine 有無分數的 covered_weight_pct。
+    for key in ENGINES:
+        engine_results[key]["coverage"] = metric.metric_coverage(engine_results[key].get("metrics"))
+    cov_pct = {k: (engine_results.get(k, {}).get("coverage") or {}).get("pct", 0.0) for k in health_scoring.ENGINE_KEYS}
+
     scores_by_style: dict[str, dict] = {}
     for style in styles:
         weights = health_scoring.get_weights(style, health_cfg)
         fs = health_scoring.compute_final_score(engine_scores, weights)
         capped = health_scoring.apply_risk_cap(fs["total"], risk_level, health_cfg.get("risk_cap"))
         diag = health_scoring.diagnosis(capped["total"], risk_level)
+        # 誠實的整體資料覆蓋率 = Σ(面向權重 × 該面向指標覆蓋率) ÷ 全權重。
+        # 面向有分數但內部指標半缺 → 這個數字會明顯低於 covered_weight_pct,讓使用者看到真實證據密度。
+        full_w = sum(weights.get(k, 0) for k in health_scoring.ENGINE_KEYS)
+        data_cov = (sum(weights.get(k, 0) * cov_pct.get(k, 0.0) / 100.0
+                        for k in health_scoring.ENGINE_KEYS) / full_w * 100.0) if full_w else 0.0
         scores_by_style[style] = {
             "label": health_scoring.STYLE_LABELS.get(style, style),
             "weights": weights, "raw_total": fs["total"], "total": capped["total"],
             "capped": capped["capped"], "cap_reason": capped["cap_reason"],
             "covered_weight_pct": fs["covered_weight_pct"], "missing_engines": fs["missing_engines"],
+            "data_coverage_pct": round(data_cov, 1),
             "breakdown": fs["breakdown"], "diagnosis": diag,
         }
 

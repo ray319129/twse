@@ -15,7 +15,7 @@ from datetime import date
 
 import pandas as pd
 
-from ..storage import FINANCIALS_DIR, BALANCE_DIR, load_financials, load_balance
+from ..storage import FINANCIALS_DIR, BALANCE_DIR, load_financials, load_balance, load_cashflow
 from ..fetchers import fetch_stock_info
 from ..config import DATA_DIR
 from . import quarterly as q
@@ -58,7 +58,10 @@ def _row_for_stock(stock_id: str, industry: str) -> dict | None:
         return None
     ni = q.last(fin, "net_income"); eq = q.last(bal, "equity")
     ta = q.last(bal, "total_assets"); tl = q.last(bal, "total_liab")
-    oi = q.last(fin, "operating_income"); ie = q.last(fin, "interest_expense")
+    # 利息保障倍數用近12個月:營業利益(損益表單季滾動4季)÷ 利息費用(現金流量表YTD去累計滾動4季)。
+    # 利息費用不在損益表,故需另讀現金流快取(與 financial_engine 同基期,同業均值才可比)。
+    cf = load_cashflow(stock_id)
+    oi_ttm = q.ttm(fin, "operating_income"); ie_ttm = q.ttm_flow(cf, "interest_expense")
     return {
         "stock_id": stock_id, "industry": industry,
         "gross_margin": q.ratio(fin, "gross_profit", "revenue", scale=100),
@@ -69,7 +72,7 @@ def _row_for_stock(stock_id: str, industry: str) -> dict | None:
         "debt_ratio": (tl / ta * 100) if (tl is not None and ta) else None,
         "current_ratio": q.ratio(bal, "current_assets", "current_liab", scale=100),
         # 速動比(需扣存貨)同業彙總層級先略過,避免重算邏輯分岔;個股卡片仍由 financial_engine 自己算。
-        "interest_coverage": (oi / abs(ie)) if (oi is not None and ie) else None,
+        "interest_coverage": (oi_ttm / abs(ie_ttm)) if (oi_ttm is not None and ie_ttm) else None,
     }
 
 

@@ -495,7 +495,8 @@
   .hs-tgl{padding:5px 11px;font-size:11.5px;}
   .hs-tgl.on{background:var(--accent);color:#fff;border-color:var(--accent);}
   .health-cap-note{color:var(--down-ink);font-weight:700;}
-  .health-missing-note{color:var(--muted-2);}
+  .health-missing-note{color:var(--muted-2);font-size:11.5px;line-height:1.55;}
+  .hm-cov{margin-left:8px;font-size:11px;color:var(--warn);font-weight:600;}
 
   .health-summary-card #health-narrative{font-size:13.5px;line-height:1.7;color:var(--ink-2);}
   .health-pc{margin-top:10px;font-size:12.5px;}
@@ -3084,12 +3085,15 @@ function newsLinkRow(n){
 function engineCard(eng){
   const has=isNum(eng.score);
   const color=has?(eng.score>=70?'var(--up)':eng.score<=40?'var(--down)':'var(--warn)'):'var(--muted)';
+  const cov=eng.coverage;
+  const covChip=(cov&&cov.total&&cov.present<cov.total)
+    ?`<span class="hm-cov" title="此面向有值指標 ${cov.present} / 應有 ${cov.total};其餘為資料不足(來源缺或免費API抓不到)">資料 ${cov.present}/${cov.total}</span>`:'';
   const notes=(eng.notes||[]).map(n=>`<div class="hm-note">${esc(n)}</div>`).join('');
   const news=eng.analyzed_news||[];
   const newsPanel=news.length?`<details class="hnl-panel"><summary>📰 分析了哪些新聞（${news.length} 則,點標題看原文）</summary>
     <div class="hnl-body">${news.map(newsLinkRow).join('')}</div></details>`:'';
   return `<details class="health-engine-card">
-    <summary><span>${esc(eng.label)}</span><span style="color:${color};font-weight:800">${has?num(eng.score,1):'資料不足'}</span></summary>
+    <summary><span>${esc(eng.label)}${covChip}</span><span style="color:${color};font-weight:800">${has?num(eng.score,1):'資料不足'}</span></summary>
     <div class="health-metric-list">${(eng.metrics||[]).map(metricRow).join('')}</div>
     ${newsPanel}
     ${notes}
@@ -3125,7 +3129,7 @@ function renderHealthReport(d){
       <div class="health-risk-line">${riskLight(d.risk_level)}</div>
       <div class="health-style-row">${styleTgls}</div>
       ${cur.capped?`<div class="health-cap-note">⚠ ${esc(cur.cap_reason||'')}</div>`:''}
-      ${(cur.missing_engines&&cur.missing_engines.length)?`<div class="health-missing-note">未涵蓋面向(資料不足):${cur.missing_engines.map(k=>esc(engineLabelMap[k]||k)).join('、')}(權重已按比例重分配給其餘面向,涵蓋權重 ${num(cur.covered_weight_pct,0)}%)</div>`:''}
+      ${isNum(cur.data_coverage_pct)?`<div class="health-missing-note">實際資料覆蓋率 <b>${num(cur.data_coverage_pct,0)}%</b>(按面向權重加權的「有值指標」密度;風險面向的董監質押/違約/減資/財報重編本就無公開結構化資料、籌碼大戶比需付費源,故不會到 100%)${(cur.missing_engines&&cur.missing_engines.length)?` · 完全未涵蓋面向:${cur.missing_engines.map(k=>esc(engineLabelMap[k]||k)).join('、')}(權重已按比例重分配)`:''}</div>`:''}
       <div style="font-size:11px;color:var(--muted-2)">${esc(d.updated_at||'')}${d.live?' · 即時查詢':' · 每日批次'}</div>
     </div>
   </div>`;

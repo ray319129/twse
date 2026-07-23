@@ -136,21 +136,24 @@ def compute(ctx: dict) -> dict:
                           formula="總負債 ÷ 總資產 × 100", source=_SRC_BS, asof=asof_bs, updated=updated, bench=bench)
     metrics.append(m); solvency.append(s)
 
-    oi = q.last(fin, "operating_income"); ie = q.last(fin, "interest_expense")
-    if oi is not None and ie:
-        cov_now = oi / abs(ie)
-        oi_p = q.at(fin, "operating_income", 1); ie_p = q.at(fin, "interest_expense", 1)
+    # 利息保障倍數:近12個月營業利益 ÷ 近12個月利息費用。利息費用取自現金流量表(損益表沒有此列),
+    # 現金流是 YTD 累計故用 ttm_flow 去累計後滾動4季;營業利益是單季故用 ttm 直接滾動4季 → 同基期可相除。
+    oi_ttm = q.ttm(fin, "operating_income"); ie_ttm = q.ttm_flow(cf, "interest_expense")
+    if oi_ttm is not None and ie_ttm:
+        cov_now = oi_ttm / abs(ie_ttm)
+        oi_p = q.ttm(fin, "operating_income", offset=1); ie_p = q.ttm_flow(cf, "interest_expense", offset=1)
         cov_prev = (oi_p / abs(ie_p)) if (oi_p is not None and ie_p) else None
         metrics.append(metric(
             "interest_coverage", "利息保障倍數", round(cov_now, 2), unit="倍",
             industry_avg=bench.get("interest_coverage"), status=status_from_delta(cov_now, cov_prev),
             rating=rating_from_thresholds(cov_now, 5, 1),
-            formula="營業利益 ÷ 利息費用", source=_SRC_FS, asof=asof_fs, updated_at=updated,
+            formula="近12個月營業利益 ÷ 近12個月利息費用(利息費用取自現金流量表,已去累計為單季再滾動4季)",
+            source=f"{_SRC_FS} + {_SRC_CF}", asof=asof_cf, updated_at=updated,
         ))
         solvency.append(clip01((cov_now - 1) / (5 - 1)))
     else:
-        metrics.append(missing_metric("interest_coverage", "利息保障倍數", source=_SRC_FS,
-                                      reason="api_unavailable" if fin is not None and not fin.empty else "stale_cache"))
+        metrics.append(missing_metric("interest_coverage", "利息保障倍數", source=f"{_SRC_FS} + {_SRC_CF}",
+                                      reason="api_unavailable" if cf is not None and not cf.empty else "stale_cache"))
 
     # ---------- 現金品質 ----------
     ocf = q.last(cf, "op_cashflow"); ocf_prev = q.at(cf, "op_cashflow", 1)
@@ -167,21 +170,24 @@ def compute(ctx: dict) -> dict:
     else:
         metrics.append(missing_metric("op_cashflow", "營業現金流", source=_SRC_CF))
 
-    capex = q.last(cf, "capex")
-    if ocf is not None and capex is not None:
-        fcf = ocf - abs(capex)
-        capex_p = q.at(cf, "capex", 1); ocf_p = ocf_prev
+    # 自由現金流:近12個月營業現金流 − |近12個月資本支出|。兩者都在現金流量表(YTD 累計),
+    # 用 ttm_flow 去累計後滾動4季 → 年化 FCF,正負判讀不受單季基期干擾。
+    ocf_ttm = q.ttm_flow(cf, "op_cashflow"); capex_ttm = q.ttm_flow(cf, "capex")
+    if ocf_ttm is not None and capex_ttm is not None:
+        fcf = ocf_ttm - abs(capex_ttm)
+        ocf_p = q.ttm_flow(cf, "op_cashflow", offset=1); capex_p = q.ttm_flow(cf, "capex", offset=1)
         fcf_prev = (ocf_p - abs(capex_p)) if (ocf_p is not None and capex_p is not None) else None
         metrics.append(metric(
-            "free_cashflow", "自由現金流", round(fcf, 0), unit="千元",
+            "free_cashflow", "自由現金流(近12個月)", round(fcf, 0), unit="千元",
             status=status_from_delta(fcf, fcf_prev),
             rating=("good" if fcf > 0 else "bad"),
-            formula="營業現金流 − |資本支出|", source=_SRC_CF, asof=asof_cf, updated_at=updated,
+            formula="近12個月營業現金流 − |近12個月資本支出|(現金流量表為YTD累計,已去累計為單季再滾動4季)",
+            source=_SRC_CF, asof=asof_cf, updated_at=updated,
         ))
         cash_quality.append(1.0 if fcf > 0 else 0.0)
     else:
-        metrics.append(missing_metric("free_cashflow", "自由現金流", source=_SRC_CF,
-                                      reason="not_applicable" if ocf is None else "api_unavailable"))
+        metrics.append(missing_metric("free_cashflow", "自由現金流(近12個月)", source=_SRC_CF,
+                                      reason="not_applicable" if ocf_ttm is None else "api_unavailable"))
 
     if ni_latest is not None and ocf is not None:
         diverging = bool(ni_latest > 0 and ocf < 0)

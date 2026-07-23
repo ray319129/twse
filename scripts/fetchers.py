@@ -485,9 +485,9 @@ _FS_TYPES = {
     "net_income": ("IncomeAfterTaxes", "ProfitAfterTax", "NetIncome", "ProfitLoss",
                    "IncomeAfterTax", "NetIncomeLoss"),
     "eps": ("EPS", "BasicEarningsPerShare", "EarningsPerShare"),
-    # 個股健檢(利息保障倍數)新增,2026-06-30。候選名稱未實測驗證,缺資料時 interest_expense
-    # 會是 None(健檢模組自動跳過該指標,不影響其他面向),不影響既有 fundamental_bonus 流程。
-    "interest_expense": ("InterestExpense", "FinanceCosts", "InterestExpenseNet"),
+    # 註:利息費用(interest_expense)原放這裡,但 2026-07-24 以真實 FinMind 回應實測發現
+    # TaiwanStockFinancialStatements(損益表)根本沒有利息費用這一列 —— 真正的 InterestExpense
+    # 在現金流量表(TaiwanStockCashFlowsStatement),故已移到下方 _CF_TYPES。
 }
 _BS_TYPES = {
     "total_assets": ("TotalAssets",),
@@ -504,13 +504,22 @@ _BS_TYPES = {
     "long_term_debt": ("LongTermBorrowings", "BondsPayable", "LongTermLoansPayable"),
 }
 _CF_TYPES = {
-    "op_cashflow": ("CashFlowsProvidedFromOperatingActivities", "CashFlowsFromOperatingActivities",
-                    "NetCashProvidedByOperatingActivities", "CashProvidedByOperatingActivities"),
-    "invest_cashflow": ("CashFlowsProvidedFromInvestingActivities", "CashFlowsFromInvestingActivities"),
-    "capex": ("AcquisitionOfPropertyPlantAndEquipment", "PaymentsToAcquirePropertyPlantAndEquipment"),
-    # 個股健檢新增,2026-06-30(EV/EBITDA 用)。
-    "depreciation_amortization": ("DepreciationAmortizationExpense", "DepreciationDepletionAndAmortisation",
-                                   "DepreciationAndAmortisationExpenseContinuingOperations"),
+    # 現金流量表的數字是「當年度累計(YTD)」—— Q1=3個月、Q2=6個月...Q4=全年。健檢模組取用前會先
+    # 去累計還原成單季(見 scripts/health/quarterly.py 的 ttm_flow),才能跟損益表的單季值同基期相除。
+    "op_cashflow": ("CashFlowsFromOperatingActivities", "NetCashInflowFromOperatingActivities",
+                    "CashFlowsProvidedFromOperatingActivities", "NetCashProvidedByOperatingActivities",
+                    "CashProvidedByOperatingActivities"),
+    "invest_cashflow": ("CashProvidedByInvestingActivities", "CashFlowsProvidedFromInvestingActivities",
+                        "CashFlowsFromInvestingActivities"),
+    # 2026-07-24 以真實 FinMind 回應實測:資本支出實名為 PropertyAndPlantAndEquipment(投資活動段的
+    # 不動產廠房設備支出,通常為負);折舊/攤銷是分開的兩列 Depreciation / AmortizationExpense
+    # (原候選 DepreciationAmortizationExpense 等一個都對不上 → EV/EBITDA 恆缺);利息費用 InterestExpense
+    # 也在現金流表(損益表沒有)。三者原候選名稱全部命中失敗,是健檢三個指標長期 0% 覆蓋率的真因。
+    "capex": ("PropertyAndPlantAndEquipment", "AcquisitionOfPropertyPlantAndEquipment",
+              "PaymentsToAcquirePropertyPlantAndEquipment"),
+    "depreciation": ("Depreciation", "DepreciationExpense"),
+    "amortization": ("AmortizationExpense", "Amortization"),
+    "interest_expense": ("InterestExpense", "FinanceCosts", "InterestExpenseNet"),
 }
 
 

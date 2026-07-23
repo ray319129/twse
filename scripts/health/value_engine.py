@@ -144,15 +144,19 @@ def compute(ctx: dict) -> dict:
     net_debt = None
     if cash is not None and (std is not None or ltd is not None):
         net_debt = (std or 0) + (ltd or 0) - cash
-    oi = q.last(fin, "operating_income"); da = q.last(cf, "depreciation_amortization")
-    ebitda = (oi + abs(da)) if (oi is not None and da is not None) else None
+    # EBITDA 用近12個月(TTM):營業利益(損益表單季→滾動4季)+ 折舊 + 攤銷(現金流量表YTD→去累計滾動4季)。
+    # 分子 EV 是時點值(市值+淨負債),分母 EBITDA 用 TTM 才是標準的 EV/EBITDA(避免用單季 EBITDA 把倍數放大約4倍)。
+    oi_ttm = q.ttm(fin, "operating_income")
+    dep_ttm = q.ttm_flow(cf, "depreciation"); amort_ttm = q.ttm_flow(cf, "amortization")
+    da_ttm = ((dep_ttm or 0.0) + (amort_ttm or 0.0)) if (dep_ttm is not None or amort_ttm is not None) else None
+    ebitda = (oi_ttm + abs(da_ttm)) if (oi_ttm is not None and da_ttm is not None) else None
     if market_cap is not None and net_debt is not None and ebitda is not None and ebitda > 0:
         ev = market_cap + net_debt
         ev_ebitda = ev / ebitda
         metrics.append(metric(
             "ev_ebitda", "EV/EBITDA", round(ev_ebitda, 2),
             rating=rating_from_thresholds(ev_ebitda, 8, 15, higher_is_better=False),
-            formula="(市值[≈PB×權益] + 淨負債[短期+長期借款−現金]) ÷ (營業利益 + 折舊攤銷);市值用 PB×權益近似,非交易所即時市值",
+            formula="(市值[≈PB×權益] + 淨負債[短期+長期借款−現金]) ÷ 近12個月EBITDA(營業利益+折舊+攤銷);市值用 PB×權益近似,非交易所即時市值",
             source=f"{src} + {_SRC_BS} + {_SRC_FS} + {_SRC_CF}", asof=asof, updated_at=updated,
         ))
         cheapness.append(clip01((15 - ev_ebitda) / (15 - 8)))
@@ -202,15 +206,12 @@ def _compute_dcf(ctx: dict, market_cap: float | None, price: float | None) -> di
     FCF 用 OCF−|capex| 近似 FCFE,不再額外扣淨負債(避免雙重計算,已在公式註記此簡化)。
     """
     cf = ctx.get("cashflow"); fin = ctx.get("financials")
-    ocf = q.last(cf, "op_cashflow"); capex = q.last(cf, "capex")
-    if ocf is None or capex is None or price is None or market_cap is None or market_cap <= 0:
-        return {"available": False, "reason": "缺現金流或市值資料(market_cap 需要 PB×權益,price 需要近收盤價)"}
-    fcf_q = ocf - abs(capex)
-    fcf_ttm = fcf_q * 4  # 簡化:用最新一季 ×4 年化(若有完整近4季加總會更準,先用最新季年化保持簡單可解釋)
-    cf_4 = cf["op_cashflow"].dropna().tail(4) if (cf is not None and "op_cashflow" in cf.columns) else None
-    capex_4 = cf["capex"].dropna().tail(4) if (cf is not None and "capex" in cf.columns) else None
-    if cf_4 is not None and capex_4 is not None and len(cf_4) == 4 and len(capex_4) == 4:
-        fcf_ttm = float(cf_4.sum()) - abs(float(capex_4.sum()))
+    # 現金流量表數字是 YTD 累計 → 用 ttm_flow 去累計為單季再滾動4季,得近12個月 FCF。
+    # (舊版用「最新季×4」年化,對累計數字會在 Q2~Q4 嚴重高估;capex 修好後 DCF 會啟動,故一併更正。)
+    ocf_ttm = q.ttm_flow(cf, "op_cashflow"); capex_ttm = q.ttm_flow(cf, "capex")
+    if ocf_ttm is None or capex_ttm is None or price is None or market_cap is None or market_cap <= 0:
+        return {"available": False, "reason": "缺現金流或市值資料(需近4季現金流量表 + market_cap[PB×權益] + 近收盤價)"}
+    fcf_ttm = ocf_ttm - abs(capex_ttm)
 
     growth_rate = q.cagr(fin, "revenue", years=5)
     if growth_rate is None:

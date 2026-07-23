@@ -104,6 +104,51 @@ def cagr(df: pd.DataFrame | None, col: str, years: int = 5) -> float | None:
     return (end / start) ** (1.0 / years) - 1.0
 
 
+def ttm(df: pd.DataFrame | None, col: str, *, offset: int = 0) -> float | None:
+    """近12個月(trailing twelve months)= 最近連續 4 個「單季」值相加。
+    適用損益表(FinMind 的 TaiwanStockFinancialStatements 本來就是單季值)。offset 同 at()。
+    不足 4 季回 None。"""
+    if df is None or df.empty or col not in df.columns:
+        return None
+    s = df[col].dropna()
+    end = len(s) - offset
+    if end < 4:
+        return None
+    return float(s.iloc[end - 4:end].sum())
+
+
+def _to_single_quarter(s: pd.Series) -> pd.Series:
+    """把「當年度累計(YTD)」序列還原成單季:Q1 維持原值,Q2~Q4 = 本期累計 − 同年上一季累計。
+    僅在同一年、且上一季存在時才相減;缺季或跨年首季維持累計值(即該年 Q1)。現金流量表專用。"""
+    if s is None or s.empty:
+        return s
+    s = s.dropna().sort_index()
+    out = {}
+    prev_val = None
+    prev_q = None
+    prev_year = None
+    for idx, val in s.items():
+        ts = pd.Timestamp(idx)
+        qtr = (ts.month - 1) // 3 + 1
+        if qtr == 1 or prev_val is None or prev_year != ts.year or prev_q != qtr - 1:
+            out[idx] = float(val)          # 該年首季 / 無法對齊上一季 → 視為單季起點
+        else:
+            out[idx] = float(val) - float(prev_val)
+        prev_val, prev_q, prev_year = val, qtr, ts.year
+    return pd.Series(out).sort_index()
+
+
+def ttm_flow(df: pd.DataFrame | None, col: str, *, offset: int = 0) -> float | None:
+    """現金流量表(YTD 累計)專用的 TTM:先去累計成單季,再取最近 4 季相加。不足 4 季回 None。"""
+    if df is None or df.empty or col not in df.columns:
+        return None
+    sq = _to_single_quarter(df[col])
+    end = len(sq) - offset
+    if end < 4:
+        return None
+    return float(sq.iloc[end - 4:end].sum())
+
+
 def consecutive(df: pd.DataFrame | None, col: str, *, negative: bool = True, max_check: int = 12) -> int:
     """近幾期連續為負(negative=True)或連續為正(negative=False)的期數,從最新一期往回數。"""
     if df is None or df.empty or col not in df.columns:
