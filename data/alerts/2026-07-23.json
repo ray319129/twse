@@ -130,5 +130,17 @@
   "volume_ratio": 0.78,
   "vwap": 87.11,
   "fired_at": "09:50"
+ },
+ "3665|breakout": {
+  "stock_id": "3665",
+  "name": "貿聯-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2195.00(現價 2280.00,高出 3.9%)・量比 1.12(市場中位 0.60)・站上均價 2232.74",
+  "price": 2280.0,
+  "change_rate": 7.8,
+  "volume_ratio": 1.12,
+  "vwap": 2232.74,
+  "fired_at": "12:25"
  }
 }
