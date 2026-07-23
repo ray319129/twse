@@ -26,3 +26,7 @@ anthropic>=0.40
 # Discord 通知裡的日K縮圖(scripts/alert_chart.py)。
 # 只在盤中通知時用到,且 import 失敗會自動略過畫圖 —— 不會讓盯盤壞掉。
 matplotlib>=3.8
+
+# K線型態辨識(scripts/tech_signals.py,61 種 CDL* 型態)。
+# 0.5.0 起 PyPI 直接有預編 wheels,不再需要先裝 C 函式庫;import 失敗會自動略過型態。
+TA-Lib>=0.5

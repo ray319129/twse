@@ -38,18 +38,18 @@ from .utils import log
 DOCS = DATA_DIR.parent / "docs"
 
 _CACHE: dict[str, dict] = {}
-_STATIC: dict = {"day": "", "levels": None, "sector": None}
+_STATIC: dict = {"day": "", "levels": None, "sector": None, "tech": None}
 
 NEWS_TIMEOUT = 6.0        # Google News 慢的時候不能拖垮盯盤迴圈
 NEWS_MAX = 3
 NEWS_DAYS = 14            # 只要「近期」——三個月前的新聞對盤中訊號沒有意義
 
 
-def _load_static() -> tuple[dict, dict]:
-    """levels.json / sector_map.json 一天只變一次,載一次就好。"""
+def _load_static() -> tuple[dict, dict, dict]:
+    """levels.json / sector_map.json / tech_tags.json 一天只變一次,載一次就好。"""
     today = now_tpe().strftime("%Y-%m-%d")
     if _STATIC["day"] != today or _STATIC["levels"] is None:
-        lv, sec = {}, {}
+        lv, sec, tech = {}, {}, {}
         try:
             lv = (json.loads((DOCS / "levels.json").read_text(encoding="utf-8"))
                   .get("levels") or {})
@@ -59,8 +59,14 @@ def _load_static() -> tuple[dict, dict]:
             sec = json.loads((DOCS / "sector_map.json").read_text(encoding="utf-8"))
         except Exception as e:
             log.warning(f"enrich: sector_map.json 讀取失敗:{e}")
-        _STATIC.update({"day": today, "levels": lv, "sector": sec})
-    return _STATIC["levels"] or {}, _STATIC["sector"] or {}
+        try:
+            # 技術標籤是盤後批次算的 → 盤中看到的是「昨收」狀態,呈現端要標明
+            tech = (json.loads((DOCS / "tech_tags.json").read_text(encoding="utf-8"))
+                    .get("tags") or {})
+        except Exception as e:
+            log.info(f"enrich: tech_tags.json 未載入(第一次批次前正常):{e}")
+        _STATIC.update({"day": today, "levels": lv, "sector": sec, "tech": tech})
+    return _STATIC["levels"] or {}, _STATIC["sector"] or {}, _STATIC["tech"] or {}
 
 
 def _business(sid: str, sector: dict, lv: dict) -> str:
@@ -173,8 +179,9 @@ def enrich(sid: str, name: str, price: float | None = None,
         out["market_cap"] = _mktcap(out.get("shares"), price)
         return out
 
-    lv, sector = _load_static()
+    lv, sector, tech = _load_static()
     L = lv.get(sid) or {}
+    T = tech.get(sid) or {}
     out: dict = {
         "business": _business(sid, sector, lv),
         "shares": L.get("shares"),
@@ -182,6 +189,9 @@ def enrich(sid: str, name: str, price: float | None = None,
         "revenue_yoy": L.get("revenue_yoy"),
         "ma5": L.get("ma5"), "ma20": L.get("ma20"),
         "ma60": L.get("ma60"), "high20": L.get("high20"),
+        # 昨收的技術訊號標籤 + 共識K線型態(tech_signals.py 產出;盤中看到=昨收基準)
+        "tech_i": T.get("i") or [],
+        "tech_p": T.get("p") or [],
     }
     if with_valuation:
         out.update(_valuation(sid))

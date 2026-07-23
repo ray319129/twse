@@ -29,6 +29,7 @@ from .screener import screen_stock, stock_summary
 from .scoring import compute_conviction
 from .industry import compute_industry_trends
 from .sector_cmoney import build_sector_map   # 2026-07-22 由 FinMind 產業鏈改用 CMoney 類股
+from .tech_signals import tags_for            # 2026-07-23 技術訊號標籤 + K線型態(只顯示不進分)
 from .market import compute_market_regime, compute_risk_gate
 from .track import build_report as build_perf_report, compute_entry_plan, compute_position_size, _style_of
 from .fundamentals import update_fundamentals, fundamental_summary, fundamental_score
@@ -448,6 +449,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     industry_map = dict(zip(universe["stock_id"], universe.get("industry_category", pd.Series([""] * len(universe)))))
 
     scored: list[dict] = []          # 全市場評分(只用免費資料)
+    tech_tags: dict[str, dict] = {}  # 技術訊號標籤/K線型態(顯示+記錄用,不進評分)
     no_data: list[str] = []
     industry_rows: list[dict] = []
 
@@ -538,6 +540,14 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
                 "last_ohlc": _last_ohlc(df),
             })
             scored.append(conv)
+            # 技術訊號標籤 + K線型態(2026-07-23,只給人看、不進信心分 —— 見 tech_signals.py 檔頭)。
+            # 用 df(原始 OHLC,型態要真實成交價形狀)+ df_ind(指標)。失敗只記 log,不影響選股。
+            try:
+                _tt = tags_for(df, df_ind)
+                if _tt.get("i") or _tt.get("p") or _tt.get("p_all"):
+                    tech_tags[sid] = _tt
+            except Exception as e:
+                log.warning(f"技術標籤 {sid} 失敗(略過):{e}")
 
     # ---------- 大盤閘門(regime,3.3):依 index + 市場廣度 + 漲跌停家數動態調 core_count / min_score ----------
     market_cfg = cfg.get("market", {}) or {}
@@ -782,6 +792,14 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     ]
     with open(docs_dir / "heatmap.json", "w", encoding="utf-8") as f:
         json.dump({"date": today.isoformat(), "stocks": heatmap_stocks}, f, ensure_ascii=False)
+
+    # 技術訊號標籤 + K線型態(docs/tech_tags.json):自選池/核心卡/Discord 卡都由此 join。
+    # 單一事實來源 —— 標籤描述的是「本批次收盤」的狀態,盤中看到時是昨收基準。
+    # p_all 記錄全部 61 種型態代碼:現在沒人看,但累積起來就是日後用 score_validate
+    # 框架驗「哪些型態在台股有 edge」的原始資料 —— 記錄成本趨近零,別省。
+    with open(docs_dir / "tech_tags.json", "w", encoding="utf-8") as f:
+        json.dump(_json_safe({"date": today.isoformat(), "tags": tech_tags}), f, ensure_ascii=False)
+    log.info(f"技術標籤:{len(tech_tags)} 檔有訊號(指標標籤/共識型態/全型態記錄)")
 
     # 產業鏈分類(docs/sector_map.json):熱力圖與市場氛圍的分組依據。
     # 分類本身變動很慢,但每天跟著批次重抓最省事;抓不到就沿用舊檔(見 build_sector_map)。

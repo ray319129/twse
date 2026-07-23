@@ -2049,3 +2049,46 @@ mode=test-publish)—— 寫個無害 heartbeat 到 freshness.json、跑一次 _
   也終於會上線,網頁的心跳框才有資料)。
 - levels.json 之前停在 07-19,明天正常發布後會恢復每日更新。
 
+
+---
+
+## 48. 技術訊號標籤 + K線型態辨識(2026-07-23)
+
+與使用者討論後定案(研究過程見 memory/twse-pattern-recognition-research):
+**只做 ① 指標訊號標籤 + ② TA-Lib K線型態;空方訊號與多方同等對待;圖表形態
+(頭肩/雙底/三角)擱置;任何標籤都不進信心分** —— 先顯示+記錄,累積後用
+score_validate 框架驗過才談。定位是幫人工混合型使用者省開圖時間,不是預測
+(大樣本回測:型態單獨使用無統計 edge)。
+
+### 檔案地圖
+- `scripts/tech_signals.py` — 核心模組:
+  - `indicator_tags(ind)`:布林(收斂/帶量突破上軌/沿上軌行走/跌破下軌)、KD(低檔金叉/
+    高檔死叉/鈍化)、MACD 柱轉正負、均線(糾結/轉多頭排列/跌破月線季線)、量價
+    (爆量長紅/長黑/長上影)、RSI 極端。**全部確定性規則**,布林規則依據文獻寫在檔頭
+    (使用者剛學布林,規則由研究定:無量突破=雜訊所以不標、band walk=趨勢確認不是反轉)。
+  - `candle_patterns(raw)`:TA-Lib 61 種全掃。**呈現**只用 CONSENSUS 24 種中文名;
+    **記錄**全部(p_all,precision 格式 `+3INSIDE`/`-HIKKAKE`)供日後驗證。
+    ⚠️ `SIDE_OVERRIDE`:TA-Lib 對十字線家族永遠回 +100(不判斷方向),照 sign 直翻
+    會把墓碑十字標成偏多 —— 已按教科書慣例覆寫。
+  - 型態用**原始 OHLC**(真實成交價形狀),指標用還原價指標(與全系統一致)。
+- `main.py` — 評分迴圈內對每檔 scored 算 `tags_for(df, df_ind)` → 寫
+  `docs/tech_tags.json` {date, tags:{sid:{i,p,p_all}}}(單一事實來源,~135KB,
+  實測 1022 檔 26 秒)。TA-Lib 沒裝會自動略過不炸批次。
+- `requirements.txt` — 加 `TA-Lib>=0.5`(0.5.0 起 PyPI 有預編 wheels,免裝 C 庫)。
+- `alert_enrich.py` — `_load_static` 改回 3-tuple(levels, sector, tech);enrich 帶
+  `tech_i`/`tech_p`。Discord 卡新增「技術狀態(昨收)」欄位(▲▼◆ 前綴)。
+- `docs/index.html` — `techChips(id)` 讀 tech_tags.json,插在 `qBody` 尾端
+  → **自選池/核心/觀察/盤中即時四處共用**。hover 顯示規則細節,標明「昨收基準」。
+
+### 重要語意
+- **所有標籤描述「最後一根完成日K」**。盤中看到 = 昨收狀態,呈現端都標了「昨收」。
+- `p_all` 現在沒人看,但它就是日後做「台股版型態統計」的原始資料 —— 每天全市場
+  61 種型態的觸發記錄,累積在 git 歷史裡,成本趨近零。
+- 已生成第一份 docs/tech_tags.json(基準日 07-21 本機資料,949/1022 檔有標籤);
+  明天 21:30 批次會用當日收盤覆蓋。
+
+### 驗證
+離線:5 檔實測(萬海抓到帶量突破上軌+爆量長紅,正好對應 7/21 真實訊號;威強電晨星)。
+瀏覽器:自選池卡片 chips + tooltip 正常。Discord embed:技術狀態欄位正常。
+**未驗:CI 上 TA-Lib wheels 安裝(理論上直接裝,看明天 21:30 批次)。**
+

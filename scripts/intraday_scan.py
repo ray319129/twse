@@ -565,6 +565,14 @@ def _embed(r: dict, ex: dict | None = None, chart_name: str | None = None) -> di
     if grow:
         fields.append({"name": "基本面", "value": " · ".join(grow), "inline": False})
 
+    # 技術狀態(昨收):指標訊號標籤 + 共識K線型態。只顯示不進分(tech_signals.py 檔頭)。
+    # ⚠️ 標明「昨收」—— 盤中看到時今天這根還沒收,別誤以為是現在的型態。
+    _mark = {"bull": "▲", "bear": "▼", "warn": "◆"}
+    ttags = [f"{_mark.get(x.get('s'), '')}{x.get('t')}"
+             for x in (ex.get("tech_i") or []) + (ex.get("tech_p") or [])][:6]
+    if ttags:
+        fields.append({"name": "技術狀態(昨收)", "value": " · ".join(ttags)[:1024], "inline": False})
+
     news = ex.get("news") or []
     if news:
         # ⚠️ **標題不做超連結。** Google News RSS 的 link 是 base64 轉址網址,

@@ -229,6 +229,16 @@
   .pl-n2{font-size:10.5px;color:var(--muted-2);margin-top:9px;line-height:1.55;}
   @media(max-width:640px){.pl-k{width:100%;justify-content:space-between;gap:8px;}}
 
+  /* 技術訊號標籤(2026-07-23)。▲多 ▼空 ◆中性觀察;hover 看規則細節。
+     色帶語意與全站一致:紅漲綠跌是行情數字,標籤用底色+描邊區分不搶版面。 */
+  .tc-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:7px;}
+  .tc-lab{font-size:10px;color:var(--muted-2);font-weight:700;margin-right:2px;}
+  .tc{font-size:10.5px;font-weight:700;padding:1.5px 7px;border-radius:999px;line-height:1.5;
+    border:1px solid transparent;cursor:default;}
+  .tc-bull{background:var(--up-bg);color:var(--up-ink);border-color:var(--up-line);}
+  .tc-bear{background:var(--down-bg);color:var(--down-ink);border-color:var(--down-line);}
+  .tc-warn{background:var(--surface-3);color:var(--muted);border-color:var(--line);}
+
   /* market regime hero */
   .regime{display:flex;align-items:center;gap:16px;}
   .regime .ring{width:74px;height:74px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;position:relative;}
@@ -1716,7 +1726,8 @@ function qBody(id,compact){
       <span><span${tip('eps')}>EPS近四季</span> <b>${_qn(q.eps_ttm)}</b></span>
       ${streakChip(id)}
       ${chips.join('')}
-    </div>`;
+    </div>
+    ${techChips(id)}`;
 }
 /* 核心/觀察/盤中的卡片已有自己的標題與收盤價 → 用 compact 版包一層淡底,
    視覺上跟「批次算好的內容」區隔開:上面是昨日收盤的分析,這一塊是現在的市況。 */
@@ -2643,6 +2654,23 @@ function loadLive(name){
 function loadSeries(){
   loadLive('series.json').then(d=>{SERIES=d;renderWatchlistBox();});
 }
+/* 技術訊號標籤 + K線型態(docs/tech_tags.json,盤後批次算 —— 盤中看到=昨收基準)。
+   2026-07-23 與使用者討論定案:只顯示、不進信心分;空方訊號(出貨/轉弱)與多方同等呈現。
+   價值是幫人工判斷省開圖時間,不是預測 —— 大樣本回測顯示型態單獨使用無統計 edge。 */
+let TECH=null;
+function loadTech(){loadLive('tech_tags.json').then(d=>{TECH=(d&&d.tags)||null;renderWatchlistBox();});}
+function techChips(id){
+  const t=TECH&&TECH[String(id)];
+  if(!t)return '';
+  const all=(t.i||[]).concat(t.p||[]);
+  if(!all.length)return '';
+  const cls={bull:'tc-bull',bear:'tc-bear',warn:'tc-warn'};
+  const mark={bull:'▲',bear:'▼',warn:'◆'};
+  const chips=all.slice(0,6).map(x=>
+    `<span class="tc ${cls[x.s]||'tc-warn'}" title="${esc(x.d||x.t)}(昨收基準)">${mark[x.s]||''}${esc(x.t)}</span>`).join('');
+  return `<div class="tc-row"><span class="tc-lab" title="盤後批次以昨日收盤計算;僅供參考不進評分">技術(昨收)</span>${chips}</div>`;
+}
+
 /* 分點連買連賣(docs/branch_streak.json,盤後 21:30 批次算)。
    主力淨買超 = 前5大買超分點 + 前5大賣超分點;連買 = 從最近往回數連續為正的天數。 */
 let STREAK=null;
@@ -2743,7 +2771,7 @@ function startLiveQuotes(sec){
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&_liveTimer)tick();});
   }
   /* levels 一天只變一次,先載完再開始輪詢 —— 否則第一輪報價會少掉產業別/突破/換手率 */
-  loadLevels().then(tick); loadDeep(); loadSeries(); loadStreak(); loadFresh(); loadPulse();
+  loadLevels().then(tick); loadDeep(); loadSeries(); loadStreak(); loadFresh(); loadPulse(); loadTech();
   _liveTimer=setInterval(tick,(sec||20)*1000);
   /* deep.json / series.json 都是每 10 分鐘才更新,前端 5 分鐘拉一次夠了;
      連買連賣是盤後才算,盤中不會變,載一次即可。心跳與大盤跟著一起拉。
