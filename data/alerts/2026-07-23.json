@@ -94,5 +94,17 @@
   "volume_ratio": 0.59,
   "vwap": 10.75,
   "fired_at": "09:26"
+ },
+ "1434|breakout": {
+  "stock_id": "1434",
+  "name": "福懋",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 20.45(現價 20.60,高出 0.7%)・量比 0.52(市場中位 0.14)・站上均價 19.92",
+  "price": 20.6,
+  "change_rate": 7.29,
+  "volume_ratio": 0.52,
+  "vwap": 19.92,
+  "fired_at": "09:27"
  }
 }
