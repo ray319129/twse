@@ -131,28 +131,40 @@
   "vwap": 87.11,
   "fired_at": "09:50"
  },
- "3665|breakout": {
-  "stock_id": "3665",
-  "name": "貿聯-KY",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 2195.00(現價 2280.00,高出 3.9%)・量比 1.12(市場中位 0.60)・站上均價 2232.74",
-  "price": 2280.0,
-  "change_rate": 7.8,
-  "volume_ratio": 1.12,
-  "vwap": 2232.74,
-  "fired_at": "12:25"
+ "4764|pullback": {
+  "stock_id": "4764",
+  "name": "雙鍵",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 314.23 附近(距 -1.3%)・翻紅 +6.71% 站回均價・量比 1.23(市場中位 0.74)",
+  "price": 310.0,
+  "change_rate": 6.71,
+  "volume_ratio": 1.23,
+  "vwap": 306.17,
+  "fired_at": "13:22"
+ },
+ "3617|pullback": {
+  "stock_id": "3617",
+  "name": "碩天",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 219.10 附近(距 -1.0%)・翻紅 +4.07% 站回均價・量比 0.97(市場中位 0.74)",
+  "price": 217.0,
+  "change_rate": 4.07,
+  "volume_ratio": 0.97,
+  "vwap": 213.26,
+  "fired_at": "13:22"
  },
  "6245|breakout": {
   "stock_id": "6245",
   "name": "立端",
   "type": "breakout",
   "label": "量增突破",
-  "reason": "突破 20 日高 83.80(現價 84.40,高出 0.7%)・量比 1.68(市場中位 0.65)・站上均價 82.93",
-  "price": 84.4,
-  "change_rate": 3.68,
-  "volume_ratio": 1.68,
-  "vwap": 82.93,
-  "fired_at": "12:50"
+  "reason": "突破 20 日高 83.80(現價 84.70,高出 1.1%)・量比 2.29(市場中位 0.74)・站上均價 83.37",
+  "price": 84.7,
+  "change_rate": 4.05,
+  "volume_ratio": 2.29,
+  "vwap": 83.37,
+  "fired_at": "13:22"
  }
 }
