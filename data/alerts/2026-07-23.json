@@ -34,5 +34,29 @@
   "volume_ratio": 0.5,
   "vwap": 170.27,
   "fired_at": "09:07"
+ },
+ "6811|breakout": {
+  "stock_id": "6811",
+  "name": "宏碁資訊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 250.50(現價 252.50,高出 0.8%)・量比 0.59(市場中位 0.10)・站上均價 251.13",
+  "price": 252.5,
+  "change_rate": 3.27,
+  "volume_ratio": 0.59,
+  "vwap": 251.13,
+  "fired_at": "09:15"
+ },
+ "8114|breakout": {
+  "stock_id": "8114",
+  "name": "振樺電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 223.50(現價 227.50,高出 1.8%)・量比 0.63(市場中位 0.10)・站上均價 226.50",
+  "price": 227.5,
+  "change_rate": 2.94,
+  "volume_ratio": 0.63,
+  "vwap": 226.5,
+  "fired_at": "09:15"
  }
 }
