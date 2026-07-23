@@ -118,5 +118,17 @@
   "volume_ratio": 0.54,
   "vwap": 486.12,
   "fired_at": "09:33"
+ },
+ "4938|breakout": {
+  "stock_id": "4938",
+  "name": "和碩",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 89.40(現價 89.70,高出 0.3%)・量比 0.78(市場中位 0.23)・站上均價 87.11",
+  "price": 89.7,
+  "change_rate": 6.27,
+  "volume_ratio": 0.78,
+  "vwap": 87.11,
+  "fired_at": "09:50"
  }
 }
