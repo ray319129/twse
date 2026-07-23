@@ -43,8 +43,37 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 PATH = "config/watchlist.json"
+MARKS_PATH = "config/my_marks.json"
 API = "https://api.github.com"
 MAX_STOCKS = 300          # 防呆:自選池不該有幾千檔,而且批次跑不完
+MAX_MARKS = 3000          # 買/跳標記上限(一天 ~10 筆,夠用好幾年)
+MARK_TTL_DAYS = 400       # 墓碑(取消的標記)保留天數,過了就清掉控檔案大小
+
+
+def _clean_marks(marks: dict) -> dict:
+    """買/跳標記(2026-07-23,使用者要求跨裝置統一)。
+    格式 {"YYYY-MM-DD|代號": {"v": "bought"|"skipped"|None, "t": epoch_ms}}。
+    v=None 是墓碑(=取消標記)—— 多裝置合併靠每鍵的 t 決定新舊,沒有墓碑的話
+    A 裝置取消的標記會被 B 裝置的舊資料復活。
+    與自選池同一條隱私界線:只有「哪天、哪檔、買或跳」,**沒有張數/成本/損益**。"""
+    import re
+    out = {}
+    for k, o in (marks or {}).items():
+        if not re.match(r"^\d{4}-\d{2}-\d{2}\|\d{4,6}[A-Z]?$", str(k)):
+            continue
+        if not isinstance(o, dict):
+            continue
+        v = o.get("v")
+        if v not in ("bought", "skipped", None):
+            continue
+        try:
+            t = int(o.get("t") or 0)
+        except (TypeError, ValueError):
+            t = 0
+        out[str(k)] = {"v": v, "t": t}
+        if len(out) >= MAX_MARKS:
+            break
+    return out
 
 
 def _clean(stocks: dict) -> dict:
@@ -82,6 +111,9 @@ class handler(BaseHTTPRequestHandler):
                              "那是**環境變數需要重新部署才生效** —— 到 Vercel "
                              "Deployments 點最新一筆的 Redeploy,或推一個 commit。"),
                 })
+            if (qs.get("what") or [""])[0] == "marks":
+                cur, _ = self._read(MARKS_PATH)
+                return self._send(200, {"marks": cur.get("marks", {}), "source": "repo"})
             cur, _ = self._read()
             self._send(200, {"stocks": cur.get("stocks", {}), "source": "repo"})
         except Exception as e:
@@ -104,6 +136,47 @@ class handler(BaseHTTPRequestHandler):
                 "可用 /api/watchlist?check=1 確認變數是否已被讀到。"})
         if body.get("secret") != secret:
             return self._send(403, {"error": "secret 不正確"})
+
+        # ---- 買/跳標記同步(帶 marks 就走這條;與自選池共用 secret 與 token)----
+        if "marks" in body:
+            marks = _clean_marks(body.get("marks"))
+            try:
+                cur, sha = self._read(MARKS_PATH)
+                # 伺服器端也做一次合併(每鍵 t 新者勝)—— 兩台裝置幾乎同時 POST 時,
+                # 後到的不會把先到的整包蓋掉
+                merged = dict(cur.get("marks") or {})
+                for k, o in marks.items():
+                    old = merged.get(k)
+                    if not isinstance(old, dict) or int(o.get("t") or 0) >= int(old.get("t") or 0):
+                        merged[k] = o
+                # 清掉過期墓碑
+                import time as _time
+                cutoff = int(_time.time() * 1000) - MARK_TTL_DAYS * 86400_000
+                merged = {k: o for k, o in merged.items()
+                          if not (o.get("v") is None and int(o.get("t") or 0) < cutoff)}
+                if merged == (cur.get("marks") or {}):
+                    return self._send(200, {"ok": True, "changed": False,
+                                            "n": len(merged), "marks": merged})
+                payload = {"_comment": "買/跳標記(我的實戰紀錄)。由網頁同步(api/watchlist.py?what=marks);"
+                                       "只有日期|代號與買/跳,無任何金額。",
+                           "marks": merged}
+                content = json.dumps(payload, ensure_ascii=False, indent=1) + "\n"
+                r = requests.put(
+                    f"{API}/repos/{os.environ['GITHUB_REPO']}/contents/{MARKS_PATH}",
+                    headers=self._gh_headers(),
+                    json={"message": f"marks: sync {len(merged)} 筆 (web)",
+                          "content": base64.b64encode(content.encode()).decode(),
+                          **({"sha": sha} if sha else {})},
+                    timeout=25)
+                if r.status_code not in (200, 201):
+                    return self._send(502, {"error": f"GitHub 寫入失敗 {r.status_code}: {r.text[:200]}"})
+                # 回合併後的全量,前端直接採用 → 兩台裝置各自 POST 後都會拿到同一份
+                return self._send(200, {"ok": True, "changed": True,
+                                        "n": len(merged), "marks": merged})
+            except KeyError as e:
+                return self._send(500, {"error": f"缺少環境變數 {e}"})
+            except Exception as e:
+                return self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
         stocks = _clean(body.get("stocks"))
         if not stocks:
@@ -147,10 +220,10 @@ class handler(BaseHTTPRequestHandler):
         return {"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
                 "Accept": "application/vnd.github+json"}
 
-    def _read(self):
+    def _read(self, path: str = PATH):
         """回 (內容 dict, sha)。抓不到就回 ({}, None) —— 第一次寫入沒有 sha 是正常的。"""
         try:
-            r = requests.get(f"{API}/repos/{os.environ['GITHUB_REPO']}/contents/{PATH}",
+            r = requests.get(f"{API}/repos/{os.environ['GITHUB_REPO']}/contents/{path}",
                              headers=self._gh_headers(), timeout=20)
             if r.status_code != 200:
                 return {}, None
