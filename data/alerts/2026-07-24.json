@@ -154,5 +154,17 @@
   "volume_ratio": 1.54,
   "vwap": 79.92,
   "fired_at": "10:35"
+ },
+ "8462|pullback": {
+  "stock_id": "8462",
+  "name": "柏文",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 152.05 附近(距 +2.3%)・翻紅 +0.64% 站回均價・量比 0.68(市場中位 0.44)",
+  "price": 155.5,
+  "change_rate": 0.64,
+  "volume_ratio": 0.68,
+  "vwap": 155.31,
+  "fired_at": "10:40"
  }
 }
