@@ -46,5 +46,17 @@
   "volume_ratio": 0.56,
   "vwap": 58.38,
   "fired_at": "09:10"
+ },
+ "4566|breakout": {
+  "stock_id": "4566",
+  "name": "時碩工業",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 72.70(現價 74.40,高出 2.3%)・量比 0.52(市場中位 0.09)・站上均價 71.69",
+  "price": 74.4,
+  "change_rate": 7.2,
+  "volume_ratio": 0.52,
+  "vwap": 71.69,
+  "fired_at": "09:14"
  }
 }
