@@ -142,5 +142,17 @@
   "volume_ratio": 0.62,
   "vwap": 365.47,
   "fired_at": "10:10"
+ },
+ "6469|breakout": {
+  "stock_id": "6469",
+  "name": "大樹",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 79.90(現價 80.40,高出 0.6%)・量比 1.54(市場中位 0.40)・站上均價 79.92",
+  "price": 80.4,
+  "change_rate": 2.29,
+  "volume_ratio": 1.54,
+  "vwap": 79.92,
+  "fired_at": "10:35"
  }
 }
