@@ -106,5 +106,17 @@
   "volume_ratio": 0.5,
   "vwap": 266.47,
   "fired_at": "09:45"
+ },
+ "6669|breakout": {
+  "stock_id": "6669",
+  "name": "緯穎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 5675.00(現價 5710.00,高出 0.6%)・量比 0.50(市場中位 0.24)・站上均價 5614.40",
+  "price": 5710.0,
+  "change_rate": 4.38,
+  "volume_ratio": 0.5,
+  "vwap": 5614.4,
+  "fired_at": "09:54"
  }
 }
