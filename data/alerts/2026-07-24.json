@@ -130,5 +130,17 @@
   "volume_ratio": 0.5,
   "vwap": 179.56,
   "fired_at": "10:06"
+ },
+ "8464|pullback": {
+  "stock_id": "8464",
+  "name": "億豐",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 360.77 附近(距 +1.6%)・翻紅 +0.68% 站回均價・量比 0.62(市場中位 0.30)",
+  "price": 366.5,
+  "change_rate": 0.68,
+  "volume_ratio": 0.62,
+  "vwap": 365.47,
+  "fired_at": "10:10"
  }
 }
