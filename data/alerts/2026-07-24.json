@@ -166,5 +166,17 @@
   "volume_ratio": 0.68,
   "vwap": 155.31,
   "fired_at": "10:40"
+ },
+ "2615|breakout": {
+  "stock_id": "2615",
+  "name": "萬海",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 87.40(現價 87.70,高出 0.3%)・量比 1.63(市場中位 0.57)・站上均價 86.16",
+  "price": 87.7,
+  "change_rate": 3.78,
+  "volume_ratio": 1.63,
+  "vwap": 86.16,
+  "fired_at": "11:24"
  }
 }
