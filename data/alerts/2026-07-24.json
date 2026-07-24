@@ -178,5 +178,17 @@
   "volume_ratio": 1.63,
   "vwap": 86.16,
   "fired_at": "11:24"
+ },
+ "6024|pullback": {
+  "stock_id": "6024",
+  "name": "群益期",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 63.11 附近(距 +2.5%)・翻紅 +0.62% 站回均價・量比 0.82(市場中位 0.62)",
+  "price": 64.7,
+  "change_rate": 0.62,
+  "volume_ratio": 0.82,
+  "vwap": 64.6,
+  "fired_at": "11:50"
  }
 }
