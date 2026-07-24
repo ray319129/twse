@@ -1,0 +1,26 @@
+{
+ "8271|breakout": {
+  "stock_id": "8271",
+  "name": "宇瞻",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 211.00(現價 214.00,高出 1.4%)・量比 0.50(市場中位 0.05)・站上均價 209.78",
+  "price": 214.0,
+  "change_rate": 1.9,
+  "volume_ratio": 0.5,
+  "vwap": 209.78,
+  "fired_at": "09:05"
+ },
+ "6166|breakout": {
+  "stock_id": "6166",
+  "name": "凌華",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 159.50(現價 171.50,高出 7.5%)・量比 0.50(市場中位 0.06)・站上均價 165.42",
+  "price": 171.5,
+  "change_rate": 7.52,
+  "volume_ratio": 0.5,
+  "vwap": 165.42,
+  "fired_at": "09:06"
+ }
+}
