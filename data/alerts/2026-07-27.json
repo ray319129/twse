@@ -202,5 +202,17 @@
   "volume_ratio": 0.57,
   "vwap": 126.9,
   "fired_at": "10:50"
+ },
+ "2801|breakout": {
+  "stock_id": "2801",
+  "name": "彰銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 24.75(現價 24.85,高出 0.4%)・量比 1.10(市場中位 0.58)・站上均價 24.65",
+  "price": 24.85,
+  "change_rate": 2.05,
+  "volume_ratio": 1.1,
+  "vwap": 24.65,
+  "fired_at": "11:44"
  }
 }
