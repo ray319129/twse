@@ -215,28 +215,64 @@
   "vwap": 24.65,
   "fired_at": "11:44"
  },
- "2646|pullback": {
-  "stock_id": "2646",
-  "name": "星宇航空",
-  "type": "pullback",
-  "label": "回檔買點",
-  "reason": "多頭排列(5>20>60)・回到月線 21.26 附近(距 +1.1%)・翻紅 +1.65% 站回均價・量比 0.95(市場中位 0.73)",
-  "price": 21.5,
-  "change_rate": 1.65,
-  "volume_ratio": 0.95,
-  "vwap": 21.41,
-  "fired_at": "12:48"
+ "5880|breakout": {
+  "stock_id": "5880",
+  "name": "合庫金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 25.70(現價 25.95,高出 1.0%)・量比 1.67(市場中位 0.85)・站上均價 25.84",
+  "price": 25.95,
+  "change_rate": 1.16,
+  "volume_ratio": 1.67,
+  "vwap": 25.84,
+  "fired_at": "13:22"
  },
- "6870|pullback": {
-  "stock_id": "6870",
-  "name": "騰雲",
+ "2707|pullback": {
+  "stock_id": "2707",
+  "name": "晶華",
   "type": "pullback",
   "label": "回檔買點",
-  "reason": "多頭排列(5>20>60)・回到月線 267.60 附近(距 -1.9%)・翻紅 +2.53% 站回均價・量比 2.02(市場中位 0.78)",
-  "price": 262.5,
-  "change_rate": 2.53,
-  "volume_ratio": 2.02,
-  "vwap": 245.72,
-  "fired_at": "13:05"
+  "reason": "多頭排列(5>20>60)・回到月線 179.47 附近(距 +0.3%)・翻紅 +0.55% 站回均價・量比 2.01(市場中位 0.85)",
+  "price": 180.0,
+  "change_rate": 0.55,
+  "volume_ratio": 2.01,
+  "vwap": 179.97,
+  "fired_at": "13:22"
+ },
+ "3032|pullback": {
+  "stock_id": "3032",
+  "name": "偉訓",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 79.72 附近(距 +3.0%)・翻紅 +5.93% 站回均價・量比 5.29(市場中位 0.85)",
+  "price": 82.1,
+  "change_rate": 5.93,
+  "volume_ratio": 5.29,
+  "vwap": 81.78,
+  "fired_at": "13:22"
+ },
+ "2206|pullback": {
+  "stock_id": "2206",
+  "name": "三陽工業",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 62.58 附近(距 +0.7%)・翻紅 +2.60% 站回均價・量比 1.80(市場中位 0.85)",
+  "price": 63.0,
+  "change_rate": 2.6,
+  "volume_ratio": 1.8,
+  "vwap": 62.59,
+  "fired_at": "13:22"
+ },
+ "2027|breakout": {
+  "stock_id": "2027",
+  "name": "大成鋼",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 42.10(現價 44.40,高出 5.5%)・量比 2.19(市場中位 0.85)・站上均價 44.39",
+  "price": 44.4,
+  "change_rate": 1.95,
+  "volume_ratio": 2.19,
+  "vwap": 44.39,
+  "fired_at": "13:22"
  }
 }
