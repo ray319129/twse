@@ -1,0 +1,14 @@
+{
+ "5388|breakout": {
+  "stock_id": "5388",
+  "name": "中磊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 91.10(現價 92.50,高出 1.5%)・量比 0.50(市場中位 0.07)・站上均價 91.21",
+  "price": 92.5,
+  "change_rate": 4.28,
+  "volume_ratio": 0.5,
+  "vwap": 91.21,
+  "fired_at": "09:07"
+ }
+}
