@@ -10,5 +10,17 @@
   "volume_ratio": 0.5,
   "vwap": 91.21,
   "fired_at": "09:07"
+ },
+ "2850|breakout": {
+  "stock_id": "2850",
+  "name": "新產",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 151.00(現價 155.00,高出 2.6%)・量比 1.21(市場中位 0.09)・站上均價 153.26",
+  "price": 155.0,
+  "change_rate": 5.08,
+  "volume_ratio": 1.21,
+  "vwap": 153.26,
+  "fired_at": "09:10"
  }
 }
