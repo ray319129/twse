@@ -22,5 +22,29 @@
   "volume_ratio": 1.21,
   "vwap": 153.26,
   "fired_at": "09:10"
+ },
+ "2812|pullback": {
+  "stock_id": "2812",
+  "name": "台中銀",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 20.35 附近(距 +1.5%)・翻紅 +0.97% 站回均價・量比 0.54(市場中位 0.12)",
+  "price": 20.65,
+  "change_rate": 0.97,
+  "volume_ratio": 0.54,
+  "vwap": 20.54,
+  "fired_at": "09:16"
+ },
+ "6517|pullback": {
+  "stock_id": "6517",
+  "name": "保勝光學",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 69.95 附近(距 -1.2%)・翻紅 +5.33% 站回均價・量比 0.50(市場中位 0.12)",
+  "price": 69.1,
+  "change_rate": 5.33,
+  "volume_ratio": 0.5,
+  "vwap": 67.96,
+  "fired_at": "09:16"
  }
 }
