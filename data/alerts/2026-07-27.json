@@ -82,5 +82,17 @@
   "volume_ratio": 0.5,
   "vwap": 25.78,
   "fired_at": "09:33"
+ },
+ "8028|pullback": {
+  "stock_id": "8028",
+  "name": "昇陽半導體",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 310.93 附近(距 -0.3%)・翻紅 +3.16% 站回均價・量比 0.51(市場中位 0.26)",
+  "price": 310.0,
+  "change_rate": 3.16,
+  "volume_ratio": 0.51,
+  "vwap": 306.18,
+  "fired_at": "09:40"
  }
 }
