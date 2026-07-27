@@ -70,5 +70,17 @@
   "volume_ratio": 0.5,
   "vwap": 40.69,
   "fired_at": "09:30"
+ },
+ "5880|pullback": {
+  "stock_id": "5880",
+  "name": "合庫金",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 25.16 附近(距 +2.8%)・翻紅 +0.77% 站回均價・量比 0.50(市場中位 0.23)",
+  "price": 25.85,
+  "change_rate": 0.77,
+  "volume_ratio": 0.5,
+  "vwap": 25.78,
+  "fired_at": "09:33"
  }
 }
