@@ -190,5 +190,17 @@
   "volume_ratio": 0.52,
   "vwap": 1156.24,
   "fired_at": "10:38"
+ },
+ "7786|pullback": {
+  "stock_id": "7786",
+  "name": "東方風能",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 127.60 附近(距 +0.3%)・翻紅 +0.78% 站回均價・量比 0.57(市場中位 0.43)",
+  "price": 128.0,
+  "change_rate": 0.78,
+  "volume_ratio": 0.57,
+  "vwap": 126.9,
+  "fired_at": "10:50"
  }
 }
