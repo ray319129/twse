@@ -46,5 +46,17 @@
   "volume_ratio": 0.5,
   "vwap": 67.96,
   "fired_at": "09:16"
+ },
+ "2466|pullback": {
+  "stock_id": "2466",
+  "name": "冠西電",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 95.80 附近(距 +2.8%)・翻紅 +3.68% 站回均價・量比 0.56(市場中位 0.19)",
+  "price": 98.5,
+  "change_rate": 3.68,
+  "volume_ratio": 0.56,
+  "vwap": 96.05,
+  "fired_at": "09:26"
  }
 }
