@@ -58,5 +58,17 @@
   "volume_ratio": 0.56,
   "vwap": 96.05,
   "fired_at": "09:26"
+ },
+ "2539|pullback": {
+  "stock_id": "2539",
+  "name": "櫻花建",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 39.86 附近(距 +2.7%)・翻紅 +0.98% 站回均價・量比 0.50(市場中位 0.22)",
+  "price": 40.95,
+  "change_rate": 0.98,
+  "volume_ratio": 0.5,
+  "vwap": 40.69,
+  "fired_at": "09:30"
  }
 }
