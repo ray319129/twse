@@ -166,5 +166,17 @@
   "volume_ratio": 0.51,
   "vwap": 41.07,
   "fired_at": "10:12"
+ },
+ "2006|breakout": {
+  "stock_id": "2006",
+  "name": "東和鋼鐵",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 72.60(現價 73.00,高出 0.6%)・量比 0.54(市場中位 0.35)・站上均價 72.36",
+  "price": 73.0,
+  "change_rate": 1.67,
+  "volume_ratio": 0.54,
+  "vwap": 72.36,
+  "fired_at": "10:17"
  }
 }
