@@ -118,5 +118,29 @@
   "volume_ratio": 0.5,
   "vwap": 18.07,
   "fired_at": "09:45"
+ },
+ "8111|breakout": {
+  "stock_id": "8111",
+  "name": "立碁",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 62.00(現價 65.00,高出 4.8%)・量比 0.50(市場中位 0.29)・站上均價 63.46",
+  "price": 65.0,
+  "change_rate": 7.26,
+  "volume_ratio": 0.5,
+  "vwap": 63.46,
+  "fired_at": "09:53"
+ },
+ "2886|breakout": {
+  "stock_id": "2886",
+  "name": "兆豐金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 49.05(現價 49.45,高出 0.8%)・量比 0.50(市場中位 0.30)・站上均價 48.98",
+  "price": 49.45,
+  "change_rate": 2.06,
+  "volume_ratio": 0.5,
+  "vwap": 48.98,
+  "fired_at": "09:53"
  }
 }
