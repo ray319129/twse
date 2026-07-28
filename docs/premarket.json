@@ -161,5 +161,104 @@
     },
     "valid_count": 3,
     "total": 3
+  },
+  "orb": {
+    "generated_at": "2026-07-28 09:25",
+    "rows": [
+      {
+        "stock_id": "2850",
+        "name": "新產",
+        "score": 67.5,
+        "profile": "品質",
+        "plan": {
+          "ref": 158.0,
+          "max_entry": 162.74,
+          "init_stop": 146.94,
+          "tp1": 180.12,
+          "r_abs": 11.060000000000002,
+          "risk_pct": 7.0,
+          "style": "momentum",
+          "tp1_resistance": false,
+          "flat_lo": 156.42,
+          "flat_hi": 159.58,
+          "gap_up_line": 160.37,
+          "gap_dn_line": 156.42,
+          "trail_ma": 10
+        },
+        "scenario": "A",
+        "scenario_label": "A 平盤",
+        "orh": 157.5,
+        "orl": 155.0,
+        "open": 157.0,
+        "or_vol": 1600,
+        "last": 157.0,
+        "status": "pending"
+      },
+      {
+        "stock_id": "5388",
+        "name": "中磊",
+        "score": 61.3,
+        "profile": "品質",
+        "plan": {
+          "ref": 90.6,
+          "max_entry": 93.32,
+          "init_stop": 87.9,
+          "tp1": 96.0,
+          "r_abs": 2.6999969482421875,
+          "risk_pct": 2.98,
+          "style": "momentum",
+          "tp1_resistance": false,
+          "flat_lo": 89.69,
+          "flat_hi": 91.51,
+          "gap_up_line": 91.96,
+          "gap_dn_line": 89.69,
+          "trail_ma": 10
+        },
+        "scenario": "C",
+        "scenario_label": "C 開低",
+        "orh": 90.0,
+        "orl": 88.2,
+        "open": 88.2,
+        "or_vol": 35666,
+        "last": 90.0,
+        "status": "pending"
+      },
+      {
+        "stock_id": "2812",
+        "name": "台中銀",
+        "score": 58.3,
+        "profile": "品質",
+        "plan": {
+          "ref": 20.75,
+          "max_entry": 21.37,
+          "init_stop": 20.3,
+          "tp1": 21.65,
+          "r_abs": 0.4500007629394531,
+          "risk_pct": 2.17,
+          "style": "momentum",
+          "tp1_resistance": false,
+          "flat_lo": 20.54,
+          "flat_hi": 20.96,
+          "gap_up_line": 21.06,
+          "gap_dn_line": 20.54,
+          "trail_ma": 10
+        },
+        "scenario": "C",
+        "scenario_label": "C 開低",
+        "orh": 20.65,
+        "orl": 20.5,
+        "open": 20.5,
+        "or_vol": 47833,
+        "last": 20.6,
+        "status": "pending"
+      }
+    ],
+    "fired_count": 0,
+    "orb_cfg": {
+      "range_minutes": 15,
+      "confirm_until": "09:30",
+      "volume_filter": true,
+      "volume_mult": 1.0
+    }
   }
 }
