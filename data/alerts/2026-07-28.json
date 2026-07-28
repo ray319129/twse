@@ -10,5 +10,17 @@
   "volume_ratio": 0.5,
   "vwap": 93.11,
   "fired_at": "09:15"
+ },
+ "2540|breakout": {
+  "stock_id": "2540",
+  "name": "愛山林",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 55.00(現價 55.50,高出 0.9%)・量比 0.80(市場中位 0.27)・站上均價 54.77",
+  "price": 55.5,
+  "change_rate": 2.2,
+  "volume_ratio": 0.8,
+  "vwap": 54.77,
+  "fired_at": "09:20"
  }
 }
