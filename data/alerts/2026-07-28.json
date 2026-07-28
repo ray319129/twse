@@ -82,5 +82,17 @@
   "volume_ratio": 0.88,
   "vwap": 119.89,
   "fired_at": "10:25"
+ },
+ "1227|pullback": {
+  "stock_id": "1227",
+  "name": "佳格",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 29.62 附近(距 -0.6%)・翻紅 +0.85% 站回均價・量比 3.31(市場中位 1.21)",
+  "price": 29.45,
+  "change_rate": 0.85,
+  "volume_ratio": 3.31,
+  "vwap": 29.39,
+  "fired_at": "13:22"
  }
 }
