@@ -46,5 +46,17 @@
   "volume_ratio": 0.5,
   "vwap": 61.44,
   "fired_at": "09:44"
+ },
+ "8111|breakout": {
+  "stock_id": "8111",
+  "name": "立碁",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 66.60(現價 66.90,高出 0.5%)・量比 1.30(市場中位 0.47)・站上均價 64.63",
+  "price": 66.9,
+  "change_rate": 5.68,
+  "volume_ratio": 1.3,
+  "vwap": 64.63,
+  "fired_at": "10:03"
  }
 }
