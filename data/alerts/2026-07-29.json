@@ -118,5 +118,17 @@
   "volume_ratio": 0.83,
   "vwap": 107.66,
   "fired_at": "09:56"
+ },
+ "9914|pullback": {
+  "stock_id": "9914",
+  "name": "美利達",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 77.66 附近(距 +2.1%)・翻紅 +2.72% 站回均價・量比 0.96(市場中位 0.72)",
+  "price": 79.3,
+  "change_rate": 2.72,
+  "volume_ratio": 0.96,
+  "vwap": 79.25,
+  "fired_at": "10:36"
  }
 }
