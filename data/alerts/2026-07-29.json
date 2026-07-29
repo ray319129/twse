@@ -106,5 +106,17 @@
   "volume_ratio": 0.64,
   "vwap": 134.12,
   "fired_at": "09:53"
+ },
+ "4904|breakout": {
+  "stock_id": "4904",
+  "name": "遠傳",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 107.50(現價 108.00,高出 0.5%)・量比 0.83(市場中位 0.48)・站上均價 107.66",
+  "price": 108.0,
+  "change_rate": 1.88,
+  "volume_ratio": 0.83,
+  "vwap": 107.66,
+  "fired_at": "09:56"
  }
 }
