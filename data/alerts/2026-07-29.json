@@ -46,5 +46,53 @@
   "volume_ratio": 0.8,
   "vwap": 70.86,
   "fired_at": "09:37"
+ },
+ "2324|pullback": {
+  "stock_id": "2324",
+  "name": "仁寶",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 35.77 附近(距 +0.9%)・翻紅 +4.03% 站回均價・量比 0.61(市場中位 0.37)",
+  "price": 36.1,
+  "change_rate": 4.03,
+  "volume_ratio": 0.61,
+  "vwap": 35.6,
+  "fired_at": "09:41"
+ },
+ "2540|breakout": {
+  "stock_id": "2540",
+  "name": "愛山林",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 56.40(現價 57.70,高出 2.3%)・量比 0.60(市場中位 0.37)・站上均價 57.40",
+  "price": 57.7,
+  "change_rate": 3.22,
+  "volume_ratio": 0.6,
+  "vwap": 57.4,
+  "fired_at": "09:41"
+ },
+ "2207|breakout": {
+  "stock_id": "2207",
+  "name": "和泰車",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 507.00(現價 515.00,高出 1.6%)・量比 0.80(市場中位 0.37)・站上均價 513.99",
+  "price": 515.0,
+  "change_rate": 3.0,
+  "volume_ratio": 0.8,
+  "vwap": 513.99,
+  "fired_at": "09:41"
+ },
+ "2539|breakout": {
+  "stock_id": "2539",
+  "name": "櫻花建",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 41.60(現價 42.55,高出 2.3%)・量比 1.53(市場中位 0.37)・站上均價 42.42",
+  "price": 42.55,
+  "change_rate": 3.4,
+  "volume_ratio": 1.53,
+  "vwap": 42.42,
+  "fired_at": "09:41"
  }
 }
