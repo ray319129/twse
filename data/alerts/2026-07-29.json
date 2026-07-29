@@ -142,5 +142,17 @@
   "volume_ratio": 2.21,
   "vwap": 129.9,
   "fired_at": "12:50"
+ },
+ "9939|pullback": {
+  "stock_id": "9939",
+  "name": "宏全",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 126.28 附近(距 +2.2%)・翻紅 +0.78% 站回均價・量比 2.59(市場中位 1.39)",
+  "price": 129.0,
+  "change_rate": 0.78,
+  "volume_ratio": 2.59,
+  "vwap": 127.22,
+  "fired_at": "13:10"
  }
 }
