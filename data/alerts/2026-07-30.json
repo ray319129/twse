@@ -166,5 +166,29 @@
   "volume_ratio": 0.65,
   "vwap": 24.63,
   "fired_at": "12:18"
+ },
+ "2867|breakout": {
+  "stock_id": "2867",
+  "name": "三商壽",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 9.65(現價 9.69,高出 0.4%)・量比 0.85(市場中位 0.49)・站上均價 9.51",
+  "price": 9.69,
+  "change_rate": 3.41,
+  "volume_ratio": 0.85,
+  "vwap": 9.51,
+  "fired_at": "12:35"
+ },
+ "6863|breakout": {
+  "stock_id": "6863",
+  "name": "永道-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 127.50(現價 128.00,高出 0.4%)・量比 0.95(市場中位 0.49)・站上均價 122.07",
+  "price": 128.0,
+  "change_rate": 3.64,
+  "volume_ratio": 0.95,
+  "vwap": 122.07,
+  "fired_at": "12:35"
  }
 }
