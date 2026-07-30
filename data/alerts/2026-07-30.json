@@ -82,5 +82,17 @@
   "volume_ratio": 0.5,
   "vwap": 50.36,
   "fired_at": "10:52"
+ },
+ "1723|pullback": {
+  "stock_id": "1723",
+  "name": "中碳",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 85.52 附近(距 -0.8%)・翻紅 +3.03% 站回均價・量比 0.51(市場中位 0.39)",
+  "price": 84.8,
+  "change_rate": 3.03,
+  "volume_ratio": 0.51,
+  "vwap": 84.01,
+  "fired_at": "11:29"
  }
 }
