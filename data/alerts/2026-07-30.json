@@ -1,0 +1,14 @@
+{
+ "1526|breakout": {
+  "stock_id": "1526",
+  "name": "日馳",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 19.40(現價 20.25,高出 4.4%)・量比 0.57(市場中位 0.08)・站上均價 19.41",
+  "price": 20.25,
+  "change_rate": 7.14,
+  "volume_ratio": 0.57,
+  "vwap": 19.41,
+  "fired_at": "09:10"
+ }
+}
