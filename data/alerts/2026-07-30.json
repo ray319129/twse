@@ -34,5 +34,17 @@
   "volume_ratio": 0.5,
   "vwap": 344.96,
   "fired_at": "09:37"
+ },
+ "2892|breakout": {
+  "stock_id": "2892",
+  "name": "第一金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 35.10(現價 35.25,高出 0.4%)・量比 0.50(市場中位 0.22)・站上均價 34.87",
+  "price": 35.25,
+  "change_rate": 1.29,
+  "volume_ratio": 0.5,
+  "vwap": 34.87,
+  "fired_at": "09:55"
  }
 }
