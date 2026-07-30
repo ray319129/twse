@@ -150,5 +150,104 @@
     },
     "valid_count": 2,
     "total": 3
+  },
+  "orb": {
+    "generated_at": "2026-07-30 09:26",
+    "rows": [
+      {
+        "stock_id": "8271",
+        "name": "宇瞻",
+        "score": 95.5,
+        "profile": "均衡",
+        "plan": {
+          "ref": 222.5,
+          "max_entry": 229.18,
+          "init_stop": 206.92,
+          "tp1": 253.65,
+          "r_abs": 15.575000000000017,
+          "risk_pct": 7.0,
+          "style": "momentum",
+          "tp1_resistance": true,
+          "flat_lo": 220.28,
+          "flat_hi": 224.72,
+          "gap_up_line": 225.84,
+          "gap_dn_line": 220.28,
+          "trail_ma": 10
+        },
+        "scenario": "C",
+        "scenario_label": "C 開低",
+        "orh": 226.5,
+        "orl": 213.0,
+        "open": 217.5,
+        "or_vol": 228000,
+        "last": 226.5,
+        "status": "pending"
+      },
+      {
+        "stock_id": "2540",
+        "name": "愛山林",
+        "score": 76.4,
+        "profile": "均衡",
+        "plan": {
+          "ref": 57.8,
+          "max_entry": 59.53,
+          "init_stop": 54.0,
+          "tp1": 65.4,
+          "r_abs": 3.799999237060547,
+          "risk_pct": 6.57,
+          "style": "momentum",
+          "tp1_resistance": false,
+          "flat_lo": 57.22,
+          "flat_hi": 58.38,
+          "gap_up_line": 58.67,
+          "gap_dn_line": 57.22,
+          "trail_ma": 10
+        },
+        "scenario": "A",
+        "scenario_label": "A 平盤",
+        "orh": 58.3,
+        "orl": 57.5,
+        "open": 58.0,
+        "or_vol": 15833,
+        "last": 58.3,
+        "status": "pending"
+      },
+      {
+        "stock_id": "2207",
+        "name": "和泰車",
+        "score": 71.7,
+        "profile": "品質",
+        "plan": {
+          "ref": 519.0,
+          "max_entry": 534.57,
+          "init_stop": 497.0,
+          "tp1": 563.0,
+          "r_abs": 22.0,
+          "risk_pct": 4.24,
+          "style": "momentum",
+          "tp1_resistance": false,
+          "flat_lo": 513.81,
+          "flat_hi": 524.19,
+          "gap_up_line": 526.78,
+          "gap_dn_line": 513.81,
+          "trail_ma": 10
+        },
+        "scenario": "A",
+        "scenario_label": "A 平盤",
+        "orh": 526.0,
+        "orl": 518.0,
+        "open": 523.0,
+        "or_vol": 7285,
+        "last": 523.0,
+        "status": "pending"
+      }
+    ],
+    "fired_count": 0,
+    "orb_cfg": {
+      "range_minutes": 15,
+      "confirm_until": "09:30",
+      "volume_filter": true,
+      "volume_mult": 1.0
+    }
   }
 }
