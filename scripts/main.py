@@ -456,9 +456,16 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     name_map = dict(zip(universe["stock_id"], universe["stock_name"]))
     industry_map = dict(zip(universe["stock_id"], universe.get("industry_category", pd.Series([""] * len(universe)))))
 
+    # 新鮮度基準:市場最後一個交易日。用大盤指數當尺(它每天現抓),而不是 today ——
+    # 離線測試與 `--date` 歷史模式下牆上時間會遠離資料日期,用 today 會把全市場誤殺成停更。
+    market_ref_date = (index_close.index[-1].date()
+                       if (index_close is not None and len(index_close)) else today)
+    max_stale_days = int(rank_cfg.get("max_stale_days", 7))   # 日曆日;0 或負數 = 關閉此閘門
+
     scored: list[dict] = []          # 全市場評分(只用免費資料)
     tech_tags: dict[str, dict] = {}  # 技術訊號標籤/K線型態(顯示+記錄用,不進評分)
     no_data: list[str] = []
+    stale: list[tuple[str, str]] = []   # (代號, 最後一根K棒日期):資料停更、不予評分
     industry_rows: list[dict] = []
 
     # ---------- 第一遍:全市場用免費資料評分 ----------
@@ -501,6 +508,19 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
 
         if historical:
             df = df[df.index.date <= today]
+
+        # ---------- 新鮮度閘門 ----------
+        # 上面那行 `df = upsert_prices(...) if not inc.empty else existing` 在增量抓不到時會**靜默沿用舊快取**,
+        # 之後照樣進 compute_all —— 等於把任意舊的最後一根 K 棒當成今日,算出的均線/RSI/量比/信心分全是假的,
+        # 而且會正常入榜、前端毫無警示、workflow 永遠 success。
+        # 實測 2026-07-30:89 檔停更(69 檔凍在 07-09),6446 用 07-09 的資料算出 62.8 分,
+        # 連續 8 個交易日掛在觀察清單、分數一字不變,而該股實際已從 1285 跌到 1015。
+        # 基準用「市場最後交易日」(大盤指數)而非牆上時間 —— 離線測試/--date 歷史模式才不會整批被誤殺。
+        if max_stale_days > 0 and not df.empty:
+            _last_bar = df.index.max().date()
+            if (market_ref_date - _last_bar).days > max_stale_days:
+                stale.append((sid, _last_bar.isoformat()))
+                continue
 
         # 新股獨立軌道:不再一律要求 120 根 K 棒;新股(>= min_history_new)也評分,只是長均線/相對強度較弱。
         if len(df) < min_hist_new:
@@ -564,6 +584,17 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         log.info(f"價格 tail 已落地:{_n_tail} 個月檔")
     except Exception as e:
         log.warning(f"價格 tail 落地失敗:{e}")
+
+    # 停更股要**吵**。這類失敗不會讓 workflow 紅燈,不主動報就等於沒修。
+    if stale:
+        _by_date: dict[str, int] = {}
+        for _s, _d in stale:
+            _by_date[_d] = _by_date.get(_d, 0) + 1
+        _top = sorted(_by_date.items(), key=lambda kv: -kv[1])[:3]
+        log.warning(
+            f"⚠ 價格停更 {len(stale)} 檔(落後市場基準日 {market_ref_date} 逾 {max_stale_days} 天),已排除不評分。"
+            f" 最後日期分布 top3:{_top};範例:{[s for s, _ in stale[:10]]}"
+        )
 
     # ---------- 大盤閘門(regime,3.3):依 index + 市場廣度 + 漲跌停家數動態調 core_count / min_score ----------
     market_cfg = cfg.get("market", {}) or {}
@@ -718,6 +749,8 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "industry_trends": industry_trends,
             "scored_count": len(scored),
             "no_data_count": len(no_data),
+            "stale_count": len(stale),
+            "stale_stocks": [{"stock_id": _s, "last_bar": _d} for _s, _d in stale[:50]],
         }), f, ensure_ascii=False, indent=2, default=str)
 
     # 歷史追蹤與績效:回看過去所有核心選股的後續走勢(讀剛寫入的 + 歷史 signals)
@@ -761,6 +794,9 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "index_below_ma20": index_below_ma20,
             "market_regime": regime,
             "scored_count": len(scored),
+            # 停更股:資料落後市場基準日、已被新鮮度閘門排除。前端顯示,免得靜默消失沒人知道。
+            "stale_count": len(stale),
+            "stale_stocks": [{"stock_id": _s, "last_bar": _d} for _s, _d in stale[:50]],
             "core": core_clean,
             "watch": watch_clean,
             "watchlist": watchlist_clean,
@@ -779,6 +815,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
             "index_below_ma20": index_below_ma20,
             "market_regime": regime,
             "scored_count": len(scored),
+            "stale_count": len(stale),
             "core": core_clean, "watch": watch_clean, "watchlist": watchlist_clean,
             "events": events,
             "label": STRATEGY_LABEL,
@@ -843,6 +880,7 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
         "index_below_ma20": index_below_ma20,
         "market_regime": regime,
         "no_data_count": len(no_data),
+        "stale_count": len(stale),
         "label": STRATEGY_LABEL,
         "events": events,
         "test_mode": test_mode,

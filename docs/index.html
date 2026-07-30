@@ -976,7 +976,12 @@ function setSub(){
   const hist=isHist?'<span class="tag-hist">歷史</span>':'';
   /* generated_at only belongs to the latest snapshot; don't show it next to a historical date */
   const upd=(!isHist&&LATEST&&LATEST.generated_at)?`<span class="dot"></span>更新 ${esc(LATEST.generated_at)}`:'';
-  $('#sub').innerHTML=`<span>${esc(d.date)||''}</span>${hist}<span class="dot"></span>全市場 <b style="color:var(--ink-2)">${isNum(d.scored_count)?d.scored_count:0}</b> 檔評分<span class="dot"></span>${mkt}${gate}${upd}`;
+  /* 停更股:資料落後市場、已被新鮮度閘門排除。要露出來 —— 這類失敗不會讓流程紅燈,
+     不顯示就等於又回到「靜默用舊資料算分」的老問題。 */
+  const stale=(isNum(d.stale_count)&&d.stale_count>0)
+    ? `<span class="dot"></span><span style="color:var(--warn)" title="${esc((d.stale_stocks||[]).slice(0,15).map(x=>x.stock_id+'('+x.last_bar+')').join(' · '))||'資料落後市場基準日,已排除不評分'}">⚠ ${d.stale_count} 檔資料停更已排除</span>`
+    : '';
+  $('#sub').innerHTML=`<span>${esc(d.date)||''}</span>${hist}<span class="dot"></span>全市場 <b style="color:var(--ink-2)">${isNum(d.scored_count)?d.scored_count:0}</b> 檔評分${stale}<span class="dot"></span>${mkt}${gate}${upd}`;
 }
 
 /* ============================================================
