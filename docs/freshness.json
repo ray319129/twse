@@ -1,1 +1,1 @@
-{"samples": 30, "distinct": 1, "gaps_s": [], "median_gap_s": null, "stamps": ["2026-07-29 12:57:24.764170"], "measured_at": "2026-07-30 09:01", "interval_used": 10.0, "heartbeat": "2026-07-30 13:18:18", "polls": 1522, "fired_today": 19, "interval": 10.0, "checked": 964}
+{"samples": 30, "distinct": 1, "gaps_s": [], "median_gap_s": null, "stamps": ["2026-07-30 12:30:08.207105"], "measured_at": "2026-07-30 13:22", "interval_used": 10.0, "heartbeat": "2026-07-30 13:22:53", "polls": 1, "fired_today": 0, "interval": 10.0, "checked": 1022}
