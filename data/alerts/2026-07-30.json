@@ -22,5 +22,17 @@
   "volume_ratio": 0.53,
   "vwap": 270.9,
   "fired_at": "09:28"
+ },
+ "1476|breakout": {
+  "stock_id": "1476",
+  "name": "儒鴻",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 350.00(現價 351.50,高出 0.4%)・量比 0.50(市場中位 0.17)・站上均價 344.96",
+  "price": 351.5,
+  "change_rate": 3.84,
+  "volume_ratio": 0.5,
+  "vwap": 344.96,
+  "fired_at": "09:37"
  }
 }
