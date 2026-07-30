@@ -2262,9 +2262,18 @@ function renderPerf(){
   const isHist=!!(LATEST&&DATA&&DATA.date!==LATEST.date);
   const hname={1:'隔日',3:'3日',5:'5日',10:'10日',20:'20日',30:'30日'};
   let stats='<div class="stats">';
-  if(isNum(o.win_rate))stats+=`<div class="stat"><div class="v">${o.win_rate}%</div><div class="l">勝率(最新報酬)<br>總 ${isNum(o.total)?o.total:'-'} · <span class="up">賺 ${isNum(o.win)?o.win:'-'}</span> · <span class="down">賠 ${isNum(o.loss)?o.loss:'-'}</span></div></div>`;
+  /* ★ 超額擺第一張:絕對報酬會把大盤自己的漲跌算到選股頭上,超額才是選股能力的尺 */
+  const bm=p.benchmark||{};
+  if(isNum(o.avg_excess)){
+    stats+=`<div class="stat"><div class="v ${cls(o.avg_excess)}">${fmt(o.avg_excess)}pp</div><div class="l">★ 超額報酬 vs ${esc(bm.name||'大盤')}<br>選股 <span class="${cls(o.avg_ret)}">${fmt(o.avg_ret)}%</span> vs 大盤同期 <span class="${cls(o.avg_bench)}">${fmt(o.avg_bench)}%</span> · 勝過大盤 ${isNum(o.beat_rate)?o.beat_rate+'%':'-'}<br><span style="color:var(--muted-2)">${isNum(o.n_excess)?o.n_excess:0} 檔有基準 · 每檔各自從選股日起算</span></div></div>`;
+  }else if(bm.available===false){
+    stats+=`<div class="stat"><div class="v" style="font-size:15px;color:var(--warn)">無大盤基準</div><div class="l">只能看絕對報酬<br><span style="color:var(--muted-2)">大盤自己的漲跌會被算到選股頭上,別據此下結論</span></div></div>`;
+  }
+  if(isNum(o.win_rate))stats+=`<div class="stat"><div class="v">${o.win_rate}%</div><div class="l">勝率(最新報酬,未扣大盤)<br>總 ${isNum(o.total)?o.total:'-'} · <span class="up">賺 ${isNum(o.win)?o.win:'-'}</span> · <span class="down">賠 ${isNum(o.loss)?o.loss:'-'}</span></div></div>`;
   if(isNum(es.closed)&&es.closed>0){
     stats+=`<div class="stat"><div class="v">${isNum(es.win_rate)?es.win_rate+'%':'-'}</div><div class="l">已實現勝率 · 平均(已扣成本) <span class="${cls(es.avg_ret)}">${fmt(es.avg_ret)}%</span>${isNum(es.avg_ret_gross)?` <span style="color:var(--muted-2)">(扣前${fmt(es.avg_ret_gross)}%)</span>`:''} · 持有 ${isNum(es.avg_hold_days)?es.avg_hold_days+'日':'-'}<br><span style="color:var(--muted-2)">隔日開盤進場 · 開高&gt;${isNum(es.max_chase)?es.max_chase:'-'}%棄單 · 停損-${isNum(es.hard_stop)?es.hard_stop:'-'}%/TP1=${isNum(es.r_multiple)?es.r_multiple:'-'}R · 含手續費${isNum(es.fee_rate)?es.fee_rate:'-'}%×2+稅${isNum(es.tax_rate)?es.tax_rate:'-'}%(同日出場才用當沖${isNum(es.tax_rate_daytrade)?es.tax_rate_daytrade:'-'}%)+滑價${isNum(es.slippage_pct)?es.slippage_pct:'-'}%×2</span></div></div>`;
+    if(isNum(es.avg_excess))
+      stats+=`<div class="stat"><div class="v ${cls(es.avg_excess)}">${fmt(es.avg_excess)}pp</div><div class="l">★ 已實現超額(扣成本後 vs 大盤)<br>淨報酬 <span class="${cls(es.avg_ret)}">${fmt(es.avg_ret)}%</span> vs 同期大盤 <span class="${cls(es.avg_bench)}">${fmt(es.avg_bench)}%</span> · 勝過大盤 ${isNum(es.beat_rate)?es.beat_rate+'%':'-'}<br><span style="color:var(--muted-2)">只算已出場的 ${isNum(es.n_excess)?es.n_excess:0} 筆 · 比的是各自實際持有期間</span></div></div>`;
     const rs=Object.entries(es.reasons||{}).map(([k,v])=>`${esc(k)} ${isNum(v)?v:'-'}%`).join(' · ');
     stats+=`<div class="stat"><div class="v" style="font-size:15px;font-weight:700">${rs||'—'}</div><div class="l">出場原因 · 持有中 ${isNum(es.open)?es.open:0} · 跳空棄單 ${isNum(es.skipped_gap)?es.skipped_gap:0} · 待進場 ${isNum(es.pending)?es.pending:0}${es.chased_catalyst?` · <span style="color:#8e44ad">催化劑放寬進場 ${es.chased_catalyst}</span>`:''}</div></div>`;
     /* 出場拆分:依進場型態(突破/回測轉強)與風格(動能/波段)—— 看哪種組合真有 edge,調參依據 */
@@ -2280,10 +2289,14 @@ function renderPerf(){
   let htab='';
   const hs=(p.horizons||[]).filter(h=>bh[h]);
   if(hs.length){
-    htab=`<div class="sec-h"><span class="bar"></span>各天期平均報酬 + 期間最高漲幅</div><div class="tbl-wrap"><table class="t"><thead><tr>
-      <th>進場後</th><th class="r">樣本</th><th class="r">勝率</th><th class="r">平均報酬</th><th class="r">平均最高漲幅</th></tr></thead><tbody>`
+    htab=`<div class="sec-h"><span class="bar"></span>各天期報酬 vs 大盤 + 期間最高漲幅</div><div class="tbl-wrap"><table class="t"><thead><tr>
+      <th>進場後</th><th class="r">樣本</th><th class="r">勝率</th><th class="r">平均報酬</th><th class="r">大盤同期</th><th class="r">超額</th><th class="r">勝過大盤</th><th class="r">平均最高漲幅</th></tr></thead><tbody>`
       +hs.map(h=>{const s=bh[h]||{};return `<tr><td class="tk">${hname[h]||esc(h)}</td><td class="r num">${isNum(s.n)?s.n:'-'}</td><td class="r num">${isNum(s.win_rate)?s.win_rate+'%':'-'}</td>
-      <td class="r num ${cls(s.avg_ret)}">${fmt(s.avg_ret)}%</td><td class="r num" style="color:var(--warn)">${isNum(s.avg_maxgain)?fmt(s.avg_maxgain)+'%':'-'}</td></tr>`;}).join('')
+      <td class="r num ${cls(s.avg_ret)}">${fmt(s.avg_ret)}%</td>
+      <td class="r num" style="color:var(--muted-2)">${isNum(s.avg_bench)?fmt(s.avg_bench)+'%':'-'}</td>
+      <td class="r num ${cls(s.avg_excess)}"><b>${isNum(s.avg_excess)?fmt(s.avg_excess)+'pp':'-'}</b></td>
+      <td class="r num">${isNum(s.beat_rate)?s.beat_rate+'%':'-'}</td>
+      <td class="r num" style="color:var(--warn)">${isNum(s.avg_maxgain)?fmt(s.avg_maxgain)+'%':'-'}</td></tr>`;}).join('')
       +`</tbody></table></div>`;
   }
 
@@ -2562,6 +2575,15 @@ function ledLive(r){
   o.ret_pct=Math.round((px/r.entry-1)*10000)/100;
   /* 期間最高漲幅:即時價創新高才更新,否則沿用批次算的波段高 */
   if(isNum(r.peak_price)&&px>r.peak_price)o.peak_gain_pct=Math.round((px/r.entry-1)*10000)/100;
+  /* 超額也要跟著即時走,否則「即時報酬 − 批次基準」是拿兩個時點相減。
+     批次基準只到昨收,故複利上今日大盤漲跌幅(PULSE 的加權指數)才對得齊。
+     沒有盤中大盤時就沿用批次基準(誤差僅今日一天),不硬掰。 */
+  if(isNum(r.bench_ret_pct)){
+    const ic=(PULSE&&PULSE.indices&&PULSE.indices['001']&&isNum(PULSE.indices['001'].change_rate))?PULSE.indices['001'].change_rate:null;
+    const b=(ic!=null)?((1+r.bench_ret_pct/100)*(1+ic/100)-1)*100:r.bench_ret_pct;
+    o.bench_ret_pct=Math.round(b*100)/100;
+    o.excess_pct=Math.round((o.ret_pct-b)*100)/100;
+  }
   o._live=true;o._lts=lq.ts;o._lsrc=lq.source;
   return o;
 }
@@ -2582,6 +2604,11 @@ function ledLiveSummary(rows){
     <div class="ll-h">${dot}未出場部位即時損益 <span class="ll-src">${live.length}/${op.length} 檔為${src}</span></div>
     <div class="ll-g">
       <div><b class="${cls(avg)}">${fmt(avg)}%</b><i>平均報酬</i></div>
+      ${(()=>{const xs=op.map(r=>r.excess_pct).filter(isNum);
+        if(!xs.length)return '';
+        const xa=xs.reduce((a,b)=>a+b,0)/xs.length,xw=xs.filter(v=>v>0).length;
+        return `<div><b class="${cls(xa)}">${fmt(xa)}pp</b><i>平均超額 vs 大盤</i></div>`
+             +`<div><b>${xw}/${xs.length}</b><i>目前贏過大盤</i></div>`;})()}
       <div><b>${win}/${rs.length}</b><i>目前獲利檔數</i></div>
       <div><b>${op.length}</b><i>仍未出場</i></div>
     </div>
@@ -2607,6 +2634,9 @@ function drawLedger(){
     {k:'latest_close',t:'最新',r:1,f:r=>`<span class="num">${num(r.latest_close)}</span>${r._live?`<span class="led-dot" title="即時報價 ${esc(r._lts||'')}"></span>`:''}`},
     {k:'days',t:'天',r:1,f:r=>`<span class="num" style="color:var(--muted-2)">${isNum(r.days)?r.days:'-'}</span>`},
     {k:'ret_pct',t:'報酬率',r:1,f:r=>`<span class="num ${cls(r.ret_pct)}" style="font-weight:800">${fmt(r.ret_pct)}%</span>`},
+    {k:'excess_pct',t:'超額',r:1,f:r=>isNum(r.excess_pct)
+      ?`<span class="num ${cls(r.excess_pct)}" style="font-weight:800" title="同期大盤 ${isNum(r.bench_ret_pct)?fmt(r.bench_ret_pct)+'%':'-'}">${fmt(r.excess_pct)}pp</span>`
+      :`<span class="num" style="color:var(--muted-2)" title="缺大盤基準,不以 0 充數">-</span>`},
     {k:'peak_gain_pct',t:'最高漲幅',r:1,f:r=>`<span class="num" style="color:var(--warn)">${isNum(r.peak_gain_pct)?fmt(r.peak_gain_pct)+'%':'-'}</span>`},
     {k:'exit_reason',t:'模擬出場',f:r=>r.exit_reason?`${esc(r.exit_reason)}${isNum(r.exit_ret_pct)?` <span class="num ${cls(r.exit_ret_pct)}">${fmt(r.exit_ret_pct)}%</span>`:''}`:'-'},
     {k:'_mp',t:'我的',f:r=>{const v=mpGet(r),k=esc(mpKey(r));

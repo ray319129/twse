@@ -20,6 +20,7 @@ from .fetchers import (
 )
 from .storage import (
     load_prices, upsert_prices, save_prices, prices_scale_shift,
+    upsert_index_cache,
     load_chips, upsert_chips,
     load_revenue, upsert_revenue,
     load_per, upsert_per,
@@ -436,6 +437,13 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
     # 大盤指數(相對強度用),整個 run 只抓一次
     index_df = fetch_index_history(days=400)
     index_close = index_df["close"] if not index_df.empty else None
+    # 大盤落地快取:回測/驗證層(backtest.py、score_validate.py)只讀 data/meta/twii.parquet,
+    # 之前沒人寫它 → 停在最後一次手動補史的日期,研究層等於拿舊基準在算超額。
+    if not historical and not index_df.empty:
+        try:
+            upsert_index_cache(index_df)
+        except Exception as e:
+            log.warning(f"twii 快取寫入失敗(不影響本次流程):{e}")
     if historical and index_close is not None:
         index_close = index_close[index_close.index.date <= today]
     index_below_ma20 = False
@@ -706,7 +714,9 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
 
     # 歷史追蹤與績效:回看過去所有核心選股的後續走勢(讀剛寫入的 + 歷史 signals)
     try:
-        performance = build_perf_report(as_of=today, exit_cfg=cfg.get("exit", {}), entry_cfg=cfg.get("entry", {}),
+        # index_close 一定要傳:沒有大盤基準,台帳只剩絕對報酬,會把大盤漲跌記到選股頭上。
+        performance = build_perf_report(index_close=index_close, as_of=today,
+                                         exit_cfg=cfg.get("exit", {}), entry_cfg=cfg.get("entry", {}),
                                          cost_cfg=cfg.get("cost", {}))
     except Exception as e:
         log.warning(f"performance report failed: {e}")

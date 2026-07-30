@@ -6,7 +6,7 @@ from datetime import date
 import pandas as pd
 
 from .config import SIGNALS_DIR
-from .storage import load_prices
+from .storage import load_prices, load_index_cache
 from .indicators import sma, atr as atr_ind
 
 """歷史追蹤與績效分析系統。
@@ -53,7 +53,8 @@ def _load_core_picks() -> list[dict]:
     return uniq
 
 
-def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date) -> dict | None:
+def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date,
+               index_close: pd.Series | None = None) -> dict | None:
     if df is None or df.empty or "close" not in df.columns:
         return None
     pos = df.index.get_indexer([pd.Timestamp(sig_date)])
@@ -61,7 +62,9 @@ def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date) -> di
         return None
     p0 = int(pos[0]); n = len(df)
     high = df["high"] if "high" in df.columns else df["close"]
-    out = {"rets": {}, "maxgain": {}}
+    # bench/excess:同一段期間的大盤報酬與超額。用個股自己的日期切點對齊,
+    # 每檔各自從選股日起算(事件時間),沒有共同終點偏誤。
+    out = {"rets": {}, "maxgain": {}, "bench": {}, "excess": {}}
     for h in HORIZONS:
         tp = p0 + h
         if tp < n:
@@ -69,8 +72,12 @@ def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date) -> di
             out["rets"][h] = float(c / entry - 1) if pd.notna(c) and entry else None
             hi = high.iloc[p0 + 1:tp + 1].max()
             out["maxgain"][h] = float(hi / entry - 1) if pd.notna(hi) and entry else None
+            b = _bench_between(index_close, df.index[p0], df.index[tp])
+            out["bench"][h] = b
+            out["excess"][h] = (out["rets"][h] - b) if (b is not None and out["rets"][h] is not None) else None
         else:
             out["rets"][h] = None; out["maxgain"][h] = None
+            out["bench"][h] = None; out["excess"][h] = None
     last = n - 1
     if last > p0:
         lc = df["close"].iloc[last]
@@ -80,9 +87,13 @@ def _pick_perf(df: pd.DataFrame, sig_date: str, entry: float, as_of: date) -> di
         out["peak_price"] = float(hi_all) if pd.notna(hi_all) else None
         out["peak_gain"] = float(hi_all / entry - 1) if pd.notna(hi_all) and entry else None
         out["trading_elapsed"] = last - p0
+        out["latest_bench"] = _bench_between(index_close, df.index[p0], df.index[last])
     else:
         out["latest_ret"] = 0.0; out["latest_close"] = entry
         out["peak_price"] = entry; out["peak_gain"] = 0.0; out["trading_elapsed"] = 0
+        out["latest_bench"] = 0.0 if index_close is not None else None
+    out["latest_excess"] = (out["latest_ret"] - out["latest_bench"]
+                            if (out["latest_bench"] is not None and out["latest_ret"] is not None) else None)
     out["days_elapsed"] = (as_of - date.fromisoformat(sig_date)).days
     return out
 
@@ -343,6 +354,36 @@ def _win_rate(vals: list[float]) -> float | None:
     return round(sum(1 for v in vals if v > 0) / len(vals) * 100, 1) if vals else None
 
 
+def _bench_between(index_close: pd.Series | None, d0, d1) -> float | None:
+    """大盤在兩個日期之間的報酬。用 `asof`(取「該日或之前最近一筆」)對齊 ——
+    個股與指數的交易日序列可能有洞(停牌/資料缺),用位置差會飄掉,用日期才對得準。
+    任一端缺值或起點為 0 回 None(缺基準時寧可不顯示,別給假超額)。
+
+    ⚠️ **必須擋區間外**:`asof` 對「晚於序列最後一筆」的日期會回傳最後一筆值,
+    等於把大盤當成從此不再變動 → 基準恆 0 → 超額 = 原始報酬,而且看起來完全正常。
+    大盤快取只要落後一天,所有新選股都會拿到假超額。故超出兩端一律回 None。"""
+    if index_close is None or d0 is None or d1 is None or index_close.empty:
+        return None
+    t0, t1 = pd.Timestamp(d0), pd.Timestamp(d1)
+    lo, hi = index_close.index[0], index_close.index[-1]
+    if t0 < lo or t1 > hi:
+        return None
+    try:
+        a = index_close.asof(t0)
+        b = index_close.asof(t1)
+    except Exception:
+        return None
+    if pd.isna(a) or pd.isna(b) or not a:
+        return None
+    return float(b / a - 1)
+
+
+def _beat_rate(excess: list[float]) -> float | None:
+    """勝過大盤的比例(超額 > 0)。與 _win_rate 分開命名,避免「絕對正報酬」被誤讀成「贏大盤」。"""
+    vals = [v for v in excess if v is not None]
+    return round(sum(1 for v in vals if v > 0) / len(vals) * 100, 1) if vals else None
+
+
 def build_report(index_close: pd.Series | None = None, as_of: date | None = None,
                  exit_cfg: dict | None = None, entry_cfg: dict | None = None,
                  cost_cfg: dict | None = None) -> dict:
@@ -353,15 +394,33 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
     max_chase = float((entry_cfg or {}).get("max_chase", 0.03))
     catalyst_chase_cfg = (entry_cfg or {}).get("catalyst_chase", {})
 
+    if index_close is not None and not index_close.empty:
+        index_close = index_close.dropna().sort_index()   # asof 要求已排序
+        if index_close.empty:
+            index_close = None
+
     rows: list[dict] = []
     for p in picks:
         df = load_prices(p["stock_id"])
-        perf = _pick_perf(df, p["date"], p["entry"], as_of)
+        perf = _pick_perf(df, p["date"], p["entry"], as_of, index_close)
         if perf is None:
             continue
         sim = _simulate_exit(df, p["date"], p["entry"], _style_of(p), exit_cfg, max_chase, cost_cfg,
                              catalyst_signal=p.get("catalyst_signal"), catalyst_chase_cfg=catalyst_chase_cfg)
         row = {**p, **perf, "exit": sim}
+        # 已出場的單:算「實際持有期間」(隔日開盤進場 → 出場當日)的大盤報酬,
+        # 才能問「這筆是靠選股贏,還是整個大盤都在漲」。
+        if sim and sim.get("status") == "closed" and sim.get("hold_days") is not None:
+            _pos = df.index.get_indexer([pd.Timestamp(p["date"])])
+            if len(_pos) and _pos[0] != -1:
+                e = int(_pos[0]) + 1
+                xp = e + int(sim["hold_days"])
+                if e < len(df) and xp < len(df):
+                    eb = _bench_between(index_close, df.index[e], df.index[xp])
+                    if eb is not None:
+                        sim["bench_ret"] = eb
+                        if sim.get("exit_ret") is not None:
+                            sim["excess"] = sim["exit_ret"] - eb
         # 機會成本測量:被「跳空開高棄單」的票,若當初照隔日開盤買進的前向表現(純量化,不改交易規則)
         if sim and sim.get("status") == "skip" and sim.get("gap") is not None and sim["gap"] > 0:
             pos = df.index.get_indexer([pd.Timestamp(p["date"])])
@@ -376,12 +435,23 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
     loss = sum(1 for r in matured if r["latest_ret"] < 0)
     overall = {"total": len(matured), "win": win, "loss": loss, "flat": len(matured) - win - loss,
                "win_rate": round(win / len(matured) * 100, 1) if matured else None}
+    # ★ 超額才是選股能力的尺:絕對報酬會把大盤漲跌算到自己頭上。
+    _ex_all = [r.get("latest_excess") for r in matured]
+    overall.update({
+        "avg_ret": _avg_pct([r["latest_ret"] for r in matured]),
+        "avg_bench": _avg_pct([r.get("latest_bench") for r in matured]),
+        "avg_excess": _avg_pct(_ex_all),
+        "beat_rate": _beat_rate(_ex_all),
+        "n_excess": sum(1 for v in _ex_all if v is not None),
+    })
 
     # ---------- 各天期平均收盤報酬 + 平均最高漲幅 ----------
     by_horizon = {}
     for h in HORIZONS:
         rs = [r["rets"][h] for r in rows if r["rets"].get(h) is not None]
         mg = [r["maxgain"][h] for r in rows if r["maxgain"].get(h) is not None]
+        ex = [r["excess"][h] for r in rows if r.get("excess", {}).get(h) is not None]
+        bn = [r["bench"][h] for r in rows if r.get("bench", {}).get(h) is not None]
         if not rs:
             continue
         by_horizon[h] = {
@@ -389,6 +459,10 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "win_rate": round(sum(1 for x in rs if x > 0) / len(rs) * 100, 1),
             "avg_ret": round(sum(rs) / len(rs) * 100, 2),
             "avg_maxgain": round(sum(mg) / len(mg) * 100, 2) if mg else None,
+            "n_excess": len(ex),
+            "avg_bench": round(sum(bn) / len(bn) * 100, 2) if bn else None,
+            "avg_excess": round(sum(ex) / len(ex) * 100, 2) if ex else None,
+            "beat_rate": _beat_rate(ex),
         }
 
     # ---------- 出場模擬(隔日開盤進場 + 跳空保護 + R 倍數 + 移動停利)→ 真實已實現勝率 ----------
@@ -419,6 +493,8 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             c = sum(1 for e in closed if e["reason"] == rn)
             if c:
                 reasons[rn] = round(c / len(closed) * 100, 1)
+        _cex = [e.get("excess") for e in closed if e.get("excess") is not None]
+        _cbn = [e.get("bench_ret") for e in closed if e.get("bench_ret") is not None]
         exit_sim.update({
             "win_rate": round(sum(1 for e in closed if e["exit_ret"] > 0) / len(closed) * 100, 1),
             "avg_ret": round(sum(e["exit_ret"] for e in closed) / len(closed) * 100, 2),
@@ -426,6 +502,11 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "avg_cost_pct": round(sum(e["cost_pct"] for e in closed) / len(closed), 2),
             "avg_hold_days": round(sum(e["hold_days"] for e in closed) / len(closed), 1),
             "reasons": reasons,
+            # 已實現超額:扣完成本的淨報酬 vs 同一段持有期間的大盤
+            "n_excess": len(_cex),
+            "avg_bench": round(sum(_cbn) / len(_cbn) * 100, 2) if _cbn else None,
+            "avg_excess": round(sum(_cex) / len(_cex) * 100, 2) if _cex else None,
+            "beat_rate": _beat_rate(_cex),
         })
         # by_trigger / by_style 拆分:看「哪種進場型態配哪種出場規則」有沒有 edge(調參依據)。
         closed_rows = [r for r in rows if r.get("exit") and r["exit"].get("status") == "closed"
@@ -457,6 +538,9 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
             "latest_close": round(r["latest_close"], 2) if r["latest_close"] is not None else None,
             "days": r["days_elapsed"], "trading_elapsed": r["trading_elapsed"],
             "ret_pct": round(r["latest_ret"] * 100, 2) if r["latest_ret"] is not None else None,
+            "bench_ret_pct": round(r["latest_bench"] * 100, 2) if r.get("latest_bench") is not None else None,
+            "excess_pct": round(r["latest_excess"] * 100, 2) if r.get("latest_excess") is not None else None,
+            "exit_excess_pct": round(ex["excess"] * 100, 2) if ex.get("excess") is not None else None,
             "peak_price": round(r["peak_price"], 2) if r["peak_price"] is not None else None,
             "peak_gain_pct": round(r["peak_gain"] * 100, 2) if r["peak_gain"] is not None else None,
             "profile": r.get("profile"), "score": r.get("score"),
@@ -478,6 +562,9 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
         "win_rate": _win_rate([r["latest_ret"] for r in matured]),
         "avg_ret": _avg_pct([r["latest_ret"] for r in matured]),
         "avg_maxgain": _avg_pct([r["peak_gain"] for r in matured]),
+        "avg_bench": _avg_pct([r.get("latest_bench") for r in matured]),
+        "avg_excess": _avg_pct([r.get("latest_excess") for r in matured]),
+        "beat_rate": _beat_rate([r.get("latest_excess") for r in matured]),
     }
     # execution_return:實際規則(隔日開盤進場 + 跳空保護 + 停損/移動停利),只有 closed 真正實現
     execution = {
@@ -531,6 +618,13 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
 
     return {
         "as_of": as_of.isoformat(),
+        "benchmark": {
+            "available": index_close is not None,
+            "name": "加權指數 (^TWII)",
+            "note": ("超額 = 個股報酬 − 同期大盤報酬,每檔各自從自己的選股日起算(事件時間,無共同終點偏誤)。"
+                     "絕對報酬會把大盤漲跌算到選股頭上,超額才是選股能力的尺。"
+                     if index_close is not None else "本次無大盤資料,超額欄位從缺(不以 0 充數)。"),
+        },
         "overall": overall,
         "by_horizon": by_horizon,
         "exit_sim": exit_sim,
@@ -548,17 +642,27 @@ def build_report(index_close: pd.Series | None = None, as_of: date | None = None
 
 def _print_report(rep: dict) -> None:
     o = rep["overall"]
+    bm = rep.get("benchmark", {})
     print(f"=== 歷史追蹤(as of {rep['as_of']}) 共 {rep['total_tracked']} 檔選股 ===")
     if o["win_rate"] is not None:
         print(f"勝率:{o['win_rate']}%  (總 {o['total']} / 獲利 {o['win']} / 虧損 {o['loss']})")
-    print(f"\n{'天期':>5} {'樣本':>5} {'勝率':>6} {'平均報酬':>9} {'平均最高漲幅':>12}")
+    if bm.get("available") and o.get("avg_excess") is not None:
+        print(f"★ 超額 vs {bm.get('name')}:平均 {o['avg_excess']:+.2f}pp"
+              f"(選股 {o.get('avg_ret'):+.2f}% vs 大盤 {o.get('avg_bench'):+.2f}%)"
+              f" · 勝過大盤 {o.get('beat_rate')}%  [n={o.get('n_excess')}]")
+    elif not bm.get("available"):
+        print("⚠ 無大盤基準,只能看絕對報酬 —— 大盤自己的漲跌會被算到選股頭上,別據此下結論。")
+    print(f"\n{'天期':>5} {'樣本':>5} {'勝率':>6} {'平均報酬':>9} {'大盤同期':>9} {'超額':>9} {'勝過大盤':>8} {'平均最高漲幅':>12}")
     names = {1: "隔日", 3: "3日", 5: "5日", 10: "10日", 20: "20日", 30: "30日"}
     for h in rep["horizons"]:
         s = rep["by_horizon"].get(h)
         if not s:
             continue
         mg = f"{s['avg_maxgain']:+.2f}%" if s["avg_maxgain"] is not None else "-"
-        print(f"{names[h]:>5} {s['n']:>5} {s['win_rate']:>5.0f}% {s['avg_ret']:>+8.2f}% {mg:>12}")
+        bn = f"{s['avg_bench']:+.2f}%" if s.get("avg_bench") is not None else "-"
+        ex = f"{s['avg_excess']:+.2f}pp" if s.get("avg_excess") is not None else "-"
+        br = f"{s['beat_rate']:.0f}%" if s.get("beat_rate") is not None else "-"
+        print(f"{names[h]:>5} {s['n']:>5} {s['win_rate']:>5.0f}% {s['avg_ret']:>+8.2f}% {bn:>9} {ex:>9} {br:>8} {mg:>12}")
     es = rep.get("exit_sim", {})
     if es.get("closed"):
         rs = " / ".join(f"{k}{v}%" for k, v in es.get("reasons", {}).items())
@@ -566,6 +670,9 @@ def _print_report(rep: dict) -> None:
         print(f"  已實現勝率 {es['win_rate']}% · 平均報酬(已扣成本) {es['avg_ret']:+.2f}%"
               f"(扣前 {es.get('avg_ret_gross', 0):+.2f}%,成本 {es.get('avg_cost_pct', 0):.2f}%) · 平均持有 {es['avg_hold_days']} 日"
               f"  ({rs} · 持有中 {es['open']} · 跳空棄單 {es.get('skipped_gap',0)} · 待進場 {es.get('pending',0)})")
+        if es.get("avg_excess") is not None:
+            print(f"  ★ 已實現超額 {es['avg_excess']:+.2f}pp(同期大盤 {es.get('avg_bench'):+.2f}%)"
+                  f" · 勝過大盤 {es.get('beat_rate')}%  [n={es.get('n_excess')}]")
         _TRIG_LABEL = {"breakout": "突破", "pullback_turn": "回測轉強", "other": "其他"}
         _STYLE_LABEL = {"momentum": "動能", "swing": "波段"}
         for title, grp, labels in (("依進場型態", es.get("by_trigger", {}), _TRIG_LABEL),
@@ -581,8 +688,9 @@ def _print_report(rep: dict) -> None:
         ex = f"{r['exit_reason']} {r['exit_ret_pct']:+.1f}%" if r.get("exit_ret_pct") is not None else (r.get("exit_reason") or "-")
         rt = f"{r['ret_pct']:+.2f}%" if r["ret_pct"] is not None else "-"
         pk = f"{r['peak_gain_pct']:+.1f}%" if r.get("peak_gain_pct") is not None else "-"
+        xs = f"{r['excess_pct']:+.2f}pp" if r.get("excess_pct") is not None else "-"
         print(f"  {r['date']} {r['stock_id']:>5} 成本{r['entry']:>8} 最新{str(r['latest_close']):>8} "
-              f"{r['days']:>2}天 報酬{rt:>8} 最高{pk:>7} 出場[{ex}]")
+              f"{r['days']:>2}天 報酬{rt:>8} 超額{xs:>9} 最高{pk:>7} 出場[{ex}]")
 
 
 if __name__ == "__main__":
@@ -592,4 +700,7 @@ if __name__ == "__main__":
         ecfg = cfg.get("exit", {}); encfg = cfg.get("entry", {}); ccfg = cfg.get("cost", {})
     except Exception:
         ecfg = {}; encfg = {}; ccfg = {}
-    _print_report(build_report(exit_cfg=ecfg, entry_cfg=encfg, cost_cfg=ccfg))
+    # 單獨跑時用落地的大盤快取(每日流程會更新它);缺檔就退化成無基準模式並明講。
+    _idx = load_index_cache()
+    _ic = _idx["close"] if (_idx is not None and not _idx.empty and "close" in _idx.columns) else None
+    _print_report(build_report(index_close=_ic, exit_cfg=ecfg, entry_cfg=encfg, cost_cfg=ccfg))

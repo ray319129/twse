@@ -304,7 +304,23 @@
     &nbsp;—&nbsp; 總追蹤 {{ performance.overall.total }} 檔 ·
     <span style="color:#27ae60;">獲利 {{ performance.overall.win }}</span> ·
     <span style="color:#c0392b;">虧損 {{ performance.overall.loss }}</span>{% if performance.overall.flat %} · 持平 {{ performance.overall.flat }}{% endif %}
-    <span style="color:#999;font-size:11px;">(以最新報酬正負計)</span>
+    <span style="color:#999;font-size:11px;">(以最新報酬正負計,未扣大盤)</span>
+  </div>
+  {% endif %}
+
+  {# ★ 超額才是選股能力的尺:絕對報酬會把大盤自己的漲跌算到選股頭上 #}
+  {% if performance.overall.avg_excess is not none %}
+  <div style="background:#fef9e7;border:1px solid #f7dc6f;border-radius:6px;padding:10px 14px;margin-bottom:10px;font-size:14px;">
+    ★ <strong>超額報酬 <span style="color: {% if performance.overall.avg_excess >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(performance.overall.avg_excess) }}pp</span></strong>
+    &nbsp;vs {{ performance.benchmark.name }}
+    &nbsp;—&nbsp; 選股 <span style="color: {% if performance.overall.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(performance.overall.avg_ret) }}%</span>
+    vs 大盤同期 <span style="color:#555;">{{ '%+.2f'|format(performance.overall.avg_bench) }}%</span> ·
+    勝過大盤 <strong>{{ performance.overall.beat_rate }}%</strong>
+    <span style="color:#999;font-size:11px;">(每檔各自從選股日起算,n={{ performance.overall.n_excess }})</span>
+  </div>
+  {% elif performance.benchmark and performance.benchmark.available == false %}
+  <div style="background:#fdedec;border:1px solid #f5b7b1;border-radius:6px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:#943126;">
+    ⚠ 本次無大盤基準,以下只有絕對報酬 —— 大盤自己的漲跌會被算到選股頭上,別據此下結論。
   </div>
   {% endif %}
 
@@ -333,7 +349,7 @@
   </div>
   {% endif %}
 
-  <h4 style="color:#117a65;margin:14px 0 6px;">各天期平均報酬 + 期間最高漲幅</h4>
+  <h4 style="color:#117a65;margin:14px 0 6px;">各天期報酬 vs 大盤 + 期間最高漲幅</h4>
   <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
     <thead>
       <tr style="background: #e8f6f3; text-align: left;">
@@ -341,6 +357,9 @@
         <th style="padding: 6px; text-align: right;">樣本數</th>
         <th style="padding: 6px; text-align: right;">勝率</th>
         <th style="padding: 6px; text-align: right;">平均報酬(收盤)</th>
+        <th style="padding: 6px; text-align: right;">大盤同期</th>
+        <th style="padding: 6px; text-align: right;">超額</th>
+        <th style="padding: 6px; text-align: right;">勝過大盤</th>
         <th style="padding: 6px; text-align: right;">平均最高漲幅</th>
       </tr>
     </thead>
@@ -353,6 +372,9 @@
         <td style="padding: 6px; text-align: right;">{{ s.n }}</td>
         <td style="padding: 6px; text-align: right;">{{ s.win_rate }}%</td>
         <td style="padding: 6px; text-align: right; color: {% if s.avg_ret >= 0 %}#27ae60{% else %}#c0392b{% endif %};">{{ '%+.2f'|format(s.avg_ret) }}%</td>
+        <td style="padding: 6px; text-align: right; color:#777;">{{ ('%+.2f'|format(s.avg_bench) + '%') if s.avg_bench is not none else '-' }}</td>
+        <td style="padding: 6px; text-align: right; font-weight:bold; color: {% if s.avg_excess is not none and s.avg_excess >= 0 %}#27ae60{% elif s.avg_excess is not none %}#c0392b{% else %}#999{% endif %};">{{ ('%+.2f'|format(s.avg_excess) + 'pp') if s.avg_excess is not none else '-' }}</td>
+        <td style="padding: 6px; text-align: right;">{{ (s.beat_rate|string + '%') if s.beat_rate is not none else '-' }}</td>
         <td style="padding: 6px; text-align: right; color:#e67e22;">{{ ('%+.2f'|format(s.avg_maxgain) + '%') if s.avg_maxgain is not none else '-' }}</td>
       </tr>
       {% endif %}

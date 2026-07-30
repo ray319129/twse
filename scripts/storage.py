@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 from pathlib import Path
-from .config import PRICES_DIR, DATA_DIR
+from .config import PRICES_DIR, DATA_DIR, META_DIR
 
 CHIPS_DIR = DATA_DIR / "chips"
 REVENUE_DIR = DATA_DIR / "revenue"
@@ -78,6 +78,23 @@ def save_prices(stock_id: str, df: pd.DataFrame) -> None:
 
 def upsert_prices(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
     return _upsert(price_path(stock_id), new_df, _load_parquet)
+
+
+# Index cache (大盤 ^TWII)
+#
+# 回測層(backtest.py / score_validate.py)只讀這份快取當基準與相對強度來源,
+# 但在此之前沒有任何流程寫它 —— 它會停在最後一次手動補史的日期。
+# 每日流程抓完大盤就 upsert 一次,研究層才不會拿舊基準算超額。
+
+INDEX_CACHE_PATH = META_DIR / "twii.parquet"
+
+
+def load_index_cache() -> pd.DataFrame:
+    return _load_parquet(INDEX_CACHE_PATH)
+
+
+def upsert_index_cache(new_df: pd.DataFrame) -> pd.DataFrame:
+    return _upsert(INDEX_CACHE_PATH, new_df, _load_parquet)
 
 
 def prices_scale_shift(cur: pd.DataFrame, new_df: pd.DataFrame, threshold: float = 0.03) -> bool:
