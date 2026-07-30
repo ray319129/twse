@@ -214,5 +214,17 @@
   "volume_ratio": 0.65,
   "vwap": 47.5,
   "fired_at": "12:46"
+ },
+ "8464|breakout": {
+  "stock_id": "8464",
+  "name": "億豐",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 381.50(現價 383.50,高出 0.5%)・量比 0.78(市場中位 0.52)・站上均價 381.20",
+  "price": 383.5,
+  "change_rate": 1.32,
+  "volume_ratio": 0.78,
+  "vwap": 381.2,
+  "fired_at": "12:55"
  }
 }
