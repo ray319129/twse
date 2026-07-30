@@ -10,5 +10,17 @@
   "volume_ratio": 0.57,
   "vwap": 19.41,
   "fired_at": "09:10"
+ },
+ "2451|breakout": {
+  "stock_id": "2451",
+  "name": "創見",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 278.00(現價 279.00,高出 0.4%)・量比 0.53(市場中位 0.14)・站上均價 270.90",
+  "price": 279.0,
+  "change_rate": 3.52,
+  "volume_ratio": 0.53,
+  "vwap": 270.9,
+  "fired_at": "09:28"
  }
 }
