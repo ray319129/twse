@@ -70,5 +70,17 @@
   "volume_ratio": 0.5,
   "vwap": 15.49,
   "fired_at": "10:40"
+ },
+ "2886|breakout": {
+  "stock_id": "2886",
+  "name": "兆豐金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 50.50(現價 50.90,高出 0.8%)・量比 0.50(市場中位 0.33)・站上均價 50.36",
+  "price": 50.9,
+  "change_rate": 2.0,
+  "volume_ratio": 0.5,
+  "vwap": 50.36,
+  "fired_at": "10:52"
  }
 }
