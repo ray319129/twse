@@ -2345,3 +2345,59 @@ H=1 的 +0.71pp 幾乎等於來回成本 0.671%(H=3 才明顯超過);舊權重�
 - **K線型態**:整體學術結論**無定論**,但**看多反轉型態、尤其 Piercing 穿刺線在台股顯著有利潤**。
   現行「只顯示不進分」是正確的保守選擇;若要進分,優先驗證看多反轉這一小類。
 - 詳見專案記憶 [[twse-taiwan-momentum-literature]]。
+
+---
+
+## 54. 價格儲存分層 base + tail —— 止住 git 成長(2026-07-30)
+
+### 問題(有到期日的基礎設施風險)
+每檔一個 parquet、每天各補一根 K 棒 = **每個交易日重寫 1,888 個檔**。parquet 是 binary,
+**git 無法 delta 壓縮** → 單一「daily update」commit 產生 **56 MB** 新物件。
+實測 `.git` 已 **329 MB**、近 3 天新增 **138 MB(46 MB/天)**,約 **1.1 GB/月**
+→ **兩週破 1 GB、3.5 個月破 5 GB**,免費自動化會撞牆。
+(盤中那 ~97 個 commit/天反而無害:只改 `docs/freshness.json`/`pulse.json` 各 2 行。)
+
+### 設計:分層,且**刻意不做資料遷移**
+```
+base  data/prices/{sid}.parquet         既有 1,979 檔原封不動,之後不再逐日重寫
+tail  data/prices/tail/YYYY-MM.parquet  當月新增的 K 棒,全市場共一份
+```
+`load_prices()` = base ⊕ tail(同日以 tail 為準)。**tail 不存在時行為與改版前完全一致** ——
+所以沒有「搬一半掛掉就毀了 5 年歷史」的風險,也不需要一次性的大遷移 commit。
+
+**寫入是緩衝式的**:`upsert_prices()` 只更新記憶體,月檔在 `flush_prices()` 才落地。
+否則一輪 1,900 次 upsert 會把同一個月檔重寫 1,900 次(比原本更慢)。
+`daily_run` 在全市場迴圈後顯式呼叫,`storage.py` 另註冊 `atexit` 保險。
+
+### 實測效果
+對全部 1,979 檔各灌一根新 K 棒後 flush:**tail 總共 84.5 KB**(當月檔 70.7 KB / 1,975 列)。
+月中 tail 會隨天數線性長大(月底約 1.4 MB),整月累計約 **15 MB**,對比原本 **1,100 MB/月**
+—— **約 70 倍**。單日對比是 56 MB → 85 KB。
+
+### 幾個非做不可的細節(踩過才知道)
+- ⚠️ **不能只用日期排除既有列**。第一版寫 `inc = inc[~inc.index.isin(base.index)]`,
+  但原本 `_upsert` 是 `keep="last"`,**新抓的資料會覆蓋既有日期** —— yfinance 會事後修正
+  已發布的 K 棒(未定收盤補上就是一例)。只看日期整列丟掉 = 默默放棄修正。
+  現在用 `_row_differs()` **比對內容**:相同才跳過,值不同照樣進 tail。
+  (NaN vs NaN 要視為相等,否則含 NaN 的列每天都判定成有異動、天天寫進 tail。)
+- **`save_prices()` 必須清掉該檔的 tail**。它是減資/分割的「整段重抓覆蓋」路徑,
+  base 已是完整正確序列;殘留的舊尺度 tail 會疊回來,把剛修好的序列再弄壞一次。
+- **`alert_chart.py` 原本繞過 `load_prices` 直接 `pd.read_parquet(price_path(...))`** —— 已改掉。
+  **任何地方都不可以直接讀 base 檔**,會少掉當月 K 棒。`intraday_scan.py` 的 `price_path` import 是死的(未使用)。
+- **`backfill.py` 是「整段抓」,要走 `save_prices` 而非 `upsert_prices`** ——
+  補史一次幾百根 K 棒,走 upsert 會把當月檔撐大幾十倍(tail 的前提是每天只加一根)。
+- `daily.yml` 是 `git add data/ docs/`(遞迴),新目錄自動涵蓋,workflow 不用改。
+
+### 維護
+tail 月檔會愈積愈多(不影響正確性,只是讀取要多合併幾份)。
+半年~一年跑一次 `python -m scripts.storage --compact` 把 tail 併回 base 並清空
+(那一次會有一個 ~56 MB 的 commit,之後 tail 重新從 0 長)。
+
+### 驗證
+- 28 項儲存層單元測試全過(tmp 目錄,不碰 `data/`):冷啟動合併、重複日期、修正既有 K 棒、
+  save_prices 清 tail、多檔共用月檔不串檔、NaN 過濾安全網、查無此檔。
+- **真實資料回歸**:1,979 檔逐一比對 `load_prices()` vs 直接讀 base,**差異 0 檔**。
+- **離線完整 `daily_run`**(HANDOFF 第 4 節)跑通:Scored 827 / 核心 3 / 觀察 20,
+  `價格 tail 已落地:0 個月檔`(fetch 回空 → 正確地沒產生 tail)。
+- 測試產物已精準清除(`data/performance.json` `docs/{data,dates,heatmap,sector_map,tech_tags}.json`
+  + `data/signals/2026-07-30.json` + `docs/history/2026-07-30.json`)。

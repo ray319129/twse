@@ -4,7 +4,7 @@ import time
 
 from .config import assert_env
 from .fetchers import fetch_stock_info, filter_tradable_stocks, fetch_price_history
-from .storage import load_prices, upsert_prices
+from .storage import load_prices, upsert_prices, save_prices, flush_prices
 from .utils import log
 
 
@@ -31,14 +31,21 @@ def backfill(days: int = 400, only_missing: bool = True, sleep: float = 0.4) -> 
         if df.empty:
             failed += 1
         else:
-            upsert_prices(sid, df)
+            # 補史是「整段抓」,直接寫 base 才對:走 upsert 會把幾百根 K 棒全塞進 tail 月檔,
+            # 反而把當月檔撐大好幾十倍(tail 的設計前提是每天只加一根)。
+            if existing.empty:
+                save_prices(sid, df)
+            else:
+                upsert_prices(sid, df)
             fetched += 1
 
         if (i + 1) % 50 == 0:
+            flush_prices()
             log.info(f"progress {i+1}/{len(universe)} fetched={fetched} skipped={skipped} failed={failed}")
 
         time.sleep(sleep)
 
+    flush_prices()
     log.info(f"Backfill done: fetched={fetched} skipped={skipped} failed={failed}")
 
 

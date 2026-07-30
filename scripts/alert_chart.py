@@ -44,16 +44,14 @@ def daily_k_png(stock_id: str, name: str = "", live_price: float | None = None,
         import matplotlib.pyplot as plt
         from matplotlib.ticker import FuncFormatter
         import pandas as pd
-        from .storage import price_path
+        from .storage import load_prices
     except Exception as e:
         log.info(f"日K圖略過(matplotlib 未安裝?):{e}")
         return None
 
     try:
-        p = price_path(str(stock_id))
-        if not p.exists():
-            return None
-        df = pd.read_parquet(p)
+        # 一定要走 load_prices:價格分成 base + tail 兩層,直接讀 base 檔會少掉當月的 K 棒。
+        df = load_prices(str(stock_id))
         if df is None or df.empty or len(df) < 20:
             return None
         df = df.dropna(subset=["close"]).tail(BARS + 60).copy()

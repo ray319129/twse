@@ -1,4 +1,5 @@
 from __future__ import annotations
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from .config import PRICES_DIR, DATA_DIR, META_DIR
@@ -56,13 +57,104 @@ def _load_parquet(path: Path) -> pd.DataFrame:
 
 
 # Prices
+#
+# ─── 儲存分層:base(每檔一份,凍結) + tail(每月一份,全市場) ─────────────────────
+#
+# 為什麼要分層:原本每檔一個 parquet、每天各補一根 K 棒,等於**每個交易日重寫 1,888 個檔**。
+# parquet 是 binary,git 無法 delta 壓縮 → 單一「daily update」commit 就產生 **56 MB** 新物件,
+# 約 1.1 GB/月。實測 .git 已 329 MB、每天長 46 MB,照這速度兩週破 1 GB、3.5 個月破 5 GB,
+# 免費自動化會直接撞牆(且愈晚修、要重寫的歷史愈大)。
+#
+# 分層後:
+#   base  `data/prices/{sid}.parquet`        —— 既有檔案原封不動,之後**不再逐日重寫**
+#   tail  `data/prices/tail/YYYY-MM.parquet` —— 當月新增的 K 棒,全市場共一份(約 1~2 MB)
+# 每天只重寫「當月那一份 tail」,日增量從 56 MB 降到 1~2 MB。
+#
+# 刻意**不做資料遷移**:base 檔一行都不動,所以沒有「搬一半掛掉就毀了 5 年歷史」的風險。
+# tail 不存在時 load_prices 的行為與改版前完全一致。
+#
+# 寫入是**緩衝式**的:upsert_prices 只更新記憶體,月檔在 flush_prices() 時才落地
+# —— 否則一輪 1,900 次 upsert 會把同一個 tail 檔重寫 1,900 次,比原本更慢。
+# daily_run 結尾會顯式呼叫,另有 atexit 保險。
+
+TAIL_DIR = PRICES_DIR / "tail"
+
+_TAIL: dict[str, pd.DataFrame] | None = None   # stock_id -> 該檔的 tail 列(date 為索引)
+_TAIL_DIRTY: set[str] = set()                  # 待寫回的月份 key(YYYY-MM)
+
 
 def price_path(stock_id: str) -> Path:
     return PRICES_DIR / f"{stock_id}.parquet"
 
 
+def _tail_path(month: str) -> Path:
+    return TAIL_DIR / f"{month}.parquet"
+
+
+def _load_tail() -> dict[str, pd.DataFrame]:
+    """把所有 tail 月檔讀成 {stock_id: DataFrame}。只做一次,之後走記憶體。"""
+    global _TAIL
+    if _TAIL is not None:
+        return _TAIL
+    frames = []
+    try:
+        paths = sorted(TAIL_DIR.glob("*.parquet"))
+    except OSError:
+        paths = []
+    for p in paths:
+        try:
+            frames.append(_normalize_index(pd.read_parquet(p)))
+        except Exception as e:
+            import logging
+            logging.getLogger("twse").warning(f"tail 讀取失敗(略過):{p.name}: {e}")
+    if frames:
+        allt = pd.concat(frames)
+        allt["stock_id"] = allt["stock_id"].astype(str)
+        _TAIL = {sid: g.drop(columns=["stock_id"]).sort_index()
+                 for sid, g in allt.groupby("stock_id", sort=False)}
+    else:
+        _TAIL = {}
+    return _TAIL
+
+
+def _merge_base_tail(base: pd.DataFrame, tail: pd.DataFrame | None) -> pd.DataFrame:
+    """tail 疊在 base 之上(同一天以 tail 為準 —— 它比較新)。"""
+    if tail is None or tail.empty:
+        return base
+    if base is None or base.empty:
+        return tail.sort_index()
+    combined = pd.concat([base, tail])
+    return combined[~combined.index.duplicated(keep="last")].sort_index()
+
+
+def _row_differs(base: pd.DataFrame, inc: pd.DataFrame, d) -> bool:
+    """該日期在 base 中不存在,或存在但數值與增量不同 → True(需要寫進 tail)。
+    只比兩邊共有的欄位;NaN 視為相等(避免 NaN != NaN 讓每天都判定成有異動)。"""
+    if d not in base.index:
+        return True
+    cols = [c for c in inc.columns if c in base.columns]
+    if not cols:
+        return True
+    a, b = base.loc[d, cols], inc.loc[d, cols]
+    if isinstance(a, pd.DataFrame):      # 理論上不該有重複索引,保險起見
+        return True
+    for c in cols:
+        x, y = a[c], b[c]
+        if pd.isna(x) and pd.isna(y):
+            continue
+        if pd.isna(x) or pd.isna(y):
+            return True
+        try:
+            if not np.isclose(float(x), float(y), rtol=1e-9, atol=1e-9):
+                return True
+        except (TypeError, ValueError):
+            if x != y:
+                return True
+    return False
+
+
 def load_prices(stock_id: str) -> pd.DataFrame:
-    df = _load_parquet(price_path(stock_id))
+    df = _merge_base_tail(_load_parquet(price_path(stock_id)), _load_tail().get(str(stock_id)))
     # 安全網:忽略收盤為 NaN 的壞 K 棒(yfinance 偶爾寫入未定收盤),否則均線/評分全毀
     if not df.empty and "close" in df.columns:
         df = df[df["close"].notna()]
@@ -70,14 +162,124 @@ def load_prices(stock_id: str) -> pd.DataFrame:
 
 
 def save_prices(stock_id: str, df: pd.DataFrame) -> None:
+    """整段覆蓋 base(減資/分割重抓走這條)。既然 base 已是完整正確的序列,
+    就要把該檔殘留的 tail 清掉,否則舊尺度的 tail 會疊回來、把剛修好的序列again弄壞。"""
     if df.empty:
         return
     out = _normalize_index(df.copy())
-    out.to_parquet(price_path(stock_id))
+    _try_write_parquet(out, price_path(stock_id))
+    sid = str(stock_id)
+    tail = _load_tail()
+    if sid in tail:
+        for m in sorted({d.strftime("%Y-%m") for d in tail[sid].index}):
+            _TAIL_DIRTY.add(m)
+        del tail[sid]
 
 
 def upsert_prices(stock_id: str, new_df: pd.DataFrame) -> pd.DataFrame:
-    return _upsert(price_path(stock_id), new_df, _load_parquet)
+    """新增/更新 K 棒 → 只進 tail 緩衝(不碰 base)。回傳合併後的完整序列,與改版前語意相同。"""
+    sid = str(stock_id)
+    base = _load_parquet(price_path(sid))
+    tail_map = _load_tail()
+    if new_df is None or new_df.empty:
+        return _merge_base_tail(base, tail_map.get(sid))
+
+    inc = _normalize_index(new_df.copy())
+    if "stock_id" in inc.columns:
+        inc = inc.drop(columns=["stock_id"])
+    # 只有「base 沒有」或「base 有但值不同」的列才進 tail。
+    # ⚠️ 不能只用 `index.isin(base.index)` 排除 —— 原本 _upsert 是 keep="last",
+    #    新抓的資料會**覆蓋**既有日期(yfinance 會事後修正已發布的 K 棒,例如未定收盤補上)。
+    #    只看日期就整列丟掉,等於默默放棄修正。改成比對內容:相同才跳過。
+    if not base.empty:
+        inc = inc[[_row_differs(base, inc, d) for d in inc.index]]
+    if inc.empty:
+        return _merge_base_tail(base, tail_map.get(sid))
+
+    cur = tail_map.get(sid)
+    merged = inc if (cur is None or cur.empty) else \
+        pd.concat([cur, inc])[lambda d: ~d.index.duplicated(keep="last")].sort_index()
+    tail_map[sid] = merged
+    for d in inc.index:
+        _TAIL_DIRTY.add(d.strftime("%Y-%m"))
+    return _merge_base_tail(base, merged)
+
+
+def flush_prices() -> int:
+    """把緩衝中的 tail 依月份落地。回傳寫出的檔案數。"""
+    if not _TAIL_DIRTY:
+        return 0
+    tail_map = _load_tail()
+    try:
+        TAIL_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return 0
+    months = sorted(_TAIL_DIRTY)
+    written = 0
+    for m in months:
+        rows = []
+        for sid, df in tail_map.items():
+            sub = df[[d.strftime("%Y-%m") == m for d in df.index]]
+            if not sub.empty:
+                sub = sub.copy()
+                sub["stock_id"] = sid
+                rows.append(sub)
+        p = _tail_path(m)
+        if not rows:
+            # 該月已無資料(例如整檔被 save_prices 收編回 base)→ 刪掉空月檔
+            try:
+                if p.exists():
+                    p.unlink()
+            except OSError:
+                pass
+            continue
+        _try_write_parquet(pd.concat(rows).sort_index(), p)
+        written += 1
+    _TAIL_DIRTY.clear()
+    return written
+
+
+import atexit as _atexit
+_atexit.register(lambda: flush_prices())   # 保險:呼叫端忘了 flush 也不會掉資料
+
+
+def compact_prices() -> dict:
+    """把所有 tail 併回 base,並清空 tail(定期維護,建議半年~一年跑一次)。
+
+    這一次會重寫全部 base 檔(約 56 MB 的 commit),但之後 tail 重新從 0 開始長。
+    不跑也不會壞,只是 tail 月檔愈積愈多、每次讀取要多合併幾份。
+    跑法:`python -m scripts.storage --compact`
+    """
+    tail = _load_tail()
+    n = 0
+    for sid, rows in list(tail.items()):
+        if rows is None or rows.empty:
+            continue
+        base = _load_parquet(price_path(sid))
+        _try_write_parquet(_merge_base_tail(base, rows), price_path(sid))
+        n += 1
+    removed = 0
+    try:
+        for p in TAIL_DIR.glob("*.parquet"):
+            p.unlink(); removed += 1
+        TAIL_DIR.rmdir()
+    except OSError:
+        pass
+    global _TAIL
+    _TAIL = {}
+    _TAIL_DIRTY.clear()
+    return {"compacted": n, "tail_files_removed": removed}
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="價格儲存維護")
+    ap.add_argument("--compact", action="store_true", help="把 tail 月檔併回 base 並清空 tail")
+    a = ap.parse_args()
+    if a.compact:
+        print(compact_prices())
+    else:
+        ap.print_help()
 
 
 # Index cache (大盤 ^TWII)

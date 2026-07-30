@@ -19,7 +19,7 @@ from .fetchers import (
     fetch_restricted_stocks,
 )
 from .storage import (
-    load_prices, upsert_prices, save_prices, prices_scale_shift,
+    load_prices, upsert_prices, save_prices, prices_scale_shift, flush_prices,
     upsert_index_cache,
     load_chips, upsert_chips,
     load_revenue, upsert_revenue,
@@ -556,6 +556,14 @@ def daily_run(test_mode: bool = False, as_of: "date | None" = None) -> None:
                     tech_tags[sid] = _tt
             except Exception as e:
                 log.warning(f"技術標籤 {sid} 失敗(略過):{e}")
+
+    # 全市場迴圈跑完 → 把緩衝的價格 tail 一次落地(逐檔寫會把同一個月檔重寫 1900 次)。
+    # storage 另有 atexit 保險,但顯式呼叫才能在 log 看到結果、也才擋得住「忘了 flush」。
+    try:
+        _n_tail = flush_prices()
+        log.info(f"價格 tail 已落地:{_n_tail} 個月檔")
+    except Exception as e:
+        log.warning(f"價格 tail 落地失敗:{e}")
 
     # ---------- 大盤閘門(regime,3.3):依 index + 市場廣度 + 漲跌停家數動態調 core_count / min_score ----------
     market_cfg = cfg.get("market", {}) or {}
