@@ -190,5 +190,17 @@
   "volume_ratio": 0.95,
   "vwap": 122.07,
   "fired_at": "12:35"
+ },
+ "2882|pullback": {
+  "stock_id": "2882",
+  "name": "國泰金",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 95.84 附近(距 -0.9%)・翻紅 +0.95% 站回均價・量比 0.64(市場中位 0.49)",
+  "price": 95.0,
+  "change_rate": 0.95,
+  "volume_ratio": 0.64,
+  "vwap": 93.96,
+  "fired_at": "12:38"
  }
 }
