@@ -94,5 +94,17 @@
   "volume_ratio": 0.51,
   "vwap": 84.01,
   "fired_at": "11:29"
+ },
+ "2207|breakout": {
+  "stock_id": "2207",
+  "name": "和泰車",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 521.00(現價 545.00,高出 4.6%)・量比 0.62(市場中位 0.40)・站上均價 531.70",
+  "price": 545.0,
+  "change_rate": 5.0,
+  "volume_ratio": 0.62,
+  "vwap": 531.7,
+  "fired_at": "11:35"
  }
 }
