@@ -286,5 +286,17 @@
   "volume_ratio": 0.65,
   "vwap": 34.97,
   "fired_at": "10:42"
+ },
+ "3029|breakout": {
+  "stock_id": "3029",
+  "name": "零壹",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 108.00(現價 109.00,高出 0.9%)・量比 2.45(市場中位 0.47)・站上均價 106.55",
+  "price": 109.0,
+  "change_rate": 7.38,
+  "volume_ratio": 2.45,
+  "vwap": 106.55,
+  "fired_at": "10:50"
  }
 }
