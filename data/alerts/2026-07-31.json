@@ -130,5 +130,53 @@
   "volume_ratio": 0.5,
   "vwap": 13.56,
   "fired_at": "09:33"
+ },
+ "2834|breakout": {
+  "stock_id": "2834",
+  "name": "臺企銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 18.25(現價 18.35,高出 0.5%)・量比 0.53(市場中位 0.26)・站上均價 18.24",
+  "price": 18.35,
+  "change_rate": 1.38,
+  "volume_ratio": 0.53,
+  "vwap": 18.24,
+  "fired_at": "09:34"
+ },
+ "2834|pullback": {
+  "stock_id": "2834",
+  "name": "臺企銀",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 17.99 附近(距 +2.0%)・翻紅 +1.38% 站回均價・量比 0.53(市場中位 0.26)",
+  "price": 18.35,
+  "change_rate": 1.38,
+  "volume_ratio": 0.53,
+  "vwap": 18.24,
+  "fired_at": "09:34"
+ },
+ "2812|pullback": {
+  "stock_id": "2812",
+  "name": "台中銀",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 20.51 附近(距 +1.4%)・翻紅 +0.72% 站回均價・量比 0.51(市場中位 0.26)",
+  "price": 20.8,
+  "change_rate": 0.72,
+  "volume_ratio": 0.51,
+  "vwap": 20.79,
+  "fired_at": "09:34"
+ },
+ "2646|pullback": {
+  "stock_id": "2646",
+  "name": "星宇航空",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 21.36 附近(距 +2.5%)・翻紅 +1.62% 站回均價・量比 0.51(市場中位 0.26)",
+  "price": 21.9,
+  "change_rate": 1.62,
+  "volume_ratio": 0.51,
+  "vwap": 21.86,
+  "fired_at": "09:35"
  }
 }
