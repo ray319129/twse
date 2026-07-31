@@ -346,5 +346,17 @@
   "volume_ratio": 0.82,
   "vwap": 43.06,
   "fired_at": "11:45"
+ },
+ "6863|breakout": {
+  "stock_id": "6863",
+  "name": "永道-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 128.50(現價 131.50,高出 2.3%)・量比 0.93(市場中位 0.59)・站上均價 127.97",
+  "price": 131.5,
+  "change_rate": 5.62,
+  "volume_ratio": 0.93,
+  "vwap": 127.97,
+  "fired_at": "11:55"
  }
 }
