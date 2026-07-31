@@ -262,5 +262,17 @@
   "volume_ratio": 0.58,
   "vwap": 60.41,
   "fired_at": "10:13"
+ },
+ "5388|pullback": {
+  "stock_id": "5388",
+  "name": "中磊",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 84.79 附近(距 -2.5%)・翻紅 +4.55% 站回均價・量比 0.51(市場中位 0.39)",
+  "price": 82.7,
+  "change_rate": 4.55,
+  "volume_ratio": 0.51,
+  "vwap": 82.63,
+  "fired_at": "10:20"
  }
 }
