@@ -347,40 +347,88 @@
   "vwap": 43.06,
   "fired_at": "11:45"
  },
- "6863|breakout": {
-  "stock_id": "6863",
-  "name": "永道-KY",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 128.50(現價 131.50,高出 2.3%)・量比 0.93(市場中位 0.59)・站上均價 127.97",
-  "price": 131.5,
-  "change_rate": 5.62,
-  "volume_ratio": 0.93,
-  "vwap": 127.97,
-  "fired_at": "11:55"
- },
- "5306|pullback": {
-  "stock_id": "5306",
-  "name": "桂盟",
+ "2324|pullback": {
+  "stock_id": "2324",
+  "name": "仁寶",
   "type": "pullback",
   "label": "回檔買點",
-  "reason": "多頭排列(5>20>60)・回到月線 90.07 附近(距 -0.1%)・翻紅 +1.12% 站回均價・量比 0.88(市場中位 0.61)",
-  "price": 90.0,
-  "change_rate": 1.12,
-  "volume_ratio": 0.88,
-  "vwap": 89.26,
-  "fired_at": "12:05"
+  "reason": "多頭排列(5>20>60)・回到月線 35.93 附近(距 +0.2%)・翻紅 +6.66% 站回均價・量比 1.05(市場中位 0.80)",
+  "price": 36.0,
+  "change_rate": 6.66,
+  "volume_ratio": 1.05,
+  "vwap": 35.88,
+  "fired_at": "13:22"
  },
- "3034|pullback": {
-  "stock_id": "3034",
-  "name": "聯詠",
+ "3617|pullback": {
+  "stock_id": "3617",
+  "name": "碩天",
   "type": "pullback",
   "label": "回檔買點",
-  "reason": "多頭排列(5>20>60)・回到月線 501.25 附近(距 +2.9%)・翻紅 +5.09% 站回均價・量比 1.13(市場中位 0.69)",
-  "price": 516.0,
-  "change_rate": 5.09,
-  "volume_ratio": 1.13,
-  "vwap": 515.2,
-  "fired_at": "12:43"
+  "reason": "多頭排列(5>20>60)・回到月線 219.10 附近(距 +0.2%)・翻紅 +9.75% 站回均價・量比 2.01(市場中位 0.80)",
+  "price": 219.5,
+  "change_rate": 9.75,
+  "volume_ratio": 2.01,
+  "vwap": 215.71,
+  "fired_at": "13:22"
+ },
+ "4541|pullback": {
+  "stock_id": "4541",
+  "name": "晟田",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 58.58 附近(距 +2.8%)・翻紅 +6.36% 站回均價・量比 1.14(市場中位 0.80)",
+  "price": 60.2,
+  "change_rate": 6.36,
+  "volume_ratio": 1.14,
+  "vwap": 59.93,
+  "fired_at": "13:22"
+ },
+ "2201|pullback": {
+  "stock_id": "2201",
+  "name": "裕隆",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 27.97 附近(距 +0.6%)・翻紅 +3.68% 站回均價・量比 2.09(市場中位 0.80)",
+  "price": 28.15,
+  "change_rate": 3.68,
+  "volume_ratio": 2.09,
+  "vwap": 28.04,
+  "fired_at": "13:22"
+ },
+ "1256|pullback": {
+  "stock_id": "1256",
+  "name": "鮮活果汁-KY",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 186.60 附近(距 -2.5%)・翻紅 +4.89% 站回均價・量比 2.17(市場中位 0.80)",
+  "price": 182.0,
+  "change_rate": 4.89,
+  "volume_ratio": 2.17,
+  "vwap": 180.43,
+  "fired_at": "13:22"
+ },
+ "2376|pullback": {
+  "stock_id": "2376",
+  "name": "技嘉",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 335.02 附近(距 +0.7%)・翻紅 +5.96% 站回均價・量比 1.41(市場中位 0.80)",
+  "price": 337.5,
+  "change_rate": 5.96,
+  "volume_ratio": 1.41,
+  "vwap": 334.24,
+  "fired_at": "13:22"
+ },
+ "6122|pullback": {
+  "stock_id": "6122",
+  "name": "擎邦",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 49.80 附近(距 +1.2%)・翻紅 +3.27% 站回均價・量比 2.52(市場中位 0.80)",
+  "price": 50.4,
+  "change_rate": 3.27,
+  "volume_ratio": 2.52,
+  "vwap": 50.34,
+  "fired_at": "13:22"
  }
 }
