@@ -358,5 +358,17 @@
   "volume_ratio": 0.93,
   "vwap": 127.97,
   "fired_at": "11:55"
+ },
+ "5306|pullback": {
+  "stock_id": "5306",
+  "name": "桂盟",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 90.07 附近(距 -0.1%)・翻紅 +1.12% 站回均價・量比 0.88(市場中位 0.61)",
+  "price": 90.0,
+  "change_rate": 1.12,
+  "volume_ratio": 0.88,
+  "vwap": 89.26,
+  "fired_at": "12:05"
  }
 }
