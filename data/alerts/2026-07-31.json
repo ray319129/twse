@@ -10,5 +10,53 @@
   "volume_ratio": 0.51,
   "vwap": 149.44,
   "fired_at": "09:08"
+ },
+ "6505|pullback": {
+  "stock_id": "6505",
+  "name": "台塑化",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 72.09 附近(距 +2.4%)・翻紅 +3.07% 站回均價・量比 0.50(市場中位 0.16)",
+  "price": 73.8,
+  "change_rate": 3.07,
+  "volume_ratio": 0.5,
+  "vwap": 73.76,
+  "fired_at": "09:14"
+ },
+ "1808|breakout": {
+  "stock_id": "1808",
+  "name": "潤隆",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 32.80(現價 33.50,高出 2.1%)・量比 0.52(市場中位 0.18)・站上均價 33.30",
+  "price": 33.5,
+  "change_rate": 3.23,
+  "volume_ratio": 0.52,
+  "vwap": 33.3,
+  "fired_at": "09:15"
+ },
+ "2106|breakout": {
+  "stock_id": "2106",
+  "name": "建大",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 18.65(現價 18.90,高出 1.3%)・量比 0.50(市場中位 0.18)・站上均價 18.76",
+  "price": 18.9,
+  "change_rate": 3.27,
+  "volume_ratio": 0.5,
+  "vwap": 18.76,
+  "fired_at": "09:16"
+ },
+ "2332|pullback": {
+  "stock_id": "2332",
+  "name": "友訊",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 22.25 附近(距 +0.9%)・翻紅 +3.93% 站回均價・量比 0.50(市場中位 0.18)",
+  "price": 22.45,
+  "change_rate": 3.93,
+  "volume_ratio": 0.5,
+  "vwap": 22.41,
+  "fired_at": "09:16"
  }
 }
