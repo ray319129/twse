@@ -106,5 +106,29 @@
   "volume_ratio": 0.5,
   "vwap": 30.17,
   "fired_at": "09:20"
+ },
+ "2607|breakout": {
+  "stock_id": "2607",
+  "name": "榮運",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 48.00(現價 48.40,高出 0.8%)・量比 0.55(市場中位 0.25)・站上均價 48.11",
+  "price": 48.4,
+  "change_rate": 2.65,
+  "volume_ratio": 0.55,
+  "vwap": 48.11,
+  "fired_at": "09:30"
+ },
+ "2845|pullback": {
+  "stock_id": "2845",
+  "name": "遠東銀",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 13.31 附近(距 +2.2%)・翻紅 +1.11% 站回均價・量比 0.50(市場中位 0.26)",
+  "price": 13.6,
+  "change_rate": 1.11,
+  "volume_ratio": 0.5,
+  "vwap": 13.56,
+  "fired_at": "09:33"
  }
 }
