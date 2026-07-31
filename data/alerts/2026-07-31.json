@@ -214,5 +214,29 @@
   "volume_ratio": 0.65,
   "vwap": 778.23,
   "fired_at": "09:48"
+ },
+ "2889|pullback": {
+  "stock_id": "2889",
+  "name": "國票金",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 15.58 附近(距 +1.1%)・翻紅 +0.63% 站回均價・量比 0.51(市場中位 0.32)",
+  "price": 15.75,
+  "change_rate": 0.63,
+  "volume_ratio": 0.51,
+  "vwap": 15.73,
+  "fired_at": "09:53"
+ },
+ "2867|breakout": {
+  "stock_id": "2867",
+  "name": "三商壽",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 9.70(現價 9.90,高出 2.1%)・量比 0.52(市場中位 0.33)・站上均價 9.88",
+  "price": 9.9,
+  "change_rate": 3.34,
+  "volume_ratio": 0.52,
+  "vwap": 9.88,
+  "fired_at": "09:53"
  }
 }
