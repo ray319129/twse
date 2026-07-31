@@ -370,5 +370,17 @@
   "volume_ratio": 0.88,
   "vwap": 89.26,
   "fired_at": "12:05"
+ },
+ "3034|pullback": {
+  "stock_id": "3034",
+  "name": "聯詠",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 501.25 附近(距 +2.9%)・翻紅 +5.09% 站回均價・量比 1.13(市場中位 0.69)",
+  "price": 516.0,
+  "change_rate": 5.09,
+  "volume_ratio": 1.13,
+  "vwap": 515.2,
+  "fired_at": "12:43"
  }
 }
