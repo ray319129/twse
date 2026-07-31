@@ -178,5 +178,29 @@
   "volume_ratio": 0.51,
   "vwap": 21.86,
   "fired_at": "09:35"
+ },
+ "9945|breakout": {
+  "stock_id": "9945",
+  "name": "潤泰新",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 27.05(現價 27.35,高出 1.1%)・量比 0.50(市場中位 0.29)・站上均價 27.19",
+  "price": 27.35,
+  "change_rate": 2.43,
+  "volume_ratio": 0.5,
+  "vwap": 27.19,
+  "fired_at": "09:44"
+ },
+ "2072|breakout": {
+  "stock_id": "2072",
+  "name": "世紀風電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 157.50(現價 158.00,高出 0.3%)・量比 0.77(市場中位 0.30)・站上均價 155.28",
+  "price": 158.0,
+  "change_rate": 7.48,
+  "volume_ratio": 0.77,
+  "vwap": 155.28,
+  "fired_at": "09:45"
  }
 }
