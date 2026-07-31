@@ -202,5 +202,17 @@
   "volume_ratio": 0.77,
   "vwap": 155.28,
   "fired_at": "09:45"
+ },
+ "2357|breakout": {
+  "stock_id": "2357",
+  "name": "華碩",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 780.00(現價 785.00,高出 0.6%)・量比 0.65(市場中位 0.31)・站上均價 778.23",
+  "price": 785.0,
+  "change_rate": 6.51,
+  "volume_ratio": 0.65,
+  "vwap": 778.23,
+  "fired_at": "09:48"
  }
 }
