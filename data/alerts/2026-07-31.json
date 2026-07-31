@@ -334,5 +334,17 @@
   "volume_ratio": 0.73,
   "vwap": 85.33,
   "fired_at": "11:40"
+ },
+ "5515|pullback": {
+  "stock_id": "5515",
+  "name": "建國",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 41.95 附近(距 +2.9%)・翻紅 +0.58% 站回均價・量比 0.82(市場中位 0.57)",
+  "price": 43.15,
+  "change_rate": 0.58,
+  "volume_ratio": 0.82,
+  "vwap": 43.06,
+  "fired_at": "11:45"
  }
 }
