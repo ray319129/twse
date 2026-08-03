@@ -34,5 +34,17 @@
   "volume_ratio": 0.58,
   "vwap": 178.59,
   "fired_at": "10:17"
+ },
+ "7734|breakout": {
+  "stock_id": "7734",
+  "name": "印能科技",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 3530.00(現價 3620.00,高出 2.5%)・量比 0.62(市場中位 0.39)・站上均價 3584.06",
+  "price": 3620.0,
+  "change_rate": 7.41,
+  "volume_ratio": 0.62,
+  "vwap": 3584.06,
+  "fired_at": "10:20"
  }
 }
