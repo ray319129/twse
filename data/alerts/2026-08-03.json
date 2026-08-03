@@ -1,0 +1,14 @@
+{
+ "6598|breakout": {
+  "stock_id": "6598",
+  "name": "ABC-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 31.30(現價 31.45,高出 0.5%)・量比 0.56(市場中位 0.21)・站上均價 30.69",
+  "price": 31.45,
+  "change_rate": 4.48,
+  "volume_ratio": 0.56,
+  "vwap": 30.69,
+  "fired_at": "09:31"
+ }
+}
