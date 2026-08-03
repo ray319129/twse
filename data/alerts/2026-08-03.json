@@ -46,5 +46,17 @@
   "volume_ratio": 0.62,
   "vwap": 3584.06,
   "fired_at": "10:20"
+ },
+ "5490|breakout": {
+  "stock_id": "5490",
+  "name": "同亨",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 35.10(現價 35.25,高出 0.4%)・量比 0.80(市場中位 0.43)・站上均價 33.74",
+  "price": 35.25,
+  "change_rate": 6.65,
+  "volume_ratio": 0.8,
+  "vwap": 33.74,
+  "fired_at": "10:31"
  }
 }
