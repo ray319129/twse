@@ -10,5 +10,17 @@
   "volume_ratio": 0.56,
   "vwap": 30.69,
   "fired_at": "09:31"
+ },
+ "1517|pullback": {
+  "stock_id": "1517",
+  "name": "利奇",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 11.33 附近(距 +1.9%)・翻紅 +1.31% 站回均價・量比 0.56(市場中位 0.36)",
+  "price": 11.55,
+  "change_rate": 1.31,
+  "volume_ratio": 0.56,
+  "vwap": 11.24,
+  "fired_at": "10:11"
  }
 }
