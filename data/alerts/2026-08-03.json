@@ -142,5 +142,17 @@
   "volume_ratio": 1.15,
   "vwap": 174.52,
   "fired_at": "13:25"
+ },
+ "9938|pullback": {
+  "stock_id": "9938",
+  "name": "百和",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 45.08 附近(距 +1.8%)・翻紅 +0.65% 站回均價・量比 1.60(市場中位 0.81)",
+  "price": 45.9,
+  "change_rate": 0.65,
+  "volume_ratio": 1.6,
+  "vwap": 45.71,
+  "fired_at": "13:30"
  }
 }
