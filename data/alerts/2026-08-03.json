@@ -118,5 +118,29 @@
   "volume_ratio": 1.23,
   "vwap": 323.98,
   "fired_at": "13:22"
+ },
+ "5321|pullback": {
+  "stock_id": "5321",
+  "name": "美而快",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 57.16 附近(距 -2.9%)・翻紅 +4.12% 站回均價・量比 1.04(市場中位 0.79)",
+  "price": 55.5,
+  "change_rate": 4.12,
+  "volume_ratio": 1.04,
+  "vwap": 55.05,
+  "fired_at": "13:25"
+ },
+ "6907|pullback": {
+  "stock_id": "6907",
+  "name": "雅特力-KY",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 174.97 附近(距 +0.9%)・翻紅 +6.96% 站回均價・量比 1.15(市場中位 0.79)",
+  "price": 176.5,
+  "change_rate": 6.96,
+  "volume_ratio": 1.15,
+  "vwap": 174.52,
+  "fired_at": "13:25"
  }
 }
