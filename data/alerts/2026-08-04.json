@@ -58,5 +58,17 @@
   "volume_ratio": 0.52,
   "vwap": 3757.84,
   "fired_at": "09:50"
+ },
+ "2425|breakout": {
+  "stock_id": "2425",
+  "name": "承啟",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 49.65(現價 49.95,高出 0.6%)・量比 0.69(市場中位 0.44)・站上均價 48.22",
+  "price": 49.95,
+  "change_rate": 3.41,
+  "volume_ratio": 0.69,
+  "vwap": 48.22,
+  "fired_at": "10:16"
  }
 }
