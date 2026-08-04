@@ -83,16 +83,76 @@
   "vwap": 11.18,
   "fired_at": "10:38"
  },
- "9939|pullback": {
-  "stock_id": "9939",
-  "name": "宏全",
+ "3704|pullback": {
+  "stock_id": "3704",
+  "name": "合勤控",
   "type": "pullback",
   "label": "回檔買點",
-  "reason": "多頭排列(5>20>60)・回到月線 127.25 附近(距 +1.8%)・翻紅 +0.77% 站回均價・量比 1.10(市場中位 0.78)",
-  "price": 129.5,
-  "change_rate": 0.77,
-  "volume_ratio": 1.1,
-  "vwap": 128.84,
-  "fired_at": "12:39"
+  "reason": "多頭排列(5>20>60)・回到月線 46.73 附近(距 -2.3%)・翻紅 +0.66% 站回均價・量比 1.28(市場中位 0.92)",
+  "price": 45.65,
+  "change_rate": 0.66,
+  "volume_ratio": 1.28,
+  "vwap": 44.89,
+  "fired_at": "13:22"
+ },
+ "6226|pullback": {
+  "stock_id": "6226",
+  "name": "光鼎",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 21.55 附近(距 +2.5%)・翻紅 +2.55% 站回均價・量比 1.71(市場中位 0.92)",
+  "price": 22.1,
+  "change_rate": 2.55,
+  "volume_ratio": 1.71,
+  "vwap": 22.05,
+  "fired_at": "13:22"
+ },
+ "8039|breakout": {
+  "stock_id": "8039",
+  "name": "台虹",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 201.00(現價 202.00,高出 0.5%)・量比 1.62(市場中位 0.92)・站上均價 197.83",
+  "price": 202.0,
+  "change_rate": 6.03,
+  "volume_ratio": 1.62,
+  "vwap": 197.83,
+  "fired_at": "13:22"
+ },
+ "1256|pullback": {
+  "stock_id": "1256",
+  "name": "鮮活果汁-KY",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 186.60 附近(距 -0.6%)・翻紅 +1.92% 站回均價・量比 1.66(市場中位 0.92)",
+  "price": 185.5,
+  "change_rate": 1.92,
+  "volume_ratio": 1.66,
+  "vwap": 183.88,
+  "fired_at": "13:22"
+ },
+ "4105|pullback": {
+  "stock_id": "4105",
+  "name": "東洋",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 76.48 附近(距 +0.0%)・翻紅 +2.13% 站回均價・量比 1.88(市場中位 0.92)",
+  "price": 76.5,
+  "change_rate": 2.13,
+  "volume_ratio": 1.88,
+  "vwap": 76.38,
+  "fired_at": "13:22"
+ },
+ "8111|breakout": {
+  "stock_id": "8111",
+  "name": "立碁",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 57.90(現價 65.60,高出 13.3%)・量比 2.39(市場中位 0.92)・站上均價 64.50",
+  "price": 65.6,
+  "change_rate": 5.97,
+  "volume_ratio": 2.39,
+  "vwap": 64.5,
+  "fired_at": "13:22"
  }
 }
