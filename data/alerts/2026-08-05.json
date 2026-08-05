@@ -118,5 +118,29 @@
   "volume_ratio": 0.5,
   "vwap": 145.8,
   "fired_at": "09:27"
+ },
+ "3022|breakout": {
+  "stock_id": "3022",
+  "name": "威強電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 95.70(現價 96.10,高出 0.4%)・量比 0.80(市場中位 0.32)・站上均價 93.96",
+  "price": 96.1,
+  "change_rate": 5.72,
+  "volume_ratio": 0.8,
+  "vwap": 93.96,
+  "fired_at": "09:30"
+ },
+ "3702|breakout": {
+  "stock_id": "3702",
+  "name": "大聯大",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 123.00(現價 124.50,高出 1.2%)・量比 0.60(市場中位 0.32)・站上均價 122.57",
+  "price": 124.5,
+  "change_rate": 5.95,
+  "volume_ratio": 0.6,
+  "vwap": 122.57,
+  "fired_at": "09:31"
  }
 }
