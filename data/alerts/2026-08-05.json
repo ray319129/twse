@@ -178,5 +178,29 @@
   "volume_ratio": 0.7,
   "vwap": 840.12,
   "fired_at": "10:02"
+ },
+ "3712|breakout": {
+  "stock_id": "3712",
+  "name": "永崴投控",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 19.00(現價 19.15,高出 0.8%)・量比 0.89(市場中位 0.50)・站上均價 19.04",
+  "price": 19.15,
+  "change_rate": 2.13,
+  "volume_ratio": 0.89,
+  "vwap": 19.04,
+  "fired_at": "10:10"
+ },
+ "2362|breakout": {
+  "stock_id": "2362",
+  "name": "藍天",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 46.10(現價 47.00,高出 2.0%)・量比 1.56(市場中位 0.50)・站上均價 46.98",
+  "price": 47.0,
+  "change_rate": 5.14,
+  "volume_ratio": 1.56,
+  "vwap": 46.98,
+  "fired_at": "10:11"
  }
 }
