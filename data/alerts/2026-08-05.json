@@ -214,5 +214,17 @@
   "volume_ratio": 0.75,
   "vwap": 229.86,
   "fired_at": "10:13"
+ },
+ "6588|breakout": {
+  "stock_id": "6588",
+  "name": "東典光電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 100.00(現價 100.50,高出 0.5%)・量比 1.09(市場中位 0.51)・站上均價 99.49",
+  "price": 100.5,
+  "change_rate": 5.34,
+  "volume_ratio": 1.09,
+  "vwap": 99.49,
+  "fired_at": "10:15"
  }
 }
