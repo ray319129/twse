@@ -34,5 +34,29 @@
   "volume_ratio": 0.81,
   "vwap": 4404.73,
   "fired_at": "09:09"
+ },
+ "6863|breakout": {
+  "stock_id": "6863",
+  "name": "永道-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 138.00(現價 142.50,高出 3.3%)・量比 0.54(市場中位 0.22)・站上均價 139.48",
+  "price": 142.5,
+  "change_rate": 6.34,
+  "volume_ratio": 0.54,
+  "vwap": 139.48,
+  "fired_at": "09:15"
+ },
+ "2347|breakout": {
+  "stock_id": "2347",
+  "name": "聯強",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 96.20(現價 96.80,高出 0.6%)・量比 0.56(市場中位 0.22)・站上均價 96.13",
+  "price": 96.8,
+  "change_rate": 3.19,
+  "volume_ratio": 0.56,
+  "vwap": 96.13,
+  "fired_at": "09:15"
  }
 }
