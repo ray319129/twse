@@ -142,5 +142,17 @@
   "volume_ratio": 0.6,
   "vwap": 122.57,
   "fired_at": "09:31"
+ },
+ "2883|breakout": {
+  "stock_id": "2883",
+  "name": "凱基金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 31.30(現價 31.40,高出 0.3%)・量比 0.63(市場中位 0.42)・站上均價 31.33",
+  "price": 31.4,
+  "change_rate": 2.78,
+  "volume_ratio": 0.63,
+  "vwap": 31.33,
+  "fired_at": "09:51"
  }
 }
