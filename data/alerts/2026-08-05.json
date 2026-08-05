@@ -202,5 +202,17 @@
   "volume_ratio": 1.56,
   "vwap": 46.98,
   "fired_at": "10:11"
+ },
+ "8271|breakout": {
+  "stock_id": "8271",
+  "name": "宇瞻",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 229.00(現價 236.00,高出 3.1%)・量比 0.75(市場中位 0.50)・站上均價 229.86",
+  "price": 236.0,
+  "change_rate": 5.35,
+  "volume_ratio": 0.75,
+  "vwap": 229.86,
+  "fired_at": "10:13"
  }
 }
