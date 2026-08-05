@@ -262,5 +262,17 @@
   "volume_ratio": 1.13,
   "vwap": 82.95,
   "fired_at": "11:34"
+ },
+ "6805|breakout": {
+  "stock_id": "6805",
+  "name": "富世達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1630.00(現價 1635.00,高出 0.3%)・量比 1.44(市場中位 0.84)・站上均價 1629.32",
+  "price": 1635.0,
+  "change_rate": 2.83,
+  "volume_ratio": 1.44,
+  "vwap": 1629.32,
+  "fired_at": "12:15"
  }
 }
