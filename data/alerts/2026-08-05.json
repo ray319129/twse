@@ -238,5 +238,17 @@
   "volume_ratio": 0.81,
   "vwap": 4277.62,
   "fired_at": "10:24"
+ },
+ "4912|breakout": {
+  "stock_id": "4912",
+  "name": "聯德控股-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 90.70(現價 91.10,高出 0.4%)・量比 0.90(市場中位 0.57)・站上均價 90.99",
+  "price": 91.1,
+  "change_rate": 2.47,
+  "volume_ratio": 0.9,
+  "vwap": 90.99,
+  "fired_at": "10:30"
  }
 }
