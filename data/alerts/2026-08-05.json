@@ -250,5 +250,17 @@
   "volume_ratio": 0.9,
   "vwap": 90.99,
   "fired_at": "10:30"
+ },
+ "2388|breakout": {
+  "stock_id": "2388",
+  "name": "威盛",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 80.70(現價 83.00,高出 2.9%)・量比 1.13(市場中位 0.75)・站上均價 82.95",
+  "price": 83.0,
+  "change_rate": 3.36,
+  "volume_ratio": 1.13,
+  "vwap": 82.95,
+  "fired_at": "11:34"
  }
 }
