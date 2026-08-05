@@ -263,16 +263,52 @@
   "vwap": 82.95,
   "fired_at": "11:34"
  },
- "6805|breakout": {
-  "stock_id": "6805",
-  "name": "富世達",
+ "3479|pullback": {
+  "stock_id": "3479",
+  "name": "安勤",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 140.60 附近(距 -0.8%)・翻紅 +4.49% 站回均價・量比 1.89(市場中位 1.07)",
+  "price": 139.5,
+  "change_rate": 4.49,
+  "volume_ratio": 1.89,
+  "vwap": 138.73,
+  "fired_at": "13:22"
+ },
+ "6186|pullback": {
+  "stock_id": "6186",
+  "name": "新潤",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 42.35 附近(距 +0.2%)・翻紅 +1.55% 站回均價・量比 1.49(市場中位 1.07)",
+  "price": 42.45,
+  "change_rate": 1.55,
+  "volume_ratio": 1.49,
+  "vwap": 42.08,
+  "fired_at": "13:22"
+ },
+ "6414|breakout": {
+  "stock_id": "6414",
+  "name": "樺漢",
   "type": "breakout",
   "label": "量增突破",
-  "reason": "突破 20 日高 1630.00(現價 1635.00,高出 0.3%)・量比 1.44(市場中位 0.84)・站上均價 1629.32",
-  "price": 1635.0,
-  "change_rate": 2.83,
-  "volume_ratio": 1.44,
-  "vwap": 1629.32,
-  "fired_at": "12:15"
+  "reason": "突破 20 日高 418.00(現價 470.00,高出 12.4%)・量比 1.77(市場中位 1.07)・站上均價 463.59",
+  "price": 470.0,
+  "change_rate": 7.67,
+  "volume_ratio": 1.77,
+  "vwap": 463.59,
+  "fired_at": "13:22"
+ },
+ "4566|breakout": {
+  "stock_id": "4566",
+  "name": "時碩工業",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 70.00(現價 70.40,高出 0.6%)・量比 1.80(市場中位 1.07)・站上均價 69.92",
+  "price": 70.4,
+  "change_rate": 4.14,
+  "volume_ratio": 1.8,
+  "vwap": 69.92,
+  "fired_at": "13:22"
  }
 }
