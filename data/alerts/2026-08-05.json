@@ -154,5 +154,17 @@
   "volume_ratio": 0.63,
   "vwap": 31.33,
   "fired_at": "09:51"
+ },
+ "6472|pullback": {
+  "stock_id": "6472",
+  "name": "保瑞",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 420.85 附近(距 -2.9%)・翻紅 +4.20% 站回均價・量比 1.11(市場中位 0.44)",
+  "price": 408.5,
+  "change_rate": 4.2,
+  "volume_ratio": 1.11,
+  "vwap": 404.89,
+  "fired_at": "09:55"
  }
 }
