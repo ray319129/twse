@@ -274,5 +274,41 @@
   "volume_ratio": 0.5,
   "vwap": 2832.42,
   "fired_at": "09:30"
+ },
+ "5274|breakout": {
+  "stock_id": "5274",
+  "name": "信驊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 16405.00(現價 16680.00,高出 1.7%)・量比 0.51(市場中位 0.27)・站上均價 16446.30",
+  "price": 16680.0,
+  "change_rate": 4.11,
+  "volume_ratio": 0.51,
+  "vwap": 16446.3,
+  "fired_at": "10:00"
+ },
+ "1476|breakout": {
+  "stock_id": "1476",
+  "name": "儒鴻",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 358.50(現價 367.00,高出 2.4%)・量比 0.50(市場中位 0.27)・站上均價 362.64",
+  "price": 367.0,
+  "change_rate": 3.38,
+  "volume_ratio": 0.5,
+  "vwap": 362.64,
+  "fired_at": "10:00"
+ },
+ "2317|breakout": {
+  "stock_id": "2317",
+  "name": "鴻海",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 260.50(現價 262.50,高出 0.8%)・量比 0.50(市場中位 0.28)・站上均價 260.38",
+  "price": 262.5,
+  "change_rate": 1.54,
+  "volume_ratio": 0.5,
+  "vwap": 260.38,
+  "fired_at": "10:01"
  }
 }
