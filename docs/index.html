@@ -2381,14 +2381,20 @@ let MYPICK={},MYPICKF={};
 function _mpDerive(){MYPICK={};for(const[k,o]of Object.entries(MYPICKF))if(o&&o.v)MYPICK[k]=o.v;}
 function mpLoad(){
   MYPICKF={};
+  let upgraded=false;
   try{
     const r=localStorage.getItem(MYPICK_KEY);
     if(r){const o=JSON.parse(r)||{};
-      for(const[k,v]of Object.entries(o))
-        MYPICKF[k]=(typeof v==='string')?{v,t:Date.now()}:v;   /* 舊格式(純字串)自動升級 */
+      for(const[k,v]of Object.entries(o)){
+        if(typeof v==='string'){MYPICKF[k]={v,t:Date.now()};upgraded=true;}  /* 舊格式(純字串)自動升級 */
+        else MYPICKF[k]=v;
+      }
     }
   }catch(e){MYPICKF={};}
   _mpDerive();
+  /* ⚠️ 升級後要**立刻存回**,把 t 定住。否則舊格式每次載入都重新取得 Date.now(),
+     這些標記會永遠比雲端「新」→ 每次合併都贏 → 其他裝置取消掉的標記會一直被復活。 */
+  if(upgraded)mpSave();
 }
 function mpSave(){try{localStorage.setItem(MYPICK_KEY,JSON.stringify(MYPICKF));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
 const mpKey=r=>`${r.date}|${r.stock_id}`;
@@ -2449,6 +2455,30 @@ function mpSet(k,v){
    有改動時去抖 3 秒自動 POST(需要 secret —— 與自選池共用同一把,已存本機就靜默送,
    沒存過則不打擾,狀態列會顯示「未連雲端」點了才提示輸入)。 */
 let _mpSyncTimer=null,_mpSyncState='';   /* ''|'ok'|'dirty'|'err'|'off' */
+/* 上次從雲端拉到的快照,用來算「這台裝置有幾筆還沒上雲」。
+   ⚠️ 這個數字一定要**明顯**顯示出來:原本只有一行 10.5px 灰字寫「未連雲端」,
+   結果手機累積了 6 筆買進標記兩週都沒人發現,兩台裝置的統計長期不一致。 */
+let _MP_REMOTE=null;
+function mpUnsyncedCount(){
+  if(_MP_REMOTE===null)return 0;            /* 還沒拉過雲端 → 無從比較,不亂報 */
+  let n=0;
+  for(const[k,lo]of Object.entries(MYPICKF)){
+    const ro=_MP_REMOTE[k];
+    if(!ro||(+lo.t||0)>(+ro.t||0))n++;
+  }
+  return n;
+}
+function mpHasSecret(){try{return !!localStorage.getItem('twse-wl-secret');}catch(e){return false;}}
+/* 未同步橫幅:放在「我的實戰紀錄」卡片內,講清楚後果(這台的數字跟別台不一樣)與怎麼修。 */
+function mpSyncBanner(){
+  const n=mpUnsyncedCount();
+  if(!n)return '';
+  const why=mpHasSecret()?'尚未上傳完成':'這台裝置<b>沒設定過同步密鑰</b>';
+  return `<div class="mp-verdict down" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <span>⚠ 本機有 <b>${n}</b> 筆標記還沒上雲端(${why})—— 這台看到的統計會與其他裝置<b>不一致</b>。</span>
+    <button type="button" class="mp-b" style="padding:4px 12px" onclick="mpCloudPush(false)">立即上傳</button>
+  </div>`;
+}
 function _mpSetState(s,msg){
   _mpSyncState=s;
   const el=$('#mp-sync-st');
@@ -2477,15 +2507,15 @@ function mpCloudLoad(){
   fetch(HEALTH_API_BASE+'/api/watchlist?what=marks').then(r=>r.ok?r.json():null).then(j=>{
     if(!j)return;
     const remote=j.marks||{};
+    _MP_REMOTE=remote;
     const got=mpMergeRemote(remote);
-    if(got){                                        /* 雲端有新東西 → 重畫受影響區塊 */
-      if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();
-      document.querySelectorAll('.mp-b').forEach(b=>{if(b.dataset.mk)mpSyncBtns(b.dataset.mk);});
-    }
+    /* 不管雲端有沒有新東西都要重畫 —— 未同步橫幅的存在與否也要跟著更新 */
+    if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();
+    if(got)document.querySelectorAll('.mp-b').forEach(b=>{if(b.dataset.mk)mpSyncBtns(b.dataset.mk);});
     /* 本機有雲端沒有的(或較新的)→ 若已存 secret 就靜默補上傳 */
-    let s=null;try{s=localStorage.getItem('twse-wl-secret');}catch(e){}
     if(_mpLocalOnlyNewer(remote)){
-      if(s)mpCloudPush(true); else _mpSetState('dirty','本機有未同步標記 — 點「同步」上傳');
+      if(mpHasSecret())mpCloudPush(true);
+      else _mpSetState('dirty',`本機 ${mpUnsyncedCount()} 筆未上雲 — 點「同步」`);
     }else _mpSetState('ok','已同步');
   }).catch(()=>_mpSetState('err','雲端讀取失敗'));
 }
@@ -2493,9 +2523,10 @@ function mpQueueSync(){
   _mpSetState('dirty','未同步…');
   if(_mpSyncTimer)clearTimeout(_mpSyncTimer);
   _mpSyncTimer=setTimeout(()=>{
-    let s=null;try{s=localStorage.getItem('twse-wl-secret');}catch(e){}
-    if(s)mpCloudPush(true);                          /* 有密鑰才自動送;沒有就留 dirty 狀態 */
-    else _mpSetState('dirty','未連雲端 — 點「同步」設定');
+    if(mpHasSecret()){mpCloudPush(true);return;}      /* 有密鑰才自動送;沒有就留 dirty 狀態 */
+    _mpSetState('dirty','未連雲端 — 點「同步」設定');
+    /* 重畫讓未同步橫幅立刻出現 —— 別讓使用者標記一整天才發現根本沒上傳 */
+    if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();
   },3000);
 }
 function mpCloudPush(silent){
@@ -2515,8 +2546,10 @@ function mpCloudPush(silent){
         return;
       }
       /* 伺服器回合併後的全量 → 直接採用,兩台裝置最終一致 */
-      if(j.marks)mpMergeRemote(j.marks);
+      if(j.marks){_MP_REMOTE=j.marks;mpMergeRemote(j.marks);}
       _mpSetState('ok','已同步('+(j.n||Object.keys(MYPICKF).length)+' 筆)');
+      /* 重畫讓未同步橫幅消失、統計換成合併後的數字 */
+      if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();
     })
     .catch(e=>{_mpSetState('err','同步失敗');if(!silent)alert('標記同步失敗:'+e);});
 }
@@ -2554,6 +2587,7 @@ function mpSummaryHtml(rows){
         <span id="mp-sync-st" style="font-size:10.5px;color:var(--muted-2)"></span>
         <button type="button" class="mp-b" onclick="mpCloudPush(false)" title="手動同步買/跳標記到雲端(與自選池共用同一把密鑰)">☁ 同步</button>
       </span></div>
+    ${mpSyncBanner()}
     <div class="mp-grid">${cell('我買的',b,true)}${cell('我跳過的',s)}${cell('全部推薦',a)}</div>
     ${verdict}
     <div style="font-size:10.5px;color:var(--muted-2);margin-top:8px;line-height:1.55">
