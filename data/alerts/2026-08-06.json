@@ -418,5 +418,17 @@
   "volume_ratio": 0.62,
   "vwap": 98.27,
   "fired_at": "10:44"
+ },
+ "3594|breakout": {
+  "stock_id": "3594",
+  "name": "磐儀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 58.50(現價 58.70,高出 0.3%)・量比 1.06(市場中位 0.41)・站上均價 57.80",
+  "price": 58.7,
+  "change_rate": 4.63,
+  "volume_ratio": 1.06,
+  "vwap": 57.8,
+  "fired_at": "10:51"
  }
 }
