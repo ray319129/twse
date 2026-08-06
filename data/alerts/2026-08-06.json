@@ -322,5 +322,29 @@
   "volume_ratio": 5.04,
   "vwap": 166.13,
   "fired_at": "10:09"
+ },
+ "3605|breakout": {
+  "stock_id": "3605",
+  "name": "宏致",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 101.50(現價 108.00,高出 6.4%)・量比 0.50(市場中位 0.31)・站上均價 102.69",
+  "price": 108.0,
+  "change_rate": 6.4,
+  "volume_ratio": 0.5,
+  "vwap": 102.69,
+  "fired_at": "10:13"
+ },
+ "4967|breakout": {
+  "stock_id": "4967",
+  "name": "十銓",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 271.00(現價 274.00,高出 1.1%)・量比 0.50(市場中位 0.31)・站上均價 269.17",
+  "price": 274.0,
+  "change_rate": 3.2,
+  "volume_ratio": 0.5,
+  "vwap": 269.17,
+  "fired_at": "10:14"
  }
 }
