@@ -142,5 +142,53 @@
   "volume_ratio": 0.5,
   "vwap": 246.95,
   "fired_at": "09:06"
+ },
+ "9939|breakout": {
+  "stock_id": "9939",
+  "name": "宏全",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 134.00(現價 140.50,高出 4.9%)・量比 0.53(市場中位 0.06)・站上均價 137.27",
+  "price": 140.5,
+  "change_rate": 4.85,
+  "volume_ratio": 0.53,
+  "vwap": 137.27,
+  "fired_at": "09:08"
+ },
+ "3141|breakout": {
+  "stock_id": "3141",
+  "name": "晶宏",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 76.10(現價 78.10,高出 2.6%)・量比 0.72(市場中位 0.07)・站上均價 77.10",
+  "price": 78.1,
+  "change_rate": 4.97,
+  "volume_ratio": 0.72,
+  "vwap": 77.1,
+  "fired_at": "09:10"
+ },
+ "3213|breakout": {
+  "stock_id": "3213",
+  "name": "茂訊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 137.00(現價 138.50,高出 1.1%)・量比 0.84(市場中位 0.07)・站上均價 136.32",
+  "price": 138.5,
+  "change_rate": 2.97,
+  "volume_ratio": 0.84,
+  "vwap": 136.32,
+  "fired_at": "09:10"
+ },
+ "2049|breakout": {
+  "stock_id": "2049",
+  "name": "上銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 365.00(現價 381.50,高出 4.5%)・量比 0.50(市場中位 0.08)・站上均價 371.33",
+  "price": 381.5,
+  "change_rate": 4.52,
+  "volume_ratio": 0.5,
+  "vwap": 371.33,
+  "fired_at": "09:10"
  }
 }
