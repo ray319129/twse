@@ -190,5 +190,29 @@
   "volume_ratio": 0.5,
   "vwap": 371.33,
   "fired_at": "09:10"
+ },
+ "3701|breakout": {
+  "stock_id": "3701",
+  "name": "大眾控",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 43.80(現價 44.20,高出 0.9%)・量比 0.56(市場中位 0.08)・站上均價 43.27",
+  "price": 44.2,
+  "change_rate": 3.03,
+  "volume_ratio": 0.56,
+  "vwap": 43.27,
+  "fired_at": "09:11"
+ },
+ "2464|breakout": {
+  "stock_id": "2464",
+  "name": "盟立",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 176.00(現價 181.00,高出 2.8%)・量比 0.50(市場中位 0.08)・站上均價 177.89",
+  "price": 181.0,
+  "change_rate": 6.47,
+  "volume_ratio": 0.5,
+  "vwap": 177.89,
+  "fired_at": "09:12"
  }
 }
