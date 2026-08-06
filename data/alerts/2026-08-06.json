@@ -406,5 +406,17 @@
   "volume_ratio": 0.89,
   "vwap": 409.9,
   "fired_at": "10:38"
+ },
+ "3022|breakout": {
+  "stock_id": "3022",
+  "name": "威強電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 99.00(現價 99.30,高出 0.3%)・量比 0.62(市場中位 0.39)・站上均價 98.27",
+  "price": 99.3,
+  "change_rate": 1.74,
+  "volume_ratio": 0.62,
+  "vwap": 98.27,
+  "fired_at": "10:44"
  }
 }
