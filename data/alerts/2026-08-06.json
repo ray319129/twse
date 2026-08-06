@@ -250,5 +250,17 @@
   "volume_ratio": 0.5,
   "vwap": 30.1,
   "fired_at": "09:17"
+ },
+ "3339|breakout": {
+  "stock_id": "3339",
+  "name": "泰谷",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 40.40(現價 41.85,高出 3.6%)・量比 0.50(市場中位 0.19)・站上均價 41.47",
+  "price": 41.85,
+  "change_rate": 5.15,
+  "volume_ratio": 0.5,
+  "vwap": 41.47,
+  "fired_at": "09:29"
  }
 }
