@@ -2386,6 +2386,8 @@ function mpLoad(){
     const r=localStorage.getItem(MYPICK_KEY);
     if(r){const o=JSON.parse(r)||{};
       for(const[k,v]of Object.entries(o)){
+        /* 清掉誤綁按鈕寫進來的垃圾鍵(見 mpBindBtns 的說明);正常 key 一定是「日期|代號」 */
+        if(!k||k.indexOf('|')<0){upgraded=true;continue;}
         if(typeof v==='string'){MYPICKF[k]={v,t:Date.now()};upgraded=true;}  /* 舊格式(純字串)自動升級 */
         else MYPICKF[k]=v;
       }
@@ -2435,12 +2437,19 @@ function mpSyncBtns(k){
   });
 }
 function mpBindBtns(root){
-  (root||document).querySelectorAll('.mp-b').forEach(b=>{
+  /* ⚠️ 選擇器必須帶 [data-mk] —— 只綁「買/跳」標記鈕。
+     「☁ 同步」與「立即上傳」也用 .mp-b 這個 class(共用外觀),而且同樣被塞在 #ledtable 裡
+     (mpSummaryHtml 的輸出),所以純 '.mp-b' 會把它們的 inline onclick **整個覆蓋掉** ——
+     按下去不會跳出密鑰輸入框,反而執行 mpSet(undefined, undefined) 在標記裡塞一個
+     "undefined" 垃圾鍵。2026-08-06 使用者回報「手機點同步沒有跳出視窗」就是這個。
+     (自選池的同步鈕 class="refresh" 不同名,所以一直是好的 —— 這也是為什麼電腦有密鑰、手機沒有。) */
+  (root||document).querySelectorAll('.mp-b[data-mk]').forEach(b=>{
     if(b._mpBound)return; b._mpBound=1;
     b.onclick=e=>{e.stopPropagation();e.preventDefault();mpSet(b.dataset.mk,b.dataset.mv);};
   });
 }
 function mpSet(k,v){
+  if(!k||!v)return;                                /* 防呆:key/值缺一不可,別讓誤綁的按鈕寫進垃圾鍵 */
   const cur=MYPICKF[k]&&MYPICKF[k].v;
   MYPICKF[k]={v:(cur===v?null:v),t:Date.now()};    /* 再點同一顆=取消 → 留墓碑供跨裝置合併 */
   _mpDerive();
@@ -2470,14 +2479,38 @@ function mpUnsyncedCount(){
 }
 function mpHasSecret(){try{return !!localStorage.getItem('twse-wl-secret');}catch(e){return false;}}
 /* 未同步橫幅:放在「我的實戰紀錄」卡片內,講清楚後果(這台的數字跟別台不一樣)與怎麼修。 */
+/* ⚠️ 這裡的按鈕**不要**用 .mp-b class —— 它會被 mpBindBtns 掃到(見該函式說明)。用 .refresh。
+   密鑰輸入也**不用 prompt()**:iOS Safari 一旦按過「不再顯示」就會靜默封鎖所有對話框,
+   使用者按了沒反應又找不出原因。改成橫幅內建輸入框,在哪都能用。 */
 function mpSyncBanner(){
   const n=mpUnsyncedCount();
   if(!n)return '';
-  const why=mpHasSecret()?'尚未上傳完成':'這台裝置<b>沒設定過同步密鑰</b>';
+  if(!mpHasSecret()){
+    return `<div class="mp-verdict down">
+      <div>⚠ 本機有 <b>${n}</b> 筆標記還沒上雲端 —— 這台裝置<b>沒設定過同步密鑰</b>,
+        看到的統計會與其他裝置<b>不一致</b>。</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px">
+        <input id="mp-secret" type="password" inputmode="text" autocomplete="off" autocapitalize="off"
+          autocorrect="off" spellcheck="false" placeholder="同步密鑰(WATCHLIST_SECRET)"
+          style="flex:1;min-width:180px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);
+                 background:var(--bg);color:var(--ink);font-size:13px">
+        <button type="button" class="refresh" onclick="mpSaveSecretAndPush()">連線並上傳</button>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted-2);margin-top:6px">
+        與自選池同一把密鑰,只需輸入一次,存在這台裝置的瀏覽器裡。</div>
+    </div>`;
+  }
   return `<div class="mp-verdict down" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <span>⚠ 本機有 <b>${n}</b> 筆標記還沒上雲端(${why})—— 這台看到的統計會與其他裝置<b>不一致</b>。</span>
-    <button type="button" class="mp-b" style="padding:4px 12px" onclick="mpCloudPush(false)">立即上傳</button>
+    <span>⚠ 本機有 <b>${n}</b> 筆標記還沒上雲端(尚未上傳完成)—— 這台看到的統計會與其他裝置<b>不一致</b>。</span>
+    <button type="button" class="refresh" onclick="mpCloudPush(false)">立即上傳</button>
   </div>`;
+}
+function mpSaveSecretAndPush(){
+  const el=document.getElementById('mp-secret');
+  const s=((el&&el.value)||'').trim();
+  if(!s){_mpSetState('err','請先輸入密鑰');if(el)el.focus();return;}
+  try{localStorage.setItem('twse-wl-secret',s);}catch(e){}
+  mpCloudPush(true);        /* silent:錯誤走狀態列,不靠 alert(同樣可能被 Safari 封鎖) */
 }
 function _mpSetState(s,msg){
   _mpSyncState=s;
@@ -2542,6 +2575,8 @@ function mpCloudPush(silent){
       if(!ok||j.error){
         if(String(j.error||'').includes('secret')){try{localStorage.removeItem('twse-wl-secret');}catch(e){}}
         _mpSetState('err','同步失敗:'+(j.error||'未知'));
+        /* 重畫:密鑰錯誤時已被清掉,橫幅要換回輸入框讓使用者重試(別只丟一個 alert 就沒下文) */
+        if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();
         if(!silent)alert('標記同步失敗:'+(j.error||'未知錯誤'));
         return;
       }
@@ -2585,7 +2620,7 @@ function mpSummaryHtml(rows){
       <span style="font-size:11.5px;color:var(--muted);font-weight:600">在下方台帳按「買/跳」標記,自動同步雲端(跨裝置共用)</span>
       <span style="margin-left:auto;display:inline-flex;gap:8px;align-items:center">
         <span id="mp-sync-st" style="font-size:10.5px;color:var(--muted-2)"></span>
-        <button type="button" class="mp-b" onclick="mpCloudPush(false)" title="手動同步買/跳標記到雲端(與自選池共用同一把密鑰)">☁ 同步</button>
+        <button type="button" class="refresh" onclick="mpCloudPush(false)" title="手動同步買/跳標記到雲端(與自選池共用同一把密鑰)">☁ 同步</button>
       </span></div>
     ${mpSyncBanner()}
     <div class="mp-grid">${cell('我買的',b,true)}${cell('我跳過的',s)}${cell('全部推薦',a)}</div>

@@ -2494,3 +2494,50 @@ Scored: 816 | 核心 3 / 觀察 20 / 自選 8
 ### 使用者要做的一次性動作
 **在手機上按「☁ 同步」→ 輸入 Vercel 的 `WATCHLIST_SECRET`** → 31 筆標記會全部上雲,
 電腦下次載入自動合併。之後兩台都會自動同步。
+
+---
+
+## 57. ⚠️ 同步鈕的 inline onclick 被 mpBindBtns 覆蓋(2026-08-06)
+
+### 症狀
+使用者:「我手機點同步的時候沒有跳出視窗」(iOS Safari)。
+
+### 根因(不是 Safari 的問題)
+```html
+<button class="mp-b" onclick="mpCloudPush(false)">☁ 同步</button>
+```
+```js
+$('#ledtable').innerHTML = ledLiveSummary(...) + mpSummaryHtml(LED) + ...;   /* 同步鈕在 #ledtable 內 */
+mpBindBtns($('#ledtable'));
+function mpBindBtns(root){
+  root.querySelectorAll('.mp-b').forEach(b=>{ b.onclick = e=>{ ... mpSet(b.dataset.mk,b.dataset.mv); }; });
+}
+```
+**同步鈕與買/跳鈕共用 `.mp-b` 這個 class**(為了外觀一致),而它就被塞在 `#ledtable` 裡
+(`mpSummaryHtml` 的輸出)。`b.onclick = fn` 會**覆蓋 inline onclick 屬性** →
+按下去執行的是 `mpSet(undefined, undefined)`,不但不跳密鑰輸入框,還會在 MYPICKF 塞一個
+`"undefined"` 垃圾鍵(值是墓碑 `{v:null}`),而且會被 push 到雲端。
+
+**為什麼電腦沒事**:自選池的同步鈕是 `class="refresh" id="wl-sync"`,**class 不同名、不會被掃到**。
+使用者當初在電腦按過那顆、存下密鑰,所以標記走「有密鑰就靜默自動 push」的路徑一直正常。
+手機從沒按過自選池同步,而標記頁那顆同步鈕是壞的 → 永遠拿不到密鑰 → 標記永遠留在本機。
+**這就是第 56 節「兩台數字不一致」的真正上游原因。**
+
+### 改法
+1. **`mpBindBtns` 選擇器改成 `.mp-b[data-mk]`** —— 只綁真正的標記鈕。(核心修正)
+2. 同步/上傳類按鈕一律改用 `class="refresh"`,不再共用 `.mp-b`。(雙保險)
+3. `mpSet(k,v)` 開頭 `if(!k||!v)return;` —— 防呆,誤綁也寫不進垃圾鍵。
+4. `mpLoad()` 丟掉不含 `|` 的 key —— 清掉既有的垃圾鍵(雲端目前乾淨,只是保險)。
+5. **密鑰輸入不再用 `prompt()`** —— iOS Safari 一旦按過「不再顯示」就會**靜默封鎖所有對話框**,
+   使用者按了沒反應又查不出原因。改成橫幅內建 `<input type="password">` + 「連線並上傳」按鈕
+   (`mpSaveSecretAndPush()`),在哪個瀏覽器都能用。密鑰錯誤時也重畫,把輸入框換回來讓人重試。
+
+### 驗證(靜態檢查,可重跑)
+抽出所有 `class="mp-b"` 的 `<button>`,斷言**每一個都帶 `data-mk`**;
+斷言 `mpBindBtns` 的選擇器含 `[data-mk]`;斷言所有 `onclick="mpCloudPush(...)"` /
+`mpSaveSecretAndPush()` 的按鈕 class **不含 mp-b**。結果:4 個 .mp-b 全是標記鈕、
+3 個同步類按鈕全為 refresh。`node --check` OK。
+
+### 教訓
+**用 class 同時當「樣式」與「行為選擇器」很容易出這種事** —— 有人為了長得一樣借用了 class,
+行為就跟著被綁上去。之後要綁行為,選擇器一律加上該行為專屬的 data 屬性條件。
