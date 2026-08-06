@@ -214,5 +214,29 @@
   "volume_ratio": 0.5,
   "vwap": 177.89,
   "fired_at": "09:12"
+ },
+ "6913|breakout": {
+  "stock_id": "6913",
+  "name": "鴻呈",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 133.00(現價 135.00,高出 1.5%)・量比 1.18(市場中位 0.11)・站上均價 131.65",
+  "price": 135.0,
+  "change_rate": 6.71,
+  "volume_ratio": 1.18,
+  "vwap": 131.65,
+  "fired_at": "09:15"
+ },
+ "2027|breakout": {
+  "stock_id": "2027",
+  "name": "大成鋼",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 45.50(現價 45.80,高出 0.7%)・量比 0.52(市場中位 0.11)・站上均價 45.23",
+  "price": 45.8,
+  "change_rate": 3.26,
+  "volume_ratio": 0.52,
+  "vwap": 45.23,
+  "fired_at": "09:16"
  }
 }
