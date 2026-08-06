@@ -455,28 +455,52 @@
   "vwap": 116.19,
   "fired_at": "11:30"
  },
- "8210|breakout": {
-  "stock_id": "8210",
-  "name": "勤誠",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 1240.00(現價 1260.00,高出 1.6%)・量比 0.81(市場中位 0.54)・站上均價 1207.47",
-  "price": 1260.0,
-  "change_rate": 7.69,
-  "volume_ratio": 0.81,
-  "vwap": 1207.47,
-  "fired_at": "11:49"
- },
  "4590|pullback": {
   "stock_id": "4590",
   "name": "富田-創",
   "type": "pullback",
   "label": "回檔買點",
-  "reason": "多頭排列(5>20>60)・回到月線 81.55 附近(距 +1.0%)・翻紅 +2.61% 站回均價・量比 0.92(市場中位 0.64)",
-  "price": 82.4,
-  "change_rate": 2.61,
-  "volume_ratio": 0.92,
-  "vwap": 80.72,
-  "fired_at": "12:45"
+  "reason": "多頭排列(5>20>60)・回到月線 81.55 附近(距 -0.7%)・翻紅 +0.87% 站回均價・量比 1.01(市場中位 0.76)",
+  "price": 81.0,
+  "change_rate": 0.87,
+  "volume_ratio": 1.01,
+  "vwap": 80.79,
+  "fired_at": "13:23"
+ },
+ "6617|pullback": {
+  "stock_id": "6617",
+  "name": "共信-KY",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 88.15 附近(距 -0.6%)・翻紅 +9.91% 站回均價・量比 1.66(市場中位 0.76)",
+  "price": 87.6,
+  "change_rate": 9.91,
+  "volume_ratio": 1.66,
+  "vwap": 84.21,
+  "fired_at": "13:23"
+ },
+ "9921|breakout": {
+  "stock_id": "9921",
+  "name": "巨大",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 89.40(現價 90.10,高出 0.8%)・量比 2.42(市場中位 0.76)・站上均價 88.28",
+  "price": 90.1,
+  "change_rate": 5.87,
+  "volume_ratio": 2.42,
+  "vwap": 88.28,
+  "fired_at": "13:23"
+ },
+ "4536|pullback": {
+  "stock_id": "4536",
+  "name": "拓凱",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 167.97 附近(距 -0.3%)・翻紅 +0.90% 站回均價・量比 1.06(市場中位 0.76)",
+  "price": 167.5,
+  "change_rate": 0.9,
+  "volume_ratio": 1.06,
+  "vwap": 166.26,
+  "fired_at": "13:23"
  }
 }
