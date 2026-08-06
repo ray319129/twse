@@ -43,6 +43,10 @@ DOCS_DIR = DATA_DIR.parent / "docs"
 SAFE_PER_MIN = 30
 _SLEEP = 60.0 / SAFE_PER_MIN
 
+# 每晚跑完往回檢查幾個交易日的缺口。取 10 是配合 net_series 的長度,
+# 也讓「某天補不到」的情況最多重試 10 個交易日就自然停手,不會永遠重試。
+CATCHUP_DAYS = 10
+
 
 def target_stocks() -> dict[str, str]:
     """核心 + 觀察 + 自選 + 持倉。持倉在 localStorage(不上傳,見隱私設計),
@@ -277,6 +281,8 @@ if __name__ == "__main__":
     ap.add_argument("--limit", type=int, help="只跑前 N 檔(測試用)")
     ap.add_argument("--backfill", type=int, metavar="DAYS", help="回補最近 N 個交易日")
     ap.add_argument("--streaks", action="store_true", help="只重算連買連賣")
+    ap.add_argument("--no-catchup", action="store_true",
+                    help="跑完不補前幾日的缺口(預設會補)")
     a = ap.parse_args()
     if a.backfill:
         print(json.dumps(backfill(a.backfill, limit=a.limit), ensure_ascii=False))
@@ -288,4 +294,11 @@ if __name__ == "__main__":
                   f"{v['streak']} 日(歷史 {v['days_used']} 日)")
     else:
         print(json.dumps(run(day=a.day, limit=a.limit), ensure_ascii=False))
+        # 當晚 job 掛掉(2026-08-06 就是 GitHub Actions 大規模故障)那天的資料就永久缺一格,
+        # 沒有任何地方會發現 —— 近 20 個交易日實際缺了 07-27 / 08-03 / 08-06 三天。
+        # 缺口對 compute_streaks() 是隱形的:它只按日期排序數連續同號,跨過缺口的
+        # 「連買 5 日」其實不連續。所以跑完順手補。
+        # backfill() 會跳過已存在的日期,沒缺口時 todo 為空、一次 API 都不打。
+        if not a.no_catchup:
+            print(json.dumps(backfill(CATCHUP_DAYS, limit=a.limit), ensure_ascii=False))
         compute_streaks()

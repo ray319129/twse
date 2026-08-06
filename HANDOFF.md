@@ -2541,3 +2541,50 @@ function mpBindBtns(root){
 ### 教訓
 **用 class 同時當「樣式」與「行為選擇器」很容易出這種事** —— 有人為了長得一樣借用了 class,
 行為就跟著被綁上去。之後要綁行為,選擇器一律加上該行為專屬的 data 屬性條件。
+
+---
+
+## 58. 分點缺口會無聲累積 —— 夜間跑完自動補洞(2026-08-07)
+
+### 起因
+2026-08-06 15:22Z 起 **GitHub Actions / Pages 大規模故障**(`Failed to resolve action download
+info: Service Unavailable`),當晚 `Branch Chips (nightly)` 連 checkout 都還沒跑就掛了,
+pages build 也失敗。這部分**不是我們的 bug**,平台恢復後重跑即可。
+
+但查缺料時發現真問題:**近 20 個交易日缺了 `2026-07-27` / `2026-08-03` / `2026-08-06` 三天**。
+也就是說夜間 job 每掛一次,那天的分點就**永久缺一格,而且沒有任何地方會發現** ——
+`chips.yml` 的設計是「沒有檔案變動就乾淨跳過不讓 job 變紅」,失敗與「非交易日」長得一樣。
+
+### 為什麼缺口比想像嚴重
+`compute_streaks()` 只是把所有 parquet 併起來**按日期排序數連續同號**,
+**中間缺一天是隱形的** —— 跨過缺口的「主力連買 5 日」其實根本不連續。
+缺口不只少一天資料,是**污染連買連賣這個欄位本身**。
+
+### 改法([scripts/branch_chips.py](scripts/branch_chips.py))
+預設路徑(`python -m scripts.branch_chips`,即 workflow 每晚跑的那條)在 `run()` 之後、
+`compute_streaks()` 之前,自動補 `CATCHUP_DAYS = 10` 個交易日內的缺口:
+
+- 直接重用既有的 `backfill()` —— 它第 167 行本來就有 `have = {p.stem for p in OUT_DIR.glob(...)}`,
+  **會跳過已存在的日期**,天生就是補洞工具,只是排程從來沒叫過它。
+- **沒缺口時零成本**:`todo` 為空 → 迴圈第一圈就 `break` → 一次 API 都不打。
+- `CATCHUP_DAYS = 10` 取這個數是配合 `net_series` 長度,也讓「某天真的補不到」的情況
+  **最多重試 10 個交易日就自然停手**,不會永遠每晚重試。
+- 新增 `--no-catchup` 可關掉。`chips.yml` **不用改**(commit 步驟已經 `git add data/chips_branch`)。
+- catchup **不依賴 `run()` 成功**,寫在 `run()` 之外 —— 當晚沒發布 / 非交易日照樣補前幾天的洞。
+
+### 驗證(離線 monkeypatch,可重跑)
+patch 層是 **`scripts.branch`**:`backfill()` 內是函式內 from-import,
+但 `_fetch_one_day` 是 **module-level** `from .branch import`,所以 runpy 前先 patch
+`scripts.branch` 兩個函式才攔得到(from-import 綁定陷阱,同 §347 那次)。
+
+1. 有缺口 → 鎖定的正是 `('2026-07-27','2026-08-03','2026-08-06')` 三天。
+2. 無缺口(`_trading_days` 改回傳已有檔的日期)→ **API 呼叫 0 次**,assert 通過。
+3. 端到端跑 `python -m scripts.branch_chips --limit 2`:`run()` 抓 2 檔 → 回 `no_data`
+   (01:26 分點還沒發布,正確)→ catchup 照樣觸發、目標日正確 → `compute_streaks()`。
+
+### 未做 / 誠實邊界
+- **那三天的缺口還沒真的補回來**:本機沒有 `FINMIND_TOKEN`(`.env.local` 只有 Vercel 的)。
+  平台恢復後跑一次 `Branch Chips (nightly)` 的 `workflow_dispatch` 就會自動補上,
+  或手動帶 `backfill=10`。補完前所有「連買 N 日」跨到那三天的都不可信。
+- 缺口的**根因沒查**(只知道 08-06 是平台故障,07-27 / 08-03 為何缺不明)。
+  這次做的是止血:不管什麼原因掛掉,隔天自己補回來。
