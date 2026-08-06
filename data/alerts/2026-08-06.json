@@ -310,5 +310,17 @@
   "volume_ratio": 0.5,
   "vwap": 260.38,
   "fired_at": "10:01"
+ },
+ "4908|breakout": {
+  "stock_id": "4908",
+  "name": "前鼎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 171.50(現價 173.00,高出 0.9%)・量比 5.04(市場中位 0.30)・站上均價 166.13",
+  "price": 173.0,
+  "change_rate": 4.53,
+  "volume_ratio": 5.04,
+  "vwap": 166.13,
+  "fired_at": "10:09"
  }
 }
