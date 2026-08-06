@@ -238,5 +238,17 @@
   "volume_ratio": 0.52,
   "vwap": 45.23,
   "fired_at": "09:16"
+ },
+ "1907|breakout": {
+  "stock_id": "1907",
+  "name": "永豐餘",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 29.85(現價 30.35,高出 1.7%)・量比 0.50(市場中位 0.12)・站上均價 30.10",
+  "price": 30.35,
+  "change_rate": 2.01,
+  "volume_ratio": 0.5,
+  "vwap": 30.1,
+  "fired_at": "09:17"
  }
 }
