@@ -274,5 +274,41 @@
   "volume_ratio": 0.5,
   "vwap": 105.77,
   "fired_at": "09:37"
+ },
+ "6533|breakout": {
+  "stock_id": "6533",
+  "name": "晶心科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 247.00(現價 249.00,高出 0.8%)・量比 1.91(市場中位 0.29)・站上均價 240.39",
+  "price": 249.0,
+  "change_rate": 6.86,
+  "volume_ratio": 1.91,
+  "vwap": 240.39,
+  "fired_at": "09:42"
+ },
+ "6177|breakout": {
+  "stock_id": "6177",
+  "name": "達麗",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 48.95(現價 49.20,高出 0.5%)・量比 0.85(市場中位 0.29)・站上均價 48.70",
+  "price": 49.2,
+  "change_rate": 2.92,
+  "volume_ratio": 0.85,
+  "vwap": 48.7,
+  "fired_at": "09:45"
+ },
+ "6782|breakout": {
+  "stock_id": "6782",
+  "name": "視陽",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 214.00(現價 216.50,高出 1.2%)・量比 0.58(市場中位 0.30)・站上均價 212.23",
+  "price": 216.5,
+  "change_rate": 5.09,
+  "volume_ratio": 0.58,
+  "vwap": 212.23,
+  "fired_at": "09:45"
  }
 }
