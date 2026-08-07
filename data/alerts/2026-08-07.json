@@ -202,5 +202,29 @@
   "volume_ratio": 0.5,
   "vwap": 147.42,
   "fired_at": "09:27"
+ },
+ "3416|breakout": {
+  "stock_id": "3416",
+  "name": "融程電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 192.00(現價 193.50,高出 0.8%)・量比 0.83(市場中位 0.23)・站上均價 190.81",
+  "price": 193.5,
+  "change_rate": 3.75,
+  "volume_ratio": 0.83,
+  "vwap": 190.81,
+  "fired_at": "09:30"
+ },
+ "3141|breakout": {
+  "stock_id": "3141",
+  "name": "晶宏",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 80.00(現價 82.30,高出 2.9%)・量比 0.50(市場中位 0.24)・站上均價 80.97",
+  "price": 82.3,
+  "change_rate": 4.97,
+  "volume_ratio": 0.5,
+  "vwap": 80.97,
+  "fired_at": "09:32"
  }
 }
