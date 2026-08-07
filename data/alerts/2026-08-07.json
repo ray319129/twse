@@ -562,5 +562,29 @@
   "volume_ratio": 1.34,
   "vwap": 205.87,
   "fired_at": "13:22"
+ },
+ "4162|pullback": {
+  "stock_id": "4162",
+  "name": "智擎",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 61.95 附近(距 +2.8%)・翻紅 +0.79% 站回均價・量比 1.89(市場中位 0.91)",
+  "price": 63.7,
+  "change_rate": 0.79,
+  "volume_ratio": 1.89,
+  "vwap": 63.43,
+  "fired_at": "13:25"
+ },
+ "4536|pullback": {
+  "stock_id": "4536",
+  "name": "拓凱",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 167.97 附近(距 +1.2%)・翻紅 +1.49% 站回均價・量比 1.23(市場中位 0.91)",
+  "price": 170.0,
+  "change_rate": 1.49,
+  "volume_ratio": 1.23,
+  "vwap": 169.75,
+  "fired_at": "13:25"
  }
 }
