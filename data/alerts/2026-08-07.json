@@ -262,5 +262,17 @@
   "volume_ratio": 0.61,
   "vwap": 48.6,
   "fired_at": "09:35"
+ },
+ "5351|breakout": {
+  "stock_id": "5351",
+  "name": "鈺創",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 105.50(現價 108.50,高出 2.8%)・量比 0.50(市場中位 0.26)・站上均價 105.77",
+  "price": 108.5,
+  "change_rate": 5.33,
+  "volume_ratio": 0.5,
+  "vwap": 105.77,
+  "fired_at": "09:37"
  }
 }
