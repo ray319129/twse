@@ -334,5 +334,29 @@
   "volume_ratio": 1.38,
   "vwap": 142.88,
   "fired_at": "09:50"
+ },
+ "6243|pullback": {
+  "stock_id": "6243",
+  "name": "迅杰",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 47.29 附近(距 +0.1%)・翻紅 +4.52% 站回均價・量比 0.50(市場中位 0.32)",
+  "price": 47.35,
+  "change_rate": 4.52,
+  "volume_ratio": 0.5,
+  "vwap": 47.29,
+  "fired_at": "09:52"
+ },
+ "3594|breakout": {
+  "stock_id": "3594",
+  "name": "磐儀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 59.80(現價 60.00,高出 0.3%)・量比 0.53(市場中位 0.33)・站上均價 59.05",
+  "price": 60.0,
+  "change_rate": 3.62,
+  "volume_ratio": 0.53,
+  "vwap": 59.05,
+  "fired_at": "09:53"
  }
 }
