@@ -154,5 +154,41 @@
   "volume_ratio": 0.5,
   "vwap": 35.16,
   "fired_at": "09:21"
+ },
+ "2606|breakout": {
+  "stock_id": "2606",
+  "name": "裕民",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 65.60(現價 65.80,高出 0.3%)・量比 0.50(市場中位 0.19)・站上均價 65.25",
+  "price": 65.8,
+  "change_rate": 2.17,
+  "volume_ratio": 0.5,
+  "vwap": 65.25,
+  "fired_at": "09:24"
+ },
+ "5515|pullback": {
+  "stock_id": "5515",
+  "name": "建國",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 42.43 附近(距 +2.2%)・翻紅 +2.24% 站回均價・量比 0.50(市場中位 0.20)",
+  "price": 43.35,
+  "change_rate": 2.24,
+  "volume_ratio": 0.5,
+  "vwap": 42.97,
+  "fired_at": "09:25"
+ },
+ "2049|breakout": {
+  "stock_id": "2049",
+  "name": "上銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 383.50(現價 390.50,高出 1.8%)・量比 0.50(市場中位 0.20)・站上均價 383.35",
+  "price": 390.5,
+  "change_rate": 7.87,
+  "volume_ratio": 0.5,
+  "vwap": 383.35,
+  "fired_at": "09:26"
  }
 }
