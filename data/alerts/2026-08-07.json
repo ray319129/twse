@@ -418,5 +418,17 @@
   "volume_ratio": 0.52,
   "vwap": 38.98,
   "fired_at": "10:07"
+ },
+ "2397|breakout": {
+  "stock_id": "2397",
+  "name": "友通",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 63.00(現價 64.20,高出 1.9%)・量比 0.63(市場中位 0.38)・站上均價 63.21",
+  "price": 64.2,
+  "change_rate": 3.88,
+  "volume_ratio": 0.63,
+  "vwap": 63.21,
+  "fired_at": "10:10"
  }
 }
