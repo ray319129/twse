@@ -310,5 +310,29 @@
   "volume_ratio": 0.58,
   "vwap": 212.23,
   "fired_at": "09:45"
+ },
+ "6279|breakout": {
+  "stock_id": "6279",
+  "name": "胡連",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 124.50(現價 125.00,高出 0.4%)・量比 2.92(市場中位 0.32)・站上均價 124.01",
+  "price": 125.0,
+  "change_rate": 3.73,
+  "volume_ratio": 2.92,
+  "vwap": 124.01,
+  "fired_at": "09:50"
+ },
+ "3218|breakout": {
+  "stock_id": "3218",
+  "name": "大學光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 143.50(現價 144.00,高出 0.3%)・量比 1.38(市場中位 0.32)・站上均價 142.88",
+  "price": 144.0,
+  "change_rate": 2.85,
+  "volume_ratio": 1.38,
+  "vwap": 142.88,
+  "fired_at": "09:50"
  }
 }
