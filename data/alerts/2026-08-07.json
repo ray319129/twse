@@ -466,5 +466,17 @@
   "volume_ratio": 0.58,
   "vwap": 82.19,
   "fired_at": "10:35"
+ },
+ "3081|breakout": {
+  "stock_id": "3081",
+  "name": "聯亞",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2375.00(現價 2470.00,高出 4.0%)・量比 0.69(市場中位 0.45)・站上均價 2458.41",
+  "price": 2470.0,
+  "change_rate": 4.0,
+  "volume_ratio": 0.69,
+  "vwap": 2458.41,
+  "fired_at": "10:40"
  }
 }
