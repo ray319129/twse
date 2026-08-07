@@ -82,5 +82,29 @@
   "volume_ratio": 0.5,
   "vwap": 43.04,
   "fired_at": "09:06"
+ },
+ "3293|breakout": {
+  "stock_id": "3293",
+  "name": "鈊象",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 793.00(現價 804.00,高出 1.4%)・量比 0.59(市場中位 0.08)・站上均價 797.69",
+  "price": 804.0,
+  "change_rate": 2.55,
+  "volume_ratio": 0.59,
+  "vwap": 797.69,
+  "fired_at": "09:08"
+ },
+ "2354|breakout": {
+  "stock_id": "2354",
+  "name": "鴻準",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 61.00(現價 62.10,高出 1.8%)・量比 0.50(市場中位 0.08)・站上均價 61.96",
+  "price": 62.1,
+  "change_rate": 1.8,
+  "volume_ratio": 0.5,
+  "vwap": 61.96,
+  "fired_at": "09:08"
  }
 }
