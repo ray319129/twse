@@ -1,0 +1,86 @@
+{
+ "4571|breakout": {
+  "stock_id": "4571",
+  "name": "鈞興-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 169.00(現價 178.00,高出 5.3%)・量比 0.57(市場中位 0.07)・站上均價 174.73",
+  "price": 178.0,
+  "change_rate": 6.26,
+  "volume_ratio": 0.57,
+  "vwap": 174.73,
+  "fired_at": "09:05"
+ },
+ "5288|pullback": {
+  "stock_id": "5288",
+  "name": "豐祥-KY",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 189.12 附近(距 -0.3%)・翻紅 +1.89% 站回均價・量比 0.52(市場中位 0.07)",
+  "price": 188.5,
+  "change_rate": 1.89,
+  "volume_ratio": 0.52,
+  "vwap": 186.02,
+  "fired_at": "09:05"
+ },
+ "6913|breakout": {
+  "stock_id": "6913",
+  "name": "鴻呈",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 139.00(現價 148.50,高出 6.8%)・量比 0.50(市場中位 0.07)・站上均價 144.25",
+  "price": 148.5,
+  "change_rate": 6.83,
+  "volume_ratio": 0.5,
+  "vwap": 144.25,
+  "fired_at": "09:05"
+ },
+ "2010|breakout": {
+  "stock_id": "2010",
+  "name": "春源",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 21.55(現價 22.85,高出 6.0%)・量比 0.59(市場中位 0.07)・站上均價 22.48",
+  "price": 22.85,
+  "change_rate": 6.52,
+  "volume_ratio": 0.59,
+  "vwap": 22.48,
+  "fired_at": "09:05"
+ },
+ "5289|breakout": {
+  "stock_id": "5289",
+  "name": "宜鼎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1610.00(現價 1665.00,高出 3.4%)・量比 0.50(市場中位 0.07)・站上均價 1641.31",
+  "price": 1665.0,
+  "change_rate": 3.41,
+  "volume_ratio": 0.5,
+  "vwap": 1641.31,
+  "fired_at": "09:05"
+ },
+ "8454|breakout": {
+  "stock_id": "8454",
+  "name": "富邦媒",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 274.00(現價 275.00,高出 0.4%)・量比 0.53(市場中位 0.07)・站上均價 267.61",
+  "price": 275.0,
+  "change_rate": 6.58,
+  "volume_ratio": 0.53,
+  "vwap": 267.61,
+  "fired_at": "09:05"
+ },
+ "2031|breakout": {
+  "stock_id": "2031",
+  "name": "新光鋼",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 41.15(現價 43.60,高出 6.0%)・量比 0.50(市場中位 0.08)・站上均價 43.04",
+  "price": 43.6,
+  "change_rate": 6.47,
+  "volume_ratio": 0.5,
+  "vwap": 43.04,
+  "fired_at": "09:06"
+ }
+}
