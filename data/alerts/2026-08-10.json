@@ -46,5 +46,17 @@
   "volume_ratio": 0.51,
   "vwap": 19.26,
   "fired_at": "09:13"
+ },
+ "2603|breakout": {
+  "stock_id": "2603",
+  "name": "長榮",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 208.50(現價 214.00,高出 2.6%)・量比 0.58(市場中位 0.17)・站上均價 211.03",
+  "price": 214.0,
+  "change_rate": 3.13,
+  "volume_ratio": 0.58,
+  "vwap": 211.03,
+  "fired_at": "09:15"
  }
 }
