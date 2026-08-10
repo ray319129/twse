@@ -322,5 +322,17 @@
   "volume_ratio": 0.77,
   "vwap": 16.37,
   "fired_at": "10:54"
+ },
+ "4441|breakout": {
+  "stock_id": "4441",
+  "name": "振大環球",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 195.00(現價 197.00,高出 1.0%)・量比 1.14(市場中位 0.62)・站上均價 193.12",
+  "price": 197.0,
+  "change_rate": 3.41,
+  "volume_ratio": 1.14,
+  "vwap": 193.12,
+  "fired_at": "11:05"
  }
 }
