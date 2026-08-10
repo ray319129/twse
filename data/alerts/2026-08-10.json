@@ -250,5 +250,17 @@
   "volume_ratio": 0.54,
   "vwap": 1168.77,
   "fired_at": "09:47"
+ },
+ "1608|breakout": {
+  "stock_id": "1608",
+  "name": "華榮",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 35.80(現價 36.05,高出 0.7%)・量比 0.63(市場中位 0.42)・站上均價 35.59",
+  "price": 36.05,
+  "change_rate": 3.14,
+  "volume_ratio": 0.63,
+  "vwap": 35.59,
+  "fired_at": "10:01"
  }
 }
