@@ -358,5 +358,17 @@
   "volume_ratio": 1.06,
   "vwap": 121.01,
   "fired_at": "11:30"
+ },
+ "7805|breakout": {
+  "stock_id": "7805",
+  "name": "威聯通",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 650.00(現價 660.00,高出 1.5%)・量比 1.25(市場中位 0.69)・站上均價 655.91",
+  "price": 660.0,
+  "change_rate": 2.48,
+  "volume_ratio": 1.25,
+  "vwap": 655.91,
+  "fired_at": "11:35"
  }
 }
