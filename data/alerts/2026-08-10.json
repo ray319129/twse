@@ -34,5 +34,17 @@
   "volume_ratio": 0.94,
   "vwap": 524.87,
   "fired_at": "09:06"
+ },
+ "2002|pullback": {
+  "stock_id": "2002",
+  "name": "中鋼",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 18.86 附近(距 +2.3%)・翻紅 +1.31% 站回均價・量比 0.51(市場中位 0.15)",
+  "price": 19.3,
+  "change_rate": 1.31,
+  "volume_ratio": 0.51,
+  "vwap": 19.26,
+  "fired_at": "09:13"
  }
 }
