@@ -58,5 +58,17 @@
   "volume_ratio": 0.58,
   "vwap": 211.03,
   "fired_at": "09:15"
+ },
+ "6024|breakout": {
+  "stock_id": "6024",
+  "name": "群益期",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 61.29(現價 61.70,高出 0.7%)・量比 0.76(市場中位 0.21)・站上均價 61.20",
+  "price": 61.7,
+  "change_rate": 3.0,
+  "volume_ratio": 0.76,
+  "vwap": 61.2,
+  "fired_at": "09:20"
  }
 }
