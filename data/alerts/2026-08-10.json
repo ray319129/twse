@@ -346,5 +346,17 @@
   "volume_ratio": 0.87,
   "vwap": 104.78,
   "fired_at": "11:22"
+ },
+ "8436|breakout": {
+  "stock_id": "8436",
+  "name": "大江",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 121.50(現價 124.00,高出 2.1%)・量比 1.06(市場中位 0.68)・站上均價 121.01",
+  "price": 124.0,
+  "change_rate": 5.98,
+  "volume_ratio": 1.06,
+  "vwap": 121.01,
+  "fired_at": "11:30"
  }
 }
