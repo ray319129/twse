@@ -310,5 +310,17 @@
   "volume_ratio": 0.89,
   "vwap": 2832.32,
   "fired_at": "10:52"
+ },
+ "2905|pullback": {
+  "stock_id": "2905",
+  "name": "三商",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 16.05 附近(距 +2.8%)・翻紅 +0.60% 站回均價・量比 0.77(市場中位 0.59)",
+  "price": 16.5,
+  "change_rate": 0.6,
+  "volume_ratio": 0.77,
+  "vwap": 16.37,
+  "fired_at": "10:54"
  }
 }
