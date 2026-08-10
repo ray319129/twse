@@ -154,5 +154,17 @@
   "volume_ratio": 0.73,
   "vwap": 11.68,
   "fired_at": "09:30"
+ },
+ "6206|breakout": {
+  "stock_id": "6206",
+  "name": "飛捷",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 153.50(現價 154.00,高出 0.3%)・量比 1.03(市場中位 0.28)・站上均價 149.76",
+  "price": 154.0,
+  "change_rate": 6.94,
+  "volume_ratio": 1.03,
+  "vwap": 149.76,
+  "fired_at": "09:31"
  }
 }
