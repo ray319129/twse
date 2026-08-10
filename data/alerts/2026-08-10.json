@@ -334,5 +334,17 @@
   "volume_ratio": 1.14,
   "vwap": 193.12,
   "fired_at": "11:05"
+ },
+ "6919|pullback": {
+  "stock_id": "6919",
+  "name": "康霈*",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 105.37 附近(距 +1.6%)・翻紅 +1.90% 站回均價・量比 0.87(市場中位 0.66)",
+  "price": 107.0,
+  "change_rate": 1.9,
+  "volume_ratio": 0.87,
+  "vwap": 104.78,
+  "fired_at": "11:22"
  }
 }
