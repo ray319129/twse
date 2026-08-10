@@ -406,5 +406,17 @@
   "volume_ratio": 2.07,
   "vwap": 49.2,
   "fired_at": "13:22"
+ },
+ "2206|pullback": {
+  "stock_id": "2206",
+  "name": "三陽工業",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 62.58 附近(距 +0.2%)・翻紅 +1.12% 站回均價・量比 1.28(市場中位 0.98)",
+  "price": 62.7,
+  "change_rate": 1.12,
+  "volume_ratio": 1.28,
+  "vwap": 62.21,
+  "fired_at": "13:23"
  }
 }
