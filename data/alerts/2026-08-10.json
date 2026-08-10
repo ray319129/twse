@@ -262,5 +262,17 @@
   "volume_ratio": 0.63,
   "vwap": 35.59,
   "fired_at": "10:01"
+ },
+ "7786|breakout": {
+  "stock_id": "7786",
+  "name": "東方風能",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 136.50(現價 137.00,高出 0.4%)・量比 1.04(市場中位 0.48)・站上均價 132.87",
+  "price": 137.0,
+  "change_rate": 7.87,
+  "volume_ratio": 1.04,
+  "vwap": 132.87,
+  "fired_at": "10:15"
  }
 }
