@@ -130,5 +130,29 @@
   "volume_ratio": 0.5,
   "vwap": 271.98,
   "fired_at": "09:25"
+ },
+ "6642|breakout": {
+  "stock_id": "6642",
+  "name": "富致",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 83.90(現價 87.10,高出 3.8%)・量比 1.07(市場中位 0.28)・站上均價 86.95",
+  "price": 87.1,
+  "change_rate": 7.93,
+  "volume_ratio": 1.07,
+  "vwap": 86.95,
+  "fired_at": "09:30"
+ },
+ "1517|pullback": {
+  "stock_id": "1517",
+  "name": "利奇",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 11.43 附近(距 +2.4%)・翻紅 +1.29% 站回均價・量比 0.73(市場中位 0.28)",
+  "price": 11.7,
+  "change_rate": 1.29,
+  "volume_ratio": 0.73,
+  "vwap": 11.68,
+  "fired_at": "09:30"
  }
 }
