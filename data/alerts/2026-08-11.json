@@ -322,5 +322,29 @@
   "volume_ratio": 0.87,
   "vwap": 182.45,
   "fired_at": "09:50"
+ },
+ "2030|breakout": {
+  "stock_id": "2030",
+  "name": "彰源",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 20.45(現價 21.25,高出 3.9%)・量比 0.61(市場中位 0.34)・站上均價 21.22",
+  "price": 21.25,
+  "change_rate": 3.91,
+  "volume_ratio": 0.61,
+  "vwap": 21.22,
+  "fired_at": "09:59"
+ },
+ "4127|breakout": {
+  "stock_id": "4127",
+  "name": "天良",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 90.60(現價 91.00,高出 0.4%)・量比 0.85(市場中位 0.36)・站上均價 87.99",
+  "price": 91.0,
+  "change_rate": 1.9,
+  "volume_ratio": 0.85,
+  "vwap": 87.99,
+  "fired_at": "10:00"
  }
 }
