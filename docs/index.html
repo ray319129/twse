@@ -3364,6 +3364,33 @@ async function initHeatmap(){
 
    ⚠️ 只覆蓋 levels.json 有的股票(1022 檔,以成交額篩過);其餘沿用批次值。
    所以標題會標明「即時(N 檔)」讓使用者知道涵蓋範圍。 */
+/* 取整份報價,不假設伺服器一次吃得下幾檔(2026-08-12 加)。
+
+   ⚠️ **前端在 GitHub Pages、後端在 Vercel,是兩套分開的部署** —— 兩邊版本不同步的空窗
+   必然存在(實際踩到:前端 CH 已上到 900,Vercel 還是舊的 MAX_IDS=200)。
+   舊伺服器超過上限是**靜默截斷**,沒有錯誤、沒有旗標,結果就是 755 檔只回 200 檔:
+   一部分即時、一部分昨收,而使用者完全看不出差別 —— 2026-07-21 已經確認過
+   「半新半舊比全舊更糟」。
+
+   所以這裡不信任任何關於伺服器上限的假設:少拿到的就把缺的再要一次,直到沒有進展。
+   伺服器夠新時只打 1 次;伺服器還舊時自己補到齊。兩邊誰先部署都不會壞。 */
+const QUOTE_CH=900;
+async function quoteAll(ids){
+  const out={};
+  let todo=ids.slice(), guard=0;
+  while(todo.length && guard++<8){
+    const batch=todo.slice(0,QUOTE_CH);
+    const d=await fetch(HEALTH_API_BASE+'/api/quote?ids='+encodeURIComponent(batch.join(',')))
+      .then(r=>r.ok?r.json():null).catch(()=>null);
+    if(!d||!d.quotes)break;                      /* 端點掛了:用已拿到的部分,別空轉 */
+    Object.assign(out,d.quotes);
+    const next=todo.filter(id=>!(id in out));
+    if(next.length===todo.length)break;          /* 這輪一檔都沒補到 → 不是截斷,是真的沒資料 */
+    todo=next;
+  }
+  return out;
+}
+
 let _hmLiveTimer=null,_hmLiveN=0;
 
 /* ⚠️ 這條輪詢是 Vercel Active CPU 的頭號來源(2026-08-12 修)。
@@ -3413,13 +3440,7 @@ async function hmLive(){
      每次冷啟動 `import pandas` 要 846ms 純 CPU,而真正的查詢工作只有 2.2ms。
      2026-08-12 把 CH 從 180 提到 900(MAX_IDS 同步 200→1000):755 檔從 5 批變 1 批,
      冷啟動次數直接砍 5 倍。改這個數字前先確認 api/quote.py 的 MAX_IDS 跟得上。 */
-  const CH=900,batches=[];
-  for(let i=0;i<ids.length;i+=CH)batches.push(ids.slice(i,i+CH));
-  const results=await Promise.all(batches.map(b=>
-    fetch(HEALTH_API_BASE+'/api/quote?ids='+encodeURIComponent(b.join(',')))
-      .then(r=>r.ok?r.json():null).catch(()=>null)));
-  const quotes={};
-  for(const d of results)if(d&&d.quotes)Object.assign(quotes,d.quotes);
+  const quotes=await quoteAll(ids);
   if(!Object.keys(quotes).length)return;
   let n=0;
   for(const s of _hmData.stocks){
