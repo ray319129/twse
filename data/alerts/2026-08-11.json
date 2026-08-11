@@ -418,5 +418,17 @@
   "volume_ratio": 0.87,
   "vwap": 77.78,
   "fired_at": "11:47"
+ },
+ "5426|breakout": {
+  "stock_id": "5426",
+  "name": "振發",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 29.80(現價 29.95,高出 0.5%)・量比 1.47(市場中位 0.67)・站上均價 28.60",
+  "price": 29.95,
+  "change_rate": 6.96,
+  "volume_ratio": 1.47,
+  "vwap": 28.6,
+  "fired_at": "12:25"
  }
 }
