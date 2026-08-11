@@ -430,5 +430,17 @@
   "volume_ratio": 1.47,
   "vwap": 28.6,
   "fired_at": "12:25"
+ },
+ "6274|breakout": {
+  "stock_id": "6274",
+  "name": "台燿",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1540.00(現價 1565.00,高出 1.6%)・量比 1.02(市場中位 0.68)・站上均價 1545.86",
+  "price": 1565.0,
+  "change_rate": 7.19,
+  "volume_ratio": 1.02,
+  "vwap": 1545.86,
+  "fired_at": "12:30"
  }
 }
