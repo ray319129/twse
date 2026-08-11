@@ -310,5 +310,17 @@
   "volume_ratio": 0.51,
   "vwap": 514.48,
   "fired_at": "09:45"
+ },
+ "5292|breakout": {
+  "stock_id": "5292",
+  "name": "華懋",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 183.50(現價 184.50,高出 0.5%)・量比 0.87(市場中位 0.32)・站上均價 182.45",
+  "price": 184.5,
+  "change_rate": 3.36,
+  "volume_ratio": 0.87,
+  "vwap": 182.45,
+  "fired_at": "09:50"
  }
 }
