@@ -370,5 +370,17 @@
   "volume_ratio": 0.72,
   "vwap": 85.93,
   "fired_at": "10:17"
+ },
+ "2536|breakout": {
+  "stock_id": "2536",
+  "name": "宏普",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 20.30(現價 20.60,高出 1.5%)・量比 0.68(市場中位 0.45)・站上均價 20.44",
+  "price": 20.6,
+  "change_rate": 1.47,
+  "volume_ratio": 0.68,
+  "vwap": 20.44,
+  "fired_at": "10:43"
  }
 }
