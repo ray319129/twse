@@ -94,5 +94,41 @@
   "volume_ratio": 0.5,
   "vwap": 505.01,
   "fired_at": "09:05"
+ },
+ "4979|breakout": {
+  "stock_id": "4979",
+  "name": "華星光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 536.00(現價 549.00,高出 2.4%)・量比 0.50(市場中位 0.08)・站上均價 540.21",
+  "price": 549.0,
+  "change_rate": 2.42,
+  "volume_ratio": 0.5,
+  "vwap": 540.21,
+  "fired_at": "09:08"
+ },
+ "3046|breakout": {
+  "stock_id": "3046",
+  "name": "建碁",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 60.00(現價 61.20,高出 2.0%)・量比 0.51(市場中位 0.10)・站上均價 60.47",
+  "price": 61.2,
+  "change_rate": 3.55,
+  "volume_ratio": 0.51,
+  "vwap": 60.47,
+  "fired_at": "09:10"
+ },
+ "6530|breakout": {
+  "stock_id": "6530",
+  "name": "創威",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 82.50(現價 83.90,高出 1.7%)・量比 0.50(市場中位 0.10)・站上均價 82.87",
+  "price": 83.9,
+  "change_rate": 1.69,
+  "volume_ratio": 0.5,
+  "vwap": 82.87,
+  "fired_at": "09:10"
  }
 }
