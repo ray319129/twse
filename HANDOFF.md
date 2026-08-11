@@ -2642,3 +2642,86 @@ patch 層是 **`scripts.branch`**:`backfill()` 內是函式內 from-import,
 使用者確認 `07-22` / `07-23` 那兩筆是**加碼**,不是同部位重標。
 所以兩筆各自是「在該建議日做了一次決策」,分開計入是對的,**不去重**。
 通則:標記衡量的是「每個建議日你當下的判斷」,同一檔在不同建議日各算一次。
+
+---
+
+## 60. Vercel Active CPU 燒到 88% —— 熱力圖輪詢停不下來(2026-08-12)
+
+### 起因
+Vercel 寄信「已用掉免費額度 75%」,實際 **Fluid Active CPU 3h33s / 4h(88%)**。
+**超過 100% 整個專案會被自動暫停**,不是降速。
+
+### 先確立計費規則(推翻了直覺答案)
+[官方文件](https://vercel.com/docs/functions/usage-and-pricing)明講 Active CPU **不計 I/O 等待**,
+而且直接點名 AI 呼叫:「only billed during actual code execution and not during I/O
+operations (database queries, like AI model calls, etc.)」。
+→ 所以**不是** AI 總覽/健檢的 LLM 呼叫在燒(那些全是 I/O),是 Python 真的在算。
+(Provisioned Memory 才是連 I/O 一起算,但那項只用了 35.6/360 GB-Hrs,不是瓶頸。)
+
+### 實測:CPU 幾乎全是冷啟動,不是運算
+| 項目 | 實測 |
+|---|---|
+| `/api/quote` 真正的工作(2852 檔 isin + to_dict 180 檔) | **2.2 ms** |
+| `import pandas` 冷啟動 | **846 ms** |
+| 實際平均(12,780 秒 ÷ 45,000 次呼叫) | **284 ms/次** |
+
+284/846 ≈ **34% 的呼叫在付冷啟動代價**,真正的工作只佔 2ms。
+**不是為運算付錢,是為「一直重新啟動 Python」付錢。** 所以省 CPU 的槓桿在
+**減少函式呼叫次數**,不在優化演算法。
+
+### 根因:`_hmLiveTimer` 是全檔唯一沒人管的計時器
+| | `_liveTimer` | `liveTimer` | **`_hmLiveTimer`** |
+|---|---|---|---|
+| `clearInterval` | ✅ | ✅ | **❌ 全檔沒有** |
+| `document.hidden` | ✅ | — | **❌** |
+| `inSession()` | ✅ | — | **❌** |
+
+**2026-07-21 就修過一模一樣的 bug**(見 `startLiveQuotes` 註解:「原本開著網頁就每 20 秒
+打一次 /api/quote,24 小時不停」),但**熱力圖那條漏掉了**。
+規模:755 檔 ÷ CH=180 → 每 30 秒 **5 個並行** `/api/quote` = **600 次/小時**,
+開過一次就永遠停不下來(切分頁、收盤、半夜、週末照打)。
+
+**最諷刺的**:舊版把「熱力圖分頁是否開著」的檢查放在 `hmLive()` **最後面** ——
+打完 5 個請求才決定要不要重畫,貴的部分早就花掉了。
+
+算術對得上:600 × 34% × 0.846 = 170 秒/小時 ≈ **2.8 分/小時**;
+開 10 小時 = **28 分/天**,與用量圖上 7/27、7/28、8/12 的 **~29 分**尖峰完全吻合。
+低的日子 1~3 分 = 沒開熱力圖。4 小時額度只夠這樣開 **85 小時/月**。
+
+### 兩刀
+**第一刀 — 三道閘門 + 生命週期**([docs/index.html](docs/index.html))
+- `hmLive()` 開頭加 `document.hidden` / 分頁是否 active / `inSession()&&_hmLiveN` 三道閘門,
+  **一律放最前面**(舊版放最後是主要的錯)。
+- 拆出 `startHmLive()` / `stopHmLive()`,`activateTab` 改
+  `if(p==='heatmap'){initHeatmap();startHmLive();}else stopHmLive();`。
+- ⚠️ **坑**:`initHeatmap()` 開頭有 `if(_hmReady)return;`,所以計時器**不能**留在它裡面 ——
+  否則加了 clearInterval 後重進分頁永遠不會重啟。必須由 `startHmLive()` 另外起。
+- 加 `visibilitychange` 切回前景立刻補一次,避免看到過期價格。
+
+**第二刀 — 扇出 5→1**([api/quote.py](api/quote.py) `MAX_IDS` 200→1000、前端 `CH` 180→900)
+快照本身就是全市場 2852 檔一次抓回,回 180 檔和回 755 檔差不到 10ms,
+但每多切一批就多一次冷啟動(846ms)。755 檔的 ids 參數 3.8KB
+(encodeURIComponent 後 5.3KB),離 Vercel URL 上限 ~14KB 仍有餘裕。
+
+### 效果
+| 情境 | 修前 | 修後 |
+|---|---|---|
+| 看著熱力圖(盤中) | 2.8 分/小時 | **0.6 分/小時** |
+| 切到別的分頁 | 2.8 分/小時 | **0** |
+| 背景 / 收盤 / 半夜 | 2.8 分/小時 | **0** |
+
+4 小時額度:85 小時/月 → **423 小時/月**,且只在真的盯著熱力圖時才計。
+
+### 驗證(本機 http.server + 攔截 fetch,可重跑)
+`node --check` 與 `py_compile` 都過。攔截 `window.fetch` 計數:
+1. 進熱力圖 → 計時器 running;切走 → **stopped**;再進 → **restarted**(`_hmReady` 那個坑已避開)
+2. 不在熱力圖分頁時直呼 `hmLive()` → **0 次請求**
+3. 偽裝前景後跑一輪 → **1 個請求**(舊版 5 個),URL 5,297 字元
+4. `_hmLiveN>0` 且非盤中 → **0 次**;`document.hidden=true` → **0 次**
+5. 伺服器端:送 755 檔 → `MAX_IDS=1000` 保留 755 檔,未被截斷
+
+### 未做
+- **沒有實際驗證修後的 Vercel 用量**(要等部署後累積幾天才看得出來)。
+- 沒查 7/27~7/29 那三天為何連續高;推論是熱力圖分頁連開三天,但無法從這端證實。
+- 使用者可到 Vercel 用量圖的 **Type / Runtime** 分頁按端點拆,直接驗證
+  `/api/quote` 是否佔壓倒性多數。

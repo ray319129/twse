@@ -33,7 +33,14 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-MAX_IDS = 200          # 一次最多查幾檔:防止有人用超長 query 把 payload 撐爆
+# 一次最多查幾檔。**這個數字直接決定 Vercel 帳單**(2026-08-12 從 200 提到 1000):
+# 快照本身是全市場 2852 檔一次抓回來的,回 180 檔和回 755 檔的運算差不到 10ms
+# (實測 isin+to_dict 只要 2.2ms),但每多切一批就多一次函式呼叫、多一次
+# `import pandas` 冷啟動(實測 846ms 純 CPU)。熱力圖 755 檔在 200 上限下要切 5 批
+# = 5 倍冷啟動,而 Active CPU 幾乎全是冷啟動的錢。提高上限 → 熱力圖一次打完。
+# 上限本身是防呆(擋超長 query 撐爆 payload):755 檔的 ids 參數才 3.8KB,
+# 1000 檔約 5KB,離 Vercel 的 URL 上限(~14KB)仍有餘裕。
+MAX_IDS = 1000
 
 # ⚠️ 這支**刻意不讀 data/levels.parquet**。Vercel 的 Python 函式不會自動打包 repo 裡的
 # 資料檔,曾經讀不到又被 except 吞掉 → 產業別/換手率/突破/回測/營收EPS 全變「—」,
