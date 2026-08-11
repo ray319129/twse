@@ -262,5 +262,29 @@
   "volume_ratio": 0.6,
   "vwap": 171.3,
   "fired_at": "09:25"
+ },
+ "1717|breakout": {
+  "stock_id": "1717",
+  "name": "長興",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 72.90(現價 73.20,高出 0.4%)・量比 0.54(市場中位 0.22)・站上均價 71.86",
+  "price": 73.2,
+  "change_rate": 4.57,
+  "volume_ratio": 0.54,
+  "vwap": 71.86,
+  "fired_at": "09:34"
+ },
+ "9921|breakout": {
+  "stock_id": "9921",
+  "name": "巨大",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 101.50(現價 108.00,高出 6.4%)・量比 0.50(市場中位 0.25)・站上均價 107.35",
+  "price": 108.0,
+  "change_rate": 6.4,
+  "volume_ratio": 0.5,
+  "vwap": 107.35,
+  "fired_at": "09:36"
  }
 }
