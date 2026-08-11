@@ -2400,21 +2400,22 @@ function mpLoad(){
 }
 function mpSave(){try{localStorage.setItem(MYPICK_KEY,JSON.stringify(MYPICKF));}catch(e){alert('本機儲存失敗:'+(e&&e.message||e));}}
 const mpKey=r=>`${r.date}|${r.stock_id}`;
-/* 「只點我買的」(2026-07-19 使用者要求):以前要每檔都點買或跳,操作成本太高、
-   樣本累積很慢。改成 —— **只要你當天點過任何一檔「買」,同一天其餘沒點的自動視為「跳過」**。
-   這樣你只需要標記實際買進的,其餘系統自己推論。
-   注意:沒點過任何「買」的日子維持「未標記」,不會把你根本沒看的日子當成全部跳過。 */
-function mpDaysWithBuy(){
-  const s=new Set();
-  for(const [k,v] of Object.entries(MYPICK))if(v==='bought')s.add(k.split('|')[0]);
-  return s;
-}
-let _mpBuyDays=null;
+/* 「跳過」只認你真的按下去的那一下(2026-08-07 使用者要求)。
+   舊規則是「當天點過任何一檔買 → 同日其餘沒點的自動視為跳過」,是為了省操作成本,
+   但它把三種完全不同的心理狀態混成同一格:
+     (a) 看過、明確不要  → 真的是「跳過」
+     (b) 沒把握、刻意不表態 → 使用者說「有些我不太確定,買跟跳都不會按」
+     (c) 根本沒看到
+   (b)(c) 被灌進對照組,「你跳過的」就不再是你的判斷,量化人工選股就失去意義。
+
+   還有一個更硬的錯:推論是**按日期**算的,所以「X 日買進、Y 日又被推薦但沒重標」的
+   股票會在 Y 日被記成「看過沒買」—— 實際上你正抱著它。台帳 140 檔有 39 檔(28%)
+   跨多天重複出現,這是遲早會踩到的。改成只認明確標記後,這個問題一併消失。
+
+   代價:對照組樣本變小(25 → 13),累積變慢。這是使用者知情下的取捨 —— 寧可樣本少,
+   不要對照組裡混進根本不是他判斷的東西。 */
 function mpGet(r){
-  const v=MYPICK[mpKey(r)];
-  if(v)return v;
-  if(_mpBuyDays===null)_mpBuyDays=mpDaysWithBuy();
-  return _mpBuyDays.has(r.date)?'skipped':null;   /* 該日有買過 → 其餘自動算跳過 */
+  return MYPICK[mpKey(r)]||null;
 }
 /* 核心精選卡片上的買/跳(2026-07-19 加):使用者每天第一個看的就是這裡,在這標記最自然。
    key 與台帳共用同一組(選股日|代號),所以兩邊標記互通、統計一致。 */
@@ -2453,7 +2454,6 @@ function mpSet(k,v){
   const cur=MYPICKF[k]&&MYPICKF[k].v;
   MYPICKF[k]={v:(cur===v?null:v),t:Date.now()};    /* 再點同一顆=取消 → 留墓碑供跨裝置合併 */
   _mpDerive();
-  _mpBuyDays=null;                                 /* 買進日集合失效,下次 mpGet 重算 */
   mpSave(); mpSyncBtns(k);
   mpQueueSync();                                   /* 跨裝置:改動後自動排程上傳(去抖) */
   if(typeof LED!=='undefined'&&LED&&LED.length&&$('#ledtable'))drawLedger();  /* 同步更新台帳上方的三組對照 */
@@ -2524,7 +2524,7 @@ function mpMergeRemote(remote){
     const lo=MYPICKF[k];
     if(!lo||((+ro.t||0)>(+lo.t||0))){MYPICKF[k]=ro;changed=true;}
   }
-  if(changed){_mpDerive();_mpBuyDays=null;mpSave();}
+  if(changed){_mpDerive();mpSave();}
   return changed;
 }
 function _mpLocalOnlyNewer(remote){
@@ -2626,7 +2626,8 @@ function mpSummaryHtml(rows){
     <div class="mp-grid">${cell('我買的',b,true)}${cell('我跳過的',s)}${cell('全部推薦',a)}</div>
     ${verdict}
     <div style="font-size:10.5px;color:var(--muted-2);margin-top:8px;line-height:1.55">
-      報酬率用台帳的「選股日成本 → 最新收盤」,與你實際進出價可能不同;這是衡量<b>挑選能力</b>,不是你的真實損益。</div>
+      報酬率用台帳的「選股日成本 → 最新收盤」,與你實際進出價可能不同;這是衡量<b>挑選能力</b>,不是你的真實損益。<br>
+      「我跳過的」<b>只算你真的按過「跳」的</b> —— 沒把握而兩顆都沒按的不列入,才不會把「沒表態」當成「你判斷不要」。</div>
   </div>`;
 }
 /* ============================================================
