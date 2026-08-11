@@ -142,5 +142,53 @@
   "volume_ratio": 0.5,
   "vwap": 27.99,
   "fired_at": "09:13"
+ },
+ "2301|breakout": {
+  "stock_id": "2301",
+  "name": "光寶科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 271.50(現價 275.00,高出 1.3%)・量比 0.70(市場中位 0.12)・站上均價 267.09",
+  "price": 275.0,
+  "change_rate": 1.28,
+  "volume_ratio": 0.7,
+  "vwap": 267.09,
+  "fired_at": "09:14"
+ },
+ "6419|breakout": {
+  "stock_id": "6419",
+  "name": "京晨科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 149.50(現價 152.50,高出 2.0%)・量比 0.82(市場中位 0.14)・站上均價 151.70",
+  "price": 152.5,
+  "change_rate": 5.17,
+  "volume_ratio": 0.82,
+  "vwap": 151.7,
+  "fired_at": "09:15"
+ },
+ "6121|breakout": {
+  "stock_id": "6121",
+  "name": "新普",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 399.00(現價 426.50,高出 6.9%)・量比 0.50(市場中位 0.14)・站上均價 416.91",
+  "price": 426.5,
+  "change_rate": 7.97,
+  "volume_ratio": 0.5,
+  "vwap": 416.91,
+  "fired_at": "09:15"
+ },
+ "5328|pullback": {
+  "stock_id": "5328",
+  "name": "華容",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 63.40 附近(距 +2.8%)・翻紅 +4.32% 站回均價・量比 0.75(市場中位 0.14)",
+  "price": 65.2,
+  "change_rate": 4.32,
+  "volume_ratio": 0.75,
+  "vwap": 64.75,
+  "fired_at": "09:16"
  }
 }
