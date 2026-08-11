@@ -358,5 +358,17 @@
   "volume_ratio": 0.67,
   "vwap": 986.61,
   "fired_at": "10:15"
+ },
+ "9914|breakout": {
+  "stock_id": "9914",
+  "name": "美利達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 88.10(現價 88.50,高出 0.5%)・量比 0.72(市場中位 0.40)・站上均價 85.93",
+  "price": 88.5,
+  "change_rate": 2.9,
+  "volume_ratio": 0.72,
+  "vwap": 85.93,
+  "fired_at": "10:17"
  }
 }
