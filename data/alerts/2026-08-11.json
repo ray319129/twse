@@ -466,5 +466,17 @@
   "volume_ratio": 1.27,
   "vwap": 21.74,
   "fired_at": "13:22"
+ },
+ "1216|pullback": {
+  "stock_id": "1216",
+  "name": "統一",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 76.62 附近(距 -0.9%)・翻紅 +0.52% 站回均價・量比 1.16(市場中位 0.85)",
+  "price": 75.9,
+  "change_rate": 0.52,
+  "volume_ratio": 1.16,
+  "vwap": 75.55,
+  "fired_at": "13:30"
  }
 }
