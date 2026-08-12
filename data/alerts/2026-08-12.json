@@ -634,5 +634,17 @@
   "volume_ratio": 3.22,
   "vwap": 91.91,
   "fired_at": "13:00"
+ },
+ "3563|breakout": {
+  "stock_id": "3563",
+  "name": "牧德",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 720.00(現價 723.00,高出 0.4%)・量比 2.48(市場中位 0.83)・站上均價 701.18",
+  "price": 723.0,
+  "change_rate": 6.79,
+  "volume_ratio": 2.48,
+  "vwap": 701.18,
+  "fired_at": "13:15"
  }
 }
