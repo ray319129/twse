@@ -238,5 +238,77 @@
   "volume_ratio": 0.63,
   "vwap": 224.9,
   "fired_at": "09:25"
+ },
+ "1608|breakout": {
+  "stock_id": "1608",
+  "name": "華榮",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 37.00(現價 37.35,高出 0.9%)・量比 0.50(市場中位 0.19)・站上均價 37.22",
+  "price": 37.35,
+  "change_rate": 2.46,
+  "volume_ratio": 0.5,
+  "vwap": 37.22,
+  "fired_at": "09:26"
+ },
+ "2417|breakout": {
+  "stock_id": "2417",
+  "name": "圓剛",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 45.50(現價 45.80,高出 0.7%)・量比 0.57(市場中位 0.19)・站上均價 44.81",
+  "price": 45.8,
+  "change_rate": 4.56,
+  "volume_ratio": 0.57,
+  "vwap": 44.81,
+  "fired_at": "09:27"
+ },
+ "6215|breakout": {
+  "stock_id": "6215",
+  "name": "和椿",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 107.00(現價 107.50,高出 0.5%)・量比 0.78(市場中位 0.20)・站上均價 104.79",
+  "price": 107.5,
+  "change_rate": 4.87,
+  "volume_ratio": 0.78,
+  "vwap": 104.79,
+  "fired_at": "09:27"
+ },
+ "2317|breakout": {
+  "stock_id": "2317",
+  "name": "鴻海",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 267.00(現價 268.00,高出 0.4%)・量比 0.53(市場中位 0.20)・站上均價 266.80",
+  "price": 268.0,
+  "change_rate": 1.9,
+  "volume_ratio": 0.53,
+  "vwap": 266.8,
+  "fired_at": "09:27"
+ },
+ "8299|breakout": {
+  "stock_id": "8299",
+  "name": "群聯",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2190.00(現價 2200.00,高出 0.5%)・量比 0.62(市場中位 0.20)・站上均價 2167.65",
+  "price": 2200.0,
+  "change_rate": 5.26,
+  "volume_ratio": 0.62,
+  "vwap": 2167.65,
+  "fired_at": "09:28"
+ },
+ "6265|breakout": {
+  "stock_id": "6265",
+  "name": "方土昶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 58.80(現價 59.00,高出 0.3%)・量比 0.54(市場中位 0.20)・站上均價 58.04",
+  "price": 59.0,
+  "change_rate": 5.16,
+  "volume_ratio": 0.54,
+  "vwap": 58.04,
+  "fired_at": "09:29"
  }
 }
