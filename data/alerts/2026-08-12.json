@@ -418,5 +418,29 @@
   "volume_ratio": 0.55,
   "vwap": 38.13,
   "fired_at": "09:48"
+ },
+ "5515|breakout": {
+  "stock_id": "5515",
+  "name": "建國",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 45.25(現價 45.40,高出 0.3%)・量比 0.98(市場中位 0.29)・站上均價 44.86",
+  "price": 45.4,
+  "change_rate": 4.0,
+  "volume_ratio": 0.98,
+  "vwap": 44.86,
+  "fired_at": "09:50"
+ },
+ "4510|breakout": {
+  "stock_id": "4510",
+  "name": "高鋒",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 42.70(現價 43.60,高出 2.1%)・量比 1.23(市場中位 0.29)・站上均價 42.42",
+  "price": 43.6,
+  "change_rate": 7.65,
+  "volume_ratio": 1.23,
+  "vwap": 42.42,
+  "fired_at": "09:50"
  }
 }
