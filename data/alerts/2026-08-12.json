@@ -370,5 +370,41 @@
   "volume_ratio": 0.5,
   "vwap": 91.55,
   "fired_at": "09:37"
+ },
+ "3229|breakout": {
+  "stock_id": "3229",
+  "name": "晟鈦",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 51.90(現價 52.10,高出 0.4%)・量比 0.59(市場中位 0.26)・站上均價 51.09",
+  "price": 52.1,
+  "change_rate": 2.15,
+  "volume_ratio": 0.59,
+  "vwap": 51.09,
+  "fired_at": "09:42"
+ },
+ "1595|breakout": {
+  "stock_id": "1595",
+  "name": "川寶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 67.00(現價 67.70,高出 1.0%)・量比 0.58(市場中位 0.28)・站上均價 66.36",
+  "price": 67.7,
+  "change_rate": 6.11,
+  "volume_ratio": 0.58,
+  "vwap": 66.36,
+  "fired_at": "09:45"
+ },
+ "2108|breakout": {
+  "stock_id": "2108",
+  "name": "南帝",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 30.05(現價 30.45,高出 1.3%)・量比 0.50(市場中位 0.28)・站上均價 30.32",
+  "price": 30.45,
+  "change_rate": 2.35,
+  "volume_ratio": 0.5,
+  "vwap": 30.32,
+  "fired_at": "09:45"
  }
 }
