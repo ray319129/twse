@@ -118,5 +118,17 @@
   "volume_ratio": 0.53,
   "vwap": 43.75,
   "fired_at": "09:10"
+ },
+ "2009|breakout": {
+  "stock_id": "2009",
+  "name": "第一銅",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 41.75(現價 41.95,高出 0.5%)・量比 0.84(市場中位 0.11)・站上均價 41.32",
+  "price": 41.95,
+  "change_rate": 4.74,
+  "volume_ratio": 0.84,
+  "vwap": 41.32,
+  "fired_at": "09:11"
  }
 }
