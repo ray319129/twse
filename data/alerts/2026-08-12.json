@@ -598,5 +598,17 @@
   "volume_ratio": 0.86,
   "vwap": 26.82,
   "fired_at": "11:31"
+ },
+ "2501|breakout": {
+  "stock_id": "2501",
+  "name": "國建",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 23.00(現價 23.10,高出 0.4%)・量比 0.96(市場中位 0.62)・站上均價 22.81",
+  "price": 23.1,
+  "change_rate": 2.89,
+  "volume_ratio": 0.96,
+  "vwap": 22.81,
+  "fired_at": "11:52"
  }
 }
