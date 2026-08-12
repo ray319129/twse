@@ -310,5 +310,17 @@
   "volume_ratio": 0.54,
   "vwap": 58.04,
   "fired_at": "09:29"
+ },
+ "4147|breakout": {
+  "stock_id": "4147",
+  "name": "中裕",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 67.60(現價 68.10,高出 0.7%)・量比 0.68(市場中位 0.21)・站上均價 66.77",
+  "price": 68.1,
+  "change_rate": 7.24,
+  "volume_ratio": 0.68,
+  "vwap": 66.77,
+  "fired_at": "09:30"
  }
 }
