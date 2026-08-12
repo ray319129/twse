@@ -563,88 +563,100 @@
   "vwap": 83.4,
   "fired_at": "10:42"
  },
- "6263|breakout": {
-  "stock_id": "6263",
-  "name": "普萊德",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 163.00(現價 163.50,高出 0.3%)・量比 1.17(市場中位 0.54)・站上均價 162.06",
-  "price": 163.5,
-  "change_rate": 2.5,
-  "volume_ratio": 1.17,
-  "vwap": 162.06,
-  "fired_at": "11:15"
+ "2520|pullback": {
+  "stock_id": "2520",
+  "name": "冠德",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 34.88 附近(距 +1.1%)・翻紅 +2.32% 站回均價・量比 1.57(市場中位 0.88)",
+  "price": 35.25,
+  "change_rate": 2.32,
+  "volume_ratio": 1.57,
+  "vwap": 35.0,
+  "fired_at": "13:22"
  },
- "2395|breakout": {
-  "stock_id": "2395",
-  "name": "研華",
+ "6913|breakout": {
+  "stock_id": "6913",
+  "name": "鴻呈",
   "type": "breakout",
   "label": "量增突破",
-  "reason": "突破 20 日高 695.00(現價 698.00,高出 0.4%)・量比 0.91(市場中位 0.56)・站上均價 686.32",
-  "price": 698.0,
-  "change_rate": 5.59,
-  "volume_ratio": 0.91,
-  "vwap": 686.32,
-  "fired_at": "11:28"
+  "reason": "突破 20 日高 133.00(現價 150.00,高出 12.8%)・量比 2.14(市場中位 0.88)・站上均價 148.90",
+  "price": 150.0,
+  "change_rate": 2.04,
+  "volume_ratio": 2.14,
+  "vwap": 148.9,
+  "fired_at": "13:22"
  },
- "8422|breakout": {
-  "stock_id": "8422",
-  "name": "可寧衛*",
+ "8039|breakout": {
+  "stock_id": "8039",
+  "name": "台虹",
   "type": "breakout",
   "label": "量增突破",
-  "reason": "突破 20 日高 27.00(現價 27.10,高出 0.4%)・量比 0.86(市場中位 0.57)・站上均價 26.82",
-  "price": 27.1,
-  "change_rate": 1.68,
-  "volume_ratio": 0.86,
-  "vwap": 26.82,
-  "fired_at": "11:31"
+  "reason": "突破 20 日高 201.00(現價 226.50,高出 12.7%)・量比 2.17(市場中位 0.88)・站上均價 221.37",
+  "price": 226.5,
+  "change_rate": 4.86,
+  "volume_ratio": 2.17,
+  "vwap": 221.37,
+  "fired_at": "13:22"
  },
- "2501|breakout": {
-  "stock_id": "2501",
-  "name": "國建",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 23.00(現價 23.10,高出 0.4%)・量比 0.96(市場中位 0.62)・站上均價 22.81",
-  "price": 23.1,
-  "change_rate": 2.89,
-  "volume_ratio": 0.96,
-  "vwap": 22.81,
-  "fired_at": "11:52"
+ "6199|pullback": {
+  "stock_id": "6199",
+  "name": "天品",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 102.57 附近(距 +0.9%)・翻紅 +5.07% 站回均價・量比 1.60(市場中位 0.88)",
+  "price": 103.5,
+  "change_rate": 5.07,
+  "volume_ratio": 1.6,
+  "vwap": 101.16,
+  "fired_at": "13:22"
  },
- "1618|breakout": {
-  "stock_id": "1618",
-  "name": "合機",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 40.85(現價 41.40,高出 1.3%)・量比 1.04(市場中位 0.69)・站上均價 41.29",
-  "price": 41.4,
-  "change_rate": 1.47,
-  "volume_ratio": 1.04,
-  "vwap": 41.29,
-  "fired_at": "12:30"
+ "2201|pullback": {
+  "stock_id": "2201",
+  "name": "裕隆",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 27.97 附近(距 +1.5%)・翻紅 +2.34% 站回均價・量比 2.76(市場中位 0.88)",
+  "price": 28.4,
+  "change_rate": 2.34,
+  "volume_ratio": 2.76,
+  "vwap": 28.25,
+  "fired_at": "13:22"
  },
  "4912|breakout": {
   "stock_id": "4912",
   "name": "聯德控股-KY",
   "type": "breakout",
   "label": "量增突破",
-  "reason": "突破 20 日高 92.30(現價 93.10,高出 0.9%)・量比 3.22(市場中位 0.77)・站上均價 91.91",
-  "price": 93.1,
-  "change_rate": 4.37,
-  "volume_ratio": 3.22,
-  "vwap": 91.91,
-  "fired_at": "13:00"
+  "reason": "突破 20 日高 91.20(現價 94.00,高出 3.1%)・量比 3.74(市場中位 0.88)・站上均價 92.15",
+  "price": 94.0,
+  "change_rate": 5.38,
+  "volume_ratio": 3.74,
+  "vwap": 92.15,
+  "fired_at": "13:22"
  },
- "3563|breakout": {
-  "stock_id": "3563",
-  "name": "牧德",
-  "type": "breakout",
-  "label": "量增突破",
-  "reason": "突破 20 日高 720.00(現價 723.00,高出 0.4%)・量比 2.48(市場中位 0.83)・站上均價 701.18",
-  "price": 723.0,
-  "change_rate": 6.79,
-  "volume_ratio": 2.48,
-  "vwap": 701.18,
-  "fired_at": "13:15"
+ "2221|pullback": {
+  "stock_id": "2221",
+  "name": "大甲",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 49.48 附近(距 +0.7%)・翻紅 +1.42% 站回均價・量比 1.29(市場中位 0.88)",
+  "price": 49.8,
+  "change_rate": 1.42,
+  "volume_ratio": 1.29,
+  "vwap": 49.61,
+  "fired_at": "13:22"
+ },
+ "1447|pullback": {
+  "stock_id": "1447",
+  "name": "力鵬",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 7.23 附近(距 -2.2%)・翻紅 +1.00% 站回均價・量比 1.19(市場中位 0.88)",
+  "price": 7.07,
+  "change_rate": 1.0,
+  "volume_ratio": 1.19,
+  "vwap": 7.01,
+  "fired_at": "13:22"
  }
 }
