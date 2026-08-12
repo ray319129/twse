@@ -322,5 +322,41 @@
   "volume_ratio": 0.68,
   "vwap": 66.77,
   "fired_at": "09:30"
+ },
+ "1519|breakout": {
+  "stock_id": "1519",
+  "name": "華城",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 710.00(現價 724.00,高出 2.0%)・量比 0.51(市場中位 0.22)・站上均價 717.91",
+  "price": 724.0,
+  "change_rate": 2.98,
+  "volume_ratio": 0.51,
+  "vwap": 717.91,
+  "fired_at": "09:33"
+ },
+ "1325|pullback": {
+  "stock_id": "1325",
+  "name": "恆大",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 26.44 附近(距 +1.4%)・翻紅 +1.90% 站回均價・量比 0.52(市場中位 0.23)",
+  "price": 26.8,
+  "change_rate": 1.9,
+  "volume_ratio": 0.52,
+  "vwap": 26.77,
+  "fired_at": "09:35"
+ },
+ "3234|breakout": {
+  "stock_id": "3234",
+  "name": "光環",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 124.50(現價 129.00,高出 3.6%)・量比 0.50(市場中位 0.23)・站上均價 124.19",
+  "price": 129.0,
+  "change_rate": 6.17,
+  "volume_ratio": 0.5,
+  "vwap": 124.19,
+  "fired_at": "09:35"
  }
 }
