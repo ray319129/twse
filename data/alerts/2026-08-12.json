@@ -682,5 +682,17 @@
   "volume_ratio": 1.62,
   "vwap": 48.72,
   "fired_at": "13:23"
+ },
+ "2801|pullback": {
+  "stock_id": "2801",
+  "name": "彰銀",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 23.54 附近(距 +0.7%)・翻紅 +2.59% 站回均價・量比 1.50(市場中位 0.95)",
+  "price": 23.7,
+  "change_rate": 2.59,
+  "volume_ratio": 1.5,
+  "vwap": 23.48,
+  "fired_at": "13:30"
  }
 }
