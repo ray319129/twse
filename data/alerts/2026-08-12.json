@@ -502,5 +502,29 @@
   "volume_ratio": 0.5,
   "vwap": 19.55,
   "fired_at": "09:59"
+ },
+ "2436|breakout": {
+  "stock_id": "2436",
+  "name": "偉詮電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 68.40(現價 68.70,高出 0.4%)・量比 0.52(市場中位 0.34)・站上均價 67.66",
+  "price": 68.7,
+  "change_rate": 2.53,
+  "volume_ratio": 0.52,
+  "vwap": 67.66,
+  "fired_at": "10:04"
+ },
+ "3189|breakout": {
+  "stock_id": "3189",
+  "name": "景碩",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 859.00(現價 864.00,高出 0.6%)・量比 0.52(市場中位 0.34)・站上均價 845.99",
+  "price": 864.0,
+  "change_rate": 2.61,
+  "volume_ratio": 0.52,
+  "vwap": 845.99,
+  "fired_at": "10:04"
  }
 }
