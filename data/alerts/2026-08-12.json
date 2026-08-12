@@ -526,5 +526,17 @@
   "volume_ratio": 0.52,
   "vwap": 845.99,
   "fired_at": "10:04"
+ },
+ "1904|breakout": {
+  "stock_id": "1904",
+  "name": "正隆",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 24.50(現價 25.05,高出 2.2%)・量比 0.66(市場中位 0.41)・站上均價 24.72",
+  "price": 25.05,
+  "change_rate": 2.24,
+  "volume_ratio": 0.66,
+  "vwap": 24.72,
+  "fired_at": "10:27"
  }
 }
