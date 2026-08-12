@@ -550,5 +550,17 @@
   "volume_ratio": 0.68,
   "vwap": 2175.61,
   "fired_at": "10:29"
+ },
+ "6530|breakout": {
+  "stock_id": "6530",
+  "name": "創威",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 84.30(現價 86.00,高出 2.0%)・量比 0.68(市場中位 0.45)・站上均價 83.40",
+  "price": 86.0,
+  "change_rate": 7.09,
+  "volume_ratio": 0.68,
+  "vwap": 83.4,
+  "fired_at": "10:42"
  }
 }
