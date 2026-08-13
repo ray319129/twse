@@ -346,5 +346,53 @@
   "volume_ratio": 0.5,
   "vwap": 4156.68,
   "fired_at": "09:33"
+ },
+ "2465|breakout": {
+  "stock_id": "2465",
+  "name": "麗臺",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 95.80(現價 99.30,高出 3.7%)・量比 0.50(市場中位 0.29)・站上均價 98.61",
+  "price": 99.3,
+  "change_rate": 3.97,
+  "volume_ratio": 0.5,
+  "vwap": 98.61,
+  "fired_at": "09:33"
+ },
+ "3048|breakout": {
+  "stock_id": "3048",
+  "name": "益登",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 62.40(現價 62.90,高出 0.8%)・量比 0.50(市場中位 0.29)・站上均價 62.04",
+  "price": 62.9,
+  "change_rate": 5.36,
+  "volume_ratio": 0.5,
+  "vwap": 62.04,
+  "fired_at": "09:33"
+ },
+ "6187|breakout": {
+  "stock_id": "6187",
+  "name": "萬潤",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1220.00(現價 1230.00,高出 0.8%)・量比 0.50(市場中位 0.30)・站上均價 1207.68",
+  "price": 1230.0,
+  "change_rate": 6.49,
+  "volume_ratio": 0.5,
+  "vwap": 1207.68,
+  "fired_at": "09:34"
+ },
+ "2426|breakout": {
+  "stock_id": "2426",
+  "name": "鼎元",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 71.00(現價 72.50,高出 2.1%)・量比 0.50(市場中位 0.31)・站上均價 71.00",
+  "price": 72.5,
+  "change_rate": 5.22,
+  "volume_ratio": 0.5,
+  "vwap": 71.0,
+  "fired_at": "09:36"
  }
 }
