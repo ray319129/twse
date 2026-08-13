@@ -502,5 +502,17 @@
   "volume_ratio": 0.61,
   "vwap": 115.28,
   "fired_at": "10:02"
+ },
+ "7769|breakout": {
+  "stock_id": "7769",
+  "name": "鴻勁",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 6730.00(現價 6780.00,高出 0.7%)・量比 0.93(市場中位 0.45)・站上均價 6675.08",
+  "price": 6780.0,
+  "change_rate": 4.62,
+  "volume_ratio": 0.93,
+  "vwap": 6675.08,
+  "fired_at": "10:05"
  }
 }
