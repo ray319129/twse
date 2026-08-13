@@ -202,5 +202,17 @@
   "volume_ratio": 0.51,
   "vwap": 3002.66,
   "fired_at": "09:15"
+ },
+ "8415|breakout": {
+  "stock_id": "8415",
+  "name": "大國鋼",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 39.00(現價 39.25,高出 0.6%)・量比 0.83(市場中位 0.22)・站上均價 39.14",
+  "price": 39.25,
+  "change_rate": 1.55,
+  "volume_ratio": 0.83,
+  "vwap": 39.14,
+  "fired_at": "09:20"
  }
 }
