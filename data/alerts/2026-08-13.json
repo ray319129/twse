@@ -598,5 +598,17 @@
   "volume_ratio": 1.1,
   "vwap": 519.2,
   "fired_at": "11:34"
+ },
+ "3685|pullback": {
+  "stock_id": "3685",
+  "name": "元創精密",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 37.38 附近(距 +2.9%)・翻紅 +1.18% 站回均價・量比 1.13(市場中位 0.76)",
+  "price": 38.45,
+  "change_rate": 1.18,
+  "volume_ratio": 1.13,
+  "vwap": 37.88,
+  "fired_at": "11:55"
  }
 }
