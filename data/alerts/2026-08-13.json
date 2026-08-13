@@ -250,5 +250,53 @@
   "volume_ratio": 0.57,
   "vwap": 264.67,
   "fired_at": "09:22"
+ },
+ "6442|breakout": {
+  "stock_id": "6442",
+  "name": "光聖",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1595.00(現價 1620.00,高出 1.6%)・量比 0.53(市場中位 0.23)・站上均價 1619.34",
+  "price": 1620.0,
+  "change_rate": 1.56,
+  "volume_ratio": 0.53,
+  "vwap": 1619.34,
+  "fired_at": "09:23"
+ },
+ "3234|breakout": {
+  "stock_id": "3234",
+  "name": "光環",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 133.50(現價 142.00,高出 6.4%)・量比 0.50(市場中位 0.24)・站上均價 137.29",
+  "price": 142.0,
+  "change_rate": 6.76,
+  "volume_ratio": 0.5,
+  "vwap": 137.29,
+  "fired_at": "09:24"
+ },
+ "6937|breakout": {
+  "stock_id": "6937",
+  "name": "天虹",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 303.50(現價 309.00,高出 1.8%)・量比 0.62(市場中位 0.25)・站上均價 301.99",
+  "price": 309.0,
+  "change_rate": 6.0,
+  "volume_ratio": 0.62,
+  "vwap": 301.99,
+  "fired_at": "09:25"
+ },
+ "3105|breakout": {
+  "stock_id": "3105",
+  "name": "穩懋",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 408.00(現價 415.50,高出 1.8%)・量比 0.50(市場中位 0.25)・站上均價 410.28",
+  "price": 415.5,
+  "change_rate": 3.87,
+  "volume_ratio": 0.5,
+  "vwap": 410.28,
+  "fired_at": "09:25"
  }
 }
