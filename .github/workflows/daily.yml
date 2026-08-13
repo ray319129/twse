@@ -69,8 +69,7 @@ jobs:
           git add data/ docs/
           if ! git diff --cached --quiet; then
             git commit -m "data: $(date -u +'%Y-%m-%d') daily update"
-            git pull --rebase origin main || true
-            git push
+            bash .github/scripts/push-with-retry.sh "今日選股結果未上傳 —— 網頁與 Email 會停在昨天,需手動重跑。"
           else
             echo "No data changes to commit."
           fi

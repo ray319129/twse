@@ -66,23 +66,5 @@ jobs:
             echo "No chip changes (holiday / not published yet)."
           else
             git commit -m "chips: branch data $(date -u +'%Y-%m-%d')"
-            # ⚠️ push 必須重試。2026-08-13 就這樣掉了一整輪:分點抓完、parquet 寫好、
-            # commit 也做了,最後 `git push` 被 remote 以 **Internal Server Error** 拒絕
-            # (GitHub 側偶發 500),runner 一銷毀當天資料就沒了。
-            # 沒有重試 = 一次隨機的平台抖動就白跑 40 分鐘。
-            #
-            # 每次重試前先 rebase 到最新 main(機器人 commit 很頻繁,落後是常態)。
-            # rebase 撞衝突就 abort —— 寧可這輪失敗(隔天 catchup 會補),
-            # 也不要把半套 rebase 結果推上去。
-            for i in 1 2 3; do
-              if git push; then
-                echo "pushed (attempt $i)"
-                exit 0
-              fi
-              echo "push 失敗(第 $i 次),等待後重試…"
-              sleep $((i * 5))
-              git pull --rebase origin main || { git rebase --abort || true; }
-            done
-            echo "push 連續 3 次失敗 —— 今日資料未上傳,隔天 catchup 會自動補回。"
-            exit 1
+            bash .github/scripts/push-with-retry.sh "今日分點未上傳,隔天 catchup 會自動補回。"
           fi

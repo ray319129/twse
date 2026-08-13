@@ -67,6 +67,5 @@ jobs:
             echo "No premarket snapshot change."
           else
             git commit -m "premarket: web snapshot $(date -u +'%Y-%m-%d %H:%M')Z"
-            git pull --rebase origin main || true
-            git push
+            bash .github/scripts/push-with-retry.sh "本次盤前快照未上傳,下一輪會覆蓋。"
           fi

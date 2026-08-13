@@ -66,6 +66,5 @@ jobs:
             echo "No snapshot change (holiday / no sponsor / API down)."
           else
             git commit -m "snapshot: market archive $(date -u +'%Y-%m-%d %H:%M')Z"
-            git pull --rebase origin main || true
-            git push
+            bash .github/scripts/push-with-retry.sh "本次市場快照未存檔,該時點的盤中快照永久缺一格。"
           fi

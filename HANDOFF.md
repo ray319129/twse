@@ -2796,7 +2796,50 @@ remote: Internal Server Error
 
 `set -e` 不會被 `if git push` 裡的失敗誤殺(if 條件不觸發 -e)。
 
-### ⚠️ 其餘 4 支 workflow 仍是舊寫法
+### 追加:抽成共用腳本,六支全部套用(同日)
+使用者裁示「一併套上去」。與其把同一段重試複製六次,抽成
+**[.github/scripts/push-with-retry.sh](.github/scripts/push-with-retry.sh)**,
+六支 workflow(chips / daily / intraday / premarket / snapshot / backfill)全部改成:
+
+```
+git commit -m "..."
+bash .github/scripts/push-with-retry.sh "這輪失敗的後果說明"
+```
+
+參數是「失敗後果的一句話」,寫進失敗日誌 —— 每支的後果不同
+(chips 隔天 catchup 會補、daily 是網頁停在昨天要手動重跑、
+snapshot 是該時點永久缺一格、intraday 5 分鐘後自己重掃、backfill 冪等可直接重跑)。
+
+**與最初 chips 版的兩點差異:**
+1. `git pull --rebase` 移到**迴圈內、每次嘗試前都做**(原本第一次 push 前沒有,
+   落後 main 時要浪費一次嘗試才會 pull)。機器人 commit 盤中每分鐘都有,落後是常態。
+2. 最後一次失敗後**不再 sleep**(`if [ "$i" -lt 3 ]`),不白等 15 秒。
+
+同時清掉了六支裡的 `git pull --rebase origin main || true` —— 那個 `|| true`
+會在 rebase 撞衝突時吞掉錯誤、留下「rebase 進行中」的狀態,接著的 push 就推出半套結果。
+改用 `|| { git rebase --abort || true; }`。
+
+### 驗證(假 git + 假 sleep,可重跑)
+六支 `yaml.safe_load` 全過、`bash -n` 過、`grep` 確認沒有殘留的裸 `git push`。
+四情境實跑:
+| 情境 | 呼叫順序 | exit |
+|---|---|---|
+| 第 1 次就成功 | `pull push` | 0 |
+| 前 2 次失敗第 3 次成功 | `pull push ×3`,退避 5→10 | 0 |
+| 三次全失敗 | `pull push ×3`,最後不多睡 | 1 |
+| push 失敗 + rebase 撞衝突 | `pull abort push ×3`,不卡死 | 1 |
+
+⚠️ **測試踩到的坑(給未來的自己)**:第一次寫測試時用
+`PATH="C:/Users/.../fakebin:$PATH"`,**Git Bash 的 PATH 不吃 Windows 路徑格式**,
+假 git 沒生效 → 腳本拿真 git 對真 remote 跑了 3 次 push。
+所幸全被 `fetch first` 拒絕、`pull --rebase` 也因有未提交改動而拒絕啟動,沒有損害。
+**要用 `cygpath -u` 轉路徑,而且跑之前先 `which git` 斷言含 `fakebin` 才繼續。**
+
+### 08-13 的資料
+使用者裁示「現在補」→ `gh workflow run chips.yml -f backfill=10`,
+commit `18eff1b97` 補回 `data/chips_branch/2026-08-13.parquet`(14,451 bytes)。
+
+### (已解決)其餘 4 支 workflow 仍是舊寫法
 `daily.yml` / `intraday.yml` / `premarket.yml` / `snapshot.yml` 的 push 段
 與 chips 出事前**一模一樣**(`git pull --rebase origin main || true` + 裸 `git push`),
 同一個 GitHub 500 打到它們也會一樣白跑。本次只動了實際出事的 chips,

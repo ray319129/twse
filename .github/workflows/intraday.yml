@@ -110,6 +110,5 @@ jobs:
             echo "No new signals."
           else
             git commit -m "intraday: signals $(date -u +'%Y-%m-%d %H:%M')Z"
-            git pull --rebase origin main || true
-            git push
+            bash .github/scripts/push-with-retry.sh "本輪盤中訊號未發布,下一輪(5 分鐘後)會重新掃描。"
           fi

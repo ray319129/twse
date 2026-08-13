@@ -54,7 +54,7 @@ jobs:
           git add data/
           if ! git diff --cached --quiet; then
             git commit -m "data: backfill $(date -u +'%Y-%m-%d')"
-            git push
+            bash .github/scripts/push-with-retry.sh "回補結果未上傳,重跑本 workflow 即可(回補是冪等的)。"
           else
             echo "No data changes."
           fi
