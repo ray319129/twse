@@ -646,5 +646,17 @@
   "volume_ratio": 1.88,
   "vwap": 115.18,
   "fired_at": "13:22"
+ },
+ "6277|breakout": {
+  "stock_id": "6277",
+  "name": "宏正",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 81.60(現價 83.70,高出 2.6%)・量比 5.13(市場中位 1.02)・站上均價 83.41",
+  "price": 83.7,
+  "change_rate": 6.48,
+  "volume_ratio": 5.13,
+  "vwap": 83.41,
+  "fired_at": "13:25"
  }
 }
