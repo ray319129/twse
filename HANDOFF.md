@@ -2755,3 +2755,52 @@ GitHub Pages 已經是新前端(`CH=900`),Vercel 卻還是舊的 `MAX_IDS=200` �
 - 沒查 7/27~7/29 那三天為何連續高;推論是熱力圖分頁連開三天,但無法從這端證實。
 - 使用者可到 Vercel 用量圖的 **Type / Runtime** 分頁按端點拆,直接驗證
   `/api/quote` 是否佔壓倒性多數。
+
+---
+
+## 61. 一次 GitHub 500 就白跑一整輪 —— push 加重試(2026-08-13)
+
+### 起因
+`Branch Chips (nightly)` 失敗。日誌看下去**不是我們的 bug**:
+
+```
+remote: Internal Server Error
+ ! [remote rejected]     main -> main (Internal Server Error)
+```
+
+分點抓完、`data/chips_branch/2026-08-13.parquet` 寫好、commit `4394ae89e` 也做了,
+**最後 `git push` 被 GitHub 以 500 拒絕**,runner 一銷毀當天資料就沒了。
+沒有重試 = 一次隨機的平台抖動白跑 40 分鐘。
+
+### 順帶驗證:§58 的 catchup 在正式環境確實有效
+近 20 個交易日只缺 `2026-08-13`(今天這次),
+而 §58 當時列的 `07-27` / `08-03` / `08-06` **全部已被自動補回**
+(commit `e49f11711`,2026-08-07 那次夜間跑順手補的)。缺口累積問題確認解決。
+所以 08-13 明天也會自己補回來 —— 但那是「事後補救」,不該取代「當下就推成功」。
+
+### 改法([.github/workflows/chips.yml](.github/workflows/chips.yml))
+`git push` 改成最多 3 次、退避 5/10/15 秒的重試迴圈:
+- 每次重試前先 `git pull --rebase origin main`(機器人 commit 很頻繁,落後是常態)
+- **rebase 撞衝突就 `rebase --abort`** —— 寧可這輪失敗(隔天 catchup 會補),
+  也不要把半套 rebase 結果推上去
+- 3 次都失敗才 `exit 1`,並在日誌寫明「隔天 catchup 會自動補回」
+
+### 驗證(假 git + 假 sleep,可重跑)
+`yaml.safe_load` 解析 OK、`bash -n` 語法 OK,四種情境實跑:
+| 情境 | 結果 |
+|---|---|
+| 第 1 次就成功 | exit 0,不重試 |
+| 前 2 次失敗第 3 次成功(**今天的狀況**) | 退避 5→10 秒,exit 0 |
+| 3 次全失敗 | exit 1 + 明確訊息 |
+| push 失敗且 rebase 撞衝突 | `rebase --abort`,不卡死,exit 1 |
+
+`set -e` 不會被 `if git push` 裡的失敗誤殺(if 條件不觸發 -e)。
+
+### ⚠️ 其餘 4 支 workflow 仍是舊寫法
+`daily.yml` / `intraday.yml` / `premarket.yml` / `snapshot.yml` 的 push 段
+與 chips 出事前**一模一樣**(`git pull --rebase origin main || true` + 裸 `git push`),
+同一個 GitHub 500 打到它們也會一樣白跑。本次只動了實際出事的 chips,
+**其餘 4 支未改,待裁示**。(`backfill.yml` 是手動一次性工具,只有裸 `git push`,優先度低。)
+
+注意 `|| true` 那段本身也有問題:rebase 撞衝突時它會吞掉錯誤、留下 rebase 進行中的狀態。
+2026-07-22 那次盤中卡死修的是 `git add A B C` 的 fatal(§intraday 註解),**push 這段從沒被加固過**。
