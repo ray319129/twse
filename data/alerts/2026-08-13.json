@@ -574,5 +574,17 @@
   "volume_ratio": 0.69,
   "vwap": 520.95,
   "fired_at": "10:20"
+ },
+ "8016|breakout": {
+  "stock_id": "8016",
+  "name": "矽創",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 323.00(現價 324.00,高出 0.3%)・量比 1.27(市場中位 0.68)・站上均價 318.27",
+  "price": 324.0,
+  "change_rate": 4.01,
+  "volume_ratio": 1.27,
+  "vwap": 318.27,
+  "fired_at": "11:18"
  }
 }
