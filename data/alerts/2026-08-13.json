@@ -442,5 +442,17 @@
   "volume_ratio": 0.51,
   "vwap": 2799.0,
   "fired_at": "09:42"
+ },
+ "2332|pullback": {
+  "stock_id": "2332",
+  "name": "友訊",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 22.57 附近(距 +1.0%)・翻紅 +2.24% 站回均價・量比 0.50(市場中位 0.36)",
+  "price": 22.8,
+  "change_rate": 2.24,
+  "volume_ratio": 0.5,
+  "vwap": 22.59,
+  "fired_at": "09:45"
  }
 }
