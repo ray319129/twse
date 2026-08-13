@@ -394,5 +394,17 @@
   "volume_ratio": 0.5,
   "vwap": 71.0,
   "fired_at": "09:36"
+ },
+ "2408|breakout": {
+  "stock_id": "2408",
+  "name": "南亞科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 511.00(現價 513.00,高出 0.4%)・量比 0.52(市場中位 0.32)・站上均價 500.34",
+  "price": 513.0,
+  "change_rate": 6.32,
+  "volume_ratio": 0.52,
+  "vwap": 500.34,
+  "fired_at": "09:37"
  }
 }
