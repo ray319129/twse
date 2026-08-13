@@ -550,5 +550,29 @@
   "volume_ratio": 1.15,
   "vwap": 169.48,
   "fired_at": "10:15"
+ },
+ "6913|breakout": {
+  "stock_id": "6913",
+  "name": "鴻呈",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 153.00(現價 154.00,高出 0.7%)・量比 0.77(市場中位 0.50)・站上均價 150.20",
+  "price": 154.0,
+  "change_rate": 2.66,
+  "volume_ratio": 0.77,
+  "vwap": 150.2,
+  "fired_at": "10:20"
+ },
+ "2207|pullback": {
+  "stock_id": "2207",
+  "name": "和泰車",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 508.68 附近(距 +2.6%)・翻紅 +3.57% 站回均價・量比 0.69(市場中位 0.50)",
+  "price": 522.0,
+  "change_rate": 3.57,
+  "volume_ratio": 0.69,
+  "vwap": 520.95,
+  "fired_at": "10:20"
  }
 }
