@@ -1,0 +1,74 @@
+{
+ "3356|breakout": {
+  "stock_id": "3356",
+  "name": "奇偶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 64.30(現價 67.10,高出 4.4%)・量比 0.54(市場中位 0.06)・站上均價 65.27",
+  "price": 67.1,
+  "change_rate": 6.67,
+  "volume_ratio": 0.54,
+  "vwap": 65.27,
+  "fired_at": "09:05"
+ },
+ "3490|breakout": {
+  "stock_id": "3490",
+  "name": "單井",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 36.85(現價 38.05,高出 3.3%)・量比 0.66(市場中位 0.06)・站上均價 37.93",
+  "price": 38.05,
+  "change_rate": 3.25,
+  "volume_ratio": 0.66,
+  "vwap": 37.93,
+  "fired_at": "09:05"
+ },
+ "9945|breakout": {
+  "stock_id": "9945",
+  "name": "潤泰新",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 27.50(現價 29.10,高出 5.8%)・量比 1.11(市場中位 0.06)・站上均價 28.68",
+  "price": 29.1,
+  "change_rate": 7.38,
+  "volume_ratio": 1.11,
+  "vwap": 28.68,
+  "fired_at": "09:05"
+ },
+ "2357|breakout": {
+  "stock_id": "2357",
+  "name": "華碩",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 937.00(現價 999.00,高出 6.6%)・量比 1.62(市場中位 0.06)・站上均價 982.59",
+  "price": 999.0,
+  "change_rate": 6.61,
+  "volume_ratio": 1.62,
+  "vwap": 982.59,
+  "fired_at": "09:05"
+ },
+ "4760|breakout": {
+  "stock_id": "4760",
+  "name": "勤凱",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 283.00(現價 286.50,高出 1.2%)・量比 0.86(市場中位 0.06)・站上均價 285.31",
+  "price": 286.5,
+  "change_rate": 1.23,
+  "volume_ratio": 0.86,
+  "vwap": 285.31,
+  "fired_at": "09:05"
+ },
+ "3693|breakout": {
+  "stock_id": "3693",
+  "name": "營邦",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 562.00(現價 568.00,高出 1.1%)・量比 0.98(市場中位 0.07)・站上均價 559.91",
+  "price": 568.0,
+  "change_rate": 2.89,
+  "volume_ratio": 0.98,
+  "vwap": 559.91,
+  "fired_at": "09:07"
+ }
+}
