@@ -394,5 +394,29 @@
   "volume_ratio": 0.5,
   "vwap": 38.27,
   "fired_at": "09:51"
+ },
+ "2337|breakout": {
+  "stock_id": "2337",
+  "name": "旺宏",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 141.50(現價 142.00,高出 0.4%)・量比 0.60(市場中位 0.28)・站上均價 141.89",
+  "price": 142.0,
+  "change_rate": 4.02,
+  "volume_ratio": 0.6,
+  "vwap": 141.89,
+  "fired_at": "09:51"
+ },
+ "5475|breakout": {
+  "stock_id": "5475",
+  "name": "德宏",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 173.00(現價 175.00,高出 1.2%)・量比 0.56(市場中位 0.29)・站上均價 171.21",
+  "price": 175.0,
+  "change_rate": 7.36,
+  "volume_ratio": 0.56,
+  "vwap": 171.21,
+  "fired_at": "09:52"
  }
 }
