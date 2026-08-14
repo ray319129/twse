@@ -598,5 +598,29 @@
   "volume_ratio": 2.18,
   "vwap": 89.32,
   "fired_at": "10:56"
+ },
+ "5222|breakout": {
+  "stock_id": "5222",
+  "name": "全訊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 123.00(現價 124.00,高出 0.8%)・量比 0.72(市場中位 0.46)・站上均價 121.48",
+  "price": 124.0,
+  "change_rate": 1.63,
+  "volume_ratio": 0.72,
+  "vwap": 121.48,
+  "fired_at": "11:00"
+ },
+ "3528|breakout": {
+  "stock_id": "3528",
+  "name": "安馳",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 91.90(現價 92.20,高出 0.3%)・量比 0.71(市場中位 0.46)・站上均價 90.99",
+  "price": 92.2,
+  "change_rate": 2.44,
+  "volume_ratio": 0.71,
+  "vwap": 90.99,
+  "fired_at": "11:00"
  }
 }
