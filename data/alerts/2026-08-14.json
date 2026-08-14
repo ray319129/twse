@@ -454,5 +454,17 @@
   "volume_ratio": 0.5,
   "vwap": 1648.94,
   "fired_at": "10:02"
+ },
+ "6278|breakout": {
+  "stock_id": "6278",
+  "name": "台表科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 176.00(現價 177.00,高出 0.6%)・量比 0.86(市場中位 0.33)・站上均價 175.92",
+  "price": 177.0,
+  "change_rate": 5.35,
+  "volume_ratio": 0.86,
+  "vwap": 175.92,
+  "fired_at": "10:05"
  }
 }
