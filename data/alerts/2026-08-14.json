@@ -574,5 +574,17 @@
   "volume_ratio": 1.08,
   "vwap": 2919.12,
   "fired_at": "10:50"
+ },
+ "6112|breakout": {
+  "stock_id": "6112",
+  "name": "邁達特",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 47.20(現價 47.35,高出 0.3%)・量比 0.73(市場中位 0.44)・站上均價 46.95",
+  "price": 47.35,
+  "change_rate": 1.71,
+  "volume_ratio": 0.73,
+  "vwap": 46.95,
+  "fired_at": "10:53"
  }
 }
