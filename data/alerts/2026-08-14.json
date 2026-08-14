@@ -298,5 +298,29 @@
   "volume_ratio": 0.51,
   "vwap": 45.66,
   "fired_at": "09:26"
+ },
+ "2615|breakout": {
+  "stock_id": "2615",
+  "name": "萬海",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 88.80(現價 89.50,高出 0.8%)・量比 0.50(市場中位 0.20)・站上均價 88.50",
+  "price": 89.5,
+  "change_rate": 2.28,
+  "volume_ratio": 0.5,
+  "vwap": 88.5,
+  "fired_at": "09:30"
+ },
+ "4510|breakout": {
+  "stock_id": "4510",
+  "name": "高鋒",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 46.50(現價 46.80,高出 0.6%)・量比 0.50(市場中位 0.21)・站上均價 46.72",
+  "price": 46.8,
+  "change_rate": 2.4,
+  "volume_ratio": 0.5,
+  "vwap": 46.72,
+  "fired_at": "09:32"
  }
 }
