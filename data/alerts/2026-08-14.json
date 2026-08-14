@@ -550,5 +550,17 @@
   "volume_ratio": 0.62,
   "vwap": 229.77,
   "fired_at": "10:42"
+ },
+ "5474|breakout": {
+  "stock_id": "5474",
+  "name": "聰泰",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 160.00(現價 161.00,高出 0.6%)・量比 0.65(市場中位 0.42)・站上均價 158.54",
+  "price": 161.0,
+  "change_rate": 2.22,
+  "volume_ratio": 0.65,
+  "vwap": 158.54,
+  "fired_at": "10:45"
  }
 }
