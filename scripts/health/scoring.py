@@ -103,25 +103,52 @@ def _find_metric_value(metrics: list[dict] | None, key: str):
     return None
 
 
+# ── Swing Score 的橫斷面校準表 ───────────────────────────────────────────────
+# 舊版用固定上限(日均成交額 300 百萬 / ATR 6%)把兩個因子壓成 0~1,但台股的成交額分布
+# 橫跨近四個數量級 —— 2026-08-14 實測 1,977 檔:P50 僅 14.1 百萬,P99 已達 11,251 百萬。
+# 結果是 16.5% 的股票流動性頂天、18.5% 的股票波動度頂天,凡是「夠大又夠活潑」的標的
+# 一律得 100 分:2303/2337/2344/2449 四檔的當沖與隔日沖分數全部是 100,零鑑別力。
+#
+# 改成「這檔在全市場排第幾百分位」——天然落在 0~100、不會飽和、也不必再猜門檻。
+# 校準表 = 2026-08-14 全市場橫斷面的分位數斷點,線性內插。
+# 分布形狀以月為單位變動很慢,建議每半年用 tools/refresh_swing_calibration.py 重算一次。
+_DOLLAR_VOL_PCTL = [(0.6, 10), (2.3, 25), (14.1, 50), (107.5, 75),
+                    (734.7, 90), (2180.9, 95), (11250.7, 99)]
+_ATR_PCT_PCTL = [(1.59, 10), (2.36, 25), (3.71, 50), (5.37, 75),
+                 (6.88, 90), (7.59, 95), (9.25, 99)]
+
+
+def _percentile_of(value: float, table: list[tuple[float, float]]) -> float:
+    """value 落在校準表的第幾百分位(線性內插)。低於首個斷點 → 由 0 起算;高於末端 → 逼近 100。"""
+    if value <= table[0][0]:
+        return table[0][1] * (value / table[0][0]) if table[0][0] > 0 else 0.0
+    for (x0, p0), (x1, p1) in zip(table, table[1:]):
+        if value <= x1:
+            return p0 + (p1 - p0) * (value - x0) / (x1 - x0)
+    x_last, p_last = table[-1]
+    # 末端之上用對數收斂到 100,避免超大型股全部並列同分。
+    import math
+    return min(100.0, p_last + (100 - p_last) * min(1.0, math.log10(value / x_last)))
+
+
 def swing_scores(technical_metrics: list[dict] | None, chip_metrics: list[dict] | None,
                  financial_score: float | None, technical_score: float | None) -> dict:
     """短線評估(Swing Score):當沖/隔日沖/波段/中長線適合度,0~100。
     純規則組合既有 Engine 已算好的指標(ATR波動度、日均成交額、技術面/財務面分數),不是新邏輯,
-    也不重新呼叫任何 API。"""
+    也不重新呼叫任何 API。流動性/波動度兩個因子是**全市場百分位**,不是絕對值(見上方校準表)。"""
     atr_pct = _find_metric_value(technical_metrics, "atr_pct")
     dollar_vol = _find_metric_value(chip_metrics, "dollar_volume")  # 百萬元
 
-    def clamp(x, lo, hi):
-        return max(lo, min(hi, x))
-
     out: dict = {}
     reasons: dict = {}
+    liq_pct = _percentile_of(dollar_vol, _DOLLAR_VOL_PCTL) if dollar_vol is not None else None
     if atr_pct is not None and dollar_vol is not None:
-        liq_factor = clamp(dollar_vol, 0, 300) / 300
-        vol_factor = clamp(atr_pct, 0, 6) / 6
+        vol_pct = _percentile_of(atr_pct, _ATR_PCT_PCTL)
+        liq_factor, vol_factor = liq_pct / 100, vol_pct / 100
         out["day_trade"] = round(clip01(vol_factor * 0.6 + liq_factor * 0.4) * 100, 0)
         out["overnight"] = round(clip01(vol_factor * 0.45 + liq_factor * 0.55) * 100, 0)
-        reasons["day_trade"] = f"ATR波動度 {atr_pct}%、日均成交額 {dollar_vol} 百萬元"
+        reasons["day_trade"] = (f"ATR波動度 {atr_pct}%(全市場第 {vol_pct:.0f} 百分位)、"
+                                f"日均成交額 {dollar_vol} 百萬元(第 {liq_pct:.0f} 百分位)")
         reasons["overnight"] = reasons["day_trade"]
         if dollar_vol < 30:
             reasons["day_trade"] += "(流動性偏低,當沖滑價風險高)"
@@ -130,9 +157,13 @@ def swing_scores(technical_metrics: list[dict] | None, chip_metrics: list[dict] 
         out["overnight"] = None
 
     if technical_score is not None:
-        liq_factor2 = clamp(dollar_vol or 0, 0, 200) / 200
+        # 舊版的 liq_factor2 上限只有 200 百萬,20% 的股票頂天 → 那 30% 權重實際是固定送 30 分地板,
+        # 「流動性納入30%權重」這句話在實務上是假的。改用同一套百分位後才真的會依流動性拉開。
+        liq_factor2 = (liq_pct / 100) if liq_pct is not None else 0.0
         out["swing"] = round(clip01(technical_score / 100 * 0.7 + liq_factor2 * 0.3) * 100, 0)
-        reasons["swing"] = f"技術面分數 {technical_score}、流動性納入30%權重"
+        reasons["swing"] = (f"技術面分數 {technical_score} 佔 70%、"
+                            + (f"流動性全市場第 {liq_pct:.0f} 百分位佔 30%" if liq_pct is not None
+                               else "流動性資料不足,該 30% 以 0 計"))
     else:
         out["swing"] = None
 

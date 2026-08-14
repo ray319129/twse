@@ -45,6 +45,8 @@ def _percentile(series: pd.Series, value: float) -> float | None:
 def compute(ctx: dict) -> dict:
     bal = ctx.get("balance"); fin = ctx.get("financials"); cf = ctx.get("cashflow")
     bench = ctx.get("industry_benchmarks") or {}
+    # 本季獲利由業外主導時,近四季 EPS 被一次性利益灌大 → PE 偏低、PEG 假便宜,兩者都要停用計分。
+    nonop = q.nonoperating_dominant(fin)
     updated = ctx.get("updated_at", "")
     per_hist = ctx.get("per_hist")
     price = ctx.get("current_price")
@@ -59,10 +61,14 @@ def compute(ctx: dict) -> dict:
         metrics.append(metric(
             "pe", "本益比(PE)", round(pe, 2),
             industry_avg=bench.get("pe"),
-            rating=rating_from_thresholds(pe, 15, 30, higher_is_better=False),
-            formula="股價 ÷ 每股盈餘(近四季)", source=src, asof=asof, updated_at=updated,
+            rating=("neutral" if nonop["hit"] else rating_from_thresholds(pe, 15, 30, higher_is_better=False)),
+            formula="股價 ÷ 每股盈餘(近四季)"
+                    + ("。⚠ 近四季 EPS 含本季由業外主導的一次性利益(見財務體質面向),"
+                       "分母被一次性放大會讓 PE 看起來偏低,此處不計入估值分數。" if nonop["hit"] else ""),
+            source=src, asof=asof, updated_at=updated,
         ))
-        cheapness.append(clip01((30 - pe) / (30 - 15)))
+        if not nonop["hit"]:
+            cheapness.append(clip01((30 - pe) / (30 - 15)))
     else:
         metrics.append(missing_metric("pe", "本益比(PE)", source=src or _SRC_PER))
 
@@ -123,7 +129,7 @@ def compute(ctx: dict) -> dict:
 
     # ---------- PEG ----------
     eps_yoy = q.yoy(fin, "eps")
-    if pe is not None and eps_yoy is not None and eps_yoy > 0:
+    if pe is not None and eps_yoy is not None and eps_yoy > 0 and not nonop["hit"]:
         peg = pe / (eps_yoy * 100)
         metrics.append(metric(
             "peg", "PEG", round(peg, 2),
@@ -132,9 +138,21 @@ def compute(ctx: dict) -> dict:
         ))
         cheapness.append(clip01((2.0 - peg) / (2.0 - 1.0)))
     else:
+        # 去年同季 EPS 為負時 yoy() 回 None(見 quarterly.yoy)。這種情況要標「不適用」,
+        # 不能落到 api_unavailable ——「資料抓不到」跟「基期是虧損所以算不出成長率」是兩件事,
+        # 前者會讓人以為重試就有,後者是本質上不該給 PEG(舊寫法會產出 PEG 0.01~0.05 這種假便宜)。
+        basis = q.yoy_basis(fin, "eps")
+        if nonop["hit"]:
+            why = "本季淨利由業外主導,EPS 年增率含一次性利益 → PEG 會被灌成假便宜,故不計算"
+        elif basis in ("turnaround", "still_negative"):
+            why = "去年同季 EPS 為負,EPS 年增率不適用 → PEG 無法計算"
+        else:
+            why = ""
         metrics.append(missing_metric(
-            "peg", "PEG", source=f"{src or _SRC_PER} + {_SRC_FS}",
-            reason="not_applicable" if (eps_yoy is not None and eps_yoy <= 0) else "api_unavailable",
+            "peg", "PEG", source=f"{src or _SRC_PER} + {_SRC_FS}", formula=why,
+            reason=("not_applicable"
+                    if (why or (eps_yoy is not None and eps_yoy <= 0))
+                    else "api_unavailable"),
         ))
 
     # ---------- EV/EBITDA ----------
@@ -212,6 +230,14 @@ def _compute_dcf(ctx: dict, market_cap: float | None, price: float | None) -> di
     if ocf_ttm is None or capex_ttm is None or price is None or market_cap is None or market_cap <= 0:
         return {"available": False, "reason": "缺現金流或市值資料(需近4季現金流量表 + market_cap[PB×權益] + 近收盤價)"}
     fcf_ttm = ocf_ttm - abs(capex_ttm)
+    # FCF 為負時整條折現鏈都是負的,會輸出「每股合理價 −231.3 元」這種沒有意義的數字
+    # (2449 京元電 2026Q2:近12個月 FCF −130.9 億 → 舊版印出 −231.3 元、「高估 192.7%」)。
+    # 兩階段 DCF 的前提是「未來現金流為正且可複合成長」,前提不成立就該誠實說不適用。
+    if fcf_ttm <= 0:
+        return {"available": False,
+                "reason": f"近12個月自由現金流為負({fcf_ttm:,.0f} 元),兩階段 DCF 的「未來現金流為正」"
+                          f"前提不成立,折現出的每股價值會是負數而無意義,故不估算。"
+                          f"重資本支出擴產期出現這種情況屬正常,建議改看 EV/EBITDA 與資本支出週期。"}
 
     growth_rate = q.cagr(fin, "revenue", years=5)
     if growth_rate is None:

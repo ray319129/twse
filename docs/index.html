@@ -3273,7 +3273,7 @@ function renderHealthReport(d){
       </div>
     </div>`;
   } else if(d.dcf&&d.dcf.reason){
-    html+=`<div class="panelcard" style="margin-top:14px"><div class="pc-h"><span>DCF 估值</span></div><div class="health-dcf" style="color:var(--muted)">資料不足:${esc(d.dcf.reason)}</div></div>`;
+    html+=`<div class="panelcard" style="margin-top:14px"><div class="pc-h"><span>DCF 估值</span></div><div class="health-dcf" style="color:var(--muted)">不適用:${esc(d.dcf.reason)}</div></div>`;
   }
 
   html+=`<div class="health-engines">${(d.engines||[]).map(engineCard).join('')}</div>`;

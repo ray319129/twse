@@ -44,10 +44,26 @@ def at(df: pd.DataFrame | None, col: str, offset: int) -> float | None:
 
 
 def yoy(df: pd.DataFrame | None, col: str) -> float | None:
+    """去年同季 ≤ 0 時回 None —— 除以「負基期的絕對值」算出來的不是成長率。
+    (2026Q2 實例:旺宏去年同季營業利益 −10.79 億、今年 +89.68 億,舊寫法得 +931.1%;
+     華邦電 EPS −0.29 → +5.40 得 +1962.1%。那是「由虧轉盈」,不是成長 931%/1962%,
+     而且會一路污染 PEG 與成長分。)要區分是哪一種缺法時用 yoy_basis()。"""
     cur, prev = last(df, col), at(df, col, 4)
-    if cur is None or prev is None or prev == 0:
+    if cur is None or prev is None or prev <= 0:
         return None
-    return (cur - prev) / abs(prev)
+    return (cur - prev) / prev
+
+
+def yoy_basis(df: pd.DataFrame | None, col: str) -> str | None:
+    """yoy() 回 None 的原因分類,給 Engine 標成人看得懂的說明:
+    'no_base' 沒有去年同季資料 / 'turnaround' 去年虧今年賺 / 'still_negative' 兩期都虧。
+    回 None 代表基期正常、yoy() 算得出來。"""
+    cur, prev = last(df, col), at(df, col, 4)
+    if cur is None or prev is None:
+        return "no_base"
+    if prev > 0:
+        return None
+    return "turnaround" if cur > 0 else "still_negative"
 
 
 def qoq(df: pd.DataFrame | None, col: str) -> float | None:
@@ -147,6 +163,63 @@ def ttm_flow(df: pd.DataFrame | None, col: str, *, offset: int = 0) -> float | N
     if end < 4:
         return None
     return float(sq.iloc[end - 4:end].sum())
+
+
+def nonoperating_dominant(df: pd.DataFrame | None) -> dict:
+    """判斷「本季淨利是不是主要來自業外」。financial/growth/value 三個 Engine 共用同一份判定,
+    避免各自寫一套門檻而互相矛盾。回傳 {hit, kind, nonop, nonop_ratio, gross_margin, net_margin}。
+
+    為什麼需要這條:2026Q2 聯電(2303)營收 687.3 億、營業利益 149.5 億、淨利 422.2 億 —— 業外
+    +272.7 億。舊版把「淨利率 61.43%」當獲利能力算進財務體質(96.1 分),又用含這筆一次性的
+    TTM EPS 推出 PE 18.72 / EPS年增率 377.5% / PEG 0.05,一路變成「便宜又高成長」。
+    一次性業外不具延續性,不該用來評估體質與估值。
+
+    三種命中方式(任一即 hit):
+      structural  淨利率 > 毛利率 —— 本業結構上不可能達成,差額必然來自業外
+      ratio       |淨利 − 營業利益| ≥ 營業利益 —— 業外規模已不小於本業
+      loss_cover  營業利益 ≤ 0 但淨利 > 0 —— 本業虧損,獲利全靠業外撐
+    """
+    out = {"hit": False, "kind": None, "nonop": None, "nonop_ratio": None,
+           "gross_margin": None, "net_margin": None}
+    ni = last(df, "net_income"); oi = last(df, "operating_income")
+    gm = ratio(df, "gross_profit", "revenue", scale=100.0)
+    nm = ratio(df, "net_income", "revenue", scale=100.0)
+    out["gross_margin"], out["net_margin"] = gm, nm
+    if ni is None or oi is None:
+        return out
+    out["nonop"] = ni - oi
+    if oi > 0:
+        out["nonop_ratio"] = abs(ni - oi) / oi
+
+    if gm is not None and nm is not None and nm > gm:
+        out.update(hit=True, kind="structural")
+    elif oi <= 0 and ni > 0:
+        out.update(hit=True, kind="loss_cover")
+    elif out["nonop_ratio"] is not None and out["nonop_ratio"] >= 1.0:
+        out.update(hit=True, kind="ratio")
+    return out
+
+
+def flow_at(df: pd.DataFrame | None, col: str, offset: int = 0) -> float | None:
+    """現金流量表(YTD 累計)的「單季」值。offset=0→最新季,offset=1→上一季。
+
+    直接對現金流量表用 last()/at() 會拿到 YTD 累計數,再互相比較就會得到假趨勢:
+    Q1(3個月)→Q2(6個月)→Q3(9個月)→Q4(12個月)本來就一路變大,Q4→Q1 又必然變小。
+    (2026Q2 實例:四檔的「營業現金流」全部標 ↑,純粹是 H1 累計 > Q1 累計造成的。)"""
+    if df is None or df.empty or col not in df.columns:
+        return None
+    sq = _to_single_quarter(df[col])
+    if len(sq) <= offset:
+        return None
+    return float(sq.iloc[-1 - offset])
+
+
+def flow_trend(df: pd.DataFrame | None, col: str, periods: int = 8) -> list[dict]:
+    """現金流量表的單季趨勢序列(先去累計再取近 N 季),避免把 3M/6M/9M/12M 累計值並排。"""
+    if df is None or df.empty or col not in df.columns:
+        return []
+    sq = _to_single_quarter(df[col]).tail(periods)
+    return [trend_point(_period_label(idx), v) for idx, v in sq.items()]
 
 
 def consecutive(df: pd.DataFrame | None, col: str, *, negative: bool = True, max_check: int = 12) -> int:

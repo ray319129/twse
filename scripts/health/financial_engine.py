@@ -60,10 +60,37 @@ def compute(ctx: dict) -> dict:
                           source=_SRC_FS, asof=asof_fs, updated=updated, bench=bench)
     metrics.append(m); profitability.append(s)
 
+    # 業外主導判定要在淨利率之前算 —— 命中時淨利率/ROE/ROA 都不進獲利能力子分。
+    nonop = q.nonoperating_dominant(fin)
+
     m, s = _ratio_metric(fin, "net_margin", "淨利率", "net_income", "revenue",
                           good=10, bad=0, formula="稅後淨利 ÷ 營收 × 100",
                           source=_SRC_FS, asof=asof_fs, updated=updated, bench=bench)
-    metrics.append(m); profitability.append(s)
+    if nonop["hit"]:
+        m["rating"] = "neutral"
+        m["formula"] += "。本季淨利主要來自業外(見下方「本季獲利是否由業外主導」),此數字不代表本業獲利能力,故不計入獲利能力子分。"
+    else:
+        profitability.append(s)
+    metrics.append(m)
+
+    if nonop["hit"]:
+        # 用 if/elif 而不是 dict 查表 —— dict 的三個 value 會**全部**先算完再取一個,
+        # 而 nonop_ratio / margin 在非對應的 kind 下可能是 None,f-string 會直接丟 TypeError。
+        if nonop["kind"] == "structural":
+            kind_txt = (f"淨利率({nonop['net_margin']:.2f}%) > 毛利率({nonop['gross_margin']:.2f}%)"
+                        f" —— 本業結構上不可能達成")
+        elif nonop["kind"] == "loss_cover":
+            kind_txt = "營業利益為負但淨利為正 —— 本業虧損,獲利全靠業外撐"
+        else:
+            kind_txt = f"業外損益規模已達營業利益的 {nonop['nonop_ratio']:.2f} 倍"
+        metrics.append(metric(
+            "nonoperating_dominant", "本季獲利是否由業外主導", "是", rating="bad",
+            formula=f"{kind_txt},差額約 {nonop['nonop']:,.0f} 元。業外損益(處分利益、投資收益、匯兌等)"
+                    f"多為一次性、不具延續性,故本季淨利率/ROE/ROA/淨利與EPS年增率均不計入分數,"
+                    f"PE 與 PEG 亦已加註。請改看營業利益率與營業利益年增率評估本業。",
+            source=_SRC_FS, asof=asof_fs, updated_at=updated,
+        ))
+        profitability.append(0.3)   # 不是零分:本業數字仍在,但獲利品質要打折
 
     eps = q.last(fin, "eps")
     eps_prev = q.at(fin, "eps", 1)
@@ -91,10 +118,14 @@ def compute(ctx: dict) -> dict:
             "roe", "ROE(近似)", round(roe_now, 2), unit="%",
             industry_avg=bench.get("roe"), status=status_from_delta(roe_now, roe_prev),
             rating=rating_from_thresholds(roe_now, 15, 0),
-            formula="單季淨利 ÷ 當期股東權益 × 100(近似,跨公司比較性有限,僅供參考)",
+            formula="單季淨利 ÷ 當期股東權益 × 100(近似,跨公司比較性有限,僅供參考)"
+                    + ("。本季淨利由業外主導,此數字不代表本業報酬率,故不計入分數。" if nonop["hit"] else ""),
             source=f"{_SRC_FS} + {_SRC_BS}", asof=asof_fs, updated_at=updated,
         ))
-        profitability.append(clip01((roe_now - 0) / 15))
+        if nonop["hit"]:
+            metrics[-1]["rating"] = "neutral"
+        else:
+            profitability.append(clip01((roe_now - 0) / 15))
     else:
         metrics.append(missing_metric("roe", "ROE(近似)", source=f"{_SRC_FS} + {_SRC_BS}"))
     if roa_now is not None:
@@ -102,10 +133,14 @@ def compute(ctx: dict) -> dict:
             "roa", "ROA(近似)", round(roa_now, 2), unit="%",
             industry_avg=bench.get("roa"), status=status_from_delta(roa_now, roa_prev),
             rating=rating_from_thresholds(roa_now, 8, 0),
-            formula="單季淨利 ÷ 當期總資產 × 100(近似)",
+            formula="單季淨利 ÷ 當期總資產 × 100(近似)"
+                    + ("。本季淨利由業外主導,此數字不代表本業報酬率,故不計入分數。" if nonop["hit"] else ""),
             source=f"{_SRC_FS} + {_SRC_BS}", asof=asof_fs, updated_at=updated,
         ))
-        profitability.append(clip01((roa_now - 0) / 8))
+        if nonop["hit"]:
+            metrics[-1]["rating"] = "neutral"
+        else:
+            profitability.append(clip01((roa_now - 0) / 8))
     else:
         metrics.append(missing_metric("roa", "ROA(近似)", source=f"{_SRC_FS} + {_SRC_BS}"))
 
@@ -156,19 +191,24 @@ def compute(ctx: dict) -> dict:
                                       reason="api_unavailable" if cf is not None and not cf.empty else "stale_cache"))
 
     # ---------- 現金品質 ----------
-    ocf = q.last(cf, "op_cashflow"); ocf_prev = q.at(cf, "op_cashflow", 1)
+    # 現金流量表是 YTD 累計,必須先去累計成單季才能比較(flow_at/flow_trend),否則
+    # Q1→Q2→Q3→Q4 一路變大是累計的必然,不是現金流真的在改善 —— 舊寫法用 q.last/q.at
+    # 讓四檔的「營業現金流」在 Q2 全部標 ↑。同檔案的自由現金流、利息保障倍數本來就已用
+    # ttm_flow 去累計,只有這一項漏掉。
+    ocf = q.flow_at(cf, "op_cashflow"); ocf_prev = q.flow_at(cf, "op_cashflow", 1)
     if ocf is not None:
         metrics.append(metric(
-            "op_cashflow", "營業現金流", round(ocf, 0), unit="千元",
-            trend=q.trend(cf, "op_cashflow"),
+            "op_cashflow", "營業現金流(單季)", round(ocf, 0), unit="元",
+            trend=q.flow_trend(cf, "op_cashflow"),
             status=status_from_delta(ocf, ocf_prev),
             rating=("good" if ocf > 0 else "bad"),
-            formula="季財報現金流量表:營業活動之淨現金流入(出)",
+            formula="季財報現金流量表:營業活動之淨現金流入(出)。原始數字為當年度累計(YTD),"
+                    "已還原為單季(本期累計 − 同年上一季累計)後再與上一季比較。",
             source=_SRC_CF, asof=asof_cf, updated_at=updated,
         ))
         cash_quality.append(1.0 if ocf > 0 else 0.0)
     else:
-        metrics.append(missing_metric("op_cashflow", "營業現金流", source=_SRC_CF))
+        metrics.append(missing_metric("op_cashflow", "營業現金流(單季)", source=_SRC_CF))
 
     # 自由現金流:近12個月營業現金流 − |近12個月資本支出|。兩者都在現金流量表(YTD 累計),
     # 用 ttm_flow 去累計後滾動4季 → 年化 FCF,正負判讀不受單季基期干擾。
@@ -178,7 +218,7 @@ def compute(ctx: dict) -> dict:
         ocf_p = q.ttm_flow(cf, "op_cashflow", offset=1); capex_p = q.ttm_flow(cf, "capex", offset=1)
         fcf_prev = (ocf_p - abs(capex_p)) if (ocf_p is not None and capex_p is not None) else None
         metrics.append(metric(
-            "free_cashflow", "自由現金流(近12個月)", round(fcf, 0), unit="千元",
+            "free_cashflow", "自由現金流(近12個月)", round(fcf, 0), unit="元",
             status=status_from_delta(fcf, fcf_prev),
             rating=("good" if fcf > 0 else "bad"),
             formula="近12個月營業現金流 − |近12個月資本支出|(現金流量表為YTD累計,已去累計為單季再滾動4季)",
@@ -201,8 +241,9 @@ def compute(ctx: dict) -> dict:
     else:
         metrics.append(missing_metric("earnings_quality", "淨利與現金流是否背離", source=f"{_SRC_FS} + {_SRC_CF}"))
 
+    # 穩定度同樣要看單季:YTD 累計序列裡 Q2~Q4 帶著前幾季的餘額,會把單季轉負的那幾季蓋掉。
     cashflow_stable = None
-    ocf_trend = q.trend(cf, "op_cashflow")
+    ocf_trend = q.flow_trend(cf, "op_cashflow")
     if len(ocf_trend) >= 4:
         vals = [t["value"] for t in ocf_trend if t["value"] is not None]
         if len(vals) >= 4:

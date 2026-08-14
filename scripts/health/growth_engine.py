@@ -51,6 +51,7 @@ def compute(ctx: dict) -> dict:
     momentum: list[float] = []
     long_term: list[float] = []
     new_high: list[float] = []
+    nonop = q.nonoperating_dominant(fin)   # 業外主導 → 淨利/EPS 成長率不計分,見下方季成長區塊
 
     # ---------- 近況動能 ----------
     if rev is not None and not rev.empty and "revenue_yoy" in rev.columns:
@@ -94,23 +95,47 @@ def compute(ctx: dict) -> dict:
 
     # ---------- 季成長(YoY) ----------
     asof_fs = q.last_period(fin, "revenue") or ""
-    for key, label, col, full in (
-        ("revenue_yoy_q", "季營收年增率", "revenue", 20),
-        ("operating_income_yoy", "營業利益年增率", "operating_income", 30),
-        ("net_income_yoy", "淨利年增率", "net_income", 30),
-        ("eps_yoy", "EPS 年增率", "eps", 30),
+    for key, label, col, full, noun in (
+        ("revenue_yoy_q", "季營收年增率", "revenue", 20, "季營收"),
+        ("operating_income_yoy", "營業利益年增率", "operating_income", 30, "營業利益"),
+        ("net_income_yoy", "淨利年增率", "net_income", 30, "淨利"),
+        ("eps_yoy", "EPS 年增率", "eps", 30, "EPS"),
     ):
         v = q.yoy(fin, col)
         if v is not None:
             v_pct = v * 100
+            # 淨利/EPS 的年增率在「本季獲利由業外主導」時是一次性利益放大出來的,不進成長分。
+            # (2303 聯電 2026Q2:業外 +272.7 億 → 淨利年增率 377.2%、EPS 年增率 377.5%。)
+            tainted = nonop["hit"] and col in ("net_income", "eps")
             metrics.append(metric(
                 key, label, round(v_pct, 1), unit="%",
                 trend=q.trend(fin, col),
                 industry_avg=bench.get(key),
-                rating=rating_from_thresholds(v_pct, 10, -10),
-                formula=f"(最新季{label[:2]} − 去年同季) ÷ |去年同季|", source=_SRC_FS, asof=asof_fs, updated_at=updated,
+                rating=("neutral" if tainted else rating_from_thresholds(v_pct, 10, -10)),
+                formula=f"(最新季{noun} − 去年同季) ÷ 去年同季"
+                        + ("。本季淨利由業外主導(見財務體質面向),此年增率含一次性利益,不計入成長分。"
+                           if tainted else ""),
+                source=_SRC_FS, asof=asof_fs, updated_at=updated,
             ))
-            momentum.append(clip01((v_pct + 10) / (full + 10)))
+            if not tainted:
+                momentum.append(clip01((v_pct + 10) / (full + 10)))
+            continue
+
+        # 去年同季為負 → 年增率沒有意義(見 quarterly.yoy 註解)。不留白、也不假裝有成長率:
+        # 改成敘述性的「由虧轉盈/仍為虧損」,方向照實給 good/bad,但**不進 momentum 分**
+        # —— 這正是要避免的「用負基期把成長分灌到接近滿分」。
+        basis = q.yoy_basis(fin, col)
+        if basis in ("turnaround", "still_negative"):
+            prev_v = q.at(fin, col, 4)
+            base_txt = f"{prev_v:,.2f}" if col == "eps" else f"{prev_v:,.0f}"
+            metrics.append(metric(
+                key, label, "由虧轉盈(年增率不適用)" if basis == "turnaround" else "仍為虧損(年增率不適用)",
+                trend=q.trend(fin, col),
+                rating=("good" if basis == "turnaround" else "bad"),
+                formula=f"去年同季{noun}為負({base_txt}),年增率的分母是負數 → 算出來的百分比沒有意義,"
+                        f"故不計算,改以「由虧轉盈/仍為虧損」呈現,且不納入成長分。",
+                source=_SRC_FS, asof=asof_fs, updated_at=updated,
+            ))
         else:
             metrics.append(missing_metric(key, label, source=_SRC_FS))
 

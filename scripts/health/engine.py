@@ -10,6 +10,8 @@
 from __future__ import annotations
 from datetime import date, timedelta
 
+import pandas as pd
+
 from . import financial_engine, growth_engine, value_engine, risk_engine
 from . import technical_engine, chip_engine, news_engine
 from . import ai_summary
@@ -109,6 +111,18 @@ def _stale(df, fresh_days: int = 80) -> bool:
         return True
 
 
+def _stale_month_index(df, fresh_days: int = 45) -> bool:
+    """月營收專用:index 是 'YYYY-MM' 字串,不是 DatetimeIndex,_stale() 會直接丟例外落到 True。
+    月營收每月 10 號左右公布,超過 45 天沒有新月份就該重抓。"""
+    if df is None or len(df) == 0:
+        return True
+    try:
+        latest = pd.Period(str(max(df.index)), freq="M").to_timestamp(how="end").date()
+        return (date.today() - latest).days > fresh_days
+    except Exception:
+        return True
+
+
 def build_ctx_batch(*, stock_id: str, name: str, industry: str | None, today: date,
                     price_df, valuation_snapshot: dict | None = None, current_price: float | None = None,
                     revenue_df=None, chips_df=None, news_items: list[dict] | None = None,
@@ -117,9 +131,11 @@ def build_ctx_batch(*, stock_id: str, name: str, industry: str | None, today: da
     (20季財報供5年CAGR、長窗PE/PB供歷史百分位、持股分散表供大戶/股東人數),這裡統一補抓+組裝,
     沿用既有 storage 快取機制(新鮮 + 已有足夠長度就不重打 FinMind)。"""
     from ..storage import (load_financials, upsert_financials, load_balance, upsert_balance,
-                           load_cashflow, upsert_cashflow, load_per, upsert_per, upsert_chips)
+                           load_cashflow, upsert_cashflow, load_per, upsert_per, upsert_chips,
+                           upsert_revenue)
     from ..fetchers import (fetch_financial_statements, fetch_balance_sheet, fetch_cashflow,
-                            fetch_per_yield, fetch_holder_distribution, fetch_chips_history)
+                            fetch_per_yield, fetch_holder_distribution, fetch_chips_history,
+                            fetch_monthly_revenue)
 
     health_cfg = health_cfg or {}
     quarters = int(health_cfg.get("quarters", 20))
@@ -146,6 +162,21 @@ def build_ctx_batch(*, stock_id: str, name: str, industry: str | None, today: da
         new = fetch_per_yield(stock_id, days=per_days)
         if not new.empty:
             per_hist = upsert_per(stock_id, new)
+
+    # 月營收:revenue 是唯一沒有「過期就現抓」fallback 的資料集,呼叫端(api/health.py)只做
+    # load_revenue() 讀本機 parquet —— 而 .vercelignore 排除了整個 data/,所以線上健檢的
+    # 月營收 YoY / 連續正成長月數 / 是否創新高 / 是否暴跌 四項**永遠**是「資料不足」。
+    # 不改 .vercelignore(把 data/ 塞進 bundle 會撞 serverless size 上限,見本檔案頭註解),
+    # 改成跟其他六個資料集一致:過期或不足就補抓。
+    # 註:revenue 的 index 是 'YYYY-MM' 字串,不能用 _stale()(它假設 DatetimeIndex),故單獨判斷。
+    revenue_months = int(health_cfg.get("revenue_months", 24))
+    if _stale_month_index(revenue_df, fresh_days=45) or len(revenue_df or []) < 13:
+        try:
+            new_rev = fetch_monthly_revenue(stock_id, months=revenue_months)
+            if not new_rev.empty:
+                revenue_df = upsert_revenue(stock_id, new_rev)
+        except Exception as e:
+            log.warning(f"revenue fetch {stock_id} 失敗(續用既有/空):{e}")
 
     # 籌碼:即時路徑(Vercel)無持久 parquet 快取,load_chips 恆空 → 籌碼分析永遠「資料不足」。
     # 批次路徑則可能有快取但當日尚未更新。統一在此:過期/太短就現抓一段窗回補

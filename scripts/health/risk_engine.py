@@ -45,32 +45,43 @@ def compute(ctx: dict) -> dict:
                  "hit": loss_streak >= 2, "penalty": min(loss_streak * 8, 30), "critical": False})
 
     # ---------- 2. 連續營收衰退月數 ----------
+    # 沒有月營收資料時「衰退 0 個月」不是好消息,是「不知道」。舊寫法讓 decline_streak
+    # 停在初始值 0 就以 rating="good" 輸出,四份報告都把它列進優點,而同一份報告的
+    # 月營收 YoY 卻標「資料不足」—— 自相矛盾,還會虛胖 Risk 面向的涵蓋率分母。
+    has_rev = bool(rev is not None and not rev.empty and "revenue_yoy" in rev.columns
+                   and not rev["revenue_yoy"].dropna().empty)
     decline_streak = 0
-    if rev is not None and not rev.empty and "revenue_yoy" in rev.columns:
+    if has_rev:
         s = rev["revenue_yoy"].dropna().tail(24)
         for v in reversed(s.tolist()):
             if v < 0:
                 decline_streak += 1
             else:
                 break
-    metrics.append(metric(
-        "revenue_decline_streak", "連續營收衰退月數", decline_streak, unit="個月",
-        rating=("bad" if decline_streak >= 3 else "good"),
-        formula="從最新月往回數,月營收 YoY 連續為負的月數",
-        source=_SRC_REV, asof=(str(rev.index[-1]) if rev is not None and not rev.empty else ""),
-        updated_at=updated,
-    ))
-    rules.append({"key": "revenue_decline", "label": f"連續營收衰退 {decline_streak} 個月",
-                 "hit": decline_streak >= 3, "penalty": min(decline_streak * 5, 25), "critical": False})
+        metrics.append(metric(
+            "revenue_decline_streak", "連續營收衰退月數", decline_streak, unit="個月",
+            rating=("bad" if decline_streak >= 3 else "good"),
+            formula="從最新月往回數,月營收 YoY 連續為負的月數",
+            source=_SRC_REV, asof=str(rev.index[-1]), updated_at=updated,
+        ))
+    else:
+        metrics.append(missing_metric("revenue_decline_streak", "連續營收衰退月數", source=_SRC_REV))
+    # 沒資料就不能宣稱這條規則「沒命中」,直接不加進 rules(不計分、也不假裝安全)。
+    if has_rev:
+        rules.append({"key": "revenue_decline", "label": f"連續營收衰退 {decline_streak} 個月",
+                     "hit": decline_streak >= 3, "penalty": min(decline_streak * 5, 25), "critical": False})
 
     # ---------- 3. 現金流異常(淨利為正但OCF為負)----------
-    ni = q.last(fin, "net_income"); ocf = q.last(cf, "op_cashflow")
+    # 淨利是單季、現金流量表是 YTD 累計,直接對比是不同期間的數字。用 flow_at 還原成單季
+    # 才是同基期比較 —— 否則 Q1 單季 OCF 轉負會被同年 Q2~Q4 的累計餘額蓋掉而漏標。
+    ni = q.last(fin, "net_income"); ocf = q.flow_at(cf, "op_cashflow")
     cashflow_anomaly = bool(ni is not None and ocf is not None and ni > 0 and ocf < 0)
     if ni is not None and ocf is not None:
         metrics.append(metric(
             "cashflow_anomaly", "現金流是否異常(淨利轉現金流背離)", "異常" if cashflow_anomaly else "正常",
             rating=("bad" if cashflow_anomaly else "good"),
-            formula="淨利為正但營業現金流為負 → 標記異常(獲利品質紅旗)",
+            formula="單季淨利為正但單季營業現金流為負 → 標記異常(獲利品質紅旗)。"
+                    "現金流量表原始數字為 YTD 累計,已還原為單季後再與單季淨利比較。",
             source=f"{_SRC_FS} + {_SRC_CF}", asof=asof_fs, updated_at=updated,
         ))
     else:
