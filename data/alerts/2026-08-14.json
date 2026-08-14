@@ -334,5 +334,17 @@
   "volume_ratio": 0.5,
   "vwap": 120.12,
   "fired_at": "09:35"
+ },
+ "6770|breakout": {
+  "stock_id": "6770",
+  "name": "力積電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 77.40(現價 80.30,高出 3.7%)・量比 0.50(市場中位 0.25)・站上均價 78.47",
+  "price": 80.3,
+  "change_rate": 7.2,
+  "volume_ratio": 0.5,
+  "vwap": 78.47,
+  "fired_at": "09:41"
  }
 }
