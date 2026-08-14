@@ -562,5 +562,17 @@
   "volume_ratio": 0.65,
   "vwap": 158.54,
   "fired_at": "10:45"
+ },
+ "6510|breakout": {
+  "stock_id": "6510",
+  "name": "精測",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2975.00(現價 3025.00,高出 1.7%)・量比 1.08(市場中位 0.43)・站上均價 2919.12",
+  "price": 3025.0,
+  "change_rate": 7.26,
+  "volume_ratio": 1.08,
+  "vwap": 2919.12,
+  "fired_at": "10:50"
  }
 }
