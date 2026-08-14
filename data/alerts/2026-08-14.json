@@ -238,5 +238,29 @@
   "volume_ratio": 0.5,
   "vwap": 1407.43,
   "fired_at": "09:19"
+ },
+ "2359|breakout": {
+  "stock_id": "2359",
+  "name": "所羅門",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 157.50(現價 159.00,高出 1.0%)・量比 0.63(市場中位 0.16)・站上均價 158.93",
+  "price": 159.0,
+  "change_rate": 1.27,
+  "volume_ratio": 0.63,
+  "vwap": 158.93,
+  "fired_at": "09:21"
+ },
+ "8039|breakout": {
+  "stock_id": "8039",
+  "name": "台虹",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 257.50(現價 258.50,高出 0.4%)・量比 0.58(市場中位 0.16)・站上均價 255.21",
+  "price": 258.5,
+  "change_rate": 3.6,
+  "volume_ratio": 0.58,
+  "vwap": 255.21,
+  "fired_at": "09:22"
  }
 }
