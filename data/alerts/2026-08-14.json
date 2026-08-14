@@ -670,5 +670,17 @@
   "volume_ratio": 0.74,
   "vwap": 115.85,
   "fired_at": "11:34"
+ },
+ "2887|breakout": {
+  "stock_id": "2887",
+  "name": "台新新光金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 36.30(現價 37.50,高出 3.3%)・量比 0.90(市場中位 0.60)・站上均價 37.12",
+  "price": 37.5,
+  "change_rate": 3.59,
+  "volume_ratio": 0.9,
+  "vwap": 37.12,
+  "fired_at": "12:08"
  }
 }
