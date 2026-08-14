@@ -514,5 +514,17 @@
   "volume_ratio": 0.58,
   "vwap": 92.68,
   "fired_at": "10:21"
+ },
+ "6902|pullback": {
+  "stock_id": "6902",
+  "name": "GOGOLOOK",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 133.05 附近(距 +1.5%)・翻紅 +3.84% 站回均價・量比 0.57(市場中位 0.40)",
+  "price": 135.0,
+  "change_rate": 3.84,
+  "volume_ratio": 0.57,
+  "vwap": 131.87,
+  "fired_at": "10:35"
  }
 }
