@@ -418,5 +418,17 @@
   "volume_ratio": 0.56,
   "vwap": 171.21,
   "fired_at": "09:52"
+ },
+ "6949|breakout": {
+  "stock_id": "6949",
+  "name": "沛爾生醫-創",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 978.00(現價 1050.00,高出 7.4%)・量比 0.54(市場中位 0.30)・站上均價 1046.29",
+  "price": 1050.0,
+  "change_rate": 2.94,
+  "volume_ratio": 0.54,
+  "vwap": 1046.29,
+  "fired_at": "09:55"
  }
 }
