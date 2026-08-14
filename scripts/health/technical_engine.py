@@ -27,7 +27,8 @@ def compute(ctx: dict) -> dict:
     last = df.iloc[-1]
     prev = df.iloc[-2] if len(df) >= 2 else None
     close = float(last["close"])
-    asof = str(df.index[-1].date())
+    partial = bool(ctx.get("partial_last_bar"))
+    asof = str(df.index[-1].date()) + ("(盤中未收盤)" if partial else "")
 
     metrics: list[dict] = []
     trend_bits: list[float] = []
@@ -119,15 +120,21 @@ def compute(ctx: dict) -> dict:
         metrics.append(missing_metric("kd", "KD", source=_SRC))
 
     # ---------- 量能 ----------
-    vol_ratio = float(last["vol_ratio"]) if "vol_ratio" in last.index and pd.notna(last["vol_ratio"]) else None
-    vol_ma5 = float(last["vol_ma5"]) if "vol_ma5" in last.index and pd.notna(last["vol_ma5"]) else None
-    vol_ma20 = float(last["vol_ma20"]) if "vol_ma20" in last.index and pd.notna(last["vol_ma20"]) else None
+    # 盤中未收盤時,最後一根 K 棒只累積了半天的成交量,直接進 5日/20日均量會把量能結構
+    # 系統性壓低(2026-08-14 實測 2303:0.72 → 0.66,剛好把敘述從「量縮」放大成「萎縮」)。
+    # 這種時候改取**上一根完整 K 棒**的均量 —— 等於「截至昨收的 5日/20日均量」,乾淨可比。
+    vrow = df.iloc[-2] if (partial and len(df) >= 2) else last
+    vol_ma5 = float(vrow["vol_ma5"]) if "vol_ma5" in vrow.index and pd.notna(vrow["vol_ma5"]) else None
+    vol_ma20 = float(vrow["vol_ma20"]) if "vol_ma20" in vrow.index and pd.notna(vrow["vol_ma20"]) else None
     if vol_ma5 is not None and vol_ma20 is not None and vol_ma20 > 0:
         vbias = vol_ma5 / vol_ma20
         metrics.append(metric(
             "volume_structure", "量能結構(5日均量/20日均量)", round(vbias, 2),
             rating=("good" if vbias >= 1.1 else ("bad" if vbias <= 0.85 else "neutral")),
-            formula="5日均量 ÷ 20日均量;>1 代表近期量能轉強", source=_SRC, asof=asof, updated_at=updated,
+            formula="5日均量 ÷ 20日均量;>1 代表近期量能轉強"
+                    + (f"。今日尚未收盤,為避免半天成交量壓低均量,此處取截至 {str(df.index[-2].date())}"
+                       f"(上一個完整交易日)的均量計算。" if vrow is not last else ""),
+            source=_SRC, asof=(str(df.index[-2].date()) if vrow is not last else asof), updated_at=updated,
         ))
         volume_bits.append(clip01((vbias - 0.7) / (1.5 - 0.7)))
     else:
@@ -189,4 +196,8 @@ def compute(ctx: dict) -> dict:
 
     sub_scores = [s for s in (avg_score(trend_bits), avg_score(momentum_bits), avg_score(volume_bits)) if s is not None]
     score = (sum(sub_scores) / len(sub_scores) * 100) if sub_scores else None
-    return engine_result(score, metrics)
+    notes = []
+    if partial:
+        notes.append("⚠ 今日尚未收盤,價格類指標(均線/RSI/KD/MACD/ATR/支撐壓力)用的是**即時價**,"
+                     "收盤後數值會變動;量能結構已改用上一個完整交易日的均量,不受半天成交量影響。")
+    return engine_result(score, metrics, notes=notes)

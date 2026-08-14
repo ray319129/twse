@@ -205,9 +205,39 @@ def compute(ctx: dict) -> dict:
     weighted_score_sum = 0.0
     weighted_score_w = 0.0
 
+    # 三個視窗有可能裝到**完全相同**的新聞:送 AI 逐則分類的則數上限是 ai_max_items(預設 30),
+    # 熱門股那最新 30 則全部落在 30 天內 → 90 天視窗一則都沒多,卻仍佔 0.2 的權重,
+    # 等於同一批新聞被算兩次、把短期情緒偽裝成長期趨勢。
+    # (2026-08-14 實測 2449:近30天 15 則 = 近90天 15 則,淨情緒都是 0.44;2344 是 13/13、0.88/0.88。)
+    # 作法:與較短視窗則數相同就判定為「無額外資料」,不輸出重複的分數、把權重讓回較短的視窗。
+    stats_by_days = {d: _window_stats(items, news_items, today, d) for d in windows}
+    duplicate_of = {}
+    for days in sorted(windows):
+        for shorter in sorted(windows):
+            if shorter < days and stats_by_days[shorter]["count"] == stats_by_days[days]["count"]:
+                duplicate_of[days] = shorter
+                break
+
+    analysed_dates = sorted(
+        d for d in (_parse_date(news_items[it["idx"]].get("published_date"))
+                    for it in items if it["idx"] < len(news_items))
+        if d is not None
+    )
+    span_txt = (f"{analysed_dates[0]} ~ {analysed_dates[-1]}" if analysed_dates else "無可解析日期")
+
     for days, label in windows.items():
-        stats = _window_stats(items, news_items, today, days)
+        stats = stats_by_days[days]
         net = stats["net_sentiment"]
+        dup = duplicate_of.get(days)
+        if dup:
+            why = (f"本次實際分析的新聞只回溯到 {span_txt}(受 news.ai_max_items 上限與 Google News "
+                   f"回傳則數限制),{label}視窗內容與近{dup}天完全相同({stats['count']} 則),"
+                   f"沒有額外資訊 → 不重複計分,權重已讓回近{dup}天視窗。")
+            metrics.append(missing_metric(f"news_net_sentiment_{days}d", f"{label}新聞淨情緒",
+                                          reason="not_applicable", formula=why, source=_SRC))
+            metrics.append(missing_metric(f"news_density_{days}d", f"{label}事件則數",
+                                          reason="not_applicable", formula=why, source=_SRC))
+            continue
         metrics.append(metric(
             f"news_net_sentiment_{days}d", f"{label}新聞淨情緒", round(net, 2) if net is not None else None,
             rating=(None if net is None else ("good" if net > 0.2 else ("bad" if net < -0.2 else "neutral"))),
@@ -217,12 +247,22 @@ def compute(ctx: dict) -> dict:
         ))
         metrics.append(metric(
             f"news_density_{days}d", f"{label}事件則數", stats["count"], unit="則",
-            formula=f"{label}內被標記出明確 sentiment 的新聞則數(利多 {stats['positive']} / 利空 {stats['negative']})",
+            formula=f"{label}內被標記出明確 sentiment 的新聞則數"
+                    f"(利多 {stats['positive']} / 利空 {stats['negative']},其餘為中性)",
             source=_SRC, asof=str(today), updated_at=updated,
         ))
         if net is not None:
             weighted_score_sum += net * window_weight[days]
             weighted_score_w += window_weight[days]
+
+    # 把「這次到底看了多久的新聞」講明白,而不是讓讀者以為真的涵蓋 90 天。
+    metrics.append(metric(
+        "news_coverage_span", "本次分析的新聞回溯範圍", span_txt,
+        formula=f"實際送 AI 逐則分類的 {len(items)} 則新聞的發布日區間。"
+                f"Google News RSS 回傳則數與 config 的 news.ai_max_items 上限會一起決定這個範圍,"
+                f"不代表該期間內的新聞都被涵蓋。",
+        source=_SRC, asof=str(today), updated_at=updated,
+    ))
 
     durable_pos = sum(1 for it in items if it["sentiment"] == "利多" and it["durability"] == "長期")
     one_off_pos = sum(1 for it in items if it["sentiment"] == "利多" and it["durability"] == "一次性")

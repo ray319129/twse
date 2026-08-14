@@ -8,7 +8,7 @@
 不必改前端渲染邏輯(前端對回傳的 engines 陣列泛型渲染)。
 """
 from __future__ import annotations
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone, time as dtime
 
 import pandas as pd
 
@@ -111,6 +111,26 @@ def _stale(df, fresh_days: int = 80) -> bool:
         return True
 
 
+def is_partial_last_bar(price_df) -> bool:
+    """最後一根 K 棒是不是「今天、而且還沒收盤」的盤中未完成棒。
+
+    yfinance 盤中會回傳當日的部分 K 棒,`compute_all` 照單全收 → 半天的成交量被當成
+    一整天餵進 5日/20日均量。2026-08-14 實測:從報告的日均成交額反推當下成交量,
+    2303 與 2449 都只有近20日均量的 42%,2303 的量能結構因此從 0.72 被壓到 0.66。
+
+    刻意**不丟棄**這根 K 棒 —— 丟掉的話盤中健檢就完全看不到今天,比失真更糟。
+    改成標記出來,讓「被半天成交量直接扭曲」的兩個指標(量能結構、日均成交金額)改用
+    不含當日的視窗;價格類指標(RSI/KD/MACD/ATR/均線)用當前價本來就是對的,不動。
+    """
+    if price_df is None or getattr(price_df, "empty", True) or len(price_df) < 2:
+        return False
+    try:
+        now = datetime.now(timezone(timedelta(hours=8)))     # 台北時間
+        return price_df.index[-1].date() == now.date() and now.time() < dtime(13, 35)
+    except Exception:
+        return False
+
+
 def _stale_month_index(df, fresh_days: int = 45) -> bool:
     """月營收專用:index 是 'YYYY-MM' 字串,不是 DatetimeIndex,_stale() 會直接丟例外落到 True。
     月營收每月 10 號左右公布,超過 45 天沒有新月份就該重抓。"""
@@ -208,6 +228,7 @@ def build_ctx_batch(*, stock_id: str, name: str, industry: str | None, today: da
         "stock_id": stock_id, "name": name, "industry": industry, "today": today,
         "today_str": today.isoformat(), "updated_at": today.isoformat(),
         "price_df": price_df, "current_price": current_price,
+        "partial_last_bar": is_partial_last_bar(price_df),
         "financials": fin, "balance": bal, "cashflow": cf, "revenue": revenue_df,
         "per_hist": per_hist, "valuation_snapshot": valuation_snapshot,
         "chips": chips_df, "holder_dist": holder_dist,

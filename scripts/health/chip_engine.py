@@ -17,6 +17,10 @@ _SRC_INST = "FinMind:TaiwanStockInstitutionalInvestorsBuySell"
 _SRC_MARGIN = "FinMind:TaiwanStockMarginPurchaseShortSale"
 _SRC_HOLD = "FinMind:TaiwanStockHoldingSharesPer(欄位未實測驗證)"
 
+# 融券回補的絕對量下限(張)。純比例門檻在融券餘額本來就很小的股票上會把雜訊放大成訊號,
+# 見 short_cover_5d 處的註解。500 張約當一般中型股數分鐘的成交量,低於此視為無意義。
+_SHORT_COVER_MIN_LOTS = 500
+
 
 def _consecutive_positive(series: pd.Series, max_check: int = 20) -> int:
     s = series.dropna().tail(max_check)
@@ -118,11 +122,21 @@ def compute(ctx: dict) -> dict:
             if len(sb) >= 6:
                 latest, prev5 = float(sb.iloc[-1]), float(sb.iloc[-6])
                 cover = (prev5 - latest) / prev5 if prev5 else None
-                short_covering = bool(cover is not None and cover >= 0.05)
+                drop_lots = prev5 - latest
+                # 只看比例會把雜訊當訊號:2026-08-14 的 2449 融券 227 張 → 209 張,只少 18 張
+                # 就達 7.9% ≥ 5%,被判「回補中」還列進優點 —— 而該檔一天成交 2 萬多張。
+                # 加一道絕對量下限,比例與張數都要過。
+                short_covering = bool(cover is not None and cover >= 0.05 and drop_lots >= _SHORT_COVER_MIN_LOTS)
+                thin = bool(cover is not None and cover >= 0.05 and drop_lots < _SHORT_COVER_MIN_LOTS)
+                # cover 在「5日前融券餘額為 0」時是 None(無從算比例),f-string 不能直接乘。
+                cover_txt = f"{cover * 100:.1f}%" if cover is not None else "5日前餘額為0,無法算比例"
                 metrics.append(metric(
-                    "short_cover_5d", "融券5日是否回補", "回補中" if short_covering else "無明顯回補", unit="",
+                    "short_cover_5d", "融券5日是否回補",
+                    "回補中" if short_covering else ("量太小不算回補" if thin else "無明顯回補"), unit="",
                     rating=("good" if short_covering else "neutral"),
-                    formula="(5日前融券餘額 − 今日) ÷ 5日前 ≥ 5% 視為回補中",
+                    formula=f"(5日前融券餘額 − 今日) ÷ 5日前 ≥ 5% **且** 減少 ≥ {_SHORT_COVER_MIN_LOTS} 張才算回補中"
+                            f"(本次:{drop_lots:,.0f} 張、{cover_txt})"
+                            + ("。比例雖達標但絕對量太小,視為雜訊。" if thin else ""),
                     source=_SRC_MARGIN, asof=asof, updated_at=updated,
                 ))
                 margin_bits.append(1.0 if short_covering else 0.5)
@@ -171,7 +185,12 @@ def compute(ctx: dict) -> dict:
     # ---------- 流動性(複用 scoring.py 既有公式精神:日均成交額)----------
     df = ctx.get("price_df")
     if df is not None and not df.empty and "vol_ma20" in df.columns:
-        last = df.iloc[-1]
+        # 盤中未收盤時,今日只累積了半天的量 → 20日均量被拉低,日均成交額跟著失真
+        # (2026-08-14 實測 2449:5,756 → 5,314 百萬,−7.7%)。這個數字還會往下餵
+        # swing_scores 的流動性百分位,所以改取上一個完整交易日的收盤價 × 20日均量。
+        partial = bool(ctx.get("partial_last_bar")) and len(df) >= 2
+        row_i = -2 if partial else -1
+        last = df.iloc[row_i]
         close = float(last["close"]) if pd.notna(last["close"]) else None
         vol_ma20 = float(last["vol_ma20"]) if pd.notna(last.get("vol_ma20")) else None
         if close is not None and vol_ma20 is not None:
@@ -179,8 +198,10 @@ def compute(ctx: dict) -> dict:
             metrics.append(metric(
                 "dollar_volume", "日均成交金額(20日)", round(dollar_vol / 1e6, 1), unit="百萬元",
                 rating=("good" if dollar_vol >= 1e8 else ("bad" if dollar_vol < 3e7 else "neutral")),
-                formula="收盤價 × 20日均量,與 scoring.compute_conviction 流動性公式一致",
-                source="本機價格資料(yfinance)", asof=str(df.index[-1].date()), updated_at=updated,
+                formula="收盤價 × 20日均量,與 scoring.compute_conviction 流動性公式一致"
+                        + ("。今日尚未收盤,已改用上一個完整交易日計算,避免半天成交量低估流動性。"
+                           if partial else ""),
+                source="本機價格資料(yfinance)", asof=str(df.index[row_i].date()), updated_at=updated,
             ))
             concentration_bits.append(clip01(np.log10(max(dollar_vol, 1) / 3e7) / np.log10(50)) if dollar_vol > 0 else 0.0)
 
