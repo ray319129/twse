@@ -682,5 +682,17 @@
   "volume_ratio": 0.9,
   "vwap": 37.12,
   "fired_at": "12:08"
+ },
+ "3653|breakout": {
+  "stock_id": "3653",
+  "name": "健策",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4600.00(現價 4800.00,高出 4.3%)・量比 0.96(市場中位 0.63)・站上均價 4685.78",
+  "price": 4800.0,
+  "change_rate": 3.55,
+  "volume_ratio": 0.96,
+  "vwap": 4685.78,
+  "fired_at": "12:18"
  }
 }
