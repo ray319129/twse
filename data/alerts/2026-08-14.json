@@ -490,5 +490,17 @@
   "volume_ratio": 0.51,
   "vwap": 435.33,
   "fired_at": "10:11"
+ },
+ "7795|breakout": {
+  "stock_id": "7795",
+  "name": "長廣",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 556.00(現價 562.00,高出 1.1%)・量比 0.53(市場中位 0.35)・站上均價 554.58",
+  "price": 562.0,
+  "change_rate": 1.07,
+  "volume_ratio": 0.53,
+  "vwap": 554.58,
+  "fired_at": "10:15"
  }
 }
