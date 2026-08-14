@@ -190,5 +190,53 @@
   "volume_ratio": 0.54,
   "vwap": 181.75,
   "fired_at": "09:17"
+ },
+ "6265|breakout": {
+  "stock_id": "6265",
+  "name": "方土昶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 59.90(現價 62.30,高出 4.0%)・量比 0.52(市場中位 0.15)・站上均價 62.26",
+  "price": 62.3,
+  "change_rate": 5.77,
+  "volume_ratio": 0.52,
+  "vwap": 62.26,
+  "fired_at": "09:18"
+ },
+ "6669|breakout": {
+  "stock_id": "6669",
+  "name": "緯穎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 6400.00(現價 6440.00,高出 0.6%)・量比 0.55(市場中位 0.15)・站上均價 6366.83",
+  "price": 6440.0,
+  "change_rate": 6.09,
+  "volume_ratio": 0.55,
+  "vwap": 6366.83,
+  "fired_at": "09:19"
+ },
+ "3661|breakout": {
+  "stock_id": "3661",
+  "name": "世芯-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4225.00(現價 4415.00,高出 4.5%)・量比 0.50(市場中位 0.15)・站上均價 4386.13",
+  "price": 4415.0,
+  "change_rate": 5.36,
+  "volume_ratio": 0.5,
+  "vwap": 4386.13,
+  "fired_at": "09:19"
+ },
+ "3491|breakout": {
+  "stock_id": "3491",
+  "name": "昇達科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1440.00(現價 1450.00,高出 0.7%)・量比 0.50(市場中位 0.15)・站上均價 1407.43",
+  "price": 1450.0,
+  "change_rate": 7.8,
+  "volume_ratio": 0.5,
+  "vwap": 1407.43,
+  "fired_at": "09:19"
  }
 }
