@@ -346,5 +346,17 @@
   "volume_ratio": 0.5,
   "vwap": 78.47,
   "fired_at": "09:41"
+ },
+ "8070|breakout": {
+  "stock_id": "8070",
+  "name": "長華*",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 50.70(現價 51.20,高出 1.0%)・量比 1.20(市場中位 0.25)・站上均價 49.83",
+  "price": 51.2,
+  "change_rate": 4.59,
+  "volume_ratio": 1.2,
+  "vwap": 49.83,
+  "fired_at": "09:43"
  }
 }
