@@ -70,5 +70,41 @@
   "volume_ratio": 0.98,
   "vwap": 559.91,
   "fired_at": "09:07"
+ },
+ "3617|breakout": {
+  "stock_id": "3617",
+  "name": "碩天",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 238.00(現價 246.00,高出 3.4%)・量比 1.50(市場中位 0.10)・站上均價 245.10",
+  "price": 246.0,
+  "change_rate": 3.36,
+  "volume_ratio": 1.5,
+  "vwap": 245.1,
+  "fired_at": "09:10"
+ },
+ "6761|breakout": {
+  "stock_id": "6761",
+  "name": "穩得",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 180.00(現價 188.00,高出 4.4%)・量比 0.53(市場中位 0.10)・站上均價 185.56",
+  "price": 188.0,
+  "change_rate": 4.44,
+  "volume_ratio": 0.53,
+  "vwap": 185.56,
+  "fired_at": "09:10"
+ },
+ "6683|breakout": {
+  "stock_id": "6683",
+  "name": "雍智科技",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1395.00(現價 1425.00,高出 2.2%)・量比 0.55(市場中位 0.10)・站上均價 1421.93",
+  "price": 1425.0,
+  "change_rate": 2.15,
+  "volume_ratio": 0.55,
+  "vwap": 1421.93,
+  "fired_at": "09:10"
  }
 }
