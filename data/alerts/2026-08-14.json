@@ -586,5 +586,17 @@
   "volume_ratio": 0.73,
   "vwap": 46.95,
   "fired_at": "10:53"
+ },
+ "5371|breakout": {
+  "stock_id": "5371",
+  "name": "中光電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 92.00(現價 92.30,高出 0.3%)・量比 2.18(市場中位 0.45)・站上均價 89.32",
+  "price": 92.3,
+  "change_rate": 6.95,
+  "volume_ratio": 2.18,
+  "vwap": 89.32,
+  "fired_at": "10:56"
  }
 }
