@@ -526,5 +526,29 @@
   "volume_ratio": 0.57,
   "vwap": 131.87,
   "fired_at": "10:35"
+ },
+ "6426|breakout": {
+  "stock_id": "6426",
+  "name": "統新",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 224.50(現價 227.00,高出 1.1%)・量比 1.13(市場中位 0.41)・站上均價 223.87",
+  "price": 227.0,
+  "change_rate": 5.09,
+  "volume_ratio": 1.13,
+  "vwap": 223.87,
+  "fired_at": "10:40"
+ },
+ "3455|breakout": {
+  "stock_id": "3455",
+  "name": "由田",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 231.50(現價 234.00,高出 1.1%)・量比 0.62(市場中位 0.41)・站上均價 229.77",
+  "price": 234.0,
+  "change_rate": 4.0,
+  "volume_ratio": 0.62,
+  "vwap": 229.77,
+  "fired_at": "10:42"
  }
 }
