@@ -574,5 +574,17 @@
   "volume_ratio": 0.8,
   "vwap": 41.25,
   "fired_at": "10:51"
+ },
+ "3234|breakout": {
+  "stock_id": "3234",
+  "name": "光環",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 146.00(現價 146.50,高出 0.3%)・量比 0.82(市場中位 0.44)・站上均價 142.04",
+  "price": 146.5,
+  "change_rate": 7.32,
+  "volume_ratio": 0.82,
+  "vwap": 142.04,
+  "fired_at": "11:21"
  }
 }
