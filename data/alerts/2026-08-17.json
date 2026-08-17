@@ -94,5 +94,17 @@
   "volume_ratio": 0.51,
   "vwap": 569.1,
   "fired_at": "09:09"
+ },
+ "3019|breakout": {
+  "stock_id": "3019",
+  "name": "亞光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 142.00(現價 142.50,高出 0.4%)・量比 0.79(市場中位 0.10)・站上均價 141.14",
+  "price": 142.5,
+  "change_rate": 4.01,
+  "volume_ratio": 0.79,
+  "vwap": 141.14,
+  "fired_at": "09:14"
  }
 }
