@@ -394,5 +394,17 @@
   "volume_ratio": 0.5,
   "vwap": 60.47,
   "fired_at": "09:57"
+ },
+ "3443|breakout": {
+  "stock_id": "3443",
+  "name": "創意",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 5830.00(現價 5850.00,高出 0.3%)・量比 0.54(市場中位 0.26)・站上均價 5593.78",
+  "price": 5850.0,
+  "change_rate": 7.04,
+  "volume_ratio": 0.54,
+  "vwap": 5593.78,
+  "fired_at": "09:59"
  }
 }
