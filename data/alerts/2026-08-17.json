@@ -274,5 +274,17 @@
   "volume_ratio": 0.53,
   "vwap": 10.72,
   "fired_at": "09:30"
+ },
+ "3490|breakout": {
+  "stock_id": "3490",
+  "name": "單井",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 40.45(現價 42.55,高出 5.2%)・量比 0.50(市場中位 0.18)・站上均價 41.31",
+  "price": 42.55,
+  "change_rate": 7.31,
+  "volume_ratio": 0.5,
+  "vwap": 41.31,
+  "fired_at": "09:31"
  }
 }
