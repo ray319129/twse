@@ -286,5 +286,17 @@
   "volume_ratio": 0.5,
   "vwap": 41.31,
   "fired_at": "09:31"
+ },
+ "3406|breakout": {
+  "stock_id": "3406",
+  "name": "玉晶光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 642.00(現價 664.00,高出 3.4%)・量比 0.83(市場中位 0.20)・站上均價 660.66",
+  "price": 664.0,
+  "change_rate": 7.96,
+  "volume_ratio": 0.83,
+  "vwap": 660.66,
+  "fired_at": "09:37"
  }
 }
