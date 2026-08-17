@@ -406,5 +406,29 @@
   "volume_ratio": 0.54,
   "vwap": 5593.78,
   "fired_at": "09:59"
+ },
+ "6265|breakout": {
+  "stock_id": "6265",
+  "name": "方土昶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 63.80(現價 67.50,高出 5.8%)・量比 0.53(市場中位 0.28)・站上均價 67.00",
+  "price": 67.5,
+  "change_rate": 8.0,
+  "volume_ratio": 0.53,
+  "vwap": 67.0,
+  "fired_at": "10:04"
+ },
+ "5321|breakout": {
+  "stock_id": "5321",
+  "name": "美而快",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 65.00(現價 67.40,高出 3.7%)・量比 0.53(市場中位 0.28)・站上均價 65.27",
+  "price": 67.4,
+  "change_rate": 5.97,
+  "volume_ratio": 0.53,
+  "vwap": 65.27,
+  "fired_at": "10:05"
  }
 }
