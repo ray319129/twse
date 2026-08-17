@@ -166,5 +166,41 @@
   "volume_ratio": 0.5,
   "vwap": 161.42,
   "fired_at": "09:17"
+ },
+ "2609|breakout": {
+  "stock_id": "2609",
+  "name": "陽明",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 52.20(現價 52.80,高出 1.1%)・量比 0.50(市場中位 0.13)・站上均價 52.37",
+  "price": 52.8,
+  "change_rate": 2.32,
+  "volume_ratio": 0.5,
+  "vwap": 52.37,
+  "fired_at": "09:19"
+ },
+ "2535|pullback": {
+  "stock_id": "2535",
+  "name": "達欣工",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 88.26 附近(距 +1.8%)・翻紅 +1.69% 站回均價・量比 0.50(市場中位 0.15)",
+  "price": 89.8,
+  "change_rate": 1.69,
+  "volume_ratio": 0.5,
+  "vwap": 89.63,
+  "fired_at": "09:20"
+ },
+ "6224|breakout": {
+  "stock_id": "6224",
+  "name": "聚鼎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 64.50(現價 66.20,高出 2.6%)・量比 0.65(市場中位 0.15)・站上均價 64.70",
+  "price": 66.2,
+  "change_rate": 4.58,
+  "volume_ratio": 0.65,
+  "vwap": 64.7,
+  "fired_at": "09:20"
  }
 }
