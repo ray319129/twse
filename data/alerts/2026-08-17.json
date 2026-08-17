@@ -706,5 +706,17 @@
   "volume_ratio": 1.74,
   "vwap": 174.58,
   "fired_at": "12:55"
+ },
+ "2371|breakout": {
+  "stock_id": "2371",
+  "name": "大同",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 27.35(現價 27.45,高出 0.4%)・量比 1.96(市場中位 0.67)・站上均價 27.00",
+  "price": 27.45,
+  "change_rate": 4.17,
+  "volume_ratio": 1.96,
+  "vwap": 27.0,
+  "fired_at": "13:13"
  }
 }
