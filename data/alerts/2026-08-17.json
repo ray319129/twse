@@ -622,5 +622,17 @@
   "volume_ratio": 0.68,
   "vwap": 520.65,
   "fired_at": "11:28"
+ },
+ "1815|breakout": {
+  "stock_id": "1815",
+  "name": "富喬",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 93.90(現價 95.00,高出 1.2%)・量比 0.71(市場中位 0.46)・站上均價 92.83",
+  "price": 95.0,
+  "change_rate": 3.82,
+  "volume_ratio": 0.71,
+  "vwap": 92.83,
+  "fired_at": "11:36"
  }
 }
