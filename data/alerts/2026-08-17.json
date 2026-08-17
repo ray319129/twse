@@ -682,5 +682,17 @@
   "volume_ratio": 0.75,
   "vwap": 47.81,
   "fired_at": "12:38"
+ },
+ "2542|breakout": {
+  "stock_id": "2542",
+  "name": "興富發",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 46.65(現價 46.80,高出 0.3%)・量比 0.87(市場中位 0.58)・站上均價 46.56",
+  "price": 46.8,
+  "change_rate": 1.29,
+  "volume_ratio": 0.87,
+  "vwap": 46.56,
+  "fired_at": "12:41"
  }
 }
