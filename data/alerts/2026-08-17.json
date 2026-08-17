@@ -106,5 +106,65 @@
   "volume_ratio": 0.79,
   "vwap": 141.14,
   "fired_at": "09:14"
+ },
+ "2603|breakout": {
+  "stock_id": "2603",
+  "name": "長榮",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 220.00(現價 226.50,高出 3.0%)・量比 0.51(市場中位 0.10)・站上均價 224.33",
+  "price": 226.5,
+  "change_rate": 3.42,
+  "volume_ratio": 0.51,
+  "vwap": 224.33,
+  "fired_at": "09:15"
+ },
+ "2364|breakout": {
+  "stock_id": "2364",
+  "name": "倫飛",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 82.30(現價 85.30,高出 3.6%)・量比 0.66(市場中位 0.11)・站上均價 84.39",
+  "price": 85.3,
+  "change_rate": 5.3,
+  "volume_ratio": 0.66,
+  "vwap": 84.39,
+  "fired_at": "09:15"
+ },
+ "3008|breakout": {
+  "stock_id": "3008",
+  "name": "大立光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4920.00(現價 4950.00,高出 0.6%)・量比 0.56(市場中位 0.12)・站上均價 4926.42",
+  "price": 4950.0,
+  "change_rate": 7.37,
+  "volume_ratio": 0.56,
+  "vwap": 4926.42,
+  "fired_at": "09:15"
+ },
+ "5521|breakout": {
+  "stock_id": "5521",
+  "name": "工信",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 10.85(現價 10.90,高出 0.5%)・量比 0.50(市場中位 0.12)・站上均價 10.84",
+  "price": 10.9,
+  "change_rate": 1.86,
+  "volume_ratio": 0.5,
+  "vwap": 10.84,
+  "fired_at": "09:17"
+ },
+ "3498|breakout": {
+  "stock_id": "3498",
+  "name": "陽程",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 158.00(現價 163.00,高出 3.2%)・量比 0.50(市場中位 0.13)・站上均價 161.42",
+  "price": 163.0,
+  "change_rate": 3.16,
+  "volume_ratio": 0.5,
+  "vwap": 161.42,
+  "fired_at": "09:17"
  }
 }
