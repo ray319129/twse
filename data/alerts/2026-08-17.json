@@ -670,5 +670,17 @@
   "volume_ratio": 0.81,
   "vwap": 52.15,
   "fired_at": "12:20"
+ },
+ "6177|pullback": {
+  "stock_id": "6177",
+  "name": "達麗",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 47.80 附近(距 +1.2%)・翻紅 +1.25% 站回均價・量比 0.75(市場中位 0.57)",
+  "price": 48.35,
+  "change_rate": 1.25,
+  "volume_ratio": 0.75,
+  "vwap": 47.81,
+  "fired_at": "12:38"
  }
 }
