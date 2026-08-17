@@ -82,5 +82,17 @@
   "volume_ratio": 0.5,
   "vwap": 41.7,
   "fired_at": "09:07"
+ },
+ "2467|breakout": {
+  "stock_id": "2467",
+  "name": "志聖",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 572.00(現價 576.00,高出 0.7%)・量比 0.51(市場中位 0.07)・站上均價 569.10",
+  "price": 576.0,
+  "change_rate": 7.66,
+  "volume_ratio": 0.51,
+  "vwap": 569.1,
+  "fired_at": "09:09"
  }
 }
