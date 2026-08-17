@@ -694,5 +694,17 @@
   "volume_ratio": 0.87,
   "vwap": 46.56,
   "fired_at": "12:41"
+ },
+ "6419|breakout": {
+  "stock_id": "6419",
+  "name": "京晨科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 169.50(現價 177.00,高出 4.4%)・量比 1.74(市場中位 0.61)・站上均價 174.58",
+  "price": 177.0,
+  "change_rate": 5.35,
+  "volume_ratio": 1.74,
+  "vwap": 174.58,
+  "fired_at": "12:55"
  }
 }
