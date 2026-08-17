@@ -610,5 +610,17 @@
   "volume_ratio": 0.66,
   "vwap": 22.96,
   "fired_at": "11:23"
+ },
+ "3450|breakout": {
+  "stock_id": "3450",
+  "name": "聯鈞",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 527.00(現價 535.00,高出 1.5%)・量比 0.68(市場中位 0.45)・站上均價 520.65",
+  "price": 535.0,
+  "change_rate": 4.9,
+  "volume_ratio": 0.68,
+  "vwap": 520.65,
+  "fired_at": "11:28"
  }
 }
