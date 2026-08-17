@@ -634,5 +634,17 @@
   "volume_ratio": 0.71,
   "vwap": 92.83,
   "fired_at": "11:36"
+ },
+ "5607|breakout": {
+  "stock_id": "5607",
+  "name": "遠雄港",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 52.30(現價 52.60,高出 0.6%)・量比 1.10(市場中位 0.51)・站上均價 52.14",
+  "price": 52.6,
+  "change_rate": 2.33,
+  "volume_ratio": 1.1,
+  "vwap": 52.14,
+  "fired_at": "12:00"
  }
 }
