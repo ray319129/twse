@@ -466,5 +466,17 @@
   "volume_ratio": 0.73,
   "vwap": 102.15,
   "fired_at": "10:15"
+ },
+ "6187|breakout": {
+  "stock_id": "6187",
+  "name": "萬潤",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1320.00(現價 1350.00,高出 2.3%)・量比 0.50(市場中位 0.32)・站上均價 1317.81",
+  "price": 1350.0,
+  "change_rate": 5.88,
+  "volume_ratio": 0.5,
+  "vwap": 1317.81,
+  "fired_at": "10:19"
  }
 }
