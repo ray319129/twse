@@ -250,5 +250,29 @@
   "volume_ratio": 0.51,
   "vwap": 43.68,
   "fired_at": "09:27"
+ },
+ "6727|breakout": {
+  "stock_id": "6727",
+  "name": "亞泰金屬",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 444.00(現價 462.00,高出 4.1%)・量比 0.70(市場中位 0.18)・站上均價 443.58",
+  "price": 462.0,
+  "change_rate": 6.94,
+  "volume_ratio": 0.7,
+  "vwap": 443.58,
+  "fired_at": "09:30"
+ },
+ "1909|breakout": {
+  "stock_id": "1909",
+  "name": "榮成",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 10.85(現價 10.95,高出 0.9%)・量比 0.53(市場中位 0.18)・站上均價 10.72",
+  "price": 10.95,
+  "change_rate": 3.3,
+  "volume_ratio": 0.53,
+  "vwap": 10.72,
+  "fired_at": "09:30"
  }
 }
