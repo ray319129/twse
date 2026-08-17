@@ -538,5 +538,17 @@
   "volume_ratio": 1.2,
   "vwap": 118.75,
   "fired_at": "10:30"
+ },
+ "7788|breakout": {
+  "stock_id": "7788",
+  "name": "松川精密",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 278.00(現價 280.00,高出 0.7%)・量比 0.59(市場中位 0.36)・站上均價 272.75",
+  "price": 280.0,
+  "change_rate": 4.47,
+  "volume_ratio": 0.59,
+  "vwap": 272.75,
+  "fired_at": "10:36"
  }
 }
