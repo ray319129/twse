@@ -202,5 +202,17 @@
   "volume_ratio": 0.65,
   "vwap": 64.7,
   "fired_at": "09:20"
+ },
+ "3455|breakout": {
+  "stock_id": "3455",
+  "name": "由田",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 236.50(現價 242.00,高出 2.3%)・量比 0.50(市場中位 0.15)・站上均價 239.20",
+  "price": 242.0,
+  "change_rate": 5.21,
+  "volume_ratio": 0.5,
+  "vwap": 239.2,
+  "fired_at": "09:22"
  }
 }
