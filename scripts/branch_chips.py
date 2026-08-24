@@ -122,6 +122,21 @@ def run(day: str | None = None, limit: int | None = None) -> dict:
             time.sleep(_SLEEP)
 
     if not out:
+        # 分點是 Sponsor 級資料集。訂閱到期後 API 一律回空,但舊訊息把它講成
+        # 「可能未到 21:00 或非交易日」—— 2026-08-24 那次跑在台北 22:23(早就過 21:00)
+        # 還是印這句,結果是資料從 08-17 起靜靜停更一週都沒人看得出原因。
+        # 先問訂閱狀態再決定怎麼講。
+        try:
+            from .quotes import sponsor_status
+            st = sponsor_status()
+        except Exception:
+            st = {}
+        if not st.get("active"):
+            exp = st.get("expires") or "未知"
+            log.warning(f"分點 {day} 無資料:**FinMind 訂閱未生效/已到期**(到期日 {exp}"
+                        f",目前等級 {st.get('level_title') or 'Free'})。"
+                        f"分點是 Sponsor 級資料集,沒有訂閱就抓不到 —— 這不是時間或交易日的問題。")
+            return {"ok": False, "n": 0, "day": day, "reason": "no_sponsor"}
         log.info(f"分點 {day} 無資料(可能未到 21:00 發布時間或非交易日)。")
         return {"ok": False, "n": 0, "day": day, "reason": "no_data"}
 

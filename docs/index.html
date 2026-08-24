@@ -3073,6 +3073,7 @@ function alertsBox(d){
       <div style="grid-column:1/-1;margin-top:-2px"><span style="font-size:11px;color:${t};font-weight:700">${esc(r.label||'')}</span></div>
     </div>`;}).join('');
   return pulseBox()+heartbeatBox()+`<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>今日盤中訊號 — ${a.length} 筆(更新 ${esc(d.updated||'')})</div>
+    ${a.some(r=>r.degraded)?`<div class="note-box" style="font-size:12px;border-left:3px solid var(--warn)">⚠️ <b>降級模式</b>:目前沒有即時資料訂閱,盤中改用 TWSE MIS 逐檔查價,<b>只掃自選池 + 當日核心/觀察</b>(非全市場),且量比與均價是<b>估計值</b>(量比=當日累積量÷20日均量×已開盤時間佔比;均價=本程式輪詢自行累積的 VWAP)。訊號可比性低於有訂閱時,別跟過去的紀錄混著看。</div>`:''}
     <div class="note-box" style="font-size:12px;color:var(--muted-2)">同一檔同一種訊號當日只提醒一次,顯示的是<b>首次觸發</b>時間與當時價格。條件觸發≠買進建議;動能型訊號在本系統台帳的歷史超額為負。</div>
     ${rows}`;
 }

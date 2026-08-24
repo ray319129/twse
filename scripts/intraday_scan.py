@@ -44,7 +44,8 @@ from pathlib import Path
 import pandas as pd
 
 from .config import DATA_DIR, now_tpe
-from .quotes import fetch_snapshot_all, sponsor_status
+from .quotes import (fetch_snapshot_all, fetch_snapshot_degraded, in_trading_session,
+                     sponsor_status)
 from .snapshot_archive import CHECKPOINTS, archive_snapshot
 from .storage import load_prices, price_path
 from .utils import log
@@ -295,39 +296,103 @@ def _signals(row: dict, vol_base: float) -> list[dict]:
     return out
 
 
+# ---------- 降級模式:沒有訂閱時掃哪些股票 ----------
+# Sponsor 全市場快照沒了,MIS 只能逐檔查(50 檔一批、易被 ban),掃不動 877 檔 levels。
+# 所以縮成「使用者真正在看的那些」:當日核心 + 觀察 + 自選池。實測 core 7 + watch 20
+# ≈ 27 檔,加自選池約 30~50 檔 —— 剛好一批 MIS,一輪 1~2 秒。
+DEGRADED_MAX_UNIVERSE = 60
+# 降級輪詢下限(秒)。MIS 是非官方端點,打太密會被 ban —— 而且它本來就不是 10 秒級資料源,
+# 密輪只會拿到同一份數字。30 秒對「突破/回檔」這種分鐘級訊號完全夠用。
+DEGRADED_MIN_INTERVAL = 30.0
+
+
+def degraded_universe() -> list[str]:
+    """降級模式要掃的股票清單(去重、有上限)。讀 docs/data.json 當日選股結果。"""
+    ids: list[str] = []
+    try:
+        import json
+        d = json.loads((DOCS_DIR / "data.json").read_text(encoding="utf-8"))
+        for key in ("core", "watch", "watchlist"):
+            for row in (d.get(key) or []):
+                sid = str(row.get("stock_id") or "").strip()
+                if sid and sid not in ids:
+                    ids.append(sid)
+    except Exception as e:
+        log.warning(f"降級宇宙:讀 docs/data.json 失敗:{e}")
+    return ids[:DEGRADED_MAX_UNIVERSE]
+
+
+def _avg_vol_map(levels: pd.DataFrame) -> dict:
+    """{stock_id: 20日均量(股)}。levels 只存 avg_turnover(成交額),除以昨收還原成量。"""
+    out = {}
+    try:
+        for r in levels.to_dict("records"):
+            turn, prev = r.get("avg_turnover"), r.get("prev_close")
+            if turn and prev and prev > 0:
+                out[str(r["stock_id"])] = float(turn) / float(prev)
+    except Exception as e:
+        log.warning(f"降級量比基準計算失敗(量比將為 None):{e}")
+    return out
+
+
 def scan(dry_run: bool = False, notify: bool = True) -> dict:
     """跑一次盤中掃描。回傳 {ok, checked, new_alerts, alerts, reason}。
     **不 raise** —— 這是每 5 分鐘跑一次的背景工作,壞掉不該把 workflow 弄紅。"""
     now = now_tpe()
     day = now.strftime("%Y-%m-%d")
 
-    st = sponsor_status()
-    if not st.get("active"):
-        log.info("非 Sponsor / 訂閱到期 —— 沒有全市場即時快照,盤中掃描跳過。")
-        return {"ok": False, "reason": "no_sponsor", "checked": 0, "new_alerts": 0, "alerts": []}
+    # levels 先載入 —— 降級模式的量比基準要用它,而且它是兩條路徑共同的硬需求。
+    levels = load_levels()
+    if levels.empty:
+        log.warning("尚未建立 levels(先跑 --build-levels),盤中掃描跳過。")
+        return {"ok": False, "reason": "no_levels", "checked": 0, "new_alerts": 0, "alerts": []}
 
-    snap = fetch_snapshot_all(force=True)
+    # ── 資料源:有訂閱走全市場快照,沒訂閱降級成「自選+選股」小宇宙 + MIS ──
+    # 舊版在這裡直接 return no_sponsor,watch 迴圈收到就 break —— 訂閱 2026-08-17 到期後
+    # 盤中掃描整整一週沒有跑過任何一輪(alerts.json / pulse.json 都凍在 08-17)。
+    # 降級的規則、門檻、去重全部照舊,差別只在「掃的檔數」與「兩個估計欄位」。
+    st = sponsor_status()
+    degraded = False
+    snap = fetch_snapshot_all(force=True) if st.get("active") else pd.DataFrame()
     if snap.empty:
-        return {"ok": False, "reason": "no_snapshot", "checked": 0, "new_alerts": 0, "alerts": []}
+        if not in_trading_session(now):
+            # MIS 在非交易時段回上一交易日收盤,而我們的快照時間戳是「現在」→
+            # 原本那道「時間戳 ≠ 今天就跳過」的保護擋不住。這裡自己擋。
+            log.info("非交易時段(09:00~13:30 之外),降級掃描跳過。")
+            return {"ok": False, "reason": "outside_session", "checked": 0,
+                    "new_alerts": 0, "alerts": []}
+        universe = degraded_universe()
+        if not universe:
+            log.warning("降級模式找不到可掃清單(docs/data.json 無 core/watch/watchlist),跳過。")
+            return {"ok": False, "reason": "no_universe", "checked": 0, "new_alerts": 0, "alerts": []}
+        snap = fetch_snapshot_degraded(universe, _avg_vol_map(levels))
+        degraded = True
+        if snap.empty:
+            return {"ok": False, "reason": "no_snapshot", "checked": 0, "new_alerts": 0, "alerts": []}
+        # 「沒訂閱」與「有訂閱但快照 API 當下掛了」要分清楚,否則會誤判成該去續訂。
+        why = ("無 Sponsor 訂閱" if not st.get("active")
+               else f"訂閱有效({st.get('level_title') or 'Sponsor'})但全市場快照暫時取不到")
+        log.info(f"降級盤中掃描:{len(snap)} 檔({why},改用 MIS 逐檔 + 估計量比/均價)")
 
     stamp = snapshot_date(snap)
     if stamp and stamp != day:
         log.info(f"快照時間戳 {stamp} ≠ 今天 {day}(非交易日或未開盤),掃描跳過。")
         return {"ok": False, "reason": f"stale:{stamp}", "checked": 0, "new_alerts": 0, "alerts": []}
 
-    levels = load_levels()
-    if levels.empty:
-        log.warning("尚未建立 levels(先跑 --build-levels),盤中掃描跳過。")
-        return {"ok": False, "reason": "no_levels", "checked": 0, "new_alerts": 0, "alerts": []}
-
     df = snap.merge(levels, on="stock_id", how="inner")
     # 當日全市場量比中位數:量能門檻的基準(見參數區)。抓不到就退回 1.0(等同固定門檻)。
-    try:
-        vol_base = float(pd.to_numeric(df["volume_ratio"], errors="coerce").median())
-        if vol_base != vol_base or vol_base <= 0:
-            vol_base = 1.0
-    except Exception:
+    # ⚠️ 降級模式**不能**這樣算:樣本只有自選+選股那 30~50 檔,本來就偏強勢/偏爆量,
+    # 拿它們的中位數當「市場中位數」會把門檻推高,反而漏掉訊號(小樣本自我參照)。
+    # 沒有全市場樣本時就誠實退回固定基準 1.0。
+    if degraded:
         vol_base = 1.0
+    else:
+        try:
+            vol_base = float(pd.to_numeric(df["volume_ratio"], errors="coerce").median())
+            if vol_base != vol_base or vol_base <= 0:
+                vol_base = 1.0
+        except Exception:
+            vol_base = 1.0
 
     # 大盤即時:用 merge 前的原始快照(merge 是 inner join levels,會把指數列濾掉)。
     # 每輪都算、每輪都寫檔 —— 這樣網頁上的大盤條跟訊號是同一個時間點的。
@@ -356,6 +421,9 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
                 "price": _f(row.get("close")), "change_rate": _f(row.get("change_rate")),
                 "volume_ratio": _f(row.get("volume_ratio")), "vwap": _f(row.get("average_price")),
                 "fired_at": now.strftime("%H:%M"),
+                # 鐵則二:降級要看得見。有訂閱=即時全市場快照;沒訂閱=MIS 逐檔 + 估計量比/均價。
+                # 通知與網頁都必須把這個標記顯示出來,不能讓人以為兩者品質一樣。
+                "degraded": degraded,
             }
             fired[key] = rec
             new.append(rec)
@@ -381,7 +449,7 @@ def scan(dry_run: bool = False, notify: bool = True) -> dict:
     log.info(f"盤中掃描 {now.strftime('%H:%M')}:比對 {len(df)} 檔,新觸發 {len(new)} 筆"
              f"(當日累計 {len(fired)} 筆)")
     return {"ok": True, "checked": len(df), "new_alerts": len(new),
-            "alerts": new, "total_today": len(fired), "reason": ""}
+            "alerts": new, "total_today": len(fired), "reason": "", "degraded": degraded}
 
 
 # ---------- 盤中大盤即時(2026-07-21 加) ----------
@@ -597,7 +665,11 @@ def _embed(r: dict, ex: dict | None = None, chart_name: str | None = None) -> di
         "color": _COLORS.get(r.get("type"), _DEFAULT_COLOR),
         "author": {"name": r.get("label") or "訊號"},
         "fields": fields,
-        "footer": {"text": f"首次觸發 {r.get('fired_at') or ''}"},
+        # 鐵則二:降級要看得見。沒有訂閱時量比/均價是估計值(MIS 逐檔 + 自行累積),
+        # 不標出來的話使用者會拿它跟有訂閱時的訊號同等看待。
+        "footer": {"text": (f"首次觸發 {r.get('fired_at') or ''}"
+                            + (" · ⚠ 降級模式:無即時訂閱,量比/均價為估計值,僅掃自選+選股"
+                               if r.get("degraded") else ""))},
     }
     if chart_name:
         out["image"] = {"url": f"attachment://{chart_name}"}
@@ -1132,6 +1204,8 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
 
     end_h, end_m = (int(x) for x in until.split(":"))
     polls = fired_total = errors = pending = 0
+    last_degraded = False          # 迴圈外保存 —— scan() 若在第一輪就拋例外,下面的
+                                   # 節奏判斷不能去讀還沒賦值的 r(會 NameError 把盯盤打掉)
     done_tags: set[str] = set()
     _pub_last[0] = 0.0            # 讓第一批訊號立刻發布,不必等節流窗
     log.info(f"常駐盯盤啟動:每 {interval:g} 秒掃一次,到 {until} 為止"
@@ -1160,6 +1234,7 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
         t0 = time.time()
         try:
             r = scan(notify=notify)
+            last_degraded = bool(r.get("degraded"))
             polls += 1
             # 心跳:寫進 docs/freshness.json。沒有這個就分不出「今天沒訊號」和「job 根本沒跑」——
             # 2026-07-21 就是因為沒有痕跡,只能靠「有沒有 commit」猜,猜不準。
@@ -1216,13 +1291,20 @@ def loop(interval: float, until: str, notify: bool = True, publish: bool = False
                        else f"intraday: live data {now.strftime('%H:%M')}")
                 _git_publish(msg)
                 pending = 0
-            elif not r.get("ok") and r.get("reason") in ("no_sponsor", "no_levels"):
+            elif not r.get("ok") and r.get("reason") in ("no_levels", "no_universe"):
                 log.warning(f"停止盯盤:{r['reason']}")   # 這兩種再輪也不會好
                 break
+            # ⚠️ no_sponsor 已經不在停止清單裡(2026-08-25):訂閱到期改走降級掃描,
+            # 不再整天空轉。會讓盯盤停下來的只剩「沒有 levels」與「沒有可掃清單」——
+            # 這兩個再輪一百次也不會自己好,其餘一律繼續輪。
         except Exception as e:
             errors += 1
             log.warning(f"單次掃描失敗(繼續):{e}")
-        time.sleep(max(0.0, interval - (time.time() - t0)))
+        # 降級模式打的是 TWSE MIS(非官方、逐檔、易被 ban),不是 FinMind 的單次全市場快照。
+        # 10 秒一輪 = 6 次/分鐘打在同一個非官方端點上,風險太高而且沒有意義
+        # (MIS 本身不是 10 秒級)。所以降級時把輪詢間隔拉到至少 DEGRADED_MIN_INTERVAL。
+        eff_interval = max(interval, DEGRADED_MIN_INTERVAL) if last_degraded else interval
+        time.sleep(max(0.0, eff_interval - (time.time() - t0)))
     if publish and pending:
         _git_publish(f"intraday: {pending} signals (final)")   # 收盤前補推殘留的
     log.info(f"盯盤結束:輪詢 {polls} 次、觸發 {fired_total} 筆、錯誤 {errors} 次")

@@ -162,6 +162,136 @@ def fetch_snapshot_all(ttl: float = _DEFAULT_TTL, force: bool = False) -> pd.Dat
     return df
 
 
+# ---------- ①b 降級快照:沒有 Sponsor 訂閱時的替代品(2026-08-25) ----------
+#
+# 訂閱到期後 `fetch_snapshot_all` 恆回空,盤中掃描原本就**直接停擺**
+# (實測 2026-08-17 到期 → 08-18 起 alerts.json / pulse.json 整整一週沒有更新)。
+# 但 MIS 那層還活著,只是「逐檔查、50 檔一批、易被 ban」,掃不動全市場 2852 檔。
+#
+# 折衷:**縮小宇宙、保留規則**。只掃自選池 + 當日核心/觀察(約 30~50 檔 = 1 批 MIS),
+# 並把 MIS 的欄位補成與 Sponsor 快照**完全相同的 schema**,讓 `_signals()` 的規則
+# 一行都不用改。兩個 Sponsor 專屬欄位改用估計值:
+#
+#   average_price(均價/VWAP)
+#       MIS 沒有這個欄位。改用**我們自己的輪詢**累積:每輪拿到 (成交價, 累積量),
+#       Δ量 = 本輪累積量 − 上輪累積量,VWAP ≈ Σ(價 × Δ量) ÷ ΣΔ量。
+#       從 09:00 第一輪開始累積,所以涵蓋整個交易時段;精度取決於輪詢間隔。
+#       第一輪還沒有 Δ量 → 回 None,該輪的「站上均價」條件自然不成立(寧可漏不可錯)。
+#
+#   volume_ratio(量比)
+#       Sponsor 版是「vs 昨日同時段」。這裡改用
+#       當日累積量 ÷ (20日均量 × 已開盤時間佔比),語意相近(今天這個時點的量能
+#       是不是高於平常),但**不是同一個定義**,所以降級模式的訊號會標記出來。
+#
+# 鐵則二(降級要看得見):回傳的 DataFrame 一律帶 `degraded=True`,
+# 呼叫端必須把它一路帶到通知與網頁上。
+
+_VWAP_ACC: dict = {"day": "", "rows": {}}   # stock_id -> {"pv": 價×量累計, "v": 量累計, "last_vol": 上輪累積量}
+
+# 台股連續交易 09:00~13:30 = 270 分鐘。用來把「當日累積量」換算成同時段的期望量。
+_SESSION_MINUTES = 270.0
+
+
+def in_trading_session(now=None) -> bool:
+    """現在是不是台股連續交易時段(09:00~13:30)。
+
+    降級快照非用不可的一道守衛:MIS 在非交易時段回的是**上一個交易日的收盤數字**,
+    但我們的快照 `date` 欄蓋的是「現在」→ scan() 原本那道「快照時間戳 ≠ 今天就跳過」
+    的保護會失效,盤後跑一次掃描就會拿昨天的收盤價當今天的即時價觸發訊號。
+    (Sponsor 快照沒這問題,因為它自己帶上游時間戳。)"""
+    now = now or now_tpe()
+    t = now.strftime("%H:%M")
+    return "09:00" <= t <= "13:30"
+
+
+def _session_elapsed_fraction(now=None) -> float:
+    """現在走完了整個交易時段的幾成(0.02~1.0)。開盤前/收盤後夾在邊界,避免除以 0。"""
+    now = now or now_tpe()
+    start = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    frac = (now - start).total_seconds() / 60.0 / _SESSION_MINUTES
+    return max(0.02, min(1.0, frac))
+
+
+def _running_vwap(sid: str, price, acc_vol, day: str):
+    """用連續輪詢估當日 VWAP。回傳 None 表示樣本還不夠(第一輪)。"""
+    if _VWAP_ACC["day"] != day:
+        _VWAP_ACC.update({"day": day, "rows": {}})
+    if price is None or acc_vol is None:
+        return None
+    st = _VWAP_ACC["rows"].setdefault(sid, {"pv": 0.0, "v": 0.0, "last_vol": None})
+    last = st["last_vol"]
+    st["last_vol"] = acc_vol
+    if last is None:
+        return None                      # 第一輪只記基準,不猜
+    dv = acc_vol - last
+    if dv > 0:
+        st["pv"] += price * dv
+        st["v"] += dv
+    return (st["pv"] / st["v"]) if st["v"] > 0 else None
+
+
+def fetch_snapshot_degraded(symbols, avg_vol_map: dict | None = None) -> pd.DataFrame:
+    """MIS 逐檔 → 組成與 `fetch_snapshot_all` 相同欄位的替代快照(沒有訂閱時用)。
+
+    symbols: ["2330", ...] 或 [("2330","twse"), ...]
+    avg_vol_map: {stock_id: 20日均量(股)},用來算 volume_ratio 估計值;沒給則該欄為 None。
+    回傳的 DataFrame 多一欄 `degraded=True`,呼叫端必須據此標示資料品質。
+    """
+    # ⚠️ 不能把裸字串一律當成上市 —— 上櫃股要用 otc_ 頻道,查錯會靜默漏掉。
+    mkts = _market_map()
+    pairs = [(s, mkts.get(s, "twse")) if isinstance(s, str) else (str(s[0]), s[1])
+             for s in symbols]
+    if not pairs:
+        return pd.DataFrame()
+    try:
+        mis = fetch_mis_quotes(pairs)
+    except Exception as e:
+        log.warning(f"降級快照:MIS 取價失敗:{e}")
+        return pd.DataFrame()
+    if not mis:
+        return pd.DataFrame()
+
+    now = now_tpe()
+    day = now.strftime("%Y-%m-%d")
+    stamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    frac = _session_elapsed_fraction(now)
+    # 非交易時段:MIS 給的是上一交易日收盤,「已開盤時間佔比」沒有意義 → 量比一律不給。
+    # 規則層要求 volume_ratio 非 None 才會觸發,所以這等於自動關掉盤後誤觸發。
+    live = in_trading_session(now)
+    names = _name_map()
+    avg_vol_map = avg_vol_map or {}
+
+    rows = []
+    for sid, m in mis.items():
+        px = m.get("price")
+        prev = m.get("prev_close")
+        acc_vol = m.get("acc_vol")          # MIS 的 v 是「張」
+        acc_shares = acc_vol * 1000 if acc_vol is not None else None
+        avg20 = avg_vol_map.get(sid)
+        vr = None
+        if live and acc_shares is not None and avg20:
+            expect = avg20 * frac
+            if expect > 0:
+                vr = round(acc_shares / expect, 3)
+        rows.append({
+            "stock_id": sid,
+            "close": px,
+            "open": m.get("open"),
+            "high": m.get("high"),
+            "low": m.get("low"),
+            "change_price": (round(px - prev, 4) if (px is not None and prev is not None) else None),
+            "change_rate": (round((px / prev - 1) * 100, 2) if (px and prev) else None),
+            "total_volume": acc_vol,
+            "average_price": _running_vwap(sid, px, acc_shares, day),
+            "volume_ratio": vr,
+            "buy_price": None, "sell_price": None,
+            "name": names.get(sid, m.get("name", "")),
+            "date": stamp,
+            "degraded": True,
+        })
+    return pd.DataFrame(rows)
+
+
 def _num(v, zero_as_none: bool = False):
     """快照欄位 → float | None。**NaN 在 Python 是 truthy**,所以 `x or None` 擋不掉,
     停牌/未開盤的股票會把 NaN 一路帶進前端變成 null 以外的怪值 —— 一律走這裡。"""
@@ -247,6 +377,28 @@ def _name_map() -> dict[str, str]:
         log.warning(f"名稱對照載入失敗(不影響報價):{e}")
         _NAME_MAP = {}
     return _NAME_MAP
+
+
+_MARKET_MAP: dict = {}
+
+
+def _market_map() -> dict[str, str]:
+    """stock_id → 'twse' / 'tpex'。
+
+    MIS 的頻道前綴分上市(tse_)與上櫃(otc_),用錯就查不到 —— 而且是**靜默**查不到,
+    回應裡直接少那幾檔。實測降級宇宙 35 檔裡有 8 檔上櫃(含核心股 6290、4707),
+    全部被丟掉且沒有任何警告。所以只要呼叫端沒指定市場別,就在這裡查出來。"""
+    global _MARKET_MAP
+    if _MARKET_MAP:
+        return _MARKET_MAP
+    try:
+        info = fetch_stock_info()
+        if info is not None and not info.empty and "type" in info.columns:
+            _MARKET_MAP = dict(zip(info["stock_id"].astype(str), info["type"].astype(str)))
+    except Exception as e:
+        log.warning(f"市場別對照載入失敗(上櫃股可能查不到報價):{e}")
+        _MARKET_MAP = {}
+    return _MARKET_MAP
 
 
 # ---------- 對外主入口 ----------
