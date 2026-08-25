@@ -24,5 +24,18 @@
   "vwap": 62.026596404215745,
   "fired_at": "09:36",
   "degraded": true
+ },
+ "2030|breakout": {
+  "stock_id": "2030",
+  "name": "彰源",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 22.50(現價 23.58,高出 4.8%)・量比 1.77(市場中位 1.00)・站上均價 23.57",
+  "price": 23.58,
+  "change_rate": 2.52,
+  "volume_ratio": 1.774,
+  "vwap": 23.567307692307693,
+  "fired_at": "13:25",
+  "degraded": true
  }
 }
