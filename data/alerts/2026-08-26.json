@@ -102,5 +102,18 @@
   "vwap": 257.1750669344043,
   "fired_at": "10:11",
   "degraded": true
+ },
+ "1727|breakout": {
+  "stock_id": "1727",
+  "name": "中華化",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 95.80(現價 96.30,高出 0.5%)・量比 2.17(市場中位 1.00)・站上均價 93.66",
+  "price": 96.3,
+  "change_rate": 5.48,
+  "volume_ratio": 2.165,
+  "vwap": 93.66093859444315,
+  "fired_at": "11:16",
+  "degraded": true
  }
 }
