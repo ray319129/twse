@@ -76,5 +76,18 @@
   "vwap": 37.72715296566077,
   "fired_at": "09:33",
   "degraded": true
+ },
+ "1563|breakout": {
+  "stock_id": "1563",
+  "name": "巧新",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 65.80(現價 66.40,高出 0.9%)・量比 2.79(市場中位 1.00)・站上均價 65.68",
+  "price": 66.4,
+  "change_rate": 2.0,
+  "volume_ratio": 2.795,
+  "vwap": 65.67827380952382,
+  "fired_at": "10:02",
+  "degraded": true
  }
 }
