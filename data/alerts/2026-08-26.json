@@ -63,5 +63,18 @@
   "vwap": 299.1264196863169,
   "fired_at": "09:06",
   "degraded": true
+ },
+ "4956|breakout": {
+  "stock_id": "4956",
+  "name": "光鋐",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 36.75(現價 37.75,高出 2.7%)・量比 25.12(市場中位 1.00)・站上均價 37.73",
+  "price": 37.75,
+  "change_rate": 7.55,
+  "volume_ratio": 25.117,
+  "vwap": 37.72715296566077,
+  "fired_at": "09:33",
+  "degraded": true
  }
 }
