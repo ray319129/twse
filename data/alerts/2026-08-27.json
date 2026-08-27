@@ -141,5 +141,18 @@
   "vwap": 29.132327157704474,
   "fired_at": "09:31",
   "degraded": true
+ },
+ "4979|breakout": {
+  "stock_id": "4979",
+  "name": "華星光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 626.00(現價 628.00,高出 0.3%)・量比 9.30(市場中位 1.00)・站上均價 617.14",
+  "price": 628.0,
+  "change_rate": 5.02,
+  "volume_ratio": 9.296,
+  "vwap": 617.1383037694013,
+  "fired_at": "09:36",
+  "degraded": true
  }
 }
