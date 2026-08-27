@@ -89,5 +89,44 @@
   "vwap": 73.2576062639821,
   "fired_at": "09:10",
   "degraded": true
+ },
+ "1515|breakout": {
+  "stock_id": "1515",
+  "name": "力山",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 36.90(現價 37.27,高出 1.0%)・量比 9.20(市場中位 1.00)・站上均價 36.51",
+  "price": 37.27,
+  "change_rate": 2.67,
+  "volume_ratio": 9.204,
+  "vwap": 36.507163588390505,
+  "fired_at": "09:13",
+  "degraded": true
+ },
+ "7714|breakout": {
+  "stock_id": "7714",
+  "name": "創泓科技",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 185.00(現價 186.50,高出 0.8%)・量比 4.85(市場中位 1.00)・站上均價 183.74",
+  "price": 186.5,
+  "change_rate": 2.47,
+  "volume_ratio": 4.851,
+  "vwap": 183.74107142857142,
+  "fired_at": "09:13",
+  "degraded": true
+ },
+ "6517|breakout": {
+  "stock_id": "6517",
+  "name": "保勝光學",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 71.70(現價 72.15,高出 0.6%)・量比 7.08(市場中位 1.00)・站上均價 71.30",
+  "price": 72.15,
+  "change_rate": 1.19,
+  "volume_ratio": 7.082,
+  "vwap": 71.2982332155477,
+  "fired_at": "09:15",
+  "degraded": true
  }
 }
