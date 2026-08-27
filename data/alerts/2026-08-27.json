@@ -180,5 +180,18 @@
   "vwap": 787.7631394533987,
   "fired_at": "09:52",
   "degraded": true
+ },
+ "6651|breakout": {
+  "stock_id": "6651",
+  "name": "全宇昕",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 152.50(現價 153.00,高出 0.3%)・量比 1.56(市場中位 1.00)・站上均價 149.08",
+  "price": 153.0,
+  "change_rate": 1.32,
+  "volume_ratio": 1.561,
+  "vwap": 149.07608695652175,
+  "fired_at": "11:21",
+  "degraded": true
  }
 }
