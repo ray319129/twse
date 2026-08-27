@@ -154,5 +154,18 @@
   "vwap": 617.1383037694013,
   "fired_at": "09:36",
   "degraded": true
+ },
+ "2340|breakout": {
+  "stock_id": "2340",
+  "name": "台亞",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 35.00(現價 35.45,高出 1.3%)・量比 5.01(市場中位 1.00)・站上均價 34.31",
+  "price": 35.45,
+  "change_rate": 2.01,
+  "volume_ratio": 5.008,
+  "vwap": 34.31005210271678,
+  "fired_at": "09:47",
+  "degraded": true
  }
 }
