@@ -24,5 +24,57 @@
   "vwap": 156.9937582128778,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "6104|breakout": {
+  "stock_id": "6104",
+  "name": "創惟",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 100.50(現價 101.25,高出 0.7%)・量比 7.21(市場中位 1.00)・站上均價 100.80",
+  "price": 101.25,
+  "change_rate": 1.25,
+  "volume_ratio": 7.206,
+  "vwap": 100.79850746268657,
+  "fired_at": "09:05",
+  "degraded": true
+ },
+ "6829|breakout": {
+  "stock_id": "6829",
+  "name": "千附精密",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 244.50(現價 250.50,高出 2.5%)・量比 25.96(市場中位 1.00)・站上均價 250.11",
+  "price": 250.5,
+  "change_rate": 4.81,
+  "volume_ratio": 25.96,
+  "vwap": 250.114406779661,
+  "fired_at": "09:05",
+  "degraded": true
+ },
+ "3017|breakout": {
+  "stock_id": "3017",
+  "name": "奇鋐",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 3320.00(現價 3405.00,高出 2.6%)・量比 11.25(市場中位 1.00)・站上均價 3345.20",
+  "price": 3405.0,
+  "change_rate": 7.92,
+  "volume_ratio": 11.252,
+  "vwap": 3345.1952277657265,
+  "fired_at": "09:05",
+  "degraded": true
+ },
+ "4771|breakout": {
+  "stock_id": "4771",
+  "name": "望隼",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 210.00(現價 212.00,高出 1.0%)・量比 9.78(市場中位 1.00)・站上均價 209.44",
+  "price": 212.0,
+  "change_rate": 2.17,
+  "volume_ratio": 9.78,
+  "vwap": 209.4360465116279,
+  "fired_at": "09:06",
+  "degraded": true
  }
 }
