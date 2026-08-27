@@ -167,5 +167,18 @@
   "vwap": 34.31005210271678,
   "fired_at": "09:47",
   "degraded": true
+ },
+ "3163|breakout": {
+  "stock_id": "3163",
+  "name": "波若威",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 797.00(現價 803.50,高出 0.8%)・量比 4.20(市場中位 1.00)・站上均價 787.76",
+  "price": 803.5,
+  "change_rate": 3.41,
+  "volume_ratio": 4.2,
+  "vwap": 787.7631394533987,
+  "fired_at": "09:52",
+  "degraded": true
  }
 }
