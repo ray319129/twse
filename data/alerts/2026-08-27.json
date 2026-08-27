@@ -76,5 +76,18 @@
   "vwap": 209.4360465116279,
   "fired_at": "09:06",
   "degraded": true
+ },
+ "3162|breakout": {
+  "stock_id": "3162",
+  "name": "精確",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 73.40(現價 74.15,高出 1.0%)・量比 27.28(市場中位 1.00)・站上均價 73.26",
+  "price": 74.15,
+  "change_rate": 1.02,
+  "volume_ratio": 27.277,
+  "vwap": 73.2576062639821,
+  "fired_at": "09:10",
+  "degraded": true
  }
 }
