@@ -37,5 +37,18 @@
   "vwap": 213.17441471571905,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "2313|breakout": {
+  "stock_id": "2313",
+  "name": "華通",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 244.00(現價 246.75,高出 1.1%)・量比 15.38(市場中位 1.00)・站上均價 243.40",
+  "price": 246.75,
+  "change_rate": 1.13,
+  "volume_ratio": 15.375,
+  "vwap": 243.39950544015826,
+  "fired_at": "09:13",
+  "degraded": true
  }
 }
