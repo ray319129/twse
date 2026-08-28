@@ -50,5 +50,18 @@
   "vwap": 243.39950544015826,
   "fired_at": "09:13",
   "degraded": true
+ },
+ "6517|breakout": {
+  "stock_id": "6517",
+  "name": "保勝光學",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 74.70(現價 75.05,高出 0.5%)・量比 4.94(市場中位 1.00)・站上均價 74.17",
+  "price": 75.05,
+  "change_rate": 1.83,
+  "volume_ratio": 4.941,
+  "vwap": 74.17175925925926,
+  "fired_at": "09:26",
+  "degraded": true
  }
 }
