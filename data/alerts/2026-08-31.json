@@ -128,5 +128,18 @@
   "vwap": 1147.9171151776104,
   "fired_at": "09:29",
   "degraded": true
+ },
+ "5498|breakout": {
+  "stock_id": "5498",
+  "name": "凱崴",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 58.50(現價 58.95,高出 0.8%)・量比 6.33(市場中位 1.00)・站上均價 57.10",
+  "price": 58.95,
+  "change_rate": 1.46,
+  "volume_ratio": 6.329,
+  "vwap": 57.09734539089848,
+  "fired_at": "09:37",
+  "degraded": true
  }
 }
