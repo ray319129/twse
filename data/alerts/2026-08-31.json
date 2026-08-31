@@ -141,5 +141,18 @@
   "vwap": 57.09734539089848,
   "fired_at": "09:37",
   "degraded": true
+ },
+ "3693|breakout": {
+  "stock_id": "3693",
+  "name": "營邦",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 599.00(現價 604.50,高出 0.9%)・量比 3.39(市場中位 1.00)・站上均價 593.24",
+  "price": 604.5,
+  "change_rate": 2.98,
+  "volume_ratio": 3.392,
+  "vwap": 593.2380952380952,
+  "fired_at": "09:44",
+  "degraded": true
  }
 }
