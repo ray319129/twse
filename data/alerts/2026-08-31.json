@@ -167,5 +167,18 @@
   "vwap": 1155.867117117117,
   "fired_at": "12:56",
   "degraded": true
+ },
+ "3228|breakout": {
+  "stock_id": "3228",
+  "name": "金麗科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 169.00(現價 170.25,高出 0.7%)・量比 2.22(市場中位 1.00)・站上均價 162.61",
+  "price": 170.25,
+  "change_rate": 2.25,
+  "volume_ratio": 2.219,
+  "vwap": 162.6119221411192,
+  "fired_at": "13:07",
+  "degraded": true
  }
 }
