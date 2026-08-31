@@ -115,5 +115,18 @@
   "vwap": 30.336526082130966,
   "fired_at": "09:28",
   "degraded": true
+ },
+ "3324|breakout": {
+  "stock_id": "3324",
+  "name": "雙鴻",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1155.00(現價 1162.50,高出 0.6%)・量比 3.86(市場中位 1.00)・站上均價 1147.92",
+  "price": 1162.5,
+  "change_rate": 1.97,
+  "volume_ratio": 3.858,
+  "vwap": 1147.9171151776104,
+  "fired_at": "09:29",
+  "degraded": true
  }
 }
