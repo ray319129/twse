@@ -63,5 +63,18 @@
   "vwap": 2411.280177890724,
   "fired_at": "09:08",
   "degraded": true
+ },
+ "2834|breakout": {
+  "stock_id": "2834",
+  "name": "臺企銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 17.05(現價 17.17,高出 0.7%)・量比 6.40(市場中位 1.00)・站上均價 17.05",
+  "price": 17.17,
+  "change_rate": 1.3,
+  "volume_ratio": 6.398,
+  "vwap": 17.051806719516797,
+  "fired_at": "09:10",
+  "degraded": true
  }
 }
