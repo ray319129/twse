@@ -89,5 +89,18 @@
   "vwap": 84.16722756410256,
   "fired_at": "09:12",
   "degraded": true
+ },
+ "1717|breakout": {
+  "stock_id": "1717",
+  "name": "長興",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 84.50(現價 85.15,高出 0.8%)・量比 9.42(市場中位 1.00)・站上均價 83.01",
+  "price": 85.15,
+  "change_rate": 3.21,
+  "volume_ratio": 9.42,
+  "vwap": 83.01103365988445,
+  "fired_at": "09:36",
+  "degraded": true
  }
 }
