@@ -128,5 +128,18 @@
   "vwap": 41.609258001939864,
   "fired_at": "09:54",
   "degraded": true
+ },
+ "2201|breakout": {
+  "stock_id": "2201",
+  "name": "裕隆",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 31.60(現價 31.95,高出 1.1%)・量比 5.04(市場中位 1.00)・站上均價 31.40",
+  "price": 31.95,
+  "change_rate": 1.43,
+  "volume_ratio": 5.042,
+  "vwap": 31.397570948469006,
+  "fired_at": "10:42",
+  "degraded": true
  }
 }
