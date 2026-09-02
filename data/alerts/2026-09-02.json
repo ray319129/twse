@@ -89,5 +89,18 @@
   "vwap": 95.8713706407137,
   "fired_at": "09:18",
   "degraded": true
+ },
+ "6209|breakout": {
+  "stock_id": "6209",
+  "name": "今國光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 84.80(現價 85.20,高出 0.5%)・量比 10.31(市場中位 1.00)・站上均價 83.59",
+  "price": 85.2,
+  "change_rate": 4.03,
+  "volume_ratio": 10.31,
+  "vwap": 83.58751101709854,
+  "fired_at": "09:19",
+  "degraded": true
  }
 }
