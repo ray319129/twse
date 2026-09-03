@@ -102,5 +102,18 @@
   "vwap": 18444.524714828898,
   "fired_at": "10:22",
   "degraded": true
+ },
+ "6668|breakout": {
+  "stock_id": "6668",
+  "name": "中揚光",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 39.05(現價 44.92,高出 15.0%)・量比 3.04(市場中位 1.00)・站上均價 42.62",
+  "price": 44.92,
+  "change_rate": 2.09,
+  "volume_ratio": 3.042,
+  "vwap": 42.62285714285714,
+  "fired_at": "13:26",
+  "degraded": true
  }
 }
