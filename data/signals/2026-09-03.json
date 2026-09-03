@@ -1,0 +1,6421 @@
+{
+  "date": "2026-09-03",
+  "core": [
+    {
+      "score": 80.7,
+      "trend": 1.0,
+      "rs": 0.94,
+      "setup": 0.91,
+      "quality": 0.88,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.9,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 12.1,
+      "ret20_pct": 13.8,
+      "dollar_vol_m": 1833.0,
+      "stock_id": "2884",
+      "name": "玉山金",
+      "industry": "金融保險",
+      "close": 43.20000076293945,
+      "change_pct": 6.67,
+      "valuation": {
+        "pe": 17.93,
+        "yield_pct": 3.24,
+        "pb": 2.48
+      },
+      "last_ohlc": [
+        41.35,
+        43.5,
+        40.55,
+        43.2
+      ],
+      "chips": {
+        "inst_total_today": 10888281,
+        "inst_buy_streak": 2,
+        "foreign_holding_pct": 30.61,
+        "foreign_holding_change_30d": -1.44,
+        "short_change_pct": 43.46
+      },
+      "fundamentals": {
+        "eps_latest": 0.5,
+        "eps_yoy": 56.2,
+        "debt_ratio": 94.2,
+        "roe": 4.0,
+        "roa": 0.2,
+        "op_cashflow": -18019743000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 4.7,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 43.20000076293945,
+        "ma5": 40.42000045776367,
+        "ma5_diff_pct": 6.44,
+        "ma20": 38.50250015258789,
+        "ma20_diff_pct": 10.87,
+        "ma60": 36.15187116444091,
+        "ma60_diff_pct": 16.32,
+        "ma120": 33.504065715553786,
+        "ma120_diff_pct": 22.44,
+        "ma240": null,
+        "ma240_diff_pct": null,
+        "high_60": 43.20000076293945,
+        "low_60": 32.282511,
+        "high_20": 43.20000076293945,
+        "low_20": 36.75,
+        "bb_lower": 35.55480218397758,
+        "bb_upper": 41.450198121198206,
+        "atr14": 1.0821432386125838,
+        "stop_2atr": 41.04,
+        "stop_2atr_pct": -5.01
+      },
+      "ohlc": [
+        [
+          34.95,
+          35.35,
+          34.35,
+          34.75
+        ],
+        [
+          34.75,
+          34.9,
+          34.45,
+          34.6
+        ],
+        [
+          34.8,
+          34.8,
+          33.95,
+          34.5
+        ],
+        [
+          34.55,
+          35.0,
+          34.3,
+          34.45
+        ],
+        [
+          34.4,
+          34.95,
+          34.4,
+          34.9
+        ],
+        [
+          34.6,
+          35.5,
+          34.5,
+          35.1
+        ],
+        [
+          35.3,
+          36.0,
+          35.1,
+          35.85
+        ],
+        [
+          35.85,
+          37.2,
+          35.85,
+          36.95
+        ],
+        [
+          36.75,
+          37.2,
+          36.05,
+          36.05
+        ],
+        [
+          36.3,
+          36.3,
+          35.4,
+          35.65
+        ],
+        [
+          35.05,
+          36.0,
+          35.05,
+          35.95
+        ],
+        [
+          36.35,
+          36.4,
+          35.9,
+          36.4
+        ],
+        [
+          36.4,
+          36.45,
+          36.0,
+          36.25
+        ],
+        [
+          36.4,
+          36.9,
+          35.85,
+          36.5
+        ],
+        [
+          36.8,
+          37.8,
+          36.35,
+          37.7
+        ],
+        [
+          37.75,
+          39.1,
+          37.55,
+          38.65
+        ],
+        [
+          38.65,
+          38.9,
+          37.9,
+          38.45
+        ],
+        [
+          38.05,
+          38.55,
+          37.85,
+          38.0
+        ],
+        [
+          38.1,
+          38.35,
+          37.6,
+          38.1
+        ],
+        [
+          37.7,
+          38.25,
+          37.7,
+          37.95
+        ],
+        [
+          37.8,
+          38.3,
+          37.8,
+          38.15
+        ],
+        [
+          38.15,
+          38.2,
+          37.25,
+          37.8
+        ],
+        [
+          37.2,
+          37.5,
+          36.65,
+          36.9
+        ],
+        [
+          37.2,
+          37.25,
+          36.3,
+          36.75
+        ],
+        [
+          37.0,
+          37.3,
+          36.35,
+          37.3
+        ],
+        [
+          37.45,
+          38.2,
+          36.95,
+          37.65
+        ],
+        [
+          37.3,
+          37.9,
+          36.65,
+          37.75
+        ],
+        [
+          38.0,
+          38.4,
+          37.5,
+          38.1
+        ],
+        [
+          38.3,
+          38.5,
+          37.75,
+          37.8
+        ],
+        [
+          37.75,
+          37.9,
+          37.05,
+          37.35
+        ],
+        [
+          37.35,
+          38.0,
+          37.15,
+          38.0
+        ],
+        [
+          38.0,
+          38.25,
+          37.75,
+          38.15
+        ],
+        [
+          38.15,
+          39.1,
+          38.1,
+          39.0
+        ],
+        [
+          38.9,
+          39.4,
+          38.4,
+          38.7
+        ],
+        [
+          39.3,
+          39.3,
+          38.35,
+          38.55
+        ],
+        [
+          38.5,
+          38.8,
+          38.1,
+          38.75
+        ],
+        [
+          38.5,
+          39.75,
+          38.5,
+          39.75
+        ],
+        [
+          39.45,
+          39.9,
+          39.0,
+          39.9
+        ],
+        [
+          39.65,
+          40.6,
+          39.35,
+          40.5
+        ],
+        [
+          41.35,
+          43.5,
+          40.55,
+          43.2
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "volume_price_surge",
+        "n_day_high",
+        "relative_strength_leader"
+      ],
+      "combos": [],
+      "plan": {
+        "ref": 43.2,
+        "max_entry": 44.5,
+        "init_stop": 40.18,
+        "tp1": 49.25,
+        "r_abs": 3.0240000534057643,
+        "risk_pct": 7.0,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 42.77,
+        "flat_hi": 43.63,
+        "gap_up_line": 43.85,
+        "gap_dn_line": 42.77,
+        "trail_ma": 10
+      },
+      "news": [],
+      "branch_breadth": null,
+      "chip_signal": 0.35,
+      "chip_bonus": 5.2,
+      "fund_signal": 0.45,
+      "fund_bonus": 2.2,
+      "catalyst_signal": null,
+      "catalyst_bonus": 0.0,
+      "industry_signal": 1.0,
+      "industry_bonus": 8.0,
+      "combo_bonus": 0.0,
+      "branch_signal": null,
+      "branch_bonus": 0.0,
+      "rank_score": 96.1,
+      "hot_industry": true
+    },
+    {
+      "score": 73.3,
+      "trend": 0.8,
+      "rs": 0.33,
+      "setup": 0.83,
+      "quality": 0.98,
+      "liquidity": 0.13,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.67,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 5.3,
+      "ret20_pct": 7.9,
+      "dollar_vol_m": 50.0,
+      "stock_id": "2897",
+      "name": "王道銀行",
+      "industry": "金融保險",
+      "close": 10.899999618530273,
+      "change_pct": 1.87,
+      "valuation": {
+        "pe": 13.63,
+        "yield_pct": 4.77,
+        "pb": 0.73
+      },
+      "last_ohlc": [
+        10.7,
+        11.0,
+        10.7,
+        10.9
+      ],
+      "chips": {
+        "inst_total_today": 9630409,
+        "inst_buy_streak": 14,
+        "foreign_holding_pct": 9.38,
+        "foreign_holding_change_30d": 0.58,
+        "short_change_pct": 33.33
+      },
+      "fundamentals": {
+        "eps_latest": 0.08,
+        "eps_yoy": -61.9,
+        "debt_ratio": 91.1,
+        "roe": 2.2,
+        "roa": 0.2,
+        "op_cashflow": 1074164000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 17.4,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 10.899999618530273,
+        "ma5": 10.580000114440917,
+        "ma5_diff_pct": 2.94,
+        "ma20": 10.287499952316285,
+        "ma20_diff_pct": 5.62,
+        "ma60": 10.307580884297689,
+        "ma60_diff_pct": 5.44,
+        "ma120": 10.195623775482177,
+        "ma120_diff_pct": 6.46,
+        "ma240": 9.687020221074421,
+        "ma240_diff_pct": 11.13,
+        "high_60": 10.899999618530273,
+        "low_60": 9.8849515914917,
+        "high_20": 10.899999618530273,
+        "low_20": 10.050000190734863,
+        "bb_lower": 9.857230703904113,
+        "bb_upper": 10.717769200728457,
+        "atr14": 0.16071421759469168,
+        "stop_2atr": 10.58,
+        "stop_2atr_pct": -2.95
+      },
+      "ohlc": [
+        [
+          10.6,
+          10.6,
+          10.5,
+          10.55
+        ],
+        [
+          10.55,
+          10.6,
+          10.45,
+          10.5
+        ],
+        [
+          10.55,
+          10.55,
+          10.3,
+          10.4
+        ],
+        [
+          10.4,
+          10.55,
+          10.4,
+          10.5
+        ],
+        [
+          10.5,
+          10.55,
+          10.45,
+          10.55
+        ],
+        [
+          10.45,
+          10.55,
+          10.4,
+          10.4
+        ],
+        [
+          10.5,
+          10.55,
+          10.35,
+          10.4
+        ],
+        [
+          10.45,
+          10.55,
+          10.4,
+          10.45
+        ],
+        [
+          10.5,
+          10.55,
+          10.45,
+          10.5
+        ],
+        [
+          10.05,
+          10.15,
+          10.0,
+          10.05
+        ],
+        [
+          10.0,
+          10.15,
+          10.0,
+          10.15
+        ],
+        [
+          10.15,
+          10.35,
+          10.1,
+          10.3
+        ],
+        [
+          10.25,
+          10.3,
+          10.1,
+          10.2
+        ],
+        [
+          10.3,
+          10.3,
+          10.05,
+          10.25
+        ],
+        [
+          10.25,
+          10.25,
+          10.15,
+          10.25
+        ],
+        [
+          10.2,
+          10.4,
+          10.2,
+          10.25
+        ],
+        [
+          10.2,
+          10.25,
+          10.15,
+          10.2
+        ],
+        [
+          10.1,
+          10.25,
+          10.1,
+          10.2
+        ],
+        [
+          10.2,
+          10.25,
+          10.15,
+          10.25
+        ],
+        [
+          10.15,
+          10.2,
+          10.1,
+          10.1
+        ],
+        [
+          10.15,
+          10.2,
+          10.1,
+          10.15
+        ],
+        [
+          10.2,
+          10.2,
+          10.05,
+          10.15
+        ],
+        [
+          10.15,
+          10.2,
+          10.1,
+          10.15
+        ],
+        [
+          10.1,
+          10.15,
+          10.05,
+          10.1
+        ],
+        [
+          10.15,
+          10.15,
+          10.05,
+          10.15
+        ],
+        [
+          10.15,
+          10.15,
+          10.05,
+          10.05
+        ],
+        [
+          10.05,
+          10.2,
+          10.05,
+          10.2
+        ],
+        [
+          10.15,
+          10.15,
+          10.05,
+          10.15
+        ],
+        [
+          10.1,
+          10.2,
+          10.05,
+          10.15
+        ],
+        [
+          10.2,
+          10.25,
+          10.15,
+          10.25
+        ],
+        [
+          10.2,
+          10.25,
+          10.15,
+          10.25
+        ],
+        [
+          10.25,
+          10.25,
+          10.15,
+          10.25
+        ],
+        [
+          10.2,
+          10.25,
+          10.15,
+          10.2
+        ],
+        [
+          10.2,
+          10.35,
+          10.2,
+          10.3
+        ],
+        [
+          10.3,
+          10.45,
+          10.3,
+          10.35
+        ],
+        [
+          10.4,
+          10.45,
+          10.35,
+          10.35
+        ],
+        [
+          10.35,
+          10.45,
+          10.35,
+          10.35
+        ],
+        [
+          10.35,
+          10.65,
+          10.35,
+          10.6
+        ],
+        [
+          10.6,
+          10.7,
+          10.4,
+          10.7
+        ],
+        [
+          10.7,
+          11.0,
+          10.7,
+          10.9
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "n_day_high",
+        "inst_consecutive_buy",
+        "monthly_revenue_growth",
+        "eps_positive_high_yield",
+        "relative_strength_leader",
+        "chip_accumulation"
+      ],
+      "combos": [
+        "保守存股"
+      ],
+      "plan": {
+        "ref": 10.9,
+        "max_entry": 11.23,
+        "init_stop": 10.4,
+        "tp1": 11.9,
+        "r_abs": 0.5,
+        "risk_pct": 4.59,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 10.79,
+        "flat_hi": 11.01,
+        "gap_up_line": 11.06,
+        "gap_dn_line": 10.79,
+        "trail_ma": 10
+      },
+      "news": [],
+      "branch_breadth": null,
+      "chip_signal": 0.57,
+      "chip_bonus": 8.6,
+      "fund_signal": 0.57,
+      "fund_bonus": 2.9,
+      "catalyst_signal": null,
+      "catalyst_bonus": 0.0,
+      "industry_signal": 1.0,
+      "industry_bonus": 8.0,
+      "combo_bonus": 3.0,
+      "branch_signal": null,
+      "branch_bonus": 0.0,
+      "rank_score": 95.8,
+      "hot_industry": true
+    },
+    {
+      "score": 75.3,
+      "trend": 1.0,
+      "rs": 0.67,
+      "setup": 0.85,
+      "quality": 0.93,
+      "liquidity": 0.72,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.75,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 7.7,
+      "ret20_pct": 14.9,
+      "dollar_vol_m": 493.0,
+      "stock_id": "2801",
+      "name": "彰銀",
+      "industry": "金融保險",
+      "close": 26.600000381469727,
+      "change_pct": 3.5,
+      "valuation": {
+        "pe": 15.65,
+        "yield_pct": 3.95,
+        "pb": 1.36
+      },
+      "last_ohlc": [
+        25.7,
+        26.9,
+        25.7,
+        26.6
+      ],
+      "chips": {
+        "inst_total_today": 4136969,
+        "inst_buy_streak": 4,
+        "foreign_holding_pct": 17.04,
+        "foreign_holding_change_30d": -0.07,
+        "short_change_pct": 24.6
+      },
+      "fundamentals": {
+        "eps_latest": 0.31,
+        "eps_yoy": -6.1,
+        "debt_ratio": 93.5,
+        "roe": 2.7,
+        "roa": 0.2,
+        "op_cashflow": -37473949000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 7.1,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 26.600000381469727,
+        "ma5": 25.500000381469725,
+        "ma5_diff_pct": 4.14,
+        "ma20": 24.18000011444092,
+        "ma20_diff_pct": 9.1,
+        "ma60": 23.667287114461264,
+        "ma60_diff_pct": 11.03,
+        "ma120": 22.235726890563967,
+        "ma120_diff_pct": 16.41,
+        "ma240": 21.27994677861532,
+        "ma240_diff_pct": 20.0,
+        "high_60": 26.600000381469727,
+        "low_60": 22.35,
+        "high_20": 26.600000381469727,
+        "low_20": 23.100000381469727,
+        "bb_lower": 22.354334769459143,
+        "bb_upper": 26.005665459422694,
+        "atr14": 0.5178567341395787,
+        "stop_2atr": 25.56,
+        "stop_2atr_pct": -3.89
+      },
+      "ohlc": [
+        [
+          24.0,
+          24.25,
+          23.9,
+          24.05
+        ],
+        [
+          24.05,
+          24.2,
+          23.85,
+          23.85
+        ],
+        [
+          24.0,
+          24.0,
+          23.35,
+          23.6
+        ],
+        [
+          23.6,
+          23.9,
+          23.6,
+          23.75
+        ],
+        [
+          23.8,
+          24.05,
+          23.7,
+          23.95
+        ],
+        [
+          23.75,
+          24.05,
+          23.75,
+          23.9
+        ],
+        [
+          24.15,
+          24.2,
+          23.55,
+          23.85
+        ],
+        [
+          23.85,
+          24.3,
+          23.85,
+          24.3
+        ],
+        [
+          24.2,
+          24.65,
+          24.2,
+          24.65
+        ],
+        [
+          24.15,
+          24.15,
+          23.51,
+          23.66
+        ],
+        [
+          23.46,
+          23.85,
+          23.41,
+          23.76
+        ],
+        [
+          23.95,
+          24.24,
+          23.76,
+          24.1
+        ],
+        [
+          23.9,
+          24.15,
+          23.76,
+          23.95
+        ],
+        [
+          24.1,
+          24.2,
+          23.41,
+          23.85
+        ],
+        [
+          23.95,
+          24.2,
+          23.61,
+          24.2
+        ],
+        [
+          24.29,
+          25.07,
+          24.24,
+          24.59
+        ],
+        [
+          24.63,
+          25.12,
+          24.59,
+          24.78
+        ],
+        [
+          24.68,
+          25.02,
+          24.54,
+          24.59
+        ],
+        [
+          24.0,
+          24.1,
+          23.55,
+          23.65
+        ],
+        [
+          23.5,
+          23.75,
+          23.15,
+          23.15
+        ],
+        [
+          23.2,
+          23.3,
+          23.0,
+          23.15
+        ],
+        [
+          23.2,
+          23.3,
+          23.0,
+          23.2
+        ],
+        [
+          23.2,
+          23.2,
+          23.05,
+          23.1
+        ],
+        [
+          23.1,
+          23.7,
+          23.1,
+          23.7
+        ],
+        [
+          23.75,
+          23.8,
+          23.3,
+          23.55
+        ],
+        [
+          23.45,
+          23.7,
+          23.35,
+          23.55
+        ],
+        [
+          23.5,
+          23.75,
+          23.45,
+          23.75
+        ],
+        [
+          23.65,
+          24.0,
+          23.65,
+          23.9
+        ],
+        [
+          23.8,
+          23.9,
+          23.65,
+          23.9
+        ],
+        [
+          23.9,
+          23.9,
+          23.65,
+          23.85
+        ],
+        [
+          23.85,
+          24.15,
+          23.7,
+          24.1
+        ],
+        [
+          24.1,
+          24.2,
+          23.85,
+          24.0
+        ],
+        [
+          24.0,
+          24.15,
+          23.75,
+          23.75
+        ],
+        [
+          23.8,
+          24.0,
+          23.75,
+          23.9
+        ],
+        [
+          24.0,
+          25.15,
+          23.95,
+          24.7
+        ],
+        [
+          25.15,
+          25.15,
+          24.7,
+          24.85
+        ],
+        [
+          24.75,
+          25.15,
+          24.65,
+          25.15
+        ],
+        [
+          24.95,
+          25.3,
+          24.9,
+          25.2
+        ],
+        [
+          24.95,
+          25.8,
+          24.95,
+          25.7
+        ],
+        [
+          25.7,
+          26.9,
+          25.7,
+          26.6
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "volume_price_surge",
+        "n_day_high",
+        "inst_consecutive_buy",
+        "relative_strength_leader"
+      ],
+      "combos": [
+        "主升段啟動"
+      ],
+      "plan": {
+        "ref": 26.6,
+        "max_entry": 27.4,
+        "init_stop": 24.95,
+        "tp1": 29.9,
+        "r_abs": 1.6499996185302734,
+        "risk_pct": 6.2,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 26.33,
+        "flat_hi": 26.87,
+        "gap_up_line": 27.0,
+        "gap_dn_line": 26.33,
+        "trail_ma": 10
+      },
+      "news": [],
+      "branch_breadth": null,
+      "chip_signal": 0.45,
+      "chip_bonus": 6.8,
+      "fund_signal": 0.27,
+      "fund_bonus": 1.4,
+      "catalyst_signal": null,
+      "catalyst_bonus": 0.0,
+      "industry_signal": 1.0,
+      "industry_bonus": 8.0,
+      "combo_bonus": 3.0,
+      "branch_signal": null,
+      "branch_bonus": 0.0,
+      "rank_score": 94.5,
+      "hot_industry": true
+    },
+    {
+      "score": 72.0,
+      "trend": 1.0,
+      "rs": 0.46,
+      "setup": 0.77,
+      "quality": 0.91,
+      "liquidity": 0.51,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.56,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 5.8,
+      "ret20_pct": 7.5,
+      "dollar_vol_m": 218.0,
+      "stock_id": "2889",
+      "name": "國票金",
+      "industry": "金融保險",
+      "close": 16.450000762939453,
+      "change_pct": 2.81,
+      "valuation": {
+        "pe": 13.48,
+        "yield_pct": 3.59,
+        "pb": 1.25
+      },
+      "last_ohlc": [
+        16.0,
+        16.8,
+        16.0,
+        16.45
+      ],
+      "chips": {
+        "inst_total_today": 20543805,
+        "inst_buy_streak": 4,
+        "foreign_holding_pct": 10.55,
+        "foreign_holding_change_30d": 0.9,
+        "short_change_pct": 64.52
+      },
+      "fundamentals": {
+        "eps_latest": 0.16,
+        "eps_yoy": 23.1,
+        "debt_ratio": 88.9,
+        "roe": 4.3,
+        "roa": 0.5,
+        "op_cashflow": -18909042000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 16.1,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 16.450000762939453,
+        "ma5": 15.734120559692382,
+        "ma5_diff_pct": 4.35,
+        "ma20": 15.399796772003175,
+        "ma20_diff_pct": 6.38,
+        "ma60": 15.362432263692222,
+        "ma60_diff_pct": 6.61,
+        "ma120": 15.250799465179444,
+        "ma120_diff_pct": 7.29,
+        "ma240": 15.657899732589721,
+        "ma240_diff_pct": 4.82,
+        "high_60": 16.450000762939453,
+        "low_60": 14.8,
+        "high_20": 16.450000762939453,
+        "low_20": 14.92536449432373,
+        "bb_lower": 14.636341577636516,
+        "bb_upper": 16.163251966369835,
+        "atr14": 0.3654945243718007,
+        "stop_2atr": 15.72,
+        "stop_2atr_pct": -4.44
+      },
+      "ohlc": [
+        [
+          15.7,
+          15.95,
+          15.65,
+          15.8
+        ],
+        [
+          15.9,
+          16.1,
+          15.7,
+          15.85
+        ],
+        [
+          15.95,
+          15.95,
+          15.5,
+          15.7
+        ],
+        [
+          15.8,
+          15.9,
+          15.7,
+          15.8
+        ],
+        [
+          15.8,
+          15.85,
+          15.75,
+          15.85
+        ],
+        [
+          15.8,
+          15.85,
+          15.6,
+          15.7
+        ],
+        [
+          15.75,
+          15.8,
+          15.55,
+          15.7
+        ],
+        [
+          15.7,
+          15.9,
+          15.65,
+          15.8
+        ],
+        [
+          15.75,
+          15.85,
+          15.65,
+          15.7
+        ],
+        [
+          15.75,
+          15.8,
+          15.55,
+          15.65
+        ],
+        [
+          15.6,
+          15.75,
+          15.5,
+          15.75
+        ],
+        [
+          15.75,
+          15.75,
+          15.55,
+          15.7
+        ],
+        [
+          15.6,
+          15.6,
+          15.5,
+          15.6
+        ],
+        [
+          15.6,
+          15.6,
+          15.15,
+          15.4
+        ],
+        [
+          15.45,
+          15.7,
+          15.3,
+          15.65
+        ],
+        [
+          15.6,
+          15.8,
+          15.6,
+          15.6
+        ],
+        [
+          15.6,
+          15.65,
+          15.35,
+          15.55
+        ],
+        [
+          15.4,
+          15.5,
+          15.25,
+          15.4
+        ],
+        [
+          15.4,
+          15.45,
+          15.35,
+          15.35
+        ],
+        [
+          15.3,
+          15.4,
+          15.2,
+          15.3
+        ],
+        [
+          15.25,
+          15.35,
+          15.25,
+          15.3
+        ],
+        [
+          15.35,
+          15.4,
+          15.2,
+          15.35
+        ],
+        [
+          15.3,
+          15.3,
+          15.2,
+          15.2
+        ],
+        [
+          15.25,
+          15.3,
+          15.15,
+          15.2
+        ],
+        [
+          15.35,
+          15.55,
+          15.3,
+          15.55
+        ],
+        [
+          15.55,
+          15.75,
+          15.5,
+          15.75
+        ],
+        [
+          15.7,
+          15.75,
+          15.55,
+          15.65
+        ],
+        [
+          15.6,
+          15.7,
+          15.55,
+          15.6
+        ],
+        [
+          15.41,
+          15.46,
+          15.31,
+          15.41
+        ],
+        [
+          15.41,
+          15.56,
+          15.41,
+          15.51
+        ],
+        [
+          15.51,
+          15.66,
+          15.46,
+          15.61
+        ],
+        [
+          15.61,
+          15.66,
+          15.46,
+          15.51
+        ],
+        [
+          15.56,
+          15.56,
+          15.41,
+          15.46
+        ],
+        [
+          15.56,
+          15.81,
+          15.46,
+          15.61
+        ],
+        [
+          15.66,
+          16.21,
+          15.56,
+          16.06
+        ],
+        [
+          16.06,
+          16.06,
+          15.66,
+          15.76
+        ],
+        [
+          15.76,
+          15.91,
+          15.66,
+          15.81
+        ],
+        [
+          15.45,
+          15.7,
+          15.35,
+          15.65
+        ],
+        [
+          15.6,
+          16.15,
+          15.6,
+          16.0
+        ],
+        [
+          16.0,
+          16.8,
+          16.0,
+          16.45
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "volume_price_surge",
+        "n_day_high",
+        "inst_consecutive_buy",
+        "monthly_revenue_growth",
+        "relative_strength_leader",
+        "chip_accumulation"
+      ],
+      "combos": [
+        "主升段啟動"
+      ],
+      "plan": {
+        "ref": 16.45,
+        "max_entry": 16.94,
+        "init_stop": 15.6,
+        "tp1": 18.15,
+        "r_abs": 0.8500003814697266,
+        "risk_pct": 5.17,
+        "style": "momentum",
+        "tp1_resistance": false,
+        "flat_lo": 16.29,
+        "flat_hi": 16.61,
+        "gap_up_line": 16.7,
+        "gap_dn_line": 16.29,
+        "trail_ma": 10
+      },
+      "news": [
+        {
+          "title": "存股變存骨？彰銀、國票金合併震撼彈股票換完「張數大失血」資產集體縮水？不看這篇恐盲目砍在阿呆谷- 上市櫃 - 旺得富理財網",
+          "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1XeG1ES3JqaktoVDk4VEpzWFVjbkJMRFBuTEtxQTJRQnkzQ29YRGZnd09VS3Q5Nk1SS253VkNRX25wWm9FRUZRMXl3MGtnYzFaQmVWdmhPN0R3Z1ZiSUU2c3hOQTZUbnJldEE?oc=5",
+          "published": "Fri, 28 Aug 2026 22:07:13 GMT",
+          "published_date": "2026-08-28",
+          "source": "旺得富理財網"
+        },
+        {
+          "title": "2889 國票金- 【09/03 產業即時新聞】金融股盤中強勢表態，多方資金搶進，有望續攻- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5pSUZJNVVLNXRGa25yTEZGc2JvOTY5MVJfUzZKSU5FWVpjNFViR1pZeVQ5LVV5OUNRYkF0YUIybjEySVBKczZRSko1ZHlrUzRHZEVjZWRIRWw?oc=5",
+          "published": "Wed, 02 Sep 2026 10:43:56 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "國票金發布重訊！配息曝光 - Yahoo新聞",
+          "link": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxOYVVJa1I2Q0Z6Y0pzQ3RtX3RYaXRFZXdRa1JDQ0FaQlFya1RHem02c3prM2FNSkowT2tGV19GeHpqWXRMNkVQMmM4SHhsbXBsQUctUHhkZ1N2UENyaGVRYm9jd3FzcnU1bU9QWW9ZckdPT1doLXRDY0lKb0ZKdkd3alhJUU5RYmQzZ2ZZa1NLeWsyYy1XNWVjMzkySUdrb2dTYjRQQTNDOTZTNWZpbXJnMVhIS0tINUJNRlJRaEtSaVltcG9IRXYtNVJjMXhuTUR4SkRZdkxoRno?oc=5",
+          "published": "Wed, 02 Sep 2026 08:20:00 GMT",
+          "published_date": "2026-09-02",
+          "source": "Yahoo新聞"
+        },
+        {
+          "title": "國票金發布重訊！配息曝光 - 三立新聞網SETN.com",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFBZTmdzMXZReFA1T0FCVERxdkxFU3RMNkhJb2VtT0xDVXpqbnY5SUdMWnl1a1VNdEg4bThYTC1XbzRXS2Y0d09GQmlQdw?oc=5",
+          "published": "Wed, 02 Sep 2026 08:18:36 GMT",
+          "published_date": "2026-09-02",
+          "source": "三立新聞網SETN.com"
+        },
+        {
+          "title": "旺旺、台鋼退讓 和解剩耐斯／國票金董事改選 公股拚主導權 - 自由時報",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBTVngwanBlY3JHeXRBS3pGWDd5aVVpM1JDU1lmQWRMNWkyY1VfcGg4Z1hyUG9NMEp0cHZRV25rY19uWEhCVmlDQlpkYVR1N0lFb2U2Wjdpdlo?oc=5",
+          "published": "Sun, 30 Aug 2026 21:49:10 GMT",
+          "published_date": "2026-08-30",
+          "source": "自由時報"
+        },
+        {
+          "title": "國票金股東會／董事改選出爐 張兆順出任董事長、總經理為吳瑛 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5oQTB5eGFtNHo0bS01TUZ5a0tfSm95cjVkWXI5Ync0SU5OSmJZUG1uMDJ3SXZpa21KRDZEdkNMS2xVMXF5RjItYl96bVplRm9nVGFBdlItUkpwQdIBX0FVX3lxTE5NREJCWjdQSlZfa2paVDAwQm9mNE9HekowbE4tZmJCZVVWbDVoWWIxLWxmc2dpd1otQTM0X1E1Yk5fQm40V2pHZmNYMFkya2p5aWpOZExKbGhnNC1YRnhr?oc=5",
+          "published": "Sun, 30 Aug 2026 09:00:00 GMT",
+          "published_date": "2026-08-30",
+          "source": "經濟日報"
+        },
+        {
+          "title": "【即時新聞】公公併傳拍板！國票金(2889)換股比例曝光，華南金爆量慘跌該逃嗎？ - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPMzNrVUNkZUNCUXpiSWh2X01CYnlhMzVEeHBVTm9hdDUxUnh6cnNGMFFpSThkMlZKNnBpS2tiQ0hRU20wVFlLTDhOVW56anBuTWxDdnpHaHpZVUMyNFRKcVdZem01aXd3R1FOMHU4Y2NDOTIzNEx0SXhFSDlyaUY0V2tTT180a3NmV2VySktyOGw?oc=5",
+          "published": "Thu, 13 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-13",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "《股市行事曆4-2》國票金(2889)除權、國票金(2889)除息 - ww2.money-link.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOMHpoYmo1aERpYkxKZENkMVRhTUpCSDh3dTRrZjRCODlxQmcycDNEb3Mwc21jUFIzSGJMNk5WcTZZYmpaZlUyeno5ZWpxa1FYM2hHT09zUm1sUHhnLWx4eEFka3o1TnR1VXhqQm5hLWhnZExIWjV5YkoxeEwzMzV1c2JZaFlDOTl6?oc=5",
+          "published": "Mon, 31 Aug 2026 23:43:00 GMT",
+          "published_date": "2026-08-31",
+          "source": "ww2.money-link.com.tw"
+        },
+        {
+          "title": "2889 國票金 - 60日地緣券商賣超 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5QaUVqLV85TFFtQmJvbnRzbjVNbXZudjYyM2RDUk1MYUtyY2pJSE45cmpMdlRLNDRpX0dIVmR4SWR6dGJaa1Q1OXB6T0ZZNDNEekt0bTlQRzQ?oc=5",
+          "published": "Mon, 31 Aug 2026 23:46:35 GMT",
+          "published_date": "2026-08-31",
+          "source": "CMoney"
+        },
+        {
+          "title": "聘金怎麼談？民股怎麼安撫？彰銀、國票金4兆婚禮最難寫的是「人心」這本帳- 上市櫃 - 旺得富理財網",
+          "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBDdlluYnVWdXc1blZhLTFtV084UTBSWFd0R0FRMzA5SnNGVDBRdFR6dGF4dnRicDY4UEFTaFluQ2pwVXRzQzRHNnN0d2RYQnNkREV1OVNzTlBLRy1sbUhnYjlfSmhtQU1YU2c?oc=5",
+          "published": "Thu, 27 Aug 2026 22:04:52 GMT",
+          "published_date": "2026-08-27",
+          "source": "旺得富理財網"
+        },
+        {
+          "title": "公股入主國票金掀子公司人事大風吹 一口氣調整5家董監 - udn.com",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5tNDBpNVU1NkRKeHcwb01rOXZjb2s2Z3NHdVIxNXdLcDJtWDZmeFRYMGwyQlQ0ODRtNm1Rbm1hNTc5NFpObXcteVJuQzhhZ3Fj0gFWQVVfeXFMUGZKV3VhaUUyTDNiOVdJOGFPN0pxREhuNHVOLXIzMC1XS1NyQU84dXk2Q1VoZzQ0eFc2TnZ5bkQtX0s1TzVHNjJ0MzdZMFZWZWNhZVh6U0E?oc=5",
+          "published": "Thu, 27 Aug 2026 12:03:23 GMT",
+          "published_date": "2026-08-27",
+          "source": "udn.com"
+        },
+        {
+          "title": "國票金董事會前夕爆內鬨? 遭民股控「四大罪狀」 張兆順這麼說 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1GYzFOTmlvRjBwYU5xRU5xSGdlZ2RrOFVQa040LVNHRUw4Q3otZlNMM3l4cElSNzdRb0JDM2dpcGpLQ0VxaVBPMlZRQWNMZmQzWVBDaGFheGNwSDZ2Mkpv?oc=5",
+          "published": "Tue, 25 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-25",
+          "source": "自由財經"
+        },
+        {
+          "title": "國票金董事長張兆順兼任穩懋獨董 財部：回歸公司治理處理 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMilANBVV95cUxOSXVMQ3hjTC1ENmJCNEUydkRJZjJBYnhRZC14WXZqY1lTMUx3TkxUUHN5a0FWMTlWWmdkMHpwNVNMNjZnaE9UY3ZjZG80TmpyTkVfRWVNY1NoUlpuX3R1VkJpcC1Ed0JfYTFnZ29IWi1NZUx5aEo5b29EemE0blFGaHAzZUJ0Q1N4WUFJUHhGbkMxcHNXR01oWThQUWhXWFMzaHk2b1JNd1ZVUWhKU0RscEFmcGtQNmNTMlZNNERod2JxZ3ZwTmI2U0QyWkJxdFc2SmE4bV9PZy1POXhYdjdJM3dralNONU5CbE9mODNzbndXRnQtQV9tN0NmMmZEaHpNaFFtV1VSX1NqR3BjSjFxcHkweGpzNGpDTHBmTDdSbkZHZEVrQms4N050TlRScTloa2ZjTFpvM0YzNk9sZWtuQ3NpNk5mU0JUeW5EZHZlMjBwSG5FeE5DM1pGTTZLcnRpbkM4VnliekU1akZFYlNkd1NkN0ZhN2tweVI2VklWOHN5MGQzX0ZSRGRrcDgxWHRYVjZjMg?oc=5",
+          "published": "Fri, 21 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-21",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "國票金公股時代來臨 傳首波鎖定此「獲利金雞母」推進100％持股 - 自由時報",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE56dDBSdHFMNldiQlhsSFhJTW9jbzdwTGx6cmFobVZwQnRrNnpLaGcwOWJoekp2Y0ZldnR4UnRlWUo4VkMxSDhNQ0UyYUF3aUxOeUw0N1pPTk8?oc=5",
+          "published": "Thu, 13 Aug 2026 14:32:35 GMT",
+          "published_date": "2026-08-13",
+          "source": "自由時報"
+        },
+        {
+          "title": "公股入主國票金卻無併購時程表！副董2千萬高薪肥缺爆密約疑雲 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiogNBVV95cUxOek1WNEl0TjgtbXFzaGF1UzZiTWhRYV9WNVhmZG1pemZ3UFdFaXNycndlYXNwWTI3TXI2eHlWQmctOHVsRnRTZEJBS0JyUzFhX3I4V04xWUtnMHdaZjc3QUdYYkZxMU5yMmNqTEdpMEZ2d3NISVdHVC1GZDhHaGNMTEV6UW9BMnNUSFhPNlhWZmtyQldCVzE0cXR5TDRFTGszWVlaMUZpRWlVdXhkVzI1V1MyWGtPNlpnb1kzdWkwbHRaTXU3YjhLbXM1eFNOLWJGamtvUWc4WEtBRlVJTERhWVk1cTZJYVpYMy0tdXBfQW43TzZSOWNvcEJfRW1lTEUzU1pXdEJhOFc5eXRLOXdvRHc1ejZCRk9tOTdKaS1vanZiLTNOYXJsTTZQbzhnbGJMT3hEdUFQYU1HOWk1elRiTW1lWlo4S05NZTRzUHpzRVlFUW8yeVYtRF85eS1SU01Na2RjTzItekp5eFlCZC1hbTBGeFlnNy1ORW9wNmlFSzExUjhkc21hSzZJOEV2MEQ0X01WMzNNcVlONVJLTzI0UzBB?oc=5",
+          "published": "Wed, 22 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-22",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "兩樁整併將撼動金控資產排名！玉山金進前五 「新國票」脫末座了？ - udn.com",
+          "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE9ld2E5WmJMWEdhRTA2VndsMkhjRkxkVFdubnJPV0xPOHAyMWRFNFZsOXpycnc1b0hRZENKSVVZSzBmZ0NXT3Z6QjNtZUZOODhfRmVlYWRoVmhFcFlWNmw3cGhvTWRiaWJ4Sjk4Qy0wTzhMUdIBVkFVX3lxTFBPMnFRcU1qOVN5cEpmejVMcFQxTnFSNmtTUkhXekxHd2U1cVB3eWtQRmJvZXV4emVUX3NVMWE4QUJsMGM5Rm9kaHJvaU9wYW9UYXUxdEFB?oc=5",
+          "published": "Mon, 31 Aug 2026 14:04:29 GMT",
+          "published_date": "2026-08-31",
+          "source": "udn.com"
+        },
+        {
+          "title": "國票金(2889)-同學風向與貼文摘要 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFBoR1JtUEpLTlNkaHFlSHlORFA1cWNseDB3UHF3VUNOdFdiZm9kc1VSVF90Qkx5cVVPQnRNckhxVy1IQlFPcEZMZjVIYVI3SmdrX1ZQYUNOclFIQUJScTk2anlB?oc=5",
+          "published": "Mon, 24 Aug 2026 16:50:47 GMT",
+          "published_date": "2026-08-24",
+          "source": "CMoney"
+        },
+        {
+          "title": "公公併有譜？買盤搶進國票金量爆增逾4倍 股價小漲 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9FRG9sOTBZSzdzMElyQjdlVHRiX2JscTZBUEJnUTBPMFJCRFRFVGR6QUJWQmpKRU9EX1R2aVVHVnpBODlkRG5CdDFVTG9EZzc0b2hFVDhsa19Ib3Zpdi1v?oc=5",
+          "published": "Wed, 26 Aug 2026 05:29:45 GMT",
+          "published_date": "2026-08-26",
+          "source": "自由財經"
+        },
+        {
+          "title": "泛官股金控整併來了！ 財政部：全力支持國票金薪酬檢討 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE05a1dsZEh2bXZJRjZia2Y3cW85VEpGbWZGQmREcUx5S19LOUZTZ0ZuTjU2YkpLN3hDWFpVd0MwaFF1ZGtpVnRUUk9xSGc5d1c4S1JfeThHYVg?oc=5",
+          "published": "Fri, 14 Aug 2026 04:04:59 GMT",
+          "published_date": "2026-08-14",
+          "source": "CMoney"
+        },
+        {
+          "title": "國票金拚整併 不當「爛蘋果」 董座張兆順稱規模小 不是併人就是被併 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9oazhLRkJVeE5DcmQ2c09SLW9wZ2JkaTBoS2NWSnVwdzMtVGp2S05Gd25SRjVDSG1DNWNNc0pxZGVsODU5SEJEajdjYnlXdlFxWHEyQ3dUcjVHd9IBX0FVX3lxTE5GbkZYTDY3cVVyMVlVd1B1LXBWcFBEajFqcmJEM0JJbWZXN2kyWkU1SE1haXNpcmVBOHpHUFEzbmY1OFJsOGo4Tng5NnJaUVE1amswa2lJRGF0TDc5aV9v?oc=5",
+          "published": "Thu, 13 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-13",
+          "source": "經濟日報"
+        },
+        {
+          "title": "彰銀27萬股東注意！正式啟動併購評估 國票金會是下一步？ - udn.com",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBKenNNWXNMTjRDWldxdURXSWd2b2F4YWFtdHNjYXpWa0wxRmZVRVVnLWlPX0dKb0J1Q0Nab2tpTWVrWjdQNjBrWWtCQm83UzNr0gFWQVVfeXFMTjhNRmJydkxOOVNSWUttcmNmX0FDMFRoR2dBWVBqS2lfWHY4cnNhNlRZb2pDcFZjLWp1dkV4bXVSQmxkLXRNSkdJR2Y1VGlaOFR0c1BGOWc?oc=5",
+          "published": "Tue, 25 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-25",
+          "source": "udn.com"
+        },
+        {
+          "title": "國票金副董年薪千萬惹議 人旺被清場！國票證本周五將選任副董 公股、耐斯全面掌控 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE54WDlvWDFBbHJ0NFdFZlZDOTA5ZmJ6bUxKYVdDN2pkdlE1Z0Z4bnhXcGlnWEpsWFlKd2NnS0NCVmdlS3RveTJaVWlGMk96SFQtWG9mTkc2MHFQNi02ZXgw?oc=5",
+          "published": "Tue, 11 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-11",
+          "source": "自由財經"
+        },
+        {
+          "title": "國票金首季獲利近9億元翻倍增 EPS0.25元 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMijgJBVV95cUxOOHE3RW5lU2NMMXRIYmpEMDlEVlR4bjFLQnc5Vlk1UDJiTWxJS29Sc216b3hSbjlkVmRxNjFxR05NaExyeHdKU2w5MGhSMkRMckxHQ2pZaE5DMXpBdUdtOHFQcUNDUk5odmI4RUZkQTFMWWJ3MjJVTzkzZXllSHhGdXpRc3N6RFFSMnY2ZjU0YVhCQkFqY2RoSTh5Yms3b29DQllCUnU3Q3p3S2ZudUxSaHA4S045T2UtREFZSW90WlB2dG9XQjU2Rk1XQzdZWWQyZ1JVTGxNWkNGNlhhcnlJM2J4WlAwVFJUSXhZeHFYMkNDZkZoWXpYQjlzR2NVaTNQT0MtOUVOSFloZTVWU3c?oc=5",
+          "published": "Thu, 09 Apr 2026 07:00:00 GMT",
+          "published_date": "2026-04-09",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "金控副董年薪2,000萬合理嗎？金管會提三大檢視原則 - 經濟日報",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5qNzFGTnd6Z1gwb1F2QWhfS3RZdkVrTkFEVkJ0Yl9EVjFWVW9VVnBVdjJlbGd2b1BmVS1PaWVITlA0bzZkZHlMWjFpRE1qZGxTZGJ1X0RtSE5uZ9IBX0FVX3lxTE95OEtla0J5T2hWSkM1ZGExVTVTR1hLMV9FdnlNZDFqVzhWckxFbUdnd1VTa3dJZ3RSNk5sbVZUVE9aMjBwdHdfMFpYMi11ekk3REo4T0RIS0pGR0UxTWdz?oc=5",
+          "published": "Sat, 29 Aug 2026 09:00:00 GMT",
+          "published_date": "2026-08-29",
+          "source": "經濟日報"
+        },
+        {
+          "title": "國票金「花落誰家」？財部首度表態：支持強化治理及薪酬檢討、評估整併 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9NZlVaOTJ4SXJPV0Y4aG45U3A1VUxldGo5a1NDLUxKZU5TVmtvWENvb2p6UEdsMFdEb3labUdQajJ6NDZBalMwZ2JmdEN4S1JTV3BhSkRqaEQ?oc=5",
+          "published": "Fri, 14 Aug 2026 04:42:14 GMT",
+          "published_date": "2026-08-14",
+          "source": "CMoney"
+        }
+      ],
+      "catalysts": [],
+      "catalyst_summary": "國票金與彰銀併購案進展，換股比例曝光，同時完成董事改選，新任董事長張兆順、總經理吳瑛就任，並發布配息重訊。",
+      "risk_flags": [
+        "彰銀國票金合併，股東資產失血",
+        "董事會前夕爆內鬨",
+        "副董年薪2千萬薪酬爭議",
+        "治理風險",
+        "公股入主人事大風吹"
+      ],
+      "target_prices": [],
+      "branch_breadth": null,
+      "chip_signal": 0.56,
+      "chip_bonus": 8.4,
+      "fund_signal": 0.52,
+      "fund_bonus": 2.6,
+      "catalyst_signal": 0.0,
+      "catalyst_bonus": 0.0,
+      "industry_signal": 1.0,
+      "industry_bonus": 8.0,
+      "combo_bonus": 3.0,
+      "branch_signal": null,
+      "branch_bonus": 0.0,
+      "rank_score": 94.0,
+      "hot_industry": true
+    },
+    {
+      "score": 71.9,
+      "trend": 0.8,
+      "rs": 0.2,
+      "setup": 0.69,
+      "quality": 0.94,
+      "liquidity": 0.46,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": true,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.82,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 5.9,
+      "ret20_pct": 12.2,
+      "dollar_vol_m": 185.0,
+      "stock_id": "2855",
+      "name": "統一證",
+      "industry": "金融保險",
+      "close": 50.599998474121094,
+      "change_pct": 2.02,
+      "valuation": {
+        "pe": 5.25,
+        "yield_pct": 4.17,
+        "pb": 1.69
+      },
+      "last_ohlc": [
+        49.7,
+        50.8,
+        49.7,
+        50.6
+      ],
+      "chips": {
+        "inst_total_today": 605638,
+        "inst_buy_streak": 7,
+        "foreign_holding_pct": 6.75,
+        "foreign_holding_change_30d": -0.69,
+        "short_change_pct": -2.07
+      },
+      "fundamentals": {
+        "eps_latest": 1.33,
+        "eps_yoy": 155.8,
+        "debt_ratio": 87.3,
+        "roe": 18.5,
+        "roa": 2.3,
+        "op_cashflow": -14713577000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 19.6,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 50.599998474121094,
+        "ma5": 49.65999908447266,
+        "ma5_diff_pct": 1.86,
+        "ma20": 47.38749961853027,
+        "ma20_diff_pct": 6.35,
+        "ma60": 47.41520032061768,
+        "ma60_diff_pct": 6.29,
+        "ma120": 41.9338403019755,
+        "ma120_diff_pct": 17.13,
+        "ma240": 33.23274441348775,
+        "ma240_diff_pct": 34.32,
+        "high_60": 52.2,
+        "low_60": 40.099998474121094,
+        "high_20": 50.599998474121094,
+        "low_20": 44.5,
+        "bb_lower": 44.23908783677711,
+        "bb_upper": 50.53591140028343,
+        "atr14": 1.1035714830671037,
+        "stop_2atr": 48.39,
+        "stop_2atr_pct": -4.36
+      },
+      "ohlc": [
+        [
+          50.5,
+          50.9,
+          49.9,
+          50.4
+        ],
+        [
+          50.5,
+          50.8,
+          49.25,
+          49.65
+        ],
+        [
+          49.75,
+          49.75,
+          46.2,
+          46.65
+        ],
+        [
+          47.6,
+          47.95,
+          46.75,
+          46.9
+        ],
+        [
+          46.8,
+          47.2,
+          45.95,
+          46.35
+        ],
+        [
+          44.85,
+          44.95,
+          43.9,
+          44.15
+        ],
+        [
+          44.15,
+          44.15,
+          42.0,
+          42.95
+        ],
+        [
+          43.45,
+          43.95,
+          43.1,
+          43.65
+        ],
+        [
+          44.1,
+          45.2,
+          44.1,
+          44.5
+        ],
+        [
+          44.95,
+          45.1,
+          44.15,
+          44.65
+        ],
+        [
+          44.05,
+          44.95,
+          44.05,
+          44.2
+        ],
+        [
+          44.4,
+          45.0,
+          43.9,
+          45.0
+        ],
+        [
+          44.0,
+          44.05,
+          41.3,
+          42.2
+        ],
+        [
+          42.3,
+          42.5,
+          39.75,
+          40.8
+        ],
+        [
+          40.7,
+          41.25,
+          39.7,
+          40.1
+        ],
+        [
+          43.0,
+          43.9,
+          42.0,
+          43.3
+        ],
+        [
+          42.9,
+          44.9,
+          42.6,
+          44.15
+        ],
+        [
+          43.65,
+          44.95,
+          43.65,
+          44.75
+        ],
+        [
+          45.5,
+          46.7,
+          45.4,
+          45.85
+        ],
+        [
+          45.3,
+          45.5,
+          44.3,
+          45.1
+        ],
+        [
+          45.0,
+          45.3,
+          44.1,
+          44.5
+        ],
+        [
+          44.5,
+          46.1,
+          44.05,
+          45.85
+        ],
+        [
+          45.55,
+          46.25,
+          45.25,
+          46.2
+        ],
+        [
+          46.4,
+          48.0,
+          46.4,
+          47.5
+        ],
+        [
+          48.05,
+          48.5,
+          47.1,
+          47.35
+        ],
+        [
+          47.5,
+          48.35,
+          47.2,
+          47.4
+        ],
+        [
+          47.4,
+          47.4,
+          46.3,
+          46.6
+        ],
+        [
+          46.6,
+          46.95,
+          46.35,
+          46.85
+        ],
+        [
+          46.3,
+          46.7,
+          45.5,
+          45.85
+        ],
+        [
+          46.3,
+          46.75,
+          45.85,
+          46.65
+        ],
+        [
+          46.65,
+          47.1,
+          46.25,
+          47.1
+        ],
+        [
+          47.0,
+          47.0,
+          45.5,
+          46.2
+        ],
+        [
+          46.0,
+          46.2,
+          45.35,
+          46.2
+        ],
+        [
+          46.6,
+          47.6,
+          46.45,
+          47.4
+        ],
+        [
+          47.4,
+          48.4,
+          47.4,
+          47.8
+        ],
+        [
+          48.35,
+          49.0,
+          48.25,
+          48.55
+        ],
+        [
+          48.3,
+          49.55,
+          47.75,
+          49.55
+        ],
+        [
+          49.5,
+          50.3,
+          49.3,
+          50.0
+        ],
+        [
+          49.5,
+          50.0,
+          49.4,
+          49.6
+        ],
+        [
+          49.7,
+          50.8,
+          49.7,
+          50.6
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "volume_price_surge",
+        "inst_consecutive_buy",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "plan": {
+        "ref": 50.6,
+        "max_entry": 52.12,
+        "init_stop": 49.4,
+        "tp1": 53.0,
+        "r_abs": 1.1999969482421875,
+        "risk_pct": 2.37,
+        "style": "momentum",
+        "tp1_resistance": true,
+        "flat_lo": 50.09,
+        "flat_hi": 51.11,
+        "gap_up_line": 51.36,
+        "gap_dn_line": 50.09,
+        "trail_ma": 10
+      },
+      "news": [],
+      "branch_breadth": null,
+      "chip_signal": 0.5,
+      "chip_bonus": 7.5,
+      "fund_signal": 0.6,
+      "fund_bonus": 3.0,
+      "catalyst_signal": null,
+      "catalyst_bonus": 0.0,
+      "industry_signal": 1.0,
+      "industry_bonus": 8.0,
+      "combo_bonus": 0.0,
+      "branch_signal": null,
+      "branch_bonus": 0.0,
+      "rank_score": 90.4,
+      "hot_industry": true
+    }
+  ],
+  "watch": [
+    {
+      "score": 74.8,
+      "trend": 0.8,
+      "rs": 0.2,
+      "setup": 0.91,
+      "quality": 0.47,
+      "liquidity": 0.36,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 4.5,
+      "ret20_pct": 40.9,
+      "dollar_vol_m": 122.0,
+      "stock_id": "6224",
+      "name": "聚鼎",
+      "industry": "電子工業",
+      "close": 79.5999984741211,
+      "change_pct": -6.35,
+      "valuation": {
+        "pe": 66.33,
+        "yield_pct": 1.57,
+        "pb": 2.99
+      },
+      "last_ohlc": [
+        89.9,
+        92.0,
+        79.6,
+        79.6
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 73.1,
+      "trend": 0.6,
+      "rs": 0.25,
+      "setup": 0.94,
+      "quality": 0.62,
+      "liquidity": 0.31,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.34,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 2.7,
+      "ret20_pct": 10.8,
+      "dollar_vol_m": 101.0,
+      "stock_id": "5285",
+      "name": "界霖",
+      "industry": "電子工業",
+      "close": 86.30000305175781,
+      "change_pct": -3.68,
+      "valuation": {
+        "pe": 27.93,
+        "yield_pct": 1.74,
+        "pb": 2.86
+      },
+      "last_ohlc": [
+        89.7,
+        90.3,
+        84.2,
+        86.3
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 71.7,
+      "trend": 0.8,
+      "rs": 0.39,
+      "setup": 0.87,
+      "quality": 0.28,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.46,
+      "consec_big_up": 1,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 6.5,
+      "ret20_pct": 12.2,
+      "dollar_vol_m": 4357.0,
+      "stock_id": "2481",
+      "name": "強茂",
+      "industry": "半導體業",
+      "close": 156.0,
+      "change_pct": 5.41,
+      "valuation": {
+        "pe": 41.38,
+        "yield_pct": 1.15,
+        "pb": 3.96
+      },
+      "last_ohlc": [
+        151.0,
+        162.5,
+        150.5,
+        156.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 71.0,
+      "trend": 0.6,
+      "rs": 0.2,
+      "setup": 0.88,
+      "quality": 0.14,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 11.0,
+      "ret20_pct": 25.1,
+      "dollar_vol_m": 5306.0,
+      "stock_id": "6442",
+      "name": "光聖",
+      "industry": "電子工業",
+      "close": 1770.0,
+      "change_pct": -1.39,
+      "valuation": {
+        "pe": 52.37,
+        "yield_pct": 0.64,
+        "pb": 10.63
+      },
+      "last_ohlc": [
+        1840.0,
+        1920.0,
+        1770.0,
+        1770.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 70.4,
+      "trend": 0.8,
+      "rs": 0.43,
+      "setup": 0.89,
+      "quality": 0.12,
+      "liquidity": 0.81,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.07,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 7.2,
+      "ret20_pct": 5.7,
+      "dollar_vol_m": 703.0,
+      "stock_id": "4576",
+      "name": "大銀微系統",
+      "industry": "電機機械",
+      "close": 231.0,
+      "change_pct": -4.55,
+      "valuation": {
+        "pe": 70.43,
+        "yield_pct": 0.35,
+        "pb": 6.45
+      },
+      "last_ohlc": [
+        250.0,
+        251.5,
+        229.5,
+        231.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 70.1,
+      "trend": 0.4,
+      "rs": 0.2,
+      "setup": 0.92,
+      "quality": 0.14,
+      "liquidity": 0.88,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.22,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 11.2,
+      "ret20_pct": 16.9,
+      "dollar_vol_m": 933.0,
+      "stock_id": "6683",
+      "name": "雍智科技",
+      "industry": "半導體業",
+      "close": 1385.0,
+      "change_pct": -5.14,
+      "valuation": {
+        "pe": 61.83,
+        "yield_pct": 0.65,
+        "pb": 13.5
+      },
+      "last_ohlc": [
+        1470.0,
+        1475.0,
+        1360.0,
+        1385.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 67.9,
+      "trend": 1.0,
+      "rs": 0.51,
+      "setup": 0.68,
+      "quality": 0.87,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.55,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": 9.8,
+      "ret20_pct": 15.4,
+      "dollar_vol_m": 2443.0,
+      "stock_id": "2882",
+      "name": "國泰金",
+      "industry": "金融保險",
+      "close": 112.5,
+      "change_pct": 3.21,
+      "valuation": {
+        "pe": 13.27,
+        "yield_pct": 3.11,
+        "pb": 1.62
+      },
+      "last_ohlc": [
+        110.5,
+        115.0,
+        109.5,
+        112.5
+      ],
+      "hot_industry": true
+    },
+    {
+      "score": 67.3,
+      "trend": 0.8,
+      "rs": 1.0,
+      "setup": 1.0,
+      "quality": 0.14,
+      "liquidity": 0.62,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.04,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 5.2,
+      "ret20_pct": 18.6,
+      "dollar_vol_m": 343.0,
+      "stock_id": "3055",
+      "name": "蔚華科",
+      "industry": "電子工業",
+      "close": 131.0,
+      "change_pct": -7.75,
+      "valuation": {
+        "pe": null,
+        "yield_pct": 0.38,
+        "pb": 9.1
+      },
+      "last_ohlc": [
+        143.0,
+        144.5,
+        130.5,
+        131.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 66.2,
+      "trend": 0.4,
+      "rs": 0.2,
+      "setup": 0.8,
+      "quality": 0.88,
+      "liquidity": 0.85,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 3.6,
+      "ret20_pct": 8.7,
+      "dollar_vol_m": 833.0,
+      "stock_id": "3019",
+      "name": "亞光",
+      "industry": "光電業",
+      "close": 143.0,
+      "change_pct": -9.21,
+      "valuation": {
+        "pe": 24.11,
+        "yield_pct": 3.22,
+        "pb": 2.69
+      },
+      "last_ohlc": [
+        162.0,
+        163.0,
+        143.0,
+        143.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 66.1,
+      "trend": 0.4,
+      "rs": 0.2,
+      "setup": 0.87,
+      "quality": 0.1,
+      "liquidity": 0.83,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.17,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 10.1,
+      "ret20_pct": 21.1,
+      "dollar_vol_m": 783.0,
+      "stock_id": "6217",
+      "name": "中探針",
+      "industry": "電子零組件業",
+      "close": 195.5,
+      "change_pct": 0.0,
+      "valuation": {
+        "yield_pct": 0.0,
+        "pb": 7.61
+      },
+      "last_ohlc": [
+        196.0,
+        210.5,
+        192.5,
+        195.5
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 65.4,
+      "trend": 0.6,
+      "rs": 0.73,
+      "setup": 0.93,
+      "quality": 0.26,
+      "liquidity": 0.84,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.01,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 11.8,
+      "ret20_pct": 15.0,
+      "dollar_vol_m": 801.0,
+      "stock_id": "8111",
+      "name": "立碁",
+      "industry": "光電業",
+      "close": 72.0,
+      "change_pct": -5.76,
+      "valuation": {
+        "pe": 63.16,
+        "yield_pct": 0.83,
+        "pb": 5.68
+      },
+      "last_ohlc": [
+        76.5,
+        82.8,
+        71.9,
+        72.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 65.4,
+      "trend": 0.8,
+      "rs": 0.9,
+      "setup": 0.88,
+      "quality": 0.52,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.06,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 1.1,
+      "ret20_pct": 7.4,
+      "dollar_vol_m": 3721.0,
+      "stock_id": "3006",
+      "name": "晶豪科",
+      "industry": "半導體業",
+      "close": 277.0,
+      "change_pct": -1.6,
+      "valuation": {
+        "pe": 8.74,
+        "yield_pct": 0.36,
+        "pb": 4.15
+      },
+      "last_ohlc": [
+        300.5,
+        309.5,
+        275.0,
+        277.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 65.0,
+      "trend": 1.0,
+      "rs": 0.45,
+      "setup": 0.8,
+      "quality": 0.51,
+      "liquidity": 0.07,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.13,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 2.5,
+      "ret20_pct": 13.6,
+      "dollar_vol_m": 39.0,
+      "stock_id": "1440",
+      "name": "南紡",
+      "industry": "紡織纖維",
+      "close": 14.199999809265137,
+      "change_pct": 0.0,
+      "valuation": {
+        "pe": 473.33,
+        "yield_pct": 2.11,
+        "pb": 0.82
+      },
+      "last_ohlc": [
+        14.4,
+        14.85,
+        14.1,
+        14.2
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 64.3,
+      "trend": 0.6,
+      "rs": 0.5,
+      "setup": 0.87,
+      "quality": 0.18,
+      "liquidity": 0.74,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.08,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 10.2,
+      "ret20_pct": 25.0,
+      "dollar_vol_m": 534.0,
+      "stock_id": "6640",
+      "name": "均華",
+      "industry": "半導體業",
+      "close": 1185.0,
+      "change_pct": -2.07,
+      "valuation": {
+        "pe": 70.75,
+        "yield_pct": 1.27,
+        "pb": 6.61
+      },
+      "last_ohlc": [
+        1230.0,
+        1240.0,
+        1180.0,
+        1185.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 64.2,
+      "trend": 1.0,
+      "rs": 0.47,
+      "setup": 0.74,
+      "quality": 0.13,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.34,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 16.6,
+      "ret20_pct": 6.6,
+      "dollar_vol_m": 5039.0,
+      "stock_id": "5274",
+      "name": "信驊",
+      "industry": "半導體業",
+      "close": 17850.0,
+      "change_pct": 0.71,
+      "valuation": {
+        "pe": 119.07,
+        "yield_pct": 0.45,
+        "pb": 86.6
+      },
+      "last_ohlc": [
+        17735.0,
+        18790.0,
+        17360.0,
+        17850.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 63.9,
+      "trend": 0.4,
+      "rs": 0.2,
+      "setup": 0.79,
+      "quality": 0.65,
+      "liquidity": 0.8,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.04,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -3.1,
+      "ret20_pct": 6.6,
+      "dollar_vol_m": 678.0,
+      "stock_id": "3714",
+      "name": "富采",
+      "industry": "電子工業",
+      "close": 61.5,
+      "change_pct": -0.81,
+      "valuation": {
+        "pe": null,
+        "yield_pct": 1.46,
+        "pb": 1.05
+      },
+      "last_ohlc": [
+        63.8,
+        68.2,
+        61.2,
+        61.5
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 62.1,
+      "trend": 0.4,
+      "rs": 0.26,
+      "setup": 0.81,
+      "quality": 0.11,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.05,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "動能",
+      "ret5_pct": 7.8,
+      "ret20_pct": 27.3,
+      "dollar_vol_m": 1774.0,
+      "stock_id": "4971",
+      "name": "IET-KY",
+      "industry": "半導體業",
+      "close": 611.0,
+      "change_pct": -8.67,
+      "valuation": {
+        "pe": 152.37,
+        "yield_pct": 0.14,
+        "pb": 6.53
+      },
+      "last_ohlc": [
+        678.0,
+        719.0,
+        605.0,
+        611.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 61.7,
+      "trend": 0.4,
+      "rs": 0.2,
+      "setup": 0.78,
+      "quality": 0.69,
+      "liquidity": 0.46,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.02,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 2.3,
+      "ret20_pct": 5.2,
+      "dollar_vol_m": 179.0,
+      "stock_id": "6664",
+      "name": "群翊",
+      "industry": "電子零組件業",
+      "close": 363.0,
+      "change_pct": 0.14,
+      "valuation": {
+        "pe": 21.83,
+        "yield_pct": 2.79,
+        "pb": 5.3
+      },
+      "last_ohlc": [
+        371.0,
+        392.5,
+        362.5,
+        363.0
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 60.3,
+      "trend": 0.2,
+      "rs": 0.2,
+      "setup": 0.8,
+      "quality": 0.88,
+      "liquidity": 0.41,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -0.9,
+      "ret20_pct": 3.6,
+      "dollar_vol_m": 151.0,
+      "stock_id": "3689",
+      "name": "湧德",
+      "industry": "電子零組件業",
+      "close": 114.5,
+      "change_pct": -3.38,
+      "valuation": {
+        "pe": 14.17,
+        "yield_pct": 3.19,
+        "pb": 2.06
+      },
+      "last_ohlc": [
+        122.5,
+        124.0,
+        114.5,
+        114.5
+      ],
+      "hot_industry": false
+    },
+    {
+      "score": 58.0,
+      "trend": 1.0,
+      "rs": 1.0,
+      "setup": 0.74,
+      "quality": 0.56,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.04,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 10.3,
+      "ret20_pct": 20.0,
+      "dollar_vol_m": 2482.0,
+      "stock_id": "1326",
+      "name": "台化",
+      "industry": "塑膠工業",
+      "close": 69.69999694824219,
+      "change_pct": -4.26,
+      "valuation": {
+        "pe": 29.53,
+        "yield_pct": 0.86,
+        "pb": 0.79
+      },
+      "last_ohlc": [
+        72.1,
+        78.2,
+        69.3,
+        69.7
+      ],
+      "hot_industry": true
+    }
+  ],
+  "watchlist": [
+    {
+      "score": 26.9,
+      "trend": 0.8,
+      "rs": 0.07,
+      "setup": 0.07,
+      "quality": 0.86,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.03,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "品質",
+      "ret5_pct": -2.5,
+      "ret20_pct": 3.9,
+      "dollar_vol_m": 4099.0,
+      "stock_id": "2324",
+      "name": "仁寶",
+      "industry": "電腦及週邊設備業",
+      "close": 38.75,
+      "change_pct": -2.39,
+      "valuation": {
+        "pe": 19.47,
+        "yield_pct": 2.84,
+        "pb": 1.19
+      },
+      "last_ohlc": [
+        40.0,
+        40.55,
+        38.7,
+        38.75
+      ],
+      "note": "仁寶",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -8194140,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 37.51,
+        "foreign_holding_change_30d": 1.12,
+        "short_change_pct": -0.37
+      },
+      "fundamentals": {
+        "eps_latest": 0.73,
+        "eps_yoy": 563.6,
+        "gross_margin": 4.6,
+        "operating_margin": 1.2,
+        "debt_ratio": 70.6,
+        "roe": 2.4,
+        "roa": 0.7,
+        "op_cashflow": -13657905000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 38.3,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 38.75,
+        "ma5": 39.68000030517578,
+        "ma5_diff_pct": -2.4,
+        "ma20": 39.60249996185303,
+        "ma20_diff_pct": -2.2,
+        "ma60": 37.29000003814697,
+        "ma60_diff_pct": 3.77,
+        "ma120": 34.40381086907348,
+        "ma120_diff_pct": 11.22,
+        "ma240": 32.22959855120341,
+        "ma240_diff_pct": 16.83,
+        "high_60": 43.20000076293945,
+        "low_60": 33.75,
+        "high_20": 43.20000076293945,
+        "low_20": 36.29999923706055,
+        "bb_lower": 36.053522575485545,
+        "bb_upper": 43.15147734822051,
+        "atr14": 2.0749994005475725,
+        "stop_2atr": 34.6,
+        "stop_2atr_pct": -10.71
+      },
+      "ohlc": [
+        [
+          36.1,
+          37.65,
+          36.1,
+          36.6
+        ],
+        [
+          37.95,
+          38.2,
+          36.2,
+          36.65
+        ],
+        [
+          36.8,
+          36.85,
+          34.7,
+          35.55
+        ],
+        [
+          35.75,
+          36.65,
+          35.4,
+          36.15
+        ],
+        [
+          36.0,
+          36.5,
+          35.6,
+          35.95
+        ],
+        [
+          35.6,
+          36.95,
+          35.2,
+          36.0
+        ],
+        [
+          36.05,
+          36.2,
+          33.7,
+          34.4
+        ],
+        [
+          34.8,
+          36.0,
+          34.45,
+          36.0
+        ],
+        [
+          36.45,
+          37.0,
+          36.05,
+          36.2
+        ],
+        [
+          36.6,
+          37.7,
+          36.4,
+          36.75
+        ],
+        [
+          36.45,
+          37.3,
+          36.1,
+          37.2
+        ],
+        [
+          37.5,
+          37.5,
+          36.05,
+          37.15
+        ],
+        [
+          36.1,
+          36.1,
+          34.5,
+          34.7
+        ],
+        [
+          35.0,
+          36.3,
+          33.9,
+          34.85
+        ],
+        [
+          35.0,
+          35.0,
+          33.2,
+          33.75
+        ],
+        [
+          36.5,
+          36.5,
+          35.3,
+          36.0
+        ],
+        [
+          35.2,
+          36.6,
+          34.55,
+          36.35
+        ],
+        [
+          36.0,
+          37.35,
+          35.85,
+          37.0
+        ],
+        [
+          37.8,
+          37.9,
+          36.85,
+          36.95
+        ],
+        [
+          36.8,
+          37.3,
+          36.5,
+          37.3
+        ],
+        [
+          37.5,
+          37.5,
+          36.4,
+          36.55
+        ],
+        [
+          36.75,
+          36.85,
+          35.85,
+          36.3
+        ],
+        [
+          36.3,
+          36.5,
+          35.65,
+          36.3
+        ],
+        [
+          36.75,
+          39.9,
+          36.6,
+          39.9
+        ],
+        [
+          40.1,
+          41.7,
+          39.1,
+          39.3
+        ],
+        [
+          40.3,
+          43.2,
+          40.3,
+          43.2
+        ],
+        [
+          43.35,
+          44.95,
+          40.95,
+          41.65
+        ],
+        [
+          41.75,
+          43.2,
+          40.15,
+          40.6
+        ],
+        [
+          39.0,
+          39.5,
+          38.05,
+          39.3
+        ],
+        [
+          39.3,
+          40.1,
+          38.25,
+          38.5
+        ],
+        [
+          38.4,
+          39.0,
+          37.9,
+          38.95
+        ],
+        [
+          40.0,
+          42.6,
+          39.5,
+          41.6
+        ],
+        [
+          41.6,
+          41.85,
+          39.65,
+          40.8
+        ],
+        [
+          40.8,
+          41.25,
+          39.85,
+          40.95
+        ],
+        [
+          41.5,
+          41.6,
+          39.6,
+          39.75
+        ],
+        [
+          39.6,
+          40.65,
+          39.3,
+          39.7
+        ],
+        [
+          39.55,
+          40.55,
+          39.3,
+          40.35
+        ],
+        [
+          40.35,
+          40.8,
+          39.5,
+          39.9
+        ],
+        [
+          40.7,
+          41.15,
+          39.65,
+          39.7
+        ],
+        [
+          40.0,
+          40.55,
+          38.7,
+          38.75
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": []
+    },
+    {
+      "score": 24.0,
+      "trend": 0.8,
+      "rs": 0.16,
+      "setup": 0.09,
+      "quality": 0.29,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": true,
+      "limit_up_today": false,
+      "close_pos": 0.5,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -0.8,
+      "ret20_pct": 1.1,
+      "dollar_vol_m": 41122.0,
+      "stock_id": "2330",
+      "name": "台積電",
+      "industry": "半導體業",
+      "close": 2390.0,
+      "change_pct": 0.21,
+      "valuation": {
+        "pe": 27.7,
+        "yield_pct": 0.92,
+        "pb": 9.64
+      },
+      "last_ohlc": [
+        2385.0,
+        2400.0,
+        2380.0,
+        2390.0
+      ],
+      "note": "台積電",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -998322,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 69.18,
+        "foreign_holding_change_30d": 0.03,
+        "short_change_pct": 4.0
+      },
+      "fundamentals": {
+        "eps_latest": 27.25,
+        "eps_yoy": 77.4,
+        "gross_margin": 67.7,
+        "operating_margin": 60.3,
+        "debt_ratio": 30.9,
+        "roe": 10.9,
+        "roa": 7.5,
+        "op_cashflow": 1482341242000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 44.7,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 2390.0,
+        "ma5": 2408.0,
+        "ma5_diff_pct": -0.75,
+        "ma20": 2397.25,
+        "ma20_diff_pct": -0.3,
+        "ma60": 2388.0666666666666,
+        "ma60_diff_pct": 0.08,
+        "ma120": 2245.045512675,
+        "ma120_diff_pct": 6.07,
+        "ma240": 1892.7282277333334,
+        "ma240_diff_pct": 20.81,
+        "high_60": 2510.0,
+        "low_60": 2200.0,
+        "high_20": 2440.0,
+        "low_20": 2350.0,
+        "bb_lower": 2352.355386561647,
+        "bb_upper": 2442.144613438353,
+        "atr14": 39.285714285714285,
+        "stop_2atr": 2311.43,
+        "stop_2atr_pct": -3.29
+      },
+      "ohlc": [
+        [
+          2450.0,
+          2460.0,
+          2415.0,
+          2415.0
+        ],
+        [
+          2460.0,
+          2480.0,
+          2440.0,
+          2440.0
+        ],
+        [
+          2410.0,
+          2430.0,
+          2390.0,
+          2420.0
+        ],
+        [
+          2425.0,
+          2460.0,
+          2415.0,
+          2440.0
+        ],
+        [
+          2430.0,
+          2470.0,
+          2420.0,
+          2470.0
+        ],
+        [
+          2375.0,
+          2395.0,
+          2290.0,
+          2290.0
+        ],
+        [
+          2300.0,
+          2345.0,
+          2300.0,
+          2320.0
+        ],
+        [
+          2350.0,
+          2410.0,
+          2345.0,
+          2410.0
+        ],
+        [
+          2440.0,
+          2445.0,
+          2385.0,
+          2400.0
+        ],
+        [
+          2385.0,
+          2405.0,
+          2370.0,
+          2405.0
+        ],
+        [
+          2355.0,
+          2365.0,
+          2345.0,
+          2350.0
+        ],
+        [
+          2330.0,
+          2365.0,
+          2330.0,
+          2350.0
+        ],
+        [
+          2270.0,
+          2305.0,
+          2270.0,
+          2280.0
+        ],
+        [
+          2260.0,
+          2280.0,
+          2180.0,
+          2200.0
+        ],
+        [
+          2205.0,
+          2260.0,
+          2190.0,
+          2205.0
+        ],
+        [
+          2350.0,
+          2425.0,
+          2345.0,
+          2425.0
+        ],
+        [
+          2390.0,
+          2395.0,
+          2365.0,
+          2370.0
+        ],
+        [
+          2335.0,
+          2360.0,
+          2310.0,
+          2320.0
+        ],
+        [
+          2385.0,
+          2415.0,
+          2370.0,
+          2405.0
+        ],
+        [
+          2395.0,
+          2395.0,
+          2360.0,
+          2365.0
+        ],
+        [
+          2390.0,
+          2395.0,
+          2355.0,
+          2370.0
+        ],
+        [
+          2390.0,
+          2410.0,
+          2380.0,
+          2380.0
+        ],
+        [
+          2390.0,
+          2405.0,
+          2375.0,
+          2395.0
+        ],
+        [
+          2405.0,
+          2415.0,
+          2390.0,
+          2415.0
+        ],
+        [
+          2440.0,
+          2445.0,
+          2425.0,
+          2435.0
+        ],
+        [
+          2435.0,
+          2440.0,
+          2395.0,
+          2395.0
+        ],
+        [
+          2410.0,
+          2420.0,
+          2390.0,
+          2400.0
+        ],
+        [
+          2415.0,
+          2415.0,
+          2375.0,
+          2380.0
+        ],
+        [
+          2340.0,
+          2355.0,
+          2335.0,
+          2350.0
+        ],
+        [
+          2365.0,
+          2375.0,
+          2350.0,
+          2375.0
+        ],
+        [
+          2375.0,
+          2410.0,
+          2365.0,
+          2410.0
+        ],
+        [
+          2410.0,
+          2410.0,
+          2375.0,
+          2375.0
+        ],
+        [
+          2355.0,
+          2400.0,
+          2350.0,
+          2400.0
+        ],
+        [
+          2375.0,
+          2425.0,
+          2375.0,
+          2415.0
+        ],
+        [
+          2430.0,
+          2435.0,
+          2410.0,
+          2410.0
+        ],
+        [
+          2440.0,
+          2445.0,
+          2410.0,
+          2420.0
+        ],
+        [
+          2395.0,
+          2405.0,
+          2375.0,
+          2405.0
+        ],
+        [
+          2395.0,
+          2440.0,
+          2390.0,
+          2440.0
+        ],
+        [
+          2415.0,
+          2420.0,
+          2385.0,
+          2385.0
+        ],
+        [
+          2385.0,
+          2400.0,
+          2380.0,
+          2390.0
+        ]
+      ],
+      "hits": [
+        "break_60ma",
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "2330 台積電 - 快訊／台股開高走低收跌307點、46k失守台積電漲5元至2390 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE8tdkhzeUtRWEh2MW8tTWh1Mmd6OWRKUHdVS1lmMzRvMUxneU1IcGpOX3FybHUybW1VTDhmZEc0bXBRU3d0aHZPNHQ1dnB5ZFpYRU55ZVZCMy0?oc=5",
+          "published": "Thu, 03 Sep 2026 09:36:41 GMT",
+          "published_date": "2026-09-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2330)台積電、(3189)景碩，投信買超(4958)臻鼎-KY、(2368)金像電，法人合計買超561.39億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMihAVBVV95cUxQMFkxVFlCSk94bjR2WEN2YnZTaFZLbHVCTnBrT0hwckFzTmY2Tjh2Slp5UENSdW9qYnhuWG1DU3ZZektUNklnU2hWNTZicUFrYmlmVVVWSVoxdXJCV2EtOEp5UEFlT3NWWG9rV2dhajNuOFQzbGJwcEozcW03WWo0aUlvOEFzRE5TaFRfREJWb1RNcUhNOXBWN1dHLTQ1UE84ZU5fcE52djI4YnJBTGtqRExvdDdOR2x2QU1INXN1b3lJcEpLMmtsWEZGMUV0VV9tc2toN2xPTzNSLXpWTElHXzNmTmRGbEZVM0ZqRkdHX1BmMGhPQ3R1QUhNY3pJcS1MNzFuSEd0SGRnQkNCTGlJUkFaamhselZkQVJ2Mm16SHpfc0IxX3dsWkNwbFQtOUw0MUM1Y1J4NWRsMnB1REZwMmpLMDZkM1FGZzg2OUowYzZzVFBEdHVUQ0kyMkpfSHFldVRPRUZsaDJMNUw4Vm43aUVxLWI3QTBWTjFDMWp1MHhDUHBZaGR0N2xpaGx3TjZsTU41Uk1vTl9kOFQtTkFtYVA2dkJZVUpLeklyX1QyT01pT3ZWcXJYTXI0eVpRbXdkdnltektmVnFsRnl0OWpzcllYVVRoUGpGODEwdjN4UmVMWEx0OUlnUC02U05hVFctQ3N6ZmVId0RsY1JyeHMzZFh5ZmEtS2JpSkVhdGtBMDdzZnd0R0t4UlFZZ1dxTTM3Tm5HcVFHRE9LWDJaUFlBSXNrdHBNaFVJZ2ZTNnZNUGlSVS1kTHRwY1h1aGtPWVV3WjZlUF95RFc1YU85enR3NXZhOXNuRVhTNkhwbzJhcE5YNlNQT2xzWVVsZ0k3T0ExOU1hQg?oc=5",
+          "published": "Tue, 01 Sep 2026 09:14:45 GMT",
+          "published_date": "2026-09-01",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "2330 台積電 - 三天劇本大漲變大跌！主動 ETF 逆勢買爆金融航運- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBVSWhVMl9sbmhfbVUtRXR4OVZ6YkNQTmdkeGVKMVNIUFhkTGJpU0owbUZKUnAzRWJXVVRCOUFKSGtnSFdsNEROYllyS3I1UDdmeDJ6TUFqazM?oc=5",
+          "published": "Thu, 03 Sep 2026 13:16:51 GMT",
+          "published_date": "2026-09-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2303)聯電、(2330)台積電，投信買超(3017)奇鋐、(1303)南亞，法人合計買超468.18億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNQ3pwZ3lXcHhVRG0xYTdYc0JkN0FucXNUQVpqdktwRXFSVllsSWRaZ1ZzZGc1bVE1ZDIxQldmOHVjajNoNnBzU241VVAwYV9STjJIdzY0djA5a0tvSlRXVjYtdGx2NXV2dU8wSGdkMjI4N01RUVBDb1JRcVpaU0J6cFJB?oc=5",
+          "published": "Sun, 30 Aug 2026 16:44:29 GMT",
+          "published_date": "2026-08-30",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "2330 台積電 - 台積侯永清：AI需求半年近翻倍建廠量創高但仍追不上- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5uQU5odF9RdF9JeFdyVVZKcFp4MjBQeGhVQjYxb2NUb1pldXpUelpMcnBUMjVNYWlvSEtmSmxLTGt3TlFEUUt5cGtyRWxXazNWay1SV0swekU?oc=5",
+          "published": "Wed, 02 Sep 2026 21:47:48 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "三大法人買賣超 – 外資買超(2330)台積電、(2454)聯發科，投信買超(3081)聯亞、(6669)緯穎，法人合計買超593.87億元 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMi0wRBVV95cUxNd1h4YUxZTHNpNGpfR1FsVHprSFAzUy1wcEQ5SHlSeU1wMG1MbDBDM3pXdy1ibmY3RGVORVptbXpaTndkc0Z2SV9zR2lmZGhERTBEbk1jNVZYWkJtZndOUHNuVjlfaEduVldqbVVndlZkdjNWSm5zVk1VNXhBRzhiSi0yZnFSVVd4eUFrZWVXOUpkV1E4aHo4MTBtRF9sM3NTRHRMZTRfVTVTNzRXZTBCUzByV2VySld5d2wzWEE3ZzdJa2dkeENVTklzeUdXTFlEQUZ1MnAyTlBVV3oxcUpPT3NEWVdueURFNHBwRGk3SVNpU3R6MVVuMW15UjhJdDNNUENTdWJEME9QNHV5YkJ2NnhQZEZYcUpURmVJQmVBOGNUanYwMG1EendnZERnUGJyeWV5UHdFZDkwWTRkX2t4MnZhZUtjcWh6ZFhIQXVRNlAtNk5WX055LTVqdW5yT3J6ekVkRXNVYmJreE1WalRWbU9jVUlYRXV5S3VVR2IzVVVHaEFhUXo5Z3Vld2hob2NWUFVWd3NpVmRpMmVBMDhmNEhIQTNFWkxucVVudW5EMXlCb05LdFJxYTYxQzl2MS1JRnNLVjhHX2JjZTJCdlF5dFlPZGZ0Y1A3d0V3RmhVUnFFM1ltekx2SmxLZThsYXhqdTJNU2tMNzdOa3Y1QnNndWw4SUVQa2JUZG1JYjV2d0VaVmZaNkFhVmYxc0V1VE9mY1FycDVDZTBjOXI2Z3pyRFZWb2ZBclg3YnpxQzdMeXJXYXUwM1FjUU9vSEFRelZMcWhn?oc=5",
+          "published": "Fri, 28 Aug 2026 08:43:12 GMT",
+          "published_date": "2026-08-28",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "產能緊繃也不怕？蔡力行談聯發科AI布局：對台灣信心大增，台積電供應沒問題 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBOWjZSTUxmQ0RSNmJSeU5QeGdOVEJwR2ZUMnowS0VaRnd5NkFvTkZzb3RwQzlDVkJkaUNCYnkwb29ISXhpOS16dTZNVnRmTnRtVHl0Uldudmk?oc=5",
+          "published": "Thu, 03 Sep 2026 03:38:06 GMT",
+          "published_date": "2026-09-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 🔥 AI營收年增221%、2028年拼2300億美元，博通財報驚豔但盤後仍跌5% 🔥 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE95c01EdnlaYVRaS25YOF9VWExZbjNkQjJvcWlfaHdTVW5BWWQzWG16U05DZWw3S1EtNHRGOUQ5NFNnOUZsTThTSWpNMlBUcjlXMU9iY2FyZlY?oc=5",
+          "published": "Thu, 03 Sep 2026 03:03:36 GMT",
+          "published_date": "2026-09-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 【美股巨頭】博通AI營收衝230億美元，但股價盤後先跌為敬- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1TQ2R0SkU1Vl90Yk9XWk10OU1TdjM4RHZMSWY1T3YwOHR5Ry15WU9ibTdBeWs0eDhvUXJQMW5aZmdqaW9zTDhtNXJOMm0tUUVvLXNLY1lveXo?oc=5",
+          "published": "Thu, 03 Sep 2026 03:03:06 GMT",
+          "published_date": "2026-09-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 買房不香了？高收入年輕人開始換一條路累積第一桶金！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9OSlNCNjdhSG10OGtVMlp1Sms3UjZUVlpFdmhsOXY4cndnYS1xMGs4cWtuZ1ZiM2xrYkZGMVVBdVVFbDFMMWpibmZwRHNlOXpGQkd5MDN3RlI?oc=5",
+          "published": "Wed, 02 Sep 2026 20:47:34 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - Google喊與台灣強化合作首席技術長強調全球算力需求無上限- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFB6dWpkSnJ6NnBmU0k5X084SEUzVG9pMFN0VnhyTjdhNmwxQ0JhLTJGbUY5TDZ4czEzX01oUzF3SFR4cllsWmpDU3ZoZ2xrc0t6NlZ0OFhIekM?oc=5",
+          "published": "Wed, 02 Sep 2026 18:46:19 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 2026 SEMICON 展場直擊！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1yVFV4YVJmMjlYU2xaOGdIeG5kRDFUM0Utb3dRY0huNHVVMGNINlM4SkE4aVlOUVpUQVktRzZZVjJxbFd1d09yNHpWVy04Q1Fxc19mZW5fWE8?oc=5",
+          "published": "Wed, 02 Sep 2026 16:10:51 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 外資翻臉！重砍台股913億元狙殺台積電、國巨逾萬張- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE01V0RzQ1JoMDFJNkJrZDNYUWJHVjdCRXlvX0lGenRYX1N2U2dlbFpPeEdLRmlLb2d1TENPbXM4aWZteGFOejc2dTBsdHhmbnd2QTRDaXFYTXE?oc=5",
+          "published": "Wed, 02 Sep 2026 11:38:50 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 蔡力行談台灣AI 時代獨特價值，彈性、速度、規模並攜手夥伴共創多贏- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9XbmZsUFpITlN0SGZsRXdxWXk1b0ZjVTE0WkZTdkZmb1pzVUNVMmVTWWxoelRQU0xOUHZhY2VsM3diTXNaMXNUYmVRNTZMUWxfRTVkdzNBWnY?oc=5",
+          "published": "Wed, 02 Sep 2026 15:42:26 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 台積電供應鏈迅得8月營收6.11億元改寫歷年同期新高年增15% - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBMS296Y1FOWWhNdVhSX2RzNU1GaFI0U0N3TU1VUjA3WnJGQWdqV0JKaE5VUG1yanBpcFk0ZngwcVRoYzVvQlNtbGJ3T2JzZjdlXzBfc2QxQ0w?oc=5",
+          "published": "Tue, 01 Sep 2026 10:01:05 GMT",
+          "published_date": "2026-09-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 台積電唱旺光通訊後市光聖、波若威營運吃補- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5jVExlZVBUUHVrei12Qy1ETmlXTXVuQ2F6YVZwSWdEVEM5emYxTE9OdjFrbG01bmVrc3M3ME50VERRaDJKbWlsYTRhcFlqb1JKQV9Zck4zUkg?oc=5",
+          "published": "Mon, 31 Aug 2026 19:01:02 GMT",
+          "published_date": "2026-08-31",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - https://youtu.be/R6Y7hDE1ppg?s... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFB1bEFHLWE4eTA4NGtQX2llS1lYUGZLcDU4V2ptUXN6NlVHQ0FheWpMOVowS2dPNHVub0t1bFNYLVY4VUlRWk1ldi1rVW8yMnNuOHF1MDU1VnE?oc=5",
+          "published": "Wed, 02 Sep 2026 13:00:29 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 外資精選台灣100 強榜單出爐，前十大皆為AI 供應鏈- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBMbnkzQ0JPTFZWNTBEVzB1TkoyMzM5dWo3aXdtTzJianlfX0QwZEdYcGNuWUoybVNRZHVGZkxrbXhCVDdDX2xyWG9zTThkemtzN3l5b2lGRE8?oc=5",
+          "published": "Wed, 02 Sep 2026 10:43:46 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - Dell財報全年營收大幅上調📈 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1NZjhVaVhhQWFmN3RFb2ZKOWIwbmlYOGU0NHJRb2NpMkhsZXFzQlo4bGQwVl9YZTd5TGxNRTAzSExoU0g5QmNzMzlvRVBWZVJrTnN0SHdOUnY?oc=5",
+          "published": "Wed, 02 Sep 2026 00:36:58 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 中探針籌碼深度剖析： 主力又吃掉融資了，繼續往上拉！ - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBPNUFMd0l2Nk9lQWJVbkFaYUktaWpSa1VlWUpIeHBuTm9tR3RwSVEzMjVpODZkT2lKMjFrNjVBMWhXa1VobGlaTHB2OUtDR3NYSmpHZTJaRmI?oc=5",
+          "published": "Tue, 01 Sep 2026 13:44:03 GMT",
+          "published_date": "2026-09-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 🥰台積電輕鬆漲上去，稍微震盪整理一下，上漲是正常模式，目前 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1vc0h3d3dQeWptZ1BsakZjRlgwOHY3Q0ZEeHYyTGJOSk1UdlUtelNfZWFjVnF5WURkY3c4NUdaSlg4T3FMUEp6dWxzNzZrd3Y3bDB6TXV1Z2U?oc=5",
+          "published": "Tue, 01 Sep 2026 06:35:19 GMT",
+          "published_date": "2026-09-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 4個月敗光47億！高槓桿的下場… - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFB5ckhIMWF6cjdkMWlhQ1g2UGpxS2lqVjc4Qk9TdEgwbEMya21DUjdrUEtPWmZkR1RMSjcyS3Zhd2pKYUt5U0FSNFhRallLMTg1OEJoekJNWmM?oc=5",
+          "published": "Wed, 02 Sep 2026 12:06:55 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 〈SEMICON〉台積電：AI功耗大增6倍供電、散熱成下世代系統兩大關鍵- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1NSk5sbVJ1Z1YyVFNwU0dla1RLa28xUVR5bjhsVUk0d1k3RnBPeE5BOHRWYU9GQmxacEZ4aGhEMGh0MnRXcnFQNmNra0RqTm9XYzY4T3NSTVM?oc=5",
+          "published": "Tue, 01 Sep 2026 06:26:05 GMT",
+          "published_date": "2026-09-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 〈台股開盤〉漲逾350點後翻黑退守4萬6 聯發科、伺服器ODM撐盤- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1DLUhyWUExeXRiVlFZZDl6M3lVd252THYwZFNpellfRXFqbjBuSDlPVFE4cGRaYW5WczRKMVRxOExmb2pzWHZkelRRY2dRUGV6Z3IzSEphak4?oc=5",
+          "published": "Wed, 02 Sep 2026 03:02:17 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        },
+        {
+          "title": "2330 台積電 - 今日最夯ETF／貼息也要買！00406A 連三日爆量逾20萬張規模增至334億元- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5SY0luaTh6Ry1BZDhocDBYQms4MWlWN0hHLTdlc2VTUmFJNDI5ZEs2Ym1PY0R0Yll5VmtkNm9VakZyZnhON20yYzlIRkt2MDRGVzVEWDMwQTM?oc=5",
+          "published": "Wed, 02 Sep 2026 10:30:09 GMT",
+          "published_date": "2026-09-02",
+          "source": "CMoney"
+        }
+      ],
+      "catalysts": [],
+      "catalyst_summary": "台積電因AI需求強勁、供應鏈景氣回升及法人持續買超而獲支撐，但月中外資突然翻空減碼逾萬張。",
+      "risk_flags": [
+        "外資重砍913億元狙殺台積電",
+        "博通盤後跌5%"
+      ],
+      "target_prices": []
+    },
+    {
+      "score": 24.5,
+      "trend": 0.0,
+      "rs": 0.0,
+      "setup": 0.26,
+      "quality": 0.33,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -8.2,
+      "ret20_pct": -9.3,
+      "dollar_vol_m": 7495.0,
+      "stock_id": "2337",
+      "name": "旺宏",
+      "industry": "半導體業",
+      "close": 117.0,
+      "change_pct": -4.88,
+      "valuation": {
+        "pe": 27.73,
+        "yield_pct": 0.0,
+        "pb": 3.74
+      },
+      "last_ohlc": [
+        125.0,
+        127.5,
+        117.0,
+        117.0
+      ],
+      "note": "旺宏",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -16101931,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 24.78,
+        "foreign_holding_change_30d": 0.28,
+        "short_change_pct": 40.26
+      },
+      "fundamentals": {
+        "eps_latest": 3.91,
+        "eps_yoy": 666.7,
+        "gross_margin": 64.4,
+        "operating_margin": 46.9,
+        "debt_ratio": 35.8,
+        "roe": 12.5,
+        "roa": 8.0,
+        "op_cashflow": 10033607000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 180.5,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 117.0,
+        "ma5": 123.0,
+        "ma5_diff_pct": -5.13,
+        "ma20": 126.325,
+        "ma20_diff_pct": -7.97,
+        "ma60": 134.91333338419597,
+        "ma60_diff_pct": -15.31,
+        "ma120": 140.84000002543132,
+        "ma120_diff_pct": -20.38,
+        "ma240": 95.26000001271565,
+        "ma240_diff_pct": 18.58,
+        "high_60": 185.5,
+        "low_60": 91.80000305175781,
+        "high_20": 137.0,
+        "low_20": 117.0,
+        "bb_lower": 114.28438889468346,
+        "bb_upper": 138.36561110531653,
+        "atr14": 6.5,
+        "stop_2atr": 104.0,
+        "stop_2atr_pct": -11.11
+      },
+      "ohlc": [
+        [
+          141.5,
+          148.0,
+          139.5,
+          143.5
+        ],
+        [
+          146.0,
+          147.0,
+          138.0,
+          138.0
+        ],
+        [
+          140.5,
+          143.0,
+          130.5,
+          139.5
+        ],
+        [
+          144.5,
+          150.5,
+          144.0,
+          148.5
+        ],
+        [
+          143.5,
+          144.0,
+          136.0,
+          136.5
+        ],
+        [
+          127.0,
+          129.5,
+          124.0,
+          125.0
+        ],
+        [
+          126.0,
+          127.0,
+          115.5,
+          117.5
+        ],
+        [
+          120.5,
+          123.5,
+          118.0,
+          123.0
+        ],
+        [
+          129.5,
+          135.0,
+          129.5,
+          135.0
+        ],
+        [
+          132.0,
+          134.5,
+          125.5,
+          129.5
+        ],
+        [
+          126.5,
+          131.0,
+          123.5,
+          124.0
+        ],
+        [
+          123.5,
+          125.5,
+          118.0,
+          125.5
+        ],
+        [
+          115.0,
+          116.0,
+          113.0,
+          113.0
+        ],
+        [
+          110.0,
+          110.5,
+          102.0,
+          102.0
+        ],
+        [
+          95.8,
+          103.0,
+          91.8,
+          91.8
+        ],
+        [
+          100.5,
+          100.5,
+          100.5,
+          100.5
+        ],
+        [
+          102.5,
+          110.5,
+          102.0,
+          110.5
+        ],
+        [
+          113.0,
+          121.0,
+          109.5,
+          120.0
+        ],
+        [
+          123.0,
+          127.5,
+          117.0,
+          117.5
+        ],
+        [
+          117.5,
+          129.0,
+          116.0,
+          129.0
+        ],
+        [
+          130.5,
+          130.5,
+          120.5,
+          121.5
+        ],
+        [
+          124.0,
+          133.5,
+          123.0,
+          133.5
+        ],
+        [
+          134.0,
+          139.0,
+          129.0,
+          132.5
+        ],
+        [
+          135.0,
+          140.0,
+          134.5,
+          136.5
+        ],
+        [
+          140.0,
+          141.5,
+          136.0,
+          136.5
+        ],
+        [
+          140.5,
+          144.5,
+          134.5,
+          137.0
+        ],
+        [
+          135.0,
+          135.0,
+          128.0,
+          129.5
+        ],
+        [
+          130.0,
+          133.5,
+          121.0,
+          122.0
+        ],
+        [
+          117.0,
+          120.5,
+          115.0,
+          119.0
+        ],
+        [
+          122.0,
+          124.5,
+          119.5,
+          122.0
+        ],
+        [
+          120.5,
+          122.5,
+          119.5,
+          122.5
+        ],
+        [
+          121.0,
+          128.0,
+          119.5,
+          124.0
+        ],
+        [
+          120.5,
+          122.5,
+          117.5,
+          122.0
+        ],
+        [
+          123.0,
+          125.5,
+          121.5,
+          125.5
+        ],
+        [
+          128.5,
+          131.0,
+          126.5,
+          127.5
+        ],
+        [
+          130.0,
+          130.0,
+          125.0,
+          126.5
+        ],
+        [
+          124.0,
+          127.5,
+          122.5,
+          126.0
+        ],
+        [
+          126.0,
+          127.5,
+          122.0,
+          122.5
+        ],
+        [
+          122.0,
+          123.5,
+          120.0,
+          123.0
+        ],
+        [
+          125.0,
+          127.5,
+          117.0,
+          117.0
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "2337 旺宏- 旺宏到底行不行!!!9月7日開獎，77億是天花板還是起跑線? - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5nM2xwOXhkWkFiRDBrSUJQQXRTcm1KRzgyM3VTNVBVcXdYS3g2RUI5TEtVclNxRzNnVzJtYl9EcmEyRmM1bzFMZFZ6RzFpY2ZQdTJEbkxDM0E?oc=5",
+          "published": "Sat, 29 Aug 2026 20:38:59 GMT",
+          "published_date": "2026-08-29",
+          "source": "CMoney"
+        },
+        {
+          "title": "南亞科、華邦電、旺宏、力積電…記憶體股跌逾半根停板、外資3天砍它10萬張！南亞科為何營收新高卻慘崩 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPZEhaazBUQkpDci1uR2xqcnFxaEJybEhUOVNCbWdXZDN5OFFUYURiRlZUSXo2Wm8wV0tCbC1sSy1fdGhmdmhHTkNQS0pjQm9rOERfcnVSMHh4Vl9DcVdkTDM0WENhREpUVmZ3MS16SnppY2RfeU1hLTN1RTlBcnlDcA?oc=5",
+          "published": "Thu, 03 Sep 2026 09:49:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "今周刊"
+        },
+        {
+          "title": "旺宏NAND eMMC供不應求推升獲利 砸378億元擴產 - moneyweekly.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBtZmpSZFBXcnRJNG1qQzVzaGN5dzJ5dFR4LVpwUGs3eTJGX2diZUVUWkNIYW5HTDFLdmsxYk1lS3lieWY5a08yTEtjR0R0SE9jZm1tVlNadHEyZGZOSEpKVWNyb0VBbUJseThFLUF5cw?oc=5",
+          "published": "Thu, 03 Sep 2026 01:39:39 GMT",
+          "published_date": "2026-09-03",
+          "source": "moneyweekly.com.tw"
+        },
+        {
+          "title": "記憶體行情燒翻了！大摩突點名愛普、旺宏 「這檔」目標價狂喊1,666元 - FTNN 新聞",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFBINlI2ejNkZ0pGaE1OV2lDaDFnMXI1bHZfQnhMNEtrN2lSY2pkSHE3UmMyVWhLWlJqdk5zN3NiWXdMdVNGaUtqT2tscw?oc=5",
+          "published": "Thu, 03 Sep 2026 06:05:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "FTNN 新聞"
+        },
+        {
+          "title": "旺宏、華邦電 權證四檔靚 - udn.com",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE1hSnBsOE93VnBhX1A5LThiYzI3T2dQSElSTlZrSndkYmpZMTZ5QXk0dks2WExyeEJTdkdMWFliSGNqb2hod0VXYVNHdkZUbDI40gFWQVVfeXFMUHRQN1JoTWsyV3YtN3BqWFZiS3Z3RkEwYWJUWnFNRjJpRFVxaFlPbGpnSkREaWRjVWlRcnZBZHpVT1Y0ZWdVZnlPZm5jS0x6UFJzRFdTUEE?oc=5",
+          "published": "Wed, 02 Sep 2026 16:50:30 GMT",
+          "published_date": "2026-09-02",
+          "source": "udn.com"
+        },
+        {
+          "title": "記憶體獲青睞！三大法人進貨「這2檔」4.9萬張 砸52.3億元掃進旺宏 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMipAJBVV95cUxNVmJLcDZRYVJ0U3lNWXE4UXlLOFJYYUFBVTVYdUt3MGtCQ0h4RENCZHRUdDR0OEN5SWcwbk43dGNYOUxlUHlqWGtZWk1oX2tRNkF1dmRiSTRnNWJlYmdidHpWT0pDN01TQW5Hc1AtNTR5NzdrbVQtNDJFclJGemNrR3V1SDdwaTE1eWpwY3J0d2NBMVMwWkU4R0llUEVPcmFKRnFqb3BkUGoxTlRGcXJOanVKSFdDRER2RXYwZUk0QkdBZ0JvXy1mYXlSMHpCaTlUWl9tTGpjb3MzRXBfRHIyTkM3ZVNuRnhlaVhEc2RyaEl6WUg2RTA5WG4xZTkyejNYazE3cUNOTEVnTDZUbTJEM0dGbWJ1YVN2Sm5zamRrcnBiSFFX?oc=5",
+          "published": "Thu, 18 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-18",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2337 旺宏- 股市最新爆料，掌握股友們對眾個股股價、技術分析、新聞的第一手... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE81OTVKc1dpSG1vT2ZjakJyNmJ2cjI0akZLSmdHOFJ3MzdzMkFxazVaaG02Q2xFU2c4Y1hqUk1yZDZlaTBWVnBlZlROVmgxTjlZc3FvWUg1Nzg?oc=5",
+          "published": "Sun, 30 Aug 2026 23:29:53 GMT",
+          "published_date": "2026-08-30",
+          "source": "CMoney"
+        },
+        {
+          "title": "再創歷史新高！旺宏5月營收62億元 年增175% - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMipAJBVV95cUxPa1ozN19EVmEyX3FBYjdxbk03Y0RuTXU5UnNwRzJTbTJ2dUlLU2M3ZUZkcHpCeTJ1UVZjNTJVc2dvQk44bnJ2YlMzZkwxbDUtNW11UFVxTHZFV1pYRUtRMXV6R1p1ZXZZZmxsSGstbnVaVHRYZ0lkLUVYaWlpNEZ3VTdwSkpVdWxQWWt3V0hvaHFYb0x1SndzbmNQVW9hZTFnVXZ3R3NJd0RCMkVlNUZCeTRlU0pQbVRWWmdyeG9ZWTZIdHBsWW5SQ2x6Mm11dXNicFRZYWoyNjVQeElmelFBMzZuNlpRUmx3ZWpqcWdmSmxUak0xNm9lelEyVXBJX0k3VlBkOUFERmtxVUZoX3Z2ekt0RW5MNVNkOXZTc2tlLWY3QU1M?oc=5",
+          "published": "Mon, 08 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-08",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "美系大行觀察記憶體產業報告 這兩檔股票被點名 - udn.com",
+          "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5zNFJ0T29uNGdIN2RfX1JpWnB0TWhPSUhGck1FaFRRMVpxbkl2Szlta1FCS09IVkhBajN4M1BLMFMyU25PcE92Q3NFSDcxaTdT0gFWQVVfeXFMTzZHZDNQZFpFd3RYUXBMTFR6cW1raTN6X2V5VGQ3VlBHTGJSaUE0UHpZQ2pnaGhPd1QwZ01lbjg3LUNzNHhIQ2pEVGpvSXMyWmJtem9taVE?oc=5",
+          "published": "Wed, 02 Sep 2026 00:44:13 GMT",
+          "published_date": "2026-09-02",
+          "source": "udn.com"
+        },
+        {
+          "title": "華邦電(2344)、南亞科(2408)、旺宏(2337)第二根漲停穩了？記憶體股只能挑一檔挑誰，杜金龍2理由喊選它 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxORE05eGdrclBzcEFuRl9BRk1hbWV4NmxwZDUxNFJYNzFTdmR6YzVWUmRwWnJwYTFBeWgxMDdyVEgzUXliemZkSFlmcy1IXzMzSkg0QlMxMWdhYURnYkF4ZmVONlNpRUpXb0t2Vmk1QXN3bkxjOWxEd3lJWkRWUmtDYw?oc=5",
+          "published": "Mon, 03 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-03",
+          "source": "今周刊"
+        },
+        {
+          "title": "2337 旺宏- 旺宏到底行不行!!! 從192元跌下來，真的只剩爛股兩個字? - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBFRThXQmZCTTdCWE96ZDVhSlBVN3hjeG1ZSTF3djVqOWpzUHNoUTd5b3BMUHIzR2Q4WlZDUGlSbE90N0xhV3lCU2kxMUdjbko3a2w2c05HZms?oc=5",
+          "published": "Sat, 22 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-22",
+          "source": "CMoney"
+        },
+        {
+          "title": "漲太多被盯上！外資狠賣「這2檔記憶體」9.1萬張 狂砍旺宏捲走83.6億元 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMisAJBVV95cUxQR3o1Y1Y2NjI4eW9ydGlobHNKZkozVzA0REhwYlp1WVphNVBJWkJrRnRMb3lVdHZRb2xQN1hLZEJqRmFBbDhVZEVyYnRFc1NLWnF4OURtT3U5NWVqT3NOclhoSy00MGlaa3B4ZmstUWFLVkVXV1JXR1E1WkJzbG9fVW1pNXE5cnNnc25uWV9uQWJZckItam12c1EzMGlldGNucVNnNjB0SXlEbDN0S2EwbjJ5MkZVd2JFVWpyZW9vaUlXR0RnZkE2bG85MjlaWmM0NFNTSTZ0ZU01RFlXSUdyNklGLTcteHBvYTU4V1RkTlc0QjlNcVRmM1pJX0NhWFpJSTd5Q0lSY2hQOWh3M3o1TDdKWmZ6Y00xalAwc1dzN1pfZHhZbk9seklXdnFPV0Zf?oc=5",
+          "published": "Sat, 23 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-23",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2337 旺宏- 旺宏一度飆破9%！昨天「這檔節目」這麼說... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBWS2dtVFJWalo2c2tSb1dfWkxPQk9KRUFfUG1OandLemRXRlVZZHMtR291WXR3RXJLeFFmRlFzaWJoSGk2WHlGaTdOaW9UUk1IM0JhcmhEOGg?oc=5",
+          "published": "Mon, 03 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "跌了就撿！大摩點讚 旺宏新目標價曝 - Yahoo新聞",
+          "link": "https://news.google.com/rss/articles/CBMiigJBVV95cUxQNGcyLUVBYmFzUmkxWGhRQnBHaFBLaHl4eS1HWnBZNk5sNlJZLXFON2huOHVISzl3MGxhTjBzMm4xYk9vczVHS0l3Yks5d2RIMmtKekZBRVpXYy1zanMydjV1aWlkMDJIUXltZTR1VkI1dUFOUXByNE5KM1ZmeWtMZXlJbVNIRkR3Ri15QzFUbTNFT3ppOWtfMGNDelFlNWdlU0M4QWdXNzF0MXJQOEVzTzJfNmZWMHc4ZlR3SE9GZU41VlJFd3dKU1pXUjVSbXdWOGl4UzRQd19CNTE3TEJqUW5IU1VyOHNKNmdUa3JKOWRIRnA0NnRkTXIyWVhjODJaekE4RXNYaURtdw?oc=5",
+          "published": "Wed, 29 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-29",
+          "source": "Yahoo新聞"
+        },
+        {
+          "title": "2337 旺宏- 逢低買進- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBtZEJXTmJIRkpubWx5cVVGOTFid2pYLVYxUWVJaEhPWE9mWlhBTVhZMzU2aldVTzU0b19TQTlER3p5Uk5Rd2tOWkdVX1BJcktFM1NMME9vQUs?oc=5",
+          "published": "Mon, 20 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-20",
+          "source": "CMoney"
+        },
+        {
+          "title": "【即時新聞】旺宏(2337)報喜卻爆量跌停鎖死，這「2檔概念股」同步遭大單倒貨！ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1Zc1VmZ0huV1E1dlFrRXFBOWNrVWlLYUtUQ1V4ZHd6bmg1T0xJUXFZV0FBRDRuZnhCZEk5Y3U1VlhnSHlrTm90bVU3WWxkNWU0UVdsN1VGMkc?oc=5",
+          "published": "Tue, 28 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-28",
+          "source": "CMoney"
+        },
+        {
+          "title": "【即時新聞】旺宏(2337)財報亮眼卻遇拋售潮，這「2 檔概念股」同步遭血洗！ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1ZWFVQMURyVWxWczhCUjZuZjI0aEhOVjlDaHpOVDBoYll5YURJa2dUQzNOOVMyMTVDWXMxT3hvNnhwT3YtWVZZaFZKcWdDM190Z1JpVGdadUw?oc=5",
+          "published": "Tue, 28 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-28",
+          "source": "CMoney"
+        },
+        {
+          "title": "2337 旺宏- 【金包銀之旺宏：記憶體大廠量增拉回，高檔震盪的實體黑K！】 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBFdk1jWTlybjVTaHJzX0VEeEFyUXZrYWpKWmVjZ2h4VmVpd3pWUFFVbE50MWJ0cVBXY1pESUJUSmxva0w2ekhSUnItMGRJTHRaWlMwcHRhTHQ?oc=5",
+          "published": "Wed, 05 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-05",
+          "source": "CMoney"
+        },
+        {
+          "title": "2337 旺宏- 股市最新爆料，掌握股友們對眾個股股價、技術分析、新聞的第一手... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE12WExweEluMUpRQjZTUUs2ODRZV09aelh4d2VYZ0FNQjBZb1FIMlJVcEkzLWNvcXBYMi1mYXp6eTBoZU5JRHFwamg2ZUhrUi1CWHJVVDdwejM?oc=5",
+          "published": "Thu, 27 Aug 2026 11:04:35 GMT",
+          "published_date": "2026-08-27",
+          "source": "CMoney"
+        },
+        {
+          "title": "【即時新聞】旺宏(2337)爆量鎖漲停，這「2檔記憶體概念股」同步亮燈狂飆！ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5vajhTWVF1RW1KamtMT0x5RlpPTFdXSkdmRDhiTmZyMlJMUW5HMGZFa1o4UE1oV1N1VnJ4MHNpbkRON25hakw3REdHa1BOeGp2QmFPeWVGcnZfUS1CQmZpVmJJZGlSVEE?oc=5",
+          "published": "Mon, 03 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-03",
+          "source": "CMoney"
+        },
+        {
+          "title": "【13:20 即時新聞】旺宏(2337)股價走強漲4.4%至166元，受記憶體報價看多與營收創高加持＋技術面多頭排列、法人買盤延續 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBkM1ZGdGwtOXRjX3JUTUR1SERZMHA0ZEtOMk0xS01Db2dIWU82QTNYS1lncFBsdzE4NzhrQ29rUmpFR0lwbTg2d0FDai16eGJJSEZvYzJfbUs?oc=5",
+          "published": "Mon, 15 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-15",
+          "source": "CMoney"
+        },
+        {
+          "title": "AI、高階記憶體需求旺！旺宏H1營收超越去年全年 八大公股5日砸9.6億元卡位9.1千張 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiuwNBVV95cUxOcXlNMVJQNzF6eWJkeW5DTlg1alBCbzhNMTZocFhnY3kyZm8yLTliMjhiVXpERmZJYS1ZMmN4MUUtUTZiZ2t0RzV6aE5CamlBcWtPMy1kQ2Q3ZlBwRkd5TVk5eW9CdTFycDJWOVNGQkVpdjJxRnVaRkliaGRvNUlWbDdaQUlYYWZReU9MendodF9oQlF4R1E0bzNzNGMydzRpNGdZdmstUjktWXdHbFVfTkIyaWhTZV96Wm9YaUhSejhyNW1KQjBtaTNnWV94MjNoUndTb1J5Z3E0U2pJeHc2Z3Z3Vm14SXNMTlVIYXE5OERxam12NHBZTFBkc2gyZmNhdEU2VU1hOFVFWHRrd21XUGpBMThQQ2s5WWZReVRVWTRQTHpPaUp1Y0ZJMnl0U0lSRjFoczJHMGl5bm9GaXUxZWlGd1dPdXZnT2Q5YlZxaTBkanJIMUpNRFg2M0NVMXZqc3NOcVlUbEh4NXpTWG9CYXZBcmxOOHJlSXZoRzNvX1kyWTlnZXphN21zb0xYek9NaThrZm5iQ2hSd04zTHplSFo1Rkk0Yl9lVnMybFZIWFBNUEtJa25ZZGQtcw?oc=5",
+          "published": "Sun, 02 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-02",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2337 旺宏- 旺宏收143.5，放量長黑先看140 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE05QkNaVnNXWVZjRDVaVHQzTk9kdl9rbGk2cDRTVV90ajdNNHVUOE4takRYWTdtTDh3ejI3bzU3a09DZkdpLXZHZk5ET0ZNb1Vmc1U0NjlJWlc?oc=5",
+          "published": "Wed, 01 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-01",
+          "source": "CMoney"
+        },
+        {
+          "title": "【即時新聞】旺宏(2337)遭外資大砍1.6萬張跌逾半根停板，最新籌碼動向與風險曝光！ - CMoney投資網誌",
+          "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPRmlEQ0FqcHJ1Q3llYzdmcDkyanZxcER4RGkwS3VpZEN2dHF3cDd3a2dXa3BjUlotR3lEM2NDVjZNVjZUb21tME8xNmpNN1hzbEc3bWFZSjdFVGl6ZDhqMzJBSk5KMlpVX0lPTnloa0ZyYmlSX0V4WV84eWdiLWRQT1RuVmdmNnU2NjZYZjl5a0Q?oc=5",
+          "published": "Tue, 18 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-18",
+          "source": "CMoney投資網誌"
+        },
+        {
+          "title": "2337 旺宏- [新聞] 記憶體漲價EPS倍增旺宏上看330元 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFAyUDQ4dmstc04yUlBIeGhkNnphMkZUYUUwV2RxVzBzbi1ObElFek02dkZqd2hmQ3ZWZTJqc0FGNkpDRU1qckVYNmkxejZOeF9EdFlIZDR6UGs?oc=5",
+          "published": "Thu, 02 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-02",
+          "source": "CMoney"
+        }
+      ],
+      "catalysts": [],
+      "catalyst_summary": "旺宏受惠記憶體供不應求與AI需求推升，營收創新高，大摩等外資看好，但外資波段追高後轉向大幅減碼。",
+      "risk_flags": [
+        "外資3天砍10萬張",
+        "爆量跌停鎖死",
+        "財報亮眼卻遇拋售潮",
+        "外資大砍1.6萬張跌逾半根停板",
+        "漲太多被盯上外資狂砍"
+      ],
+      "target_prices": [
+        {
+          "broker": "大摩",
+          "price": 1666.0,
+          "asof": "2026-09-03",
+          "evidence": "記憶體行情燒翻了！大摩突點名愛普、旺宏 「這檔」目標價狂喊1,666元"
+        }
+      ]
+    },
+    {
+      "score": 23.9,
+      "trend": 0.6,
+      "rs": 0.27,
+      "setup": 0.15,
+      "quality": 0.52,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.06,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -9.1,
+      "ret20_pct": -1.2,
+      "dollar_vol_m": 26586.0,
+      "stock_id": "2344",
+      "name": "華邦電",
+      "industry": "半導體業",
+      "close": 169.0,
+      "change_pct": -5.59,
+      "valuation": {
+        "pe": 18.63,
+        "yield_pct": 0.3,
+        "pb": 4.61
+      },
+      "last_ohlc": [
+        181.5,
+        185.5,
+        168.0,
+        169.0
+      ],
+      "note": "華邦電",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -31898978,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 18.81,
+        "foreign_holding_change_30d": 1.1,
+        "short_change_pct": 82.64
+      },
+      "fundamentals": {
+        "eps_latest": 5.4,
+        "eps_yoy": 1962.1,
+        "gross_margin": 53.4,
+        "operating_margin": 32.8,
+        "debt_ratio": 40.8,
+        "roe": 5.8,
+        "roa": 3.5,
+        "op_cashflow": 35672052000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 291.5,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 169.0,
+        "ma5": 177.6,
+        "ma5_diff_pct": -5.09,
+        "ma20": 177.675,
+        "ma20_diff_pct": -5.13,
+        "ma60": 175.4,
+        "ma60_diff_pct": -3.79,
+        "ma120": 144.90762586666668,
+        "ma120_diff_pct": 14.26,
+        "ma240": 108.43190428749999,
+        "ma240_diff_pct": 35.84,
+        "high_60": 222.0,
+        "low_60": 118.5,
+        "high_20": 186.0,
+        "low_20": 163.5,
+        "bb_lower": 166.76737350339198,
+        "bb_upper": 188.58262649660804,
+        "atr14": 10.321428571428571,
+        "stop_2atr": 148.36,
+        "stop_2atr_pct": -12.21
+      },
+      "ohlc": [
+        [
+          173.5,
+          184.0,
+          170.0,
+          176.5
+        ],
+        [
+          181.5,
+          183.0,
+          166.0,
+          167.0
+        ],
+        [
+          170.0,
+          172.5,
+          156.0,
+          164.5
+        ],
+        [
+          175.5,
+          180.5,
+          173.5,
+          180.5
+        ],
+        [
+          176.0,
+          180.5,
+          171.0,
+          172.0
+        ],
+        [
+          159.5,
+          162.5,
+          155.0,
+          155.0
+        ],
+        [
+          155.0,
+          157.0,
+          146.0,
+          151.0
+        ],
+        [
+          156.0,
+          158.0,
+          152.0,
+          155.5
+        ],
+        [
+          165.0,
+          171.0,
+          164.5,
+          171.0
+        ],
+        [
+          172.0,
+          172.0,
+          157.0,
+          161.0
+        ],
+        [
+          158.5,
+          164.0,
+          153.5,
+          154.5
+        ],
+        [
+          155.0,
+          161.0,
+          150.0,
+          160.0
+        ],
+        [
+          144.0,
+          147.0,
+          144.0,
+          144.0
+        ],
+        [
+          137.0,
+          137.5,
+          130.0,
+          130.0
+        ],
+        [
+          123.5,
+          133.0,
+          117.0,
+          118.5
+        ],
+        [
+          130.0,
+          130.0,
+          130.0,
+          130.0
+        ],
+        [
+          134.0,
+          143.0,
+          133.5,
+          143.0
+        ],
+        [
+          145.0,
+          157.0,
+          144.0,
+          157.0
+        ],
+        [
+          167.0,
+          172.5,
+          164.5,
+          169.0
+        ],
+        [
+          165.5,
+          173.0,
+          162.0,
+          171.0
+        ],
+        [
+          170.0,
+          170.5,
+          160.5,
+          163.5
+        ],
+        [
+          169.0,
+          179.5,
+          168.5,
+          179.5
+        ],
+        [
+          178.0,
+          181.0,
+          172.5,
+          178.0
+        ],
+        [
+          186.5,
+          193.0,
+          174.5,
+          177.0
+        ],
+        [
+          183.0,
+          185.0,
+          177.0,
+          177.0
+        ],
+        [
+          183.0,
+          191.0,
+          180.5,
+          183.5
+        ],
+        [
+          185.5,
+          190.0,
+          181.5,
+          181.5
+        ],
+        [
+          186.0,
+          192.0,
+          176.0,
+          176.5
+        ],
+        [
+          167.0,
+          169.5,
+          165.0,
+          168.0
+        ],
+        [
+          174.0,
+          180.5,
+          172.0,
+          176.5
+        ],
+        [
+          176.0,
+          182.0,
+          174.5,
+          181.0
+        ],
+        [
+          179.5,
+          184.5,
+          175.5,
+          177.0
+        ],
+        [
+          172.0,
+          179.0,
+          168.5,
+          179.0
+        ],
+        [
+          179.5,
+          182.5,
+          178.0,
+          181.5
+        ],
+        [
+          184.0,
+          190.0,
+          183.0,
+          186.0
+        ],
+        [
+          188.5,
+          192.0,
+          180.5,
+          181.5
+        ],
+        [
+          179.5,
+          186.0,
+          176.0,
+          182.5
+        ],
+        [
+          183.5,
+          184.0,
+          175.5,
+          176.0
+        ],
+        [
+          173.5,
+          180.0,
+          171.5,
+          179.0
+        ],
+        [
+          181.5,
+          185.5,
+          168.0,
+          169.0
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "記憶體齊下挫！「這檔」大跌7.82%狂炸586億元 華邦電也殺5.59%噴277億元 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMikAJBVV95cUxNdVR3anY3U19kRFBOMFkxNFJuVm56SzJITE40enU5d1FrYzlSU2xUZFZ0Rkp2eVl5STJBN3c2VFpCMEU3RkJTMFZTRmdaQ1d1cDNvOGRsbGk0QUFTNzFuZjR4VEhoTms1VGhwUFlJMUVKRjFRZkhGdmEwX0N2SEMtTXFzd1d5V3F0QVF0RjJJNGNxamhlNkNHRFJpS2JrSlc0TnNhejd6WnUtRkE1RldCcjgyTVpjSUlTZGd0VEpkd2tfUjdxUFNicXRaQ09GbGpWVUR5a3hPakVDR2h5NTRZOEFzVXdpamtoUzZscUF0YzhXZzZoZ0NlX2I1dmdrb0tST3ZhcUE4S1J4WnNSd2ZJRg?oc=5",
+          "published": "Thu, 03 Sep 2026 07:05:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "南亞科、華邦電、旺宏、力積電…記憶體股跌逾半根停板、外資3天砍它10萬張！南亞科為何營收新高卻慘崩 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPZEhaazBUQkpDci1uR2xqcnFxaEJybEhUOVNCbWdXZDN5OFFUYURiRlZUSXo2Wm8wV0tCbC1sSy1fdGhmdmhHTkNQS0pjQm9rOERfcnVSMHh4Vl9DcVdkTDM0WENhREpUVmZ3MS16SnppY2RfeU1hLTN1RTlBcnlDcA?oc=5",
+          "published": "Thu, 03 Sep 2026 09:49:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "今周刊"
+        },
+        {
+          "title": "華邦電法說／26Q2 EPS 5.4元創高，記憶體營收季增73%、CMS營收年增467%｜股市話題｜豐雲學堂2026 年 08 月 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiswNBVV95cUxPVFNOZlRQcXNkdWJZaWtVRXdnWmQ3RDhydEZtT01lMjlzcXl6MjRnbmplLW5kQ0NEWHV3NFpxd2Fxd0xBNzRnZ2RXSXJvNGZuTXVEZGllX0FCTVllbFlNSk96T1haNnBqVXVXNmY5TFllclZyTWU4eUlGMDJES1RBemM0Mmlza0xiSklwSlk4RFlPS2dMWVdjYVZwT2EzZWZLZUFpaGRRVWUxZFFEUDl2b3BlYVFoeTFUdDlfeTl6YnduVHJDenkzR2FGaEc0UDYtdlU5TklHVEJYNFJES2lJazJxdFpsUHhyc3RxQkRfNm9jMXg5N1dKZ2ZyWnl4a1RiU2ZEWDA0R1dXX0ZKR0Y4Y1RYTmhFaDR4Nm5mdjJRVDNJNVE3bmRPbThaQVFIQXR3VVZKOXhENkY4NEQ2V1ZBaE9YcG5KcVVpaFJzaDU0aXNvbUxoMF9xVHluWFE4c0p0S1NCaDF6RjVIUlVuNWFmQjRfTjFtT0RCYTFmLTlmQ0RMckxyQW5QaGZfVHlxNjN5QVhoRW83YzVSNkRyMEhzVGgtVUtfdFhSS3dXellZV1dHams?oc=5",
+          "published": "Fri, 21 Aug 2026 08:43:58 GMT",
+          "published_date": "2026-08-21",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "記憶體全體臉綠！「這指標股」8月營收旺仍摔7.82%、華邦電挫半根群聯跌3%力守2000元、模組廠也全受累 - FTNN 新聞",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFBpX3NTbG5DM01wSTF3bFJrdU95dmd3YWJ0Zm1oLWhCcUo5UHhXZGE3ZWdrRE5SMUdLTFlwcW5NZ0k2UGp1Vml5TFIxbw?oc=5",
+          "published": "Thu, 03 Sep 2026 07:33:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "FTNN 新聞"
+        },
+        {
+          "title": "焦點股》華邦電：法說利多 漲停重返百元俱樂部 - 自由時報",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE8tclNZNjJzQ19nVDc4cE8yNHVOWDRxcEwzV1Mxa1BNWjhQY005NVE5RzBma0tlcEtUcllKdUF6WG9GTmJ6cW1hQlNoWjU0dVFhYlYwb1lJVUU?oc=5",
+          "published": "Tue, 01 Sep 2026 21:09:44 GMT",
+          "published_date": "2026-09-01",
+          "source": "自由時報"
+        },
+        {
+          "title": "投信近5日賣超個股 - TradingView",
+          "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE9FdjNwSzZQOG9xY3VPLUdJdzdMNU1RcjhHZHc2cEFxTXR4NWo1YVROZVZOd3BOblRJa1UzSk1uelpwNFcwXzA5enBRaF9TSUYwY1BNMDBsTW5RQmg0bGZFckFVTXM?oc=5",
+          "published": "Thu, 03 Sep 2026 02:08:22 GMT",
+          "published_date": "2026-09-03",
+          "source": "TradingView"
+        },
+        {
+          "title": "外資賣超481億！ 南亞科、華邦電遭砍翻 「這檔」爆買5.5萬張 - 東森新聞",
+          "link": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE80cVJVa01MQTBaOXpMdEhSdU1UU09vc1RRdFM0TlJIUk55S3ZWNGltN3BpMkZxU2Y4WHdsaXhibU9lRDNKVmFPNE1hMzJwMnZBd3dPMTdQMA?oc=5",
+          "published": "Thu, 03 Sep 2026 09:12:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "東森新聞"
+        },
+        {
+          "title": "族群慘遭綠彈狂炸 記憶體三雄全倒！「它」竟存活逆勢上漲近3％ - 三立新聞網SETN.com",
+          "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9RTy1FOXg3akdibWZlWS1fSjZ4c0RrT1NBUGF6NFRvZG9YNDdMdm42elNLVXliSTE2R1hLSzFJNXZMQWNqQVgxVUhUQQ?oc=5",
+          "published": "Thu, 03 Sep 2026 03:25:46 GMT",
+          "published_date": "2026-09-03",
+          "source": "三立新聞網SETN.com"
+        },
+        {
+          "title": "2344 華邦電｜修正後浮現止跌訊號，留意能否重返短期均線 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBGV2Eyc3p4blJodDZ4VzFXQnd4ck53d015b053Ri1TR0FLRFRxYno5aFYzTlBveURsMG1JcmdZNmVHX0RWQnRYZjdDcUMwbUlYQVVKemhvV0Y?oc=5",
+          "published": "Thu, 09 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-09",
+          "source": "CMoney"
+        },
+        {
+          "title": "華邦電上沖下洗！兇手抓到了 53萬股東心寒 - 自由財經",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE82Y05RcWRUNURZVkhvSmI1WXZQNEdXbFloTVR2Q09SWXVnWE0yc0E3MUh0OTBPSExjS0dtYUVhVTRHdFpiT3BWUUpFdHR0RUsyNEhqZlJSUG9TUGdFLUkw0gFkQVVfeXFMUG9tT08wRkFDaGJMT0o3a2gtbWdVZlZpQ1dvYlV3ZTRHTTExZjlwalRRZEc3SUFVS1ZQazhoaFNCTGZMdHBIQ0lYTnVsMG1HRlJia1E1NUZUSC1KSDBUUXJvRGIxcA?oc=5",
+          "published": "Tue, 01 Sep 2026 08:26:58 GMT",
+          "published_date": "2026-09-01",
+          "source": "自由財經"
+        },
+        {
+          "title": "大盤飆820點！外資投信卻聯手痛殺6.6萬張：華邦電重挫、53萬股東要哭了 - Yahoo新聞",
+          "link": "https://news.google.com/rss/articles/CBMimgNBVV95cUxPLVR0UWctdHg3WVFHVWZrWTJ3b1ZrWUxweG9abVRZNTVPRlJmcjZXRGdYeGN5MVRueG9xU0kxZ05sYkMwNElrNDlrelJLMmhocFE3NHMtM05IWi00N3RSZ2piSmNoOU0wZmJBc3ZCR0dydFhaX3RvNWNBaGJHWjR3TFlKZ0VTNUxsekRuYnhzUWozQ3loc3Fab2JHUWtDLWt2ejJfNkNJU3JKQlJMYnI0RmxERkRxUkNoSHBlellYdU9IdXRUVmJpWlF5Z1lWYmRLdUgzWEswY2NjclVhNWZFTjNfNDZlYjJFZzVFc1RmTDJZV1NSSDBnaE9wd1NzTkJPWXQ3R3VKNDZNd0EwZktiVUkyeW5QaGFBNE5oOUtaMWF1NHc0R0kzeFRRZVNfa3hhNmJ3ZUtqM0FBbWFETHNqdDZIaFZ0b29JQkVaZTVfQ1dBcnZVN0RyRmtaQ05IX0w3OGFEUGx2dHNLMlNkQnIwMEJOc3VIc3VlbVlEYWRDdVpUeUVFTlNPdC02emdaSlJ3SXNpY3lWTmVKQQ?oc=5",
+          "published": "Tue, 01 Sep 2026 09:07:00 GMT",
+          "published_date": "2026-09-01",
+          "source": "Yahoo新聞"
+        },
+        {
+          "title": "2344 華邦電- 準備噴出- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5WcDJLVUROUXZ1NjN4MDh3NnYyYmRya1didjFZbVFuNG9mR0FHdzdEYUVvZDdJRTRoelFOcW9fVXF6dWNnTDd2b2RQYU1RYVR2d1VtZTFGMHo?oc=5",
+          "published": "Tue, 07 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-07",
+          "source": "CMoney"
+        },
+        {
+          "title": "上半年EPS飆破7.65元！華邦電Q2營收年增爆184% 總座曝2027年記憶體供應更緊張 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiqwNBVV95cUxNNnVJWVRuaE9rdnlienBZT1U3aFU1TnZJT0I0UHFJbjVqWEhoRFE0UFJvNUkxLTRDMVVWRmFHVlo4UmJHYmRaNTJNLWZkMURScVFseFFPZHdOWFNCZFNubWotdVI5b2RpNlhvM1d0ZjdROGZUdm5pbXBSWW0td211VklGcU1sUjhfdVFRN0ZaNGtBc2htTjlHT3poQ1JqUS1GWUxVMVFXNGxVUVM5cEdXLUYyOTFrQjY1dnBXdll3RVozQ2F5OVY1eDA3NlFjdlBkd2xXam9XeG8teU5iUVBxZ3pBeFMySDUtWEdOd2hrRGFSOW1pOUJ5T2ZhTEJnWGJYV1RDM1N1SlkweWtMd1hLWVpKY0k2dWR6Q09JaVo0a01yTzFwV2E5VW96Mzd1MGhwVVNIS0xxbVVMaURaTjdDZlFCTjR2LUlyQkhzU3NuR2F5ZmFHZmRqLVNGZmNOb25hZUdOd0FncVlRRkdOVFA4MlRwSldfMWoxSWMyUVByTzlwZmttb0Z5QkxWc21hcE13bTdnRm9NT2NyZ1N6U2tFbDdmRldYd0VRVG9n?oc=5",
+          "published": "Thu, 06 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-06",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "華邦電：記憶體缺貨到明年下半年 - 自由時報",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE01MGJqekFoeC1STjVCT1F5WFRuaXZ2QVVWdHBaMFZkRXRMaW1aU1Bjd1dwSWxSN2Z0TDRibWgxQlRmSWhtNHhvd21BUWZuT3lVWk8yOVh2VWM?oc=5",
+          "published": "Wed, 02 Sep 2026 05:06:59 GMT",
+          "published_date": "2026-09-02",
+          "source": "自由時報"
+        },
+        {
+          "title": "【零股排行榜】 盤中零股排行榜TOP 20｜0050 元大台灣50、2344 華邦電、3037 欣興、2330 台積電、2408 南亞科 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMihgRBVV95cUxOTm10cnVBNUZQd2lmVnExRklvM1gxbGdRZGt6TmR1N19JMnd4SXIxbUNIOGgyeHZuYWUxY1pobjhJQVNjRkpoTDdvVHYwYjljcDQ4OUlUY0RIOEpUMDYxcWxOeHd1dVNqVkIyNV9hMGp2NWpEazZJSG0tNDAzVEtGN0JvODY1a214TWR0WDhxcW5tM2QwdE11Z0swekpVYXQzOEJ3b3I2cE5zQ0xTeXQ2UXJSSWQ3ME1yMFFndjY4SFBuT1I0M2c0REpWUW5SaWZTVVRNZk95Y2JUS3NwX0dFUjd2bmJWU1NEQVk4YWJ3TC1oY3BfRmFPNzFOYmY1LVZHTGs4VXJSWk1lQXhYeWdQVlRSVWtqTDFMd1ZhdkF1TXowWExkaDlBS1pNSzRYUnMyendYcktERy1ZRWRYYVR4OVBOSV9UbjFYNjQteUJ0czlZVl9vaERfQnFzYjdzTFkyZDU0d3VOS0pETERCTko4d2V1d0xuSUtVclA0MDlOZUNZSFd5X0NaYVJJOXV3VHFTTXZ2VTJCT093aW1ZVEdxdDNQMmxQLXluTExKclgyVlZxYm43ZlBHajFPcVpMMHRKakE4MndTSFoxejBjNkNTcV9TOGR5bm1KbHBMZldXNkpSaEhsQml0eGtZekZmdVBaQ0daLXhGdEVUUTZhV19uUU44TUw5QQ?oc=5",
+          "published": "Wed, 12 Aug 2026 12:09:13 GMT",
+          "published_date": "2026-08-12",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "🥰群創37.9～44.9區間，華邦電107～130區間 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5nWWtMZjBaczQ3cFJhNUlZYkdMZjg2V2VuaFJ0SnlYT1JzaGNGeExaVWloNUpWSTJCUnJUY2VyeXZITkttcGhPZG93b0pJMDJ2NmZJb0o1VXM?oc=5",
+          "published": "Thu, 30 Jul 2026 22:24:35 GMT",
+          "published_date": "2026-07-30",
+          "source": "CMoney"
+        },
+        {
+          "title": "6月營收飆破205億創新高！華邦電H1營收年增139.2% 記憶體缺貨潮持續發酵 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMipANBVV95cUxNbVMtVkdtR3ZNNXJ4dVAzZndwNHZZYURPUFlHd3JabEN3LTJzQXlaMnNEdkZFZ2VKeHd3eEZoZHdrZzBFVlZ5bnk2dFhXUFNQNzlfaUhmX042V1VVbExDRUdkN0FwZGpfVi1lcWhjU194Z2ZwSVJrLW9MTWMyaXVVQUVxMDhXN2lSbjBQRmdhcDRHVDlNOU4zMko1UDUtUFNQOGl3cDJlSDBiNXdHbTVsdlJaek5ZeFdmZzJhckRxNGVDQ2FHcUFEb01JcG53eG5UYTNLb2tIdDlRRG9ITG5Dd2lfNXZCYmZ4X3o5bGZTZDdWcHFFX0lEVFJUdHk0alAtaDRMX2ZMNk1GQWNGSE9lVXo4elJFNl9HS3B4ZjY5M3kxeVRPOGNxVGNYcWFqeDhiNHFzUlJsUTY3U2E2Rks3elVhREVHS2N3UFFzSVp5c2lvRUhHNWljVVFPa3NESTlLRUo0QlpwNVd5d1NUYm84QWMxOGRhb21LbzhrLXJvUjJ6UlA1bEpiemp2cXRtWEQwc3J6ZXg4bkxjVFcwOWFMS1JCUl8?oc=5",
+          "published": "Tue, 07 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-07",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "記憶體兩樣情！創見單季賺贏歷年全年飆漲逾8% 華邦電、南亞科走弱 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMiugNBVV95cUxNbmRyRW5QZFNPS3FLcGdoNUY5TGdqNDJuemJhZlgxTHhaLTFqUWpwc20yWFFHY3h1N1E3TmllcThzVmxKU3RwMzloWTZJUE1fRlhkTlFsd05BeVZjb3E4VXBPVTFfRDhFTUNKLXEyTzdleUtiTFJoRXk1MDNnbUJRSDhSV3k4UUtoRWR3YzZPek5OV0U2cGdEdFMzcXF3RC1zZm9tdC1nRnJQcXlTX1BQMURZNEFjZGQyT05kWUxHVmJNN1VsQ29pRVl6WHJhSWtDYWJWd2J0RUNFaElITHRPWU1zX2IteksyLVNJTlRrcmppQ3RlNHFGS29rZXdESkpfRXllbnFweUxSR0JqWGFFWTEzTWlGbG42bTMwcGpwT3VVSUJNWjZrRnpCdHJaVE1tSDh6clk0UEFJVDJfX1o0eGVzZ1FvMzN0OElIWDQ4X3pqVVREYnlTbE83NmxLQ3ZDYTM4UXJuaHpWNl9kcTlPZm12TmxsZ3Q5WlV2aG9NbDg0T0l2WmpsVmVmVlR4WUdLazBnUHNqX2toVUkyUWh1cVU3NzNZeFY0dUVHdTZvVEFObzd6OEEwY1pB?oc=5",
+          "published": "Thu, 23 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-23",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "華邦電法說》「記憶體產能緊得不得了！」 2分析師齊看多：明天股價有戲 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi3gNBVV95cUxQTEdPVjZBMHppalkzbndGU2gzOVNTZkQxRDY3eDA4WGduV1huelFPWlAwRlRSb0J4cEYxRFdYZWVwTUQ3ekx5SGVnR3M1eFplNGR2WTZQWnM0R25LanhjcXlNTDZ3UnRUMTZjdXlCUlhHWW9BdW10OGlNVTVDYzJ5U0M5Ty1LanFwME05dkpXTFdSei1EUnAwVE9SNlloRnFSckY1UWhBdURDWEZMeFdLTWE5NmpQc1Myb2hFQi1jYk96Z2t3Ti1FdEhLeWZsLW04VWh4TldVMEVsdVZldmxfclV4SHY2ekVLNEtaLTRuUWoySUtrS2pyODVfTm5MTC01NERxZGcxMkVjcWFjaDItRVMxZVVYeXlnbUU2ZVhCcDhKOHk2SFNFdlhzZnNITHQ4UExQV09jWllNMUtZcDdORUR4RTY3aVp2WmVMRHVyeGVOSHlQRkZrbEYwSDZ6Nlh0Qkt4OHV4VzQyanFyV1dtc1h6bDVlX2txUDFTb2JZWlI5MmVQZHNqbjRTOVB4dko0ZTU3TzZzZmE1aDZXLUZLdzBzV2h1bm11UVNYUmpSd2FoN0NXOG1WNzMzNGhhVFF1anhJemNrQlFiYzdZNE9OR2thNlJpVmRETjRqajln?oc=5",
+          "published": "Tue, 05 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-05",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "大舉進軍記憶體！「這3檔」獲自營商輸血逾7.29億元 華邦電營收、財報都亮眼被掃入2830張 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi-gJBVV95cUxPNTBmSnh4TklOQ0Y0WHZDY2N3YzNHXzhQVnhEVFJtTEtEVnZ5QU1hejFyVEJNRURtTERmVll3VFdpMWZWbmxaTnA4dWFHVEM0eDQzYXRWbDhkZVVqRS13TWtjWTBNRjNEV0ZqUS1KT3AxVTBiOHAwcV9uTjliTkZ1NnR0b2xWNG82WDI1UkkyOWgyTkpmc204MUhRVERKSU04dDJiMHRtX05jeVc3dW02TlFaeTBxblhKQXIzaFpzTk43QzFCSXl0aFZJRnBaVmlrYUE2Qlg2bDFETnh2MVhfdGVtSWtURWgtSGNVd1lpdy1VNU1mUU5KelNzM3V0TnNjbGRhMnZhX0I4X1V6ZndXbkZ2UEJSby1wSVd3dFpTNTdrOC11TG5xSkM5YVExRG1YZzdwZndHSzhObDlXMUl0X0hjZ19wUFZTNGd1ZEZYb0R5czBLeklGeURLR29tdjlXVENCVFE1VVJwal94cHN3RnpoYkYyTDU5MWc?oc=5",
+          "published": "Sat, 09 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-09",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "營收速報 - 華邦電(2344)6月營收205.97億元年增率高達189.88％｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE51X2lIaWJyVFlQYzM0OVBMaUllU2p0Smt0SWVuZWVoU2NOQnlkaVVxb1ZBYndFQk9NbTVYNzFFLUJVR21tLWdxLU9TTkptaWdTX1pEVjZrT2J0OVRkNVluUUoyRkhpeXBYOGtySG94WGlqci1EOVE?oc=5",
+          "published": "Tue, 07 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-07",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "跟歐巴一起衝！華邦電不演了秒攻漲停180.5元 這「記憶體概念股」噴1根強壓南亞科、旺宏 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMisgJBVV95cUxPaUpsRFNXSzR6UU5DNDAtVFI2SEFiMTFBSW9HMndVZnQtZF9JeGpZYUFPMGZDWmJQUE5iVkZYUVRWWXZsbjRYYXppdFh3LXlIcVkwQ3hUeWN1d0Vad1E3ajRFV0dCRWJKbEVudEtlOTYtamp4bEN5cGFVSzFoMFZOWE9xTGV4ZXdSdks1aDc5V2hCR1ZHTERJaWUxQzU1Wl9QTUU4QmIyLUsyRFJhSW9sTEZjUG4xV2RrdnQ0VFNVNzNxVDdtN09XWnZDWTJtcUhGMzRRVm1LU3dhbkl6OFp0bloySnFXdk1hTjFQUXMzcENKTnhaaVZialA4MGY5Y2RxeUg4OHdUOG5pblNvZWdPbmllNEd1YW9ocGtiTXktR2haTXN3YXo4ZDBYRkZvRHA2Qmc?oc=5",
+          "published": "Tue, 14 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-14",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "🥰下週一旺宏，群創友達，力積電，華邦電，南亞科，走勢 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBTajhJbXJIWTRhQzhfVFZ0OEtZU2pTa3VxV1V4TDlqRjBlelRpd3MwcGRZSlZUWVBtd2YxYjFqYl84YXZKcm9mYndnRk96MXgxR1c3QmwyVmQ?oc=5",
+          "published": "Fri, 31 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-31",
+          "source": "CMoney"
+        },
+        {
+          "title": "記憶體漲價潮停不下來！華邦電獲投信連9日獲加碼 今再加碼110億元買超4.8萬張 - Yahoo股市",
+          "link": "https://news.google.com/rss/articles/CBMi2wNBVV95cUxNWGVZbDNTaE1CYXVGQmpLVFE2dDNodzNSelhyQlZfS0VteWhyQVNEM3ZoRTNVSmNJLS1HNDd0QnJIWXBWTDhoVzY5Y1pFdmF5YkRFMk1sX3dTMWtmZThlNHppQUYtQW5yVkRYS1Z2SlpiNzJ2VTBYVVViRkdpYnNka3lIOWVtd2U5cXFvUmxXeTljLVRqUXNBZjlYMU9LMzk0SzFvcGo1SmZMeV9keWlJZ1RVTXo2d2F6TTBaVDFlOWRMWmVhWnZMSW9qanFVWEhmcE81MVlUaG5LM0ZRZ3RpRWZsU1A1aXRheWtrT3dWWmZ6cF82bmhzTlp2QmFPYi1KSERhZlhmUDdEQmMzaTNMMlNSSEtZa3QtTDRBS1MyRFB3QU94SnlpY0hDTHF4dmxKUzNGb1NQUmlnTnBxcG0tYXZQRGxBcDdqeG1keFRITmlDb2JkSHk4YV9aV0xjc2k5cXlWSzZQNEN3N09WYTE4U0VNX1Q1eXJYMk50Szh3VUpWNTIzd09VU0Z6bGZYSHVwbXdDNm4xRV92TVgwRkpkQ1E1OE14ZWJTa3pOU1l1M05ybkM2UnVKUUN6VWo2cHJxbGI5V2l6NEFoLVNoMUE0Vk9mcFJoMWIxeVBz?oc=5",
+          "published": "Mon, 22 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-22",
+          "source": "Yahoo股市"
+        },
+        {
+          "title": "2344 華邦電 - 28-Aug -2026 當日個股 – 三大法人合計賣超... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE51bXpxYlo5SW1uUXRkdWNuWjdZT2FwRVU2SS1KY05wcFFlTWlXdGlwT3JWVWJOSzFUYmdyb1RXRGRoRjE0eXcwMkNyaC1CSzBZMDVkbGZZaDA?oc=5",
+          "published": "Sat, 29 Aug 2026 01:19:35 GMT",
+          "published_date": "2026-08-29",
+          "source": "CMoney"
+        }
+      ],
+      "catalysts": [],
+      "catalyst_summary": "華邦電上半年獲利創高與記憶體缺貨潮支撐股價，惟8月底至9月初遭外資大幅賣超逾10萬張，股價隨記憶體族群跳水承壓。",
+      "risk_flags": [
+        "記憶體股狂跌、華邦電殺5.59%",
+        "外資3天砍10萬張",
+        "外資賣超481億",
+        "投信近5日賣超",
+        "三大法人合計賣超"
+      ],
+      "target_prices": []
+    },
+    {
+      "score": 51.8,
+      "trend": 0.6,
+      "rs": 0.48,
+      "setup": 0.63,
+      "quality": 0.47,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": true,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": true,
+      "limit_up_today": false,
+      "close_pos": 0.0,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 5.1,
+      "ret20_pct": 8.1,
+      "dollar_vol_m": 4289.0,
+      "stock_id": "2409",
+      "name": "友達",
+      "industry": "光電業",
+      "close": 26.549999237060547,
+      "change_pct": 0.57,
+      "valuation": {
+        "pe": 110.63,
+        "yield_pct": 1.51,
+        "pb": 1.3
+      },
+      "last_ohlc": [
+        26.9,
+        28.85,
+        26.55,
+        26.55
+      ],
+      "note": "友達",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": 55439916,
+        "inst_buy_streak": 2,
+        "foreign_holding_pct": 11.07,
+        "foreign_holding_change_30d": 0.72,
+        "short_change_pct": -6.59
+      },
+      "fundamentals": {
+        "eps_latest": 0.18,
+        "eps_yoy": -30.8,
+        "gross_margin": 13.0,
+        "operating_margin": 0.3,
+        "debt_ratio": 55.8,
+        "roe": 1.3,
+        "roa": 0.6,
+        "op_cashflow": 6877414000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": -2.6,
+        "revenue_growth_months": 1
+      },
+      "levels": {
+        "close": 26.549999237060547,
+        "ma5": 26.36999969482422,
+        "ma5_diff_pct": 0.68,
+        "ma20": 26.004999828338622,
+        "ma20_diff_pct": 2.05,
+        "ma60": 26.598849519093832,
+        "ma60_diff_pct": -0.18,
+        "ma120": 22.825258092880247,
+        "ma120_diff_pct": 14.03,
+        "ma240": 18.10033737977346,
+        "ma240_diff_pct": 31.83,
+        "high_60": 32.7,
+        "low_60": 22.200000762939453,
+        "high_20": 27.25,
+        "low_20": 24.549999237060547,
+        "bb_lower": 24.727708204545188,
+        "bb_upper": 27.282291452132057,
+        "atr14": 1.0785714558192663,
+        "stop_2atr": 24.39,
+        "stop_2atr_pct": -8.12
+      },
+      "ohlc": [
+        [
+          30.0,
+          32.35,
+          29.4,
+          31.45
+        ],
+        [
+          31.7,
+          32.5,
+          29.2,
+          29.25
+        ],
+        [
+          29.05,
+          29.4,
+          26.5,
+          27.55
+        ],
+        [
+          28.2,
+          28.75,
+          27.7,
+          28.3
+        ],
+        [
+          27.75,
+          28.2,
+          27.0,
+          27.65
+        ],
+        [
+          26.5,
+          26.75,
+          25.55,
+          25.8
+        ],
+        [
+          26.25,
+          26.45,
+          24.55,
+          25.4
+        ],
+        [
+          26.0,
+          26.35,
+          25.55,
+          25.6
+        ],
+        [
+          26.15,
+          26.8,
+          25.8,
+          25.8
+        ],
+        [
+          26.3,
+          26.7,
+          25.55,
+          26.25
+        ],
+        [
+          25.6,
+          26.0,
+          25.15,
+          25.5
+        ],
+        [
+          25.55,
+          25.6,
+          23.35,
+          23.9
+        ],
+        [
+          22.75,
+          24.85,
+          22.0,
+          23.9
+        ],
+        [
+          24.8,
+          25.15,
+          23.05,
+          23.65
+        ],
+        [
+          22.95,
+          25.1,
+          22.1,
+          22.2
+        ],
+        [
+          24.4,
+          24.4,
+          23.55,
+          24.2
+        ],
+        [
+          23.7,
+          24.4,
+          23.4,
+          23.9
+        ],
+        [
+          23.9,
+          24.85,
+          23.7,
+          24.45
+        ],
+        [
+          25.25,
+          25.55,
+          24.35,
+          24.45
+        ],
+        [
+          24.3,
+          24.65,
+          23.65,
+          24.55
+        ],
+        [
+          24.55,
+          25.0,
+          24.1,
+          24.55
+        ],
+        [
+          25.6,
+          27.0,
+          25.35,
+          27.0
+        ],
+        [
+          27.85,
+          27.9,
+          25.9,
+          26.1
+        ],
+        [
+          26.4,
+          26.9,
+          26.15,
+          26.25
+        ],
+        [
+          26.55,
+          26.9,
+          25.75,
+          25.75
+        ],
+        [
+          26.05,
+          26.4,
+          25.75,
+          25.8
+        ],
+        [
+          26.0,
+          27.4,
+          25.8,
+          27.25
+        ],
+        [
+          27.2,
+          27.25,
+          26.25,
+          26.35
+        ],
+        [
+          25.7,
+          26.75,
+          25.25,
+          26.15
+        ],
+        [
+          26.35,
+          26.55,
+          25.55,
+          25.8
+        ],
+        [
+          25.8,
+          25.8,
+          25.35,
+          25.6
+        ],
+        [
+          25.7,
+          26.1,
+          25.25,
+          25.25
+        ],
+        [
+          25.05,
+          25.65,
+          24.6,
+          25.65
+        ],
+        [
+          25.8,
+          25.95,
+          25.5,
+          25.5
+        ],
+        [
+          25.8,
+          25.9,
+          25.25,
+          25.25
+        ],
+        [
+          25.25,
+          26.2,
+          25.2,
+          25.85
+        ],
+        [
+          25.75,
+          26.65,
+          25.4,
+          26.65
+        ],
+        [
+          26.8,
+          27.1,
+          26.35,
+          26.4
+        ],
+        [
+          26.2,
+          27.15,
+          26.05,
+          26.4
+        ],
+        [
+          26.9,
+          28.85,
+          26.55,
+          26.55
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "short_cover_with_buy",
+        "pullback_to_support",
+        "relative_strength_leader"
+      ],
+      "combos": [],
+      "news": []
+    },
+    {
+      "score": 56.5,
+      "trend": 1.0,
+      "rs": 0.2,
+      "setup": 0.55,
+      "quality": 0.18,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": true,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.38,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": 12.3,
+      "ret20_pct": 10.7,
+      "dollar_vol_m": 32616.0,
+      "stock_id": "2454",
+      "name": "聯發科",
+      "industry": "半導體業",
+      "close": 4340.0,
+      "change_pct": 1.52,
+      "valuation": {
+        "pe": 71.68,
+        "yield_pct": 1.23,
+        "pb": 16.33
+      },
+      "last_ohlc": [
+        4400.0,
+        4420.0,
+        4290.0,
+        4340.0
+      ],
+      "note": "聯發科",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": 1687713,
+        "inst_buy_streak": 1,
+        "foreign_holding_pct": 55.69,
+        "foreign_holding_change_30d": 0.53,
+        "short_change_pct": 42.42
+      },
+      "fundamentals": {
+        "eps_latest": 15.17,
+        "eps_yoy": -17.7,
+        "gross_margin": 46.2,
+        "operating_margin": 15.0,
+        "debt_ratio": 45.1,
+        "roe": 5.7,
+        "roa": 3.1,
+        "op_cashflow": 6593980000.0,
+        "op_cashflow_positive": true,
+        "revenue_yoy": 12.2,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 4340.0,
+        "ma5": 4168.0,
+        "ma5_diff_pct": 3.96,
+        "ma20": 3987.5,
+        "ma20_diff_pct": 8.12,
+        "ma60": 3959.7180404,
+        "ma60_diff_pct": 8.76,
+        "ma120": 3344.7870707416664,
+        "ma120_diff_pct": 22.93,
+        "ma240": 2391.6938343916668,
+        "ma240_diff_pct": 44.89,
+        "high_60": 4532.916364,
+        "low_60": 3150.0,
+        "high_20": 4340.0,
+        "low_20": 3700.0,
+        "bb_lower": 3597.9861329407395,
+        "bb_upper": 4377.0138670592605,
+        "atr14": 185.0,
+        "stop_2atr": 3970.0,
+        "stop_2atr_pct": -8.53
+      },
+      "ohlc": [
+        [
+          3970.0,
+          4050.0,
+          3925.0,
+          3925.0
+        ],
+        [
+          4095.0,
+          4095.0,
+          3825.0,
+          3825.0
+        ],
+        [
+          3830.0,
+          3860.0,
+          3515.0,
+          3660.0
+        ],
+        [
+          3790.0,
+          3790.0,
+          3665.0,
+          3740.0
+        ],
+        [
+          3735.0,
+          3755.0,
+          3620.0,
+          3700.0
+        ],
+        [
+          3470.0,
+          3570.0,
+          3370.0,
+          3370.0
+        ],
+        [
+          3355.0,
+          3435.0,
+          3240.0,
+          3340.0
+        ],
+        [
+          3435.0,
+          3670.0,
+          3410.0,
+          3670.0
+        ],
+        [
+          4000.0,
+          4000.0,
+          3830.0,
+          3850.0
+        ],
+        [
+          3950.0,
+          4050.0,
+          3850.0,
+          3875.0
+        ],
+        [
+          3805.0,
+          4010.0,
+          3750.0,
+          3750.0
+        ],
+        [
+          3655.0,
+          3710.0,
+          3525.0,
+          3680.0
+        ],
+        [
+          3425.0,
+          3460.0,
+          3315.0,
+          3315.0
+        ],
+        [
+          3315.0,
+          3335.0,
+          2990.0,
+          3150.0
+        ],
+        [
+          3145.0,
+          3410.0,
+          3060.0,
+          3235.0
+        ],
+        [
+          3555.0,
+          3555.0,
+          3555.0,
+          3555.0
+        ],
+        [
+          3910.0,
+          3910.0,
+          3780.0,
+          3910.0
+        ],
+        [
+          4095.0,
+          4095.0,
+          3800.0,
+          3865.0
+        ],
+        [
+          4095.0,
+          4125.0,
+          3980.0,
+          4000.0
+        ],
+        [
+          4100.0,
+          4100.0,
+          3905.0,
+          3920.0
+        ],
+        [
+          3990.0,
+          4010.0,
+          3825.0,
+          3900.0
+        ],
+        [
+          3920.0,
+          3995.0,
+          3915.0,
+          3960.0
+        ],
+        [
+          3900.0,
+          4050.0,
+          3810.0,
+          4020.0
+        ],
+        [
+          3950.0,
+          4030.0,
+          3950.0,
+          4015.0
+        ],
+        [
+          4130.0,
+          4295.0,
+          4115.0,
+          4225.0
+        ],
+        [
+          4400.0,
+          4400.0,
+          4205.0,
+          4210.0
+        ],
+        [
+          4205.0,
+          4225.0,
+          4025.0,
+          4050.0
+        ],
+        [
+          4020.0,
+          4050.0,
+          3885.0,
+          3885.0
+        ],
+        [
+          3750.0,
+          3910.0,
+          3750.0,
+          3845.0
+        ],
+        [
+          3820.0,
+          3870.0,
+          3675.0,
+          3700.0
+        ],
+        [
+          3725.0,
+          3810.0,
+          3695.0,
+          3790.0
+        ],
+        [
+          3820.0,
+          3825.0,
+          3745.0,
+          3765.0
+        ],
+        [
+          3725.0,
+          3735.0,
+          3655.0,
+          3735.0
+        ],
+        [
+          3730.0,
+          3965.0,
+          3710.0,
+          3945.0
+        ],
+        [
+          4005.0,
+          4005.0,
+          3865.0,
+          3865.0
+        ],
+        [
+          3935.0,
+          4000.0,
+          3925.0,
+          3985.0
+        ],
+        [
+          3885.0,
+          3945.0,
+          3820.0,
+          3925.0
+        ],
+        [
+          4315.0,
+          4315.0,
+          4315.0,
+          4315.0
+        ],
+        [
+          4450.0,
+          4565.0,
+          4230.0,
+          4275.0
+        ],
+        [
+          4400.0,
+          4420.0,
+          4290.0,
+          4340.0
+        ]
+      ],
+      "hits": [
+        "bullish_ma_alignment",
+        "above_240ma",
+        "monthly_revenue_growth"
+      ],
+      "combos": [],
+      "news": []
+    },
+    {
+      "score": 22.1,
+      "trend": 0.4,
+      "rs": 0.0,
+      "setup": 0.1,
+      "quality": 0.58,
+      "liquidity": 1.0,
+      "exhausted": false,
+      "trigger": false,
+      "brewing": false,
+      "new_stock": false,
+      "breakout": false,
+      "pullback_turn": false,
+      "limit_up_today": false,
+      "close_pos": 0.08,
+      "consec_big_up": 0,
+      "spike_no_lock": false,
+      "first_board": false,
+      "profile": "均衡",
+      "ret5_pct": -7.2,
+      "ret20_pct": -1.2,
+      "dollar_vol_m": 10761.0,
+      "stock_id": "8299",
+      "name": "群聯",
+      "industry": "半導體業",
+      "close": 2000.0,
+      "change_pct": -3.15,
+      "valuation": {
+        "pe": 9.17,
+        "yield_pct": 1.16,
+        "pb": 4.33
+      },
+      "last_ohlc": [
+        2085.0,
+        2120.0,
+        1990.0,
+        2000.0
+      ],
+      "note": "群聯",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": -101114,
+        "inst_buy_streak": 0,
+        "foreign_holding_pct": 41.59,
+        "foreign_holding_change_30d": 2.09,
+        "short_change_pct": -12.5
+      },
+      "fundamentals": {
+        "eps_latest": 68.8,
+        "eps_yoy": 1144.1,
+        "gross_margin": 65.3,
+        "operating_margin": 38.8,
+        "debt_ratio": 47.3,
+        "roe": 25.7,
+        "roa": 13.5,
+        "op_cashflow": -14872559000.0,
+        "op_cashflow_positive": false,
+        "revenue_yoy": 377.6,
+        "revenue_growth_months": 3
+      },
+      "levels": {
+        "close": 2000.0,
+        "ma5": 2101.0,
+        "ma5_diff_pct": -5.05,
+        "ma20": 2092.25,
+        "ma20_diff_pct": -4.61,
+        "ma60": 2089.5227863333334,
+        "ma60_diff_pct": -4.48,
+        "ma120": 2078.2990968833333,
+        "ma120_diff_pct": -3.91,
+        "ma240": 1684.038757225,
+        "ma240_diff_pct": 15.8,
+        "high_60": 2561.300513,
+        "low_60": 1495.0,
+        "high_20": 2280.0,
+        "low_20": 1965.0,
+        "bb_lower": 1934.9211456183266,
+        "bb_upper": 2249.5788543816734,
+        "atr14": 93.57142857142857,
+        "stop_2atr": 1812.86,
+        "stop_2atr_pct": -9.36
+      },
+      "ohlc": [
+        [
+          2190.0,
+          2280.0,
+          2165.0,
+          2220.0
+        ],
+        [
+          2275.0,
+          2275.0,
+          2155.0,
+          2170.0
+        ],
+        [
+          2175.0,
+          2200.0,
+          1955.0,
+          2050.0
+        ],
+        [
+          2110.0,
+          2190.0,
+          2070.0,
+          2105.0
+        ],
+        [
+          2035.0,
+          2040.0,
+          1960.0,
+          1980.0
+        ],
+        [
+          1860.0,
+          1870.0,
+          1785.0,
+          1785.0
+        ],
+        [
+          1800.0,
+          1820.0,
+          1685.0,
+          1735.0
+        ],
+        [
+          1800.0,
+          1855.0,
+          1775.0,
+          1855.0
+        ],
+        [
+          1940.0,
+          1995.0,
+          1915.0,
+          1915.0
+        ],
+        [
+          1940.0,
+          1960.0,
+          1895.0,
+          1920.0
+        ],
+        [
+          1900.0,
+          1970.0,
+          1820.0,
+          1825.0
+        ],
+        [
+          1805.0,
+          1820.0,
+          1730.0,
+          1820.0
+        ],
+        [
+          1680.0,
+          1685.0,
+          1640.0,
+          1650.0
+        ],
+        [
+          1620.0,
+          1620.0,
+          1485.0,
+          1515.0
+        ],
+        [
+          1485.0,
+          1640.0,
+          1445.0,
+          1495.0
+        ],
+        [
+          1640.0,
+          1640.0,
+          1640.0,
+          1640.0
+        ],
+        [
+          1675.0,
+          1800.0,
+          1670.0,
+          1760.0
+        ],
+        [
+          1750.0,
+          1850.0,
+          1725.0,
+          1820.0
+        ],
+        [
+          1900.0,
+          1910.0,
+          1845.0,
+          1845.0
+        ],
+        [
+          1815.0,
+          2025.0,
+          1815.0,
+          2025.0
+        ],
+        [
+          2060.0,
+          2075.0,
+          1970.0,
+          2020.0
+        ],
+        [
+          2060.0,
+          2080.0,
+          2030.0,
+          2040.0
+        ],
+        [
+          2035.0,
+          2100.0,
+          2015.0,
+          2090.0
+        ],
+        [
+          2110.0,
+          2245.0,
+          2110.0,
+          2210.0
+        ],
+        [
+          2260.0,
+          2280.0,
+          2175.0,
+          2280.0
+        ],
+        [
+          2325.0,
+          2325.0,
+          2065.0,
+          2080.0
+        ],
+        [
+          2110.0,
+          2125.0,
+          2085.0,
+          2085.0
+        ],
+        [
+          2105.0,
+          2120.0,
+          2000.0,
+          2000.0
+        ],
+        [
+          1920.0,
+          1970.0,
+          1905.0,
+          1965.0
+        ],
+        [
+          2010.0,
+          2080.0,
+          1965.0,
+          1995.0
+        ],
+        [
+          2005.0,
+          2075.0,
+          1995.0,
+          2075.0
+        ],
+        [
+          2095.0,
+          2215.0,
+          2070.0,
+          2135.0
+        ],
+        [
+          2110.0,
+          2120.0,
+          2000.0,
+          2085.0
+        ],
+        [
+          2115.0,
+          2125.0,
+          2070.0,
+          2125.0
+        ],
+        [
+          2145.0,
+          2180.0,
+          2115.0,
+          2155.0
+        ],
+        [
+          2170.0,
+          2195.0,
+          2115.0,
+          2150.0
+        ],
+        [
+          2130.0,
+          2185.0,
+          2110.0,
+          2165.0
+        ],
+        [
+          2185.0,
+          2185.0,
+          2080.0,
+          2125.0
+        ],
+        [
+          2100.0,
+          2115.0,
+          2060.0,
+          2065.0
+        ],
+        [
+          2085.0,
+          2120.0,
+          1990.0,
+          2000.0
+        ]
+      ],
+      "hits": [
+        "above_240ma",
+        "foreign_holding_increase",
+        "monthly_revenue_growth",
+        "chip_accumulation"
+      ],
+      "combos": [],
+      "news": [
+        {
+          "title": "群聯NAND供應穩定- 日報 - 工商時報",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1URHB1cGlkVk9uNC15QzBCRmtLdmNId0w2TU9jNnE2WjlrSUZxWnhlbWt1WWhmOVZPQUZCcVI3WjQwZG1lREl3V2Y0YVBxUEpONl9HRTBCR1JaNTFjU0hB?oc=5",
+          "published": "Mon, 31 Aug 2026 19:00:00 GMT",
+          "published_date": "2026-08-31",
+          "source": "工商時報"
+        },
+        {
+          "title": "個股：群聯(8299)9/15受邀參加UBS證券舉辦之投資論壇 - ww2.money-link.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQdFZzaWd0QkFoZE9kNlV1SGI2c3ZTaXE1RDZGRjVidTMtb1d4MlcyVzZJb0h0RTZWXy1JM2ljaGtzNWlQcmFKUUllME11cE50SmY3TjdaLU92MW9XaW9DRVVNQ0dpS0lTdUs4ZWdHbjRXRzR1TUZZcVlLMm9wT2U4TURtRFBfQmU4?oc=5",
+          "published": "Thu, 03 Sep 2026 06:42:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "ww2.money-link.com.tw"
+        },
+        {
+          "title": "8299 群聯- 季線守穩了，月線快要穿過季線了。 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1ZbWViWjAwVlM5eTBjR3BsRUtuZU5vZmVZRFE5cFdhTUNVZUR0UzNoQmRIcktob0FiMFh3dkVyd0dxeUM5eGJVMW9uLXUwMjl0Q3had2FEWV8?oc=5",
+          "published": "Mon, 31 Aug 2026 06:31:51 GMT",
+          "published_date": "2026-08-31",
+          "source": "CMoney"
+        },
+        {
+          "title": "Factset 最新調查：群聯(8299-TW)EPS預估下修至388.99元，預估目標價為2750元｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1uWlNYa0NYTEp5Ykt2bS15ZTVQU2xYbUdtQ0lBcGNrWFNXeWpsYm8tMzVseklVdUZNeW1NZWVtT1lzV00ycGNhR0dJX2pNc0ZwUi0xZUZBRlUtWF92QjBHZE9DVVB3Z2trYlJvS2xhY1FDbXRNTGc?oc=5",
+          "published": "Mon, 17 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-17",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "群聯(8299)財報史上最強，為何股價暴跌？法人目標價竟從3字頭砍到2字頭「大老不說的2個祕密」…黃金買點曝光 - 今周刊",
+          "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNRHI4U3k5cnVOanhqVGdvYWxmbmVYc0ZHeGRieGlMYU5aVzRNbDRLMUMwNlUzOTFxc1Q2T0RNel9ud0FUcjFDbmtUY0lZbndqbzNncXJRR3htTnZ4MER5dDVsMHItWkJnMFVEVGl0RGFFMEgxdnNZYXRRanc1SjNVVA?oc=5",
+          "published": "Sun, 16 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-16",
+          "source": "今周刊"
+        },
+        {
+          "title": "最牛一輪／群聯有戲 凱基61搶鏡 - udn.com",
+          "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE1WcDFLQjVWM096T0pxV19uOGpLTkRZRkJtY3RzeFBTMTluZnUxWDdIemtqWEItb0pKUXB0LUFRRXFySE5LZXR2WkpKWFhNN1NiVmY2RjN0VU9zYVlOWjhTRzZON2xUckVLVEhFNEhVUEZ1d9IBVkFVX3lxTFBvQk9wb3lxNGlhQjlrWkhDXzVERWU1bVNBTkd4aHV4b2xTODI0LVBYTjVCQlJNWHFCRnZQQzRKRkZHRjNYZHVqNGlteUMxR3ZrSEpXX0dR?oc=5",
+          "published": "Mon, 31 Aug 2026 16:46:43 GMT",
+          "published_date": "2026-08-31",
+          "source": "udn.com"
+        },
+        {
+          "title": "個股：群聯(8299)9/8受邀參加Horizon證券舉辦之投資論壇 - ww2.money-link.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNVXJwZks1QUpjVTRkclViMjN3WHlwZ01oTl9GNU9MOXJTd3FwMDN6R01PWDJsNGp6Qkc1Y2ppOHVnamtjQmZGTkRKUjMtbTF0cC1XRWkwRW13UDl2cUtkWUhCY2pBaHZtLVZvUmd4SjhHb1lsclVGN1RleHhwcjlFeTJ2VnRPckts?oc=5",
+          "published": "Thu, 03 Sep 2026 06:41:00 GMT",
+          "published_date": "2026-09-03",
+          "source": "ww2.money-link.com.tw"
+        },
+        {
+          "title": "8299 群聯- 集邦：2026Q2 eSSD 出貨量、合約價飆升讓營收翻倍- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1ySGdtVkEzRzlsdnlWNVRQX2R0aHJSUzh0T3ItTW14YVhVUjRDVVhiQVYyMzhZSG9aZDNaMEc4OWRKQWlsVlBkNVNIZXdlM2Q0aF9WenF6MVA?oc=5",
+          "published": "Mon, 31 Aug 2026 22:12:05 GMT",
+          "published_date": "2026-08-31",
+          "source": "CMoney"
+        },
+        {
+          "title": "Factset 最新調查：群聯(8299-TW)目標價調降至2900元，幅度約3.33%｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBBWUkzZV9TZWFnQi1uanRiYjNJYjVLR0hEa3RPNHdtVkgzUjQ0cUpab1dVbkNGQVZQNS05V2wxajhiYVcwWUJXVEcwTE9fdURQM2NjRU0zeWdRVFoyX2dpbkhPWkVrNFpOQ2xHX1MwRHRESXZTZXc?oc=5",
+          "published": "Fri, 14 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-14",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "【12:15 即時新聞】群聯(8299)股價上攻逾3%，受惠AI eSSD高成長題材帶動，法人買盤迴流助多頭結構轉強 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBOb2FOQ3JCbHF2OVNpNDN6d2FHU0xzT2NSYzd3SWNqNWdLUXhnQ01qT3A1RlBNemE4WnBYcUlXS19ERTFTOS1peFlHOEtxclF3YjBGbXBhejU?oc=5",
+          "published": "Sun, 23 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-23",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299群聯整股現價2115｜豐雲學堂 2026 年 08 月 31 日 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9Vdzh5eVZMdFdZSHpqRFJkVlg1UkdBeWRWaUMybTRIN3NKcFNaR2lkRFRxSjJKZFQ4S25VRTlIZ1FvQ0JzN0dQNWJYVDJHYlJYa0psN1VNUU1KUnVDVXVmeGFmOU5xX2wt?oc=5",
+          "published": "Fri, 14 Aug 2026 06:55:04 GMT",
+          "published_date": "2026-08-14",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "群聯 (8299) 下周盤勢多維度展望與操作策略 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1Nd3JfcXZLNUtDeUtON0xyVjJnRFE4V1ZEY2hBbkZTbVkxZXlTc3Rrbk1YTzRDa1Y0emZxdkd3S2IxVGdqWjc1ODZuX1JZeTlQTWd2bFQ3OC0?oc=5",
+          "published": "Sun, 09 Aug 2026 01:10:29 GMT",
+          "published_date": "2026-08-09",
+          "source": "CMoney"
+        },
+        {
+          "title": "Factset 最新調查：群聯(8299-TW)EPS預估上修至340.55元，預估目標價為3000元｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9XNG1ydDVkbk1oZzEzT0F2Nlp0QWlsQVVVUjRfdll4WkZualdkeTJPWGozZmtxYmp5c3VKQlg3UHNVN3lqY3FVX0Z3MEQwXzZRTm90Mk9qa3hfVzRic2RPbHN3cHVqM3BXV1ZCMDIxSDV1aFNpa1E?oc=5",
+          "published": "Thu, 02 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-02",
+          "source": "sinotrade.com.tw"
+        },
+        {
+          "title": "【即時新聞】群聯(8299)高層加碼飆漲停！這「2檔記憶體概念股」大戶急敲卡位？ - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1JdmZGaEpLNW04N2JNM0JXOFQ4blkyck52WlVQcldSaGtMYkE5cDhHNnRNUlhpVU9LRUJvRzNIU1llVHdZb1NrOHFXLTV3MjdOMkt2MnF0N05raUhzdU03YmVuM2thVjQ?oc=5",
+          "published": "Thu, 06 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-06",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299 群聯- 群聯為什麼今天反而爆量大跌- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9HREEzUTJNQUtidHB5ZFAtOEN6TXVUY0U1TmpKNk5jYzBSX0N0dHNScEU4VUdPdEJ5enkyRnVzQ2pMaXhQNGNCcXpQckJjMVEwNC15bzRPaHo?oc=5",
+          "published": "Fri, 14 Aug 2026 03:45:40 GMT",
+          "published_date": "2026-08-14",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299 群聯- 你敢跌我就敢買！(今日5股) - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1rY2dqbzdGNmExM3JFODh4TW1nZ1hQNng5S0hsWEM2QTBpekx3Y0x1RDZ0ancyV2VBcHpLaHN6U2I4NDJxaEJtVUs4VHFtZE9UbjNaQkplYUg?oc=5",
+          "published": "Wed, 17 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-17",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299 群聯 - 圖引：henryouyang0716 脆 - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE85WkZCTFNQR0drcmZYZTRrcTRhNTJsRXpfb3NsM0R5R1k2clVLcU9MamVMS1Z1VEUzdmc1Rk0zbk1lNE5Cd2pTQkxyZDhHRllldWI3TTRkck4?oc=5",
+          "published": "Thu, 30 Jul 2026 16:15:05 GMT",
+          "published_date": "2026-07-30",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299 群聯- 大盤創新紀錄，當天下跌點數最大的一天！ 來聽聽艦長分析，半導... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBvdXhjWTRDTDktTUQwandzTy1SdWF1LV9YU1YzaXNsNGhGYmN5N0l2UnZON1d6ZFFRMXNSd3A1dHhpN2xONEs5WV9LSHhJdXNWU1VEX2VmSGQ?oc=5",
+          "published": "Thu, 16 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-16",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299 群聯- 很久沒有出來寫雞湯文了，幫大家補一下雞血！ 群聯早就破月線，... - 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1EVDZnUm53X0xZTl9HREQtWWw1OUEzOTdGWE9nbHRwQmR3aXl4azlLblVIOTFfNEZLSGJTU2l6TkpWSXZRYW54WXhiSUc5SjBDcHlkX2FSUlI?oc=5",
+          "published": "Wed, 15 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-15",
+          "source": "CMoney"
+        },
+        {
+          "title": "8299 群聯- 群聯庫存現金流循環表現- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9RRUl2eVdFU2d1dTFGbl84T0hVNmVhbkN4QlNHRnYxNkkwV054QnRpSklUazR2Qm9tUTBlR0dYWjlKd2pManVjU2hLZ3JNbDdBMnZoaXBzcHU?oc=5",
+          "published": "Fri, 31 Jul 2026 07:00:00 GMT",
+          "published_date": "2026-07-31",
+          "source": "CMoney"
+        },
+        {
+          "title": "Q2狂賺逾11個股本！群聯財報創紀錄股價卻翻黑大跌原因抓到了- 證券 - 工商時報",
+          "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1SSDhIeWo5YXNDWm5GOVRJRFViTG9VSldnQW44anRReHI4UVJudUltaFBrRHBUaUpzNEVuVWNpMEI0QlRsTnV6MXpGVzVEM3MycEg1M29wR01sb1g5SDQw?oc=5",
+          "published": "Fri, 14 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-14",
+          "source": "工商時報"
+        },
+        {
+          "title": "〈群聯法說〉AI引爆存儲需求 NAND供需2027、2028年恐仍難平衡 - news.cnyes.com",
+          "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE90Ykl3c0JqMld2d3Zqd0JZWDdieGdScHNJYjdUQzUyLXllVERjdk0xNlhOX3BmRnVUN09xT1B6b3EwbUJPTlJjWkl6R0hZQk0?oc=5",
+          "published": "Thu, 13 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-13",
+          "source": "news.cnyes.com"
+        },
+        {
+          "title": "8299 群聯- 2026年五月群聯營收！推估今年EPS就好- 股市爆料同學會 - CMoney",
+          "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1jdXgtRUV5cGJZUzVXZ3dLUF81QkNxOEZuNW9xM3lDeHZRMnNwRDhUcEVIaUUyVTlmZl85NHl0ZEZHcVhmWWxlVFdsY3BvQndNcHNvbmo1WGo?oc=5",
+          "published": "Thu, 04 Jun 2026 07:00:00 GMT",
+          "published_date": "2026-06-04",
+          "source": "CMoney"
+        },
+        {
+          "title": "《獨家專訪5》被分析師酸「只是模組廠」？群聯半年狂賺19 個股本！潘健成霸氣反擊：我自掏數億「一股不賣」！ - 優分析UAnalyze",
+          "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1mMzFQVGZueXNsZEs2aW40MlVxbWlJMzZkNU95WGxfSWs1WDRibUxHQmtueW1XQVlOOFNoS3NZbVZrYVZjZXJ1UjNmVndCTF9MYnd3cF9n?oc=5",
+          "published": "Sat, 22 Aug 2026 07:00:00 GMT",
+          "published_date": "2026-08-22",
+          "source": "優分析UAnalyze"
+        },
+        {
+          "title": "Factset 最新調查：群聯(8299-TW)EPS預估上修至202.4元，預估目標價為2511.5元｜新聞快訊｜豐雲學堂 - sinotrade.com.tw",
+          "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9FTWxSMkZKWmhnR0pJYVUxM1l3V203WllTTUtld2hlRFc5VktnNzMyQ1V0b2FocVVzakU4eU1QLU5oZmIxQWRWcDNPTE03NjZRenVNWllJWWNNS1FlRGp5UlJaTlJBYUJLV1pJNXVBaWI1RzVxTUE?oc=5",
+          "published": "Sun, 10 May 2026 07:00:00 GMT",
+          "published_date": "2026-05-10",
+          "source": "sinotrade.com.tw"
+        }
+      ]
+    },
+    {
+      "stock_id": "009816",
+      "name": "009816",
+      "close": null,
+      "change_pct": null,
+      "valuation": {},
+      "note": "凱基台灣TOP50",
+      "hot_industry": false,
+      "chips": {
+        "inst_total_today": 9144068,
+        "inst_buy_streak": 1,
+        "foreign_holding_pct": 2.19,
+        "foreign_holding_change_30d": -0.16,
+        "short_change_pct": -2.05
+      },
+      "news": []
+    }
+  ],
+  "industry_trends": [
+    {
+      "industry": "金融保險",
+      "count": 31,
+      "avg_change": 1.61,
+      "avg_ret20": 8.8,
+      "breadth_ma20": 94.0,
+      "breadth_ma60": 97.0,
+      "bullish_ratio": 55.0,
+      "combo_hits": 0,
+      "score": 68.9
+    },
+    {
+      "industry": "航運業",
+      "count": 33,
+      "avg_change": 0.64,
+      "avg_ret20": 6.9,
+      "breadth_ma20": 61.0,
+      "breadth_ma60": 67.0,
+      "bullish_ratio": 33.0,
+      "combo_hits": 0,
+      "score": 46.5
+    },
+    {
+      "industry": "金融業",
+      "count": 9,
+      "avg_change": 0.59,
+      "avg_ret20": 9.0,
+      "breadth_ma20": 100.0,
+      "breadth_ma60": 56.0,
+      "bullish_ratio": 11.0,
+      "combo_hits": 0,
+      "score": 44.7
+    },
+    {
+      "industry": "塑膠工業",
+      "count": 26,
+      "avg_change": -1.21,
+      "avg_ret20": 7.7,
+      "breadth_ma20": 69.0,
+      "breadth_ma60": 54.0,
+      "bullish_ratio": 12.0,
+      "combo_hits": 0,
+      "score": 38.6
+    },
+    {
+      "industry": "造紙工業",
+      "count": 7,
+      "avg_change": -0.04,
+      "avg_ret20": 3.9,
+      "breadth_ma20": 57.0,
+      "breadth_ma60": 43.0,
+      "bullish_ratio": 29.0,
+      "combo_hits": 0,
+      "score": 34.0
+    },
+    {
+      "industry": "水泥工業",
+      "count": 7,
+      "avg_change": 0.15,
+      "avg_ret20": 1.7,
+      "breadth_ma20": 57.0,
+      "breadth_ma60": 57.0,
+      "bullish_ratio": 14.0,
+      "combo_hits": 0,
+      "score": 33.5
+    },
+    {
+      "industry": "油電燃氣業",
+      "count": 12,
+      "avg_change": -0.13,
+      "avg_ret20": 0.1,
+      "breadth_ma20": 67.0,
+      "breadth_ma60": 58.0,
+      "bullish_ratio": 8.0,
+      "combo_hits": 0,
+      "score": 32.6
+    },
+    {
+      "industry": "農業科技業",
+      "count": 4,
+      "avg_change": 0.02,
+      "avg_ret20": -0.3,
+      "breadth_ma20": 25.0,
+      "breadth_ma60": 75.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 30.0
+    },
+    {
+      "industry": "綠能環保類",
+      "count": 6,
+      "avg_change": -0.35,
+      "avg_ret20": 5.9,
+      "breadth_ma20": 50.0,
+      "breadth_ma60": 50.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 29.9
+    },
+    {
+      "industry": "建材營造",
+      "count": 77,
+      "avg_change": 0.19,
+      "avg_ret20": 2.7,
+      "breadth_ma20": 49.0,
+      "breadth_ma60": 47.0,
+      "bullish_ratio": 10.0,
+      "combo_hits": 0,
+      "score": 28.6
+    },
+    {
+      "industry": "鋼鐵工業",
+      "count": 48,
+      "avg_change": 0.02,
+      "avg_ret20": 2.7,
+      "breadth_ma20": 42.0,
+      "breadth_ma60": 50.0,
+      "bullish_ratio": 10.0,
+      "combo_hits": 0,
+      "score": 28.6
+    },
+    {
+      "industry": "橡膠工業",
+      "count": 11,
+      "avg_change": -0.89,
+      "avg_ret20": 2.5,
+      "breadth_ma20": 36.0,
+      "breadth_ma60": 45.0,
+      "bullish_ratio": 9.0,
+      "combo_hits": 0,
+      "score": 25.7
+    },
+    {
+      "industry": "電器電纜",
+      "count": 17,
+      "avg_change": -1.08,
+      "avg_ret20": 2.6,
+      "breadth_ma20": 47.0,
+      "breadth_ma60": 41.0,
+      "bullish_ratio": 6.0,
+      "combo_hits": 0,
+      "score": 25.1
+    },
+    {
+      "industry": "化學生技醫療",
+      "count": 39,
+      "avg_change": -1.35,
+      "avg_ret20": 0.6,
+      "breadth_ma20": 33.0,
+      "breadth_ma60": 44.0,
+      "bullish_ratio": 8.0,
+      "combo_hits": 0,
+      "score": 22.7
+    },
+    {
+      "industry": "光電業",
+      "count": 101,
+      "avg_change": -2.66,
+      "avg_ret20": 4.0,
+      "breadth_ma20": 46.0,
+      "breadth_ma60": 34.0,
+      "bullish_ratio": 1.0,
+      "combo_hits": 0,
+      "score": 22.2
+    },
+    {
+      "industry": "其他",
+      "count": 125,
+      "avg_change": -0.5,
+      "avg_ret20": 1.1,
+      "breadth_ma20": 33.0,
+      "breadth_ma60": 41.0,
+      "bullish_ratio": 3.0,
+      "combo_hits": 0,
+      "score": 20.9
+    },
+    {
+      "industry": "半導體業",
+      "count": 165,
+      "avg_change": -2.18,
+      "avg_ret20": 2.5,
+      "breadth_ma20": 42.0,
+      "breadth_ma60": 33.0,
+      "bullish_ratio": 4.0,
+      "combo_hits": 0,
+      "score": 20.8
+    },
+    {
+      "industry": "其他電子類",
+      "count": 53,
+      "avg_change": -2.05,
+      "avg_ret20": 3.6,
+      "breadth_ma20": 42.0,
+      "breadth_ma60": 32.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 20.5
+    },
+    {
+      "industry": "化學工業",
+      "count": 40,
+      "avg_change": -2.11,
+      "avg_ret20": 1.2,
+      "breadth_ma20": 45.0,
+      "breadth_ma60": 30.0,
+      "bullish_ratio": 8.0,
+      "combo_hits": 0,
+      "score": 20.2
+    },
+    {
+      "industry": "居家生活類",
+      "count": 5,
+      "avg_change": 1.02,
+      "avg_ret20": -0.4,
+      "breadth_ma20": 40.0,
+      "breadth_ma60": 40.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 20.0
+    },
+    {
+      "industry": "生技醫療業",
+      "count": 115,
+      "avg_change": -0.78,
+      "avg_ret20": -0.1,
+      "breadth_ma20": 31.0,
+      "breadth_ma60": 40.0,
+      "bullish_ratio": 3.0,
+      "combo_hits": 0,
+      "score": 19.6
+    },
+    {
+      "industry": "通信網路業",
+      "count": 78,
+      "avg_change": -2.21,
+      "avg_ret20": 2.2,
+      "breadth_ma20": 36.0,
+      "breadth_ma60": 31.0,
+      "bullish_ratio": 6.0,
+      "combo_hits": 0,
+      "score": 19.6
+    },
+    {
+      "industry": "電子零組件業",
+      "count": 138,
+      "avg_change": -2.85,
+      "avg_ret20": 3.4,
+      "breadth_ma20": 37.0,
+      "breadth_ma60": 30.0,
+      "bullish_ratio": 1.0,
+      "combo_hits": 0,
+      "score": 19.0
+    },
+    {
+      "industry": "紡織纖維",
+      "count": 57,
+      "avg_change": -0.71,
+      "avg_ret20": -0.4,
+      "breadth_ma20": 33.0,
+      "breadth_ma60": 33.0,
+      "bullish_ratio": 7.0,
+      "combo_hits": 0,
+      "score": 18.4
+    },
+    {
+      "industry": "汽車工業",
+      "count": 39,
+      "avg_change": -0.76,
+      "avg_ret20": -1.2,
+      "breadth_ma20": 33.0,
+      "breadth_ma60": 33.0,
+      "bullish_ratio": 5.0,
+      "combo_hits": 0,
+      "score": 17.9
+    },
+    {
+      "industry": "貿易百貨",
+      "count": 37,
+      "avg_change": -0.54,
+      "avg_ret20": 0.3,
+      "breadth_ma20": 24.0,
+      "breadth_ma60": 35.0,
+      "bullish_ratio": 5.0,
+      "combo_hits": 0,
+      "score": 17.6
+    },
+    {
+      "industry": "玻璃陶瓷",
+      "count": 5,
+      "avg_change": -2.08,
+      "avg_ret20": 1.4,
+      "breadth_ma20": 60.0,
+      "breadth_ma60": 20.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 17.2
+    },
+    {
+      "industry": "電子工業",
+      "count": 211,
+      "avg_change": -2.53,
+      "avg_ret20": 1.6,
+      "breadth_ma20": 36.0,
+      "breadth_ma60": 27.0,
+      "bullish_ratio": 3.0,
+      "combo_hits": 0,
+      "score": 17.1
+    },
+    {
+      "industry": "電腦及週邊設備業",
+      "count": 64,
+      "avg_change": -1.94,
+      "avg_ret20": -1.1,
+      "breadth_ma20": 30.0,
+      "breadth_ma60": 34.0,
+      "bullish_ratio": 2.0,
+      "combo_hits": 0,
+      "score": 16.9
+    },
+    {
+      "industry": "數位雲端類",
+      "count": 11,
+      "avg_change": -1.01,
+      "avg_ret20": 0.1,
+      "breadth_ma20": 27.0,
+      "breadth_ma60": 27.0,
+      "bullish_ratio": 9.0,
+      "combo_hits": 0,
+      "score": 16.0
+    },
+    {
+      "industry": "電機機械",
+      "count": 97,
+      "avg_change": -1.58,
+      "avg_ret20": -0.2,
+      "breadth_ma20": 32.0,
+      "breadth_ma60": 28.0,
+      "bullish_ratio": 3.0,
+      "combo_hits": 0,
+      "score": 15.3
+    },
+    {
+      "industry": "食品工業",
+      "count": 32,
+      "avg_change": -0.27,
+      "avg_ret20": -0.2,
+      "breadth_ma20": 38.0,
+      "breadth_ma60": 22.0,
+      "bullish_ratio": 6.0,
+      "combo_hits": 0,
+      "score": 14.8
+    },
+    {
+      "industry": "觀光事業",
+      "count": 41,
+      "avg_change": -0.48,
+      "avg_ret20": 1.0,
+      "breadth_ma20": 29.0,
+      "breadth_ma60": 20.0,
+      "bullish_ratio": 5.0,
+      "combo_hits": 0,
+      "score": 13.3
+    },
+    {
+      "industry": "綠能環保",
+      "count": 8,
+      "avg_change": -1.46,
+      "avg_ret20": 0.3,
+      "breadth_ma20": 25.0,
+      "breadth_ma60": 25.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 12.8
+    },
+    {
+      "industry": "電子商務業",
+      "count": 8,
+      "avg_change": -0.75,
+      "avg_ret20": -2.5,
+      "breadth_ma20": 25.0,
+      "breadth_ma60": 25.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 12.5
+    },
+    {
+      "industry": "文化創意業",
+      "count": 26,
+      "avg_change": -0.69,
+      "avg_ret20": -0.6,
+      "breadth_ma20": 42.0,
+      "breadth_ma60": 15.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 11.7
+    },
+    {
+      "industry": "數位雲端",
+      "count": 5,
+      "avg_change": 1.42,
+      "avg_ret20": 1.8,
+      "breadth_ma20": 20.0,
+      "breadth_ma60": 20.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 11.5
+    },
+    {
+      "industry": "電子通路業",
+      "count": 23,
+      "avg_change": -1.5,
+      "avg_ret20": -3.2,
+      "breadth_ma20": 17.0,
+      "breadth_ma60": 22.0,
+      "bullish_ratio": 4.0,
+      "combo_hits": 0,
+      "score": 11.3
+    },
+    {
+      "industry": "資訊服務業",
+      "count": 42,
+      "avg_change": -1.01,
+      "avg_ret20": -1.5,
+      "breadth_ma20": 29.0,
+      "breadth_ma60": 17.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 10.1
+    },
+    {
+      "industry": "其他電子業",
+      "count": 29,
+      "avg_change": -1.59,
+      "avg_ret20": -1.2,
+      "breadth_ma20": 17.0,
+      "breadth_ma60": 17.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 8.6
+    },
+    {
+      "industry": "運動休閒",
+      "count": 3,
+      "avg_change": 0.51,
+      "avg_ret20": -2.0,
+      "breadth_ma20": 33.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 5.0
+    },
+    {
+      "industry": "觀光餐旅",
+      "count": 7,
+      "avg_change": -0.69,
+      "avg_ret20": -1.2,
+      "breadth_ma20": 14.0,
+      "breadth_ma60": 0.0,
+      "bullish_ratio": 0.0,
+      "combo_hits": 0,
+      "score": 2.1
+    }
+  ],
+  "scored_count": 733,
+  "no_data_count": 155,
+  "stale_count": 19,
+  "stale_stocks": [
+    {
+      "stock_id": "6426",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "3092",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "3652",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "6806",
+      "last_bar": "2026-06-22"
+    },
+    {
+      "stock_id": "6472",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "4736",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "6446",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "4712",
+      "last_bar": "2024-09-24"
+    },
+    {
+      "stock_id": "9801",
+      "last_bar": "2026-05-26"
+    },
+    {
+      "stock_id": "6589",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "4987",
+      "last_bar": "2026-05-28"
+    },
+    {
+      "stock_id": "3426",
+      "last_bar": "2026-07-08"
+    },
+    {
+      "stock_id": "3454",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "1589",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "2443",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "2358",
+      "last_bar": "2026-07-09"
+    },
+    {
+      "stock_id": "5371",
+      "last_bar": "2026-08-21"
+    },
+    {
+      "stock_id": "4130",
+      "last_bar": "2026-07-21"
+    },
+    {
+      "stock_id": "2867",
+      "last_bar": "2026-08-19"
+    }
+  ]
+}
