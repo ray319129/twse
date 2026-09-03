@@ -63,5 +63,31 @@
   "vwap": 28.00665300953516,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "3023|breakout": {
+  "stock_id": "3023",
+  "name": "信邦",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 331.50(現價 334.75,高出 1.0%)・量比 14.02(市場中位 1.00)・站上均價 332.99",
+  "price": 334.75,
+  "change_rate": 1.44,
+  "volume_ratio": 14.021,
+  "vwap": 332.99029126213594,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "5876|breakout": {
+  "stock_id": "5876",
+  "name": "上海商銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 45.35(現價 45.85,高出 1.1%)・量比 4.57(市場中位 1.00)・站上均價 45.60",
+  "price": 45.85,
+  "change_rate": 1.1,
+  "volume_ratio": 4.573,
+  "vwap": 45.604619469026545,
+  "fired_at": "09:07",
+  "degraded": true
  }
 }
