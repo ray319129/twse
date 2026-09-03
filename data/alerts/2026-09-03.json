@@ -89,5 +89,18 @@
   "vwap": 45.604619469026545,
   "fired_at": "09:07",
   "degraded": true
+ },
+ "5274|breakout": {
+  "stock_id": "5274",
+  "name": "信驊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 18600.00(現價 18685.00,高出 0.5%)・量比 3.47(市場中位 1.00)・站上均價 18444.52",
+  "price": 18685.0,
+  "change_rate": 5.42,
+  "volume_ratio": 3.47,
+  "vwap": 18444.524714828898,
+  "fired_at": "10:22",
+  "degraded": true
  }
 }
