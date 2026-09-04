@@ -63,5 +63,18 @@
   "vwap": 1228.597339782346,
   "fired_at": "11:06",
   "degraded": true
+ },
+ "3006|breakout": {
+  "stock_id": "3006",
+  "name": "晶豪科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 285.50(現價 286.50,高出 0.4%)・量比 2.47(市場中位 1.00)・站上均價 280.37",
+  "price": 286.5,
+  "change_rate": 3.43,
+  "volume_ratio": 2.469,
+  "vwap": 280.36659877800406,
+  "fired_at": "13:26",
+  "degraded": true
  }
 }
