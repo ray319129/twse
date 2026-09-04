@@ -24,5 +24,18 @@
   "vwap": 39.580405626431144,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "2330|pullback": {
+  "stock_id": "2330",
+  "name": "台積電",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 2397.25 附近(距 +0.5%)・翻紅 +0.84% 站回均價・量比 4.97(市場中位 1.00)",
+  "price": 2410.0,
+  "change_rate": 0.84,
+  "volume_ratio": 4.966,
+  "vwap": 2408.9443535188216,
+  "fired_at": "09:05",
+  "degraded": true
  }
 }
