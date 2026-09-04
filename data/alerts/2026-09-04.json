@@ -50,5 +50,18 @@
   "vwap": 50.86772030651341,
   "fired_at": "09:16",
   "degraded": true
+ },
+ "6640|breakout": {
+  "stock_id": "6640",
+  "name": "均華",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1250.00(現價 1262.50,高出 1.0%)・量比 4.51(市場中位 1.00)・站上均價 1228.60",
+  "price": 1262.5,
+  "change_rate": 6.54,
+  "volume_ratio": 4.51,
+  "vwap": 1228.597339782346,
+  "fired_at": "11:06",
+  "degraded": true
  }
 }
