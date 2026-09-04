@@ -76,5 +76,18 @@
   "vwap": 280.36659877800406,
   "fired_at": "13:26",
   "degraded": true
+ },
+ "6224|breakout": {
+  "stock_id": "6224",
+  "name": "聚鼎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 77.20(現價 84.90,高出 10.0%)・量比 5.63(市場中位 1.00)・站上均價 84.76",
+  "price": 84.9,
+  "change_rate": 6.66,
+  "volume_ratio": 5.634,
+  "vwap": 84.7625,
+  "fired_at": "13:28",
+  "degraded": true
  }
 }
