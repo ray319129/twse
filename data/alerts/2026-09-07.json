@@ -141,5 +141,18 @@
   "vwap": 2441.9969668928643,
   "fired_at": "10:18",
   "degraded": true
+ },
+ "8064|breakout": {
+  "stock_id": "8064",
+  "name": "東捷",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 114.50(現價 115.00,高出 0.4%)・量比 4.18(市場中位 1.00)・站上均價 111.46",
+  "price": 115.0,
+  "change_rate": 2.68,
+  "volume_ratio": 4.176,
+  "vwap": 111.46239741692453,
+  "fired_at": "11:54",
+  "degraded": true
  }
 }
