@@ -102,5 +102,18 @@
   "vwap": 4555.278541953233,
   "fired_at": "09:07",
   "degraded": true
+ },
+ "2884|breakout": {
+  "stock_id": "2884",
+  "name": "玉山金",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 43.55(現價 44.02,高出 1.1%)・量比 3.30(市場中位 1.00)・站上均價 43.99",
+  "price": 44.02,
+  "change_rate": 1.08,
+  "volume_ratio": 3.304,
+  "vwap": 43.990584997641136,
+  "fired_at": "09:17",
+  "degraded": true
  }
 }
