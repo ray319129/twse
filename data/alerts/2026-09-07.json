@@ -76,5 +76,31 @@
   "vwap": 2436.1114285714284,
   "fired_at": "09:05",
   "degraded": true
+ },
+ "6667|breakout": {
+  "stock_id": "6667",
+  "name": "信紘科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 239.50(現價 255.00,高出 6.5%)・量比 60.99(市場中位 1.00)・站上均價 252.61",
+  "price": 255.0,
+  "change_rate": 6.47,
+  "volume_ratio": 60.992,
+  "vwap": 252.6138790035587,
+  "fired_at": "09:07",
+  "degraded": true
+ },
+ "2454|breakout": {
+  "stock_id": "2454",
+  "name": "聯發科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4565.00(現價 4592.50,高出 0.6%)・量比 11.95(市場中位 1.00)・站上均價 4555.28",
+  "price": 4592.5,
+  "change_rate": 4.02,
+  "volume_ratio": 11.949,
+  "vwap": 4555.278541953233,
+  "fired_at": "09:07",
+  "degraded": true
  }
 }
