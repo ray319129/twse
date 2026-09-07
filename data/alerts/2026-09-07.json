@@ -154,5 +154,44 @@
   "vwap": 111.46239741692453,
   "fired_at": "11:54",
   "degraded": true
+ },
+ "3714|breakout": {
+  "stock_id": "3714",
+  "name": "富采",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 60.20(現價 67.75,高出 12.5%)・量比 3.65(市場中位 1.00)・站上均價 67.57",
+  "price": 67.75,
+  "change_rate": 1.42,
+  "volume_ratio": 3.647,
+  "vwap": 67.56957295373665,
+  "fired_at": "13:25",
+  "degraded": true
+ },
+ "6224|breakout": {
+  "stock_id": "6224",
+  "name": "聚鼎",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 77.20(現價 88.80,高出 15.0%)・量比 8.97(市場中位 1.00)・站上均價 88.75",
+  "price": 88.8,
+  "change_rate": 4.72,
+  "volume_ratio": 8.973,
+  "vwap": 88.75428571428571,
+  "fired_at": "13:25",
+  "degraded": true
+ },
+ "2409|breakout": {
+  "stock_id": "2409",
+  "name": "友達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 27.90(現價 28.60,高出 2.5%)・量比 2.93(市場中位 1.00)・站上均價 28.60",
+  "price": 28.6,
+  "change_rate": 6.72,
+  "volume_ratio": 2.932,
+  "vwap": 28.596263314870047,
+  "fired_at": "13:25",
+  "degraded": true
  }
 }
