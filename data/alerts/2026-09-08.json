@@ -24,5 +24,31 @@
   "vwap": 2468.009759136213,
   "fired_at": "09:26",
   "degraded": true
+ },
+ "5274|breakout": {
+  "stock_id": "5274",
+  "name": "信驊",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 19215.00(現價 19447.50,高出 1.2%)・量比 2.74(市場中位 1.00)・站上均價 19226.54",
+  "price": 19447.5,
+  "change_rate": 1.21,
+  "volume_ratio": 2.744,
+  "vwap": 19226.54411764706,
+  "fired_at": "09:37",
+  "degraded": true
+ },
+ "7828|breakout": {
+  "stock_id": "7828",
+  "name": "創新服務",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2000.00(現價 2012.50,高出 0.6%)・量比 8.97(市場中位 1.00)・站上均價 1984.88",
+  "price": 2012.5,
+  "change_rate": 7.62,
+  "volume_ratio": 8.975,
+  "vwap": 1984.8777777777777,
+  "fired_at": "09:39",
+  "degraded": true
  }
 }
