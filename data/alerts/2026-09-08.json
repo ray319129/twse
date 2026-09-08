@@ -102,5 +102,18 @@
   "vwap": 44.89402786994028,
   "fired_at": "10:42",
   "degraded": true
+ },
+ "6667|breakout": {
+  "stock_id": "6667",
+  "name": "信紘科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 243.00(現價 258.25,高出 6.3%)・量比 2.73(市場中位 1.00)・站上均價 251.50",
+  "price": 258.25,
+  "change_rate": 1.27,
+  "volume_ratio": 2.728,
+  "vwap": 251.5,
+  "fired_at": "13:26",
+  "degraded": true
  }
 }
