@@ -292,10 +292,22 @@ def run_watch(until: str = "13:35") -> dict:
     polls = pushed = 0
     log.info(f"當沖盯盤啟動:每 {interval:g} 秒、到 {until}、"
              f"池 {len(pool.get('long', []))}多/{len(pool.get('short', []))}空")
+
+    # 開盤後先量一次 MIS 真實延遲 —— 只有交易時段量得到,而且它直接決定
+    # 「價位穿越推播」這一層值不值得做(見 latency.py)。量完寫進
+    # docs/daytrade_latency.json,結論會顯示在網頁上。失敗不影響盯盤。
+    measured = False
     while now_tpe().strftime("%H:%M") < until:
         t0 = time.time()
         try:
             if in_trading_session():
+                if not measured:
+                    measured = True
+                    try:
+                        from .latency import measure_from_pool
+                        measure_from_pool(seconds=90, interval=3.0)
+                    except Exception as e:
+                        log.warning(f"MIS 延遲量測失敗(不影響盯盤):{e}")
                 r = scan_once(pool, state, cfg)
                 polls += 1
                 pushed += r.get("pushed", 0)

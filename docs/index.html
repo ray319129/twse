@@ -585,6 +585,7 @@
     <button class="tab" data-p="watch" role="tab" aria-selected="false" aria-controls="p-watch">觀察清單</button>
     <button class="tab" data-p="watchlist" role="tab" aria-selected="false" aria-controls="p-watchlist">自選池</button>
     <button class="tab" data-p="port" role="tab" aria-selected="false" aria-controls="p-port">我的持倉</button>
+    <button class="tab" data-p="daytrade" role="tab" aria-selected="false" aria-controls="p-daytrade">當沖</button>
     <button class="tab" data-p="health" role="tab" aria-selected="false" aria-controls="p-health">個股健檢</button>
     <button class="tab" data-p="heatmap" role="tab" aria-selected="false" aria-controls="p-heatmap">族群熱力圖</button>
     <button class="tab" data-p="perf" role="tab" aria-selected="false" aria-controls="p-perf">歷史追蹤與績效</button>
@@ -596,6 +597,7 @@
   <div class="panel" id="p-watch" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-watchlist" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-port" role="tabpanel" tabindex="0"></div>
+  <div class="panel" id="p-daytrade" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-health" role="tabpanel" tabindex="0"></div>
   <div class="panel" id="p-heatmap" role="tabpanel" tabindex="0">
     <div class="hm-toolbar">
@@ -3741,6 +3743,183 @@ const _origApplyTheme=window.applyThemeLabel;
 window.applyThemeLabel=function(){if(_origApplyTheme)_origApplyTheme();if(_hmReady)renderHeatmap();};
 
 /* ============================================================
+   當沖分頁(2026-09-08)—— 讀 docs/daytrade.json,與既有選股資料完全分開。
+   這一層還在驗證階段,所以頁面刻意把「成本」與「還沒驗證」講在最前面,
+   不做成看起來很篤定的推薦清單。
+   ============================================================ */
+let DT=null,DTLAT=null,DT_LOADED=false;
+
+function dtCostChip(c){
+  const map={cheap:['var(--up-ink)','成本佳'],normal:['var(--muted)','成本普通'],
+             expensive:['var(--down-ink)','成本差']};
+  const [col,txt]=map[c.cost_rating]||['var(--muted)',''];
+  return `<span style="color:${col};font-weight:700">${esc(txt)} ${c.cost_pct.toFixed(3)}%</span>`;
+}
+
+function dtRows(list,side){
+  if(!list||!list.length)return `<div class="note-box" style="color:var(--muted-2)">${side==='long'?'多方':'空方'}今日無符合條件的標的。</div>`;
+  return list.slice(0,20).map(c=>`
+    <div class="mk-row" style="grid-template-columns:1fr auto auto auto">
+      <div class="mk-nm"><b>${esc(c.name||'')}</b><span class="mk-id">${slink(c.stock_id)}</span>
+        <div style="font-size:11px;color:var(--muted-2);margin-top:2px">
+          ${dtCostChip(c)} · tick ${c.tick} · 需賺 ${c.breakeven_ticks} 檔打平
+          ${c.borrow_fee_pct?` · <span style="color:var(--down-ink)">借券費 ${c.borrow_fee_pct}%</span>`:''}
+          ${c.gate_note&&c.gate_note!=='閘門全過'?` · ${esc(c.gate_note)}`:''}
+        </div></div>
+      <div class="num">${num(c.price)}</div>
+      <div class="num" title="ATR% ÷ 來回成本% —— 一天的波動能覆蓋幾次來回成本">
+        ${c.edge_ratio?c.edge_ratio.toFixed(1)+'x':'—'}</div>
+      <div class="num" title="以你設定的額度可買張數">${c.lots_affordable} 張</div>
+    </div>`).join('');
+}
+
+function dtLatencyBox(){
+  if(!DTLAT||!DTLAT.verdict)return `<div class="note-box" style="color:var(--muted-2)">
+    MIS 盤中延遲尚未量測(只有交易時段量得到,盯盤啟動後會自動量一次並顯示在這裡)。</div>`;
+  const v=DTLAT.verdict,lag=(DTLAT.lag_seconds||{});
+  const col=v.level==='good'?'var(--up-ink)':(v.level==='poor'?'var(--down-ink)':'var(--warn)');
+  return `<div class="note-box" style="border-left:3px solid ${col}">
+    <b style="color:${col}">資料延遲實測</b> · 中位 ${lag.median??'—'} 秒
+    (P25 ${lag.p25??'—'} / P75 ${lag.p75??'—'})· 上游更新間隔中位 ${(DTLAT.upstream_update_gap_s||{}).median??'—'} 秒
+    <br>${esc(v.text)}
+    <div style="color:var(--muted-2);font-size:11px;margin-top:4px">量測於 ${esc(DTLAT.measured_at||'')}</div>
+  </div>`;
+}
+
+/* ---- 部位標記(強制回補提醒的資料來源)------------------------------------
+   盯盤跑在 GitHub Actions 上,讀不到瀏覽器的 localStorage —— 所以部位一定要
+   上雲端,否則 13:00/13:15/13:25 的回補提醒完全沒東西可提醒(那是整個當沖層裡
+   價值最高、最不受延遲影響的一層)。走 /api/daytrade,與自選池共用同一把 secret。
+   界線:只送代號/方向/進場價/張數/停損,不送任何累計損益或帳戶餘額。 */
+let DTPOS=[],DTPOS_LOADED=false;
+const dtToday=()=>new Date(Date.now()+8*3600e3).toISOString().slice(0,10);
+
+function dtLoadPositions(cb){
+  fetch('/api/daytrade?what=positions&day='+dtToday()+'&_='+Date.now())
+    .then(r=>r.ok?r.json():null)
+    .then(j=>{DTPOS=(j&&j.positions)||[];DTPOS_LOADED=true;cb&&cb();})
+    .catch(()=>{DTPOS_LOADED=true;cb&&cb();});
+}
+
+function dtSavePositions(){
+  const secret=wlSecret(); if(!secret)return;
+  fetch('/api/daytrade',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({positions:DTPOS,day:dtToday(),secret})})
+    .then(r=>r.json()).then(j=>{
+      if(j&&j.ok){DTPOS=j.positions||DTPOS;renderDaytrade();}
+      else{
+        if(String((j&&j.error)||'').includes('secret')){try{localStorage.removeItem('twse-wl-secret');}catch(e){}}
+        alert('部位同步失敗:'+((j&&j.error)||'未知錯誤'));
+      }
+    }).catch(e=>alert('部位同步失敗:'+e));
+}
+
+function dtAddPosition(){
+  const sid=(prompt('股票代號?')||'').trim();
+  if(!/^\d{4,6}[A-Z]?$/.test(sid))return;
+  const side=(prompt('方向?輸入 long(做多)或 short(做空,先賣後買)','long')||'').trim();
+  if(side!=='long'&&side!=='short')return;
+  const entry=parseFloat(prompt('進場價?')||'');
+  if(!(entry>0))return;
+  const lots=parseInt(prompt('張數?','1')||'',10);
+  if(!(lots>0))return;
+  const stopIn=prompt('停損價?(可留空,但留空就不會有停損提醒)','');
+  const stop=stopIn?parseFloat(stopIn):null;
+  const cand=[...(DT&&DT.long||[]),...(DT&&DT.short||[])].find(c=>c.stock_id===sid);
+  DTPOS.push({stock_id:sid,name:(cand&&cand.name)||'',side,entry_price:entry,lots,
+              stop_price:(stop>0?stop:null),
+              opened_at:new Date().toTimeString().slice(0,8),closed:false});
+  dtSavePositions();
+}
+
+function dtClosePosition(i){
+  if(!DTPOS[i])return;
+  DTPOS[i].closed=!DTPOS[i].closed;
+  dtSavePositions();
+}
+window.dtAddPosition=dtAddPosition;window.dtClosePosition=dtClosePosition;
+
+function dtPositionsBox(){
+  const live=DTPOS.filter(p=>!p.closed);
+  const shorts=live.filter(p=>p.side==='short').length;
+  const rows=DTPOS.map((p,i)=>`
+    <div class="mk-row" style="grid-template-columns:1fr auto auto auto;${p.closed?'opacity:.45':''}">
+      <div class="mk-nm"><b>${esc(p.name||'')}</b><span class="mk-id">${slink(p.stock_id)}</span>
+        <div style="font-size:11px;color:var(--muted-2);margin-top:2px">
+          <span style="color:${p.side==='short'?'var(--down-ink)':'var(--up-ink)'};font-weight:700">
+            ${p.side==='short'?'做空(先賣後買)':'做多'}</span>
+          · ${p.lots} 張 @${p.entry_price}
+          ${p.stop_price?` · 停損 ${p.stop_price}`:' · <span style="color:var(--warn)">未設停損</span>'}
+        </div></div>
+      <div class="num">${(p.entry_price*p.lots*1000/10000).toFixed(1)}萬</div>
+      <div class="num">${p.opened_at||''}</div>
+      <div><button class="lk" onclick="dtClosePosition(${i})">${p.closed?'重開':'已平倉'}</button></div>
+    </div>`).join('');
+  return `
+  <div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--warn);display:inline-block"></span>
+    我的當沖部位 <span class="lk" onclick="dtAddPosition()" style="margin-left:8px">+ 新增</span></div>
+  ${live.length?`<div class="note-box" style="border-left:3px solid ${shorts?'var(--down-ink)':'var(--warn)'}">
+      未平倉 <b>${live.length}</b> 筆${shorts?`,其中 <b>${shorts}</b> 筆是先賣後買 ——
+      收盤沒買回會變成券差,券商代為借券後當日 15:30 前沒補款會<b>報違約交割</b>`:''}。
+      系統會在 13:00 / 13:15 / 13:25 推播回補提醒。</div>`
+    :`<div class="note-box" style="color:var(--muted-2)">今日尚未登記部位。
+      <b>沒有登記就不會有回補提醒與停損提醒</b> —— 那是這一層最有價值的部分,建議做了就順手登記。</div>`}
+  ${rows}`;
+}
+
+function renderDaytrade(){
+  const el=$('#p-daytrade');if(!el)return;
+  if(!DT_LOADED){
+    DT_LOADED=true;
+    el.innerHTML='<div class="note-box">載入中…</div>';
+    Promise.all([
+      fetch('./daytrade.json?'+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch('./daytrade_latency.json?'+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null),
+    ]).then(([a,b])=>{DT=a;DTLAT=b;dtLoadPositions(()=>renderDaytrade());});
+    return;
+  }
+  if(!DT){
+    el.innerHTML=`<div class="note-box">尚未產生當沖標的池。每個交易日 08:30 由
+      <code>daytrade.yml</code> 自動建立;也可手動觸發該 workflow 的 <code>pool</code> 模式。</div>`;
+    return;
+  }
+  const p=DT.prefs||{},s=DT.stats||{};
+  const quota=p.quota_twd||0;
+  el.innerHTML=`
+  <div class="note-box" style="border-left:3px solid var(--warn)">
+    <b>⚠️ 這一層還在驗證期</b> —— 每筆當沖來回成本門檻約
+    <b>0.52%</b>(手續稅 0.321% + 進出各跨一檔價差),一天做 3 筆就要先賺 1.56% 才打平。
+    所以系統<b>刻意只推多空各前 3 名</b>,其餘只記錄進台帳當對照組。
+    條件觸發 ≠ 買進建議;請等台帳累積一個月後再判斷這套有沒有用。
+  </div>
+  ${dtLatencyBox()}
+  ${dtPositionsBox()}
+  <div class="gmetrics" style="margin:14px 0">
+    <div class="stat"><div class="k">額度</div><div class="v">${(quota/10000).toFixed(0)}<small>萬</small></div></div>
+    <div class="stat"><div class="k">價格區間</div><div class="v" style="font-size:19px">${p.price_min}–${p.price_max}</div></div>
+    <div class="stat"><div class="k">多方標的</div><div class="v">${(DT.long||[]).length}</div></div>
+    <div class="stat"><div class="k">空方標的</div><div class="v">${(DT.short||[]).length}</div></div>
+  </div>
+  <div class="note-box" style="font-size:12px;color:var(--muted-2)">
+    篩選過程:掃 ${s.scanned??'—'} 檔 → 法規閘門擋 ${s.gate_blocked??0}、價格帶擋 ${s.price_filtered??0}、
+    流動性擋 ${s.liquidity_filtered??0}、額度買不起擋 ${s.unaffordable??0}、波動不足擋 ${s.volatility_filtered??0}、
+    成本帶擋 ${s.cost_filtered??0}、空間不足擋 ${s.edge_filtered??0}、空方閘門擋 ${s.short_gate_blocked??0}。
+    <br><b>空間</b> = ATR% ÷ 來回成本%,代表一天的波動能覆蓋幾次來回成本 —— 這是排序主軸。
+    <b>tick 換檔的正上方最貴</b>(如 105 元的來回成本是 99 元的 2.4 倍),已預設排除。
+  </div>
+  <div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--up-ink);display:inline-block"></span>多方標的池</div>
+  ${dtRows(DT.long,'long')}
+  <div class="sec-h2" style="margin-top:22px"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--down-ink);display:inline-block"></span>空方標的池(先賣後買)</div>
+  <div class="note-box" style="font-size:12px;color:var(--muted-2)">
+    空方已過額外閘門:非處置、<b>非暫停先賣後買</b>、借券費低於 ${p.max_borrow_fee_pct}%。
+    ⚠️ 先賣後買收盤沒買回會變成券差,券商代為借券後當日 15:30 前沒補款會<b>報違約交割</b> ——
+    系統會在 13:00 / 13:15 / 13:25 推播回補提醒,但那需要你先在部位標記裡登記。
+  </div>
+  ${dtRows(DT.short,'short')}
+  <div class="health-foot">標的池於每交易日 08:30 產生,資料日期 ${esc(DT.date||'')}。本頁僅供研究參考,非投資建議。</div>`;
+}
+
+/* ============================================================
    tabs / 載入
    ============================================================ */
 function activateTab(p){
@@ -3749,6 +3928,7 @@ function activateTab(p){
   if(p==='live')startLivePoll();else stopLivePoll();
   if(p==='dash')loadDashLive();
   if(p==='health'&&!HEALTH_TAB_INIT){HEALTH_TAB_INIT=true;renderHealthTab();}
+  if(p==='daytrade')renderDaytrade();
   /* 離開熱力圖一定要停輪詢 —— 它是 Vercel CPU 的頭號來源(見 hmLive 註解)。
      重進時 initHeatmap 因 _hmReady 會直接 return,所以計時器必須由 startHmLive 另外起。 */
   if(p==='heatmap'){initHeatmap();startHmLive();}else stopHmLive();
