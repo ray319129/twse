@@ -50,5 +50,18 @@
   "vwap": 1984.8777777777777,
   "fired_at": "09:39",
   "degraded": true
+ },
+ "2330|breakout": {
+  "stock_id": "2330",
+  "name": "台積電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2460.00(現價 2487.50,高出 1.1%)・量比 1.78(市場中位 1.00)・站上均價 2474.68",
+  "price": 2487.5,
+  "change_rate": 1.12,
+  "volume_ratio": 1.783,
+  "vwap": 2474.6841362272808,
+  "fired_at": "10:00",
+  "degraded": true
  }
 }
