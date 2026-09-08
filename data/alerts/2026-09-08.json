@@ -89,5 +89,18 @@
   "vwap": 6812.151685393258,
   "fired_at": "10:21",
   "degraded": true
+ },
+ "6218|breakout": {
+  "stock_id": "6218",
+  "name": "豪勉",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 45.50(現價 45.77,高出 0.6%)・量比 3.05(市場中位 1.00)・站上均價 44.89",
+  "price": 45.77,
+  "change_rate": 2.74,
+  "volume_ratio": 3.047,
+  "vwap": 44.89402786994028,
+  "fired_at": "10:42",
+  "degraded": true
  }
 }
