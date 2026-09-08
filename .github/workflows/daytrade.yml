@@ -1,0 +1,93 @@
+name: Day Trade (independent)
+
+# 當沖層 —— **與既有選股/盤中掃描完全分開的獨立排程**(使用者要求「獨立出來測試」)。
+# 關掉這支 workflow,或把 config/daytrade.yaml 的 enabled 設 false,
+# 既有 daily / intraday / premarket 一行都不受影響。
+#
+# 一天兩段:
+#   08:30 台北  建今日標的池(多空兩欄,過六道法規閘門 + 成本帶篩選)
+#   09:00 台北  常駐盯水位到 13:35(含停損穿越與 13:00/13:15/13:25 強制回補提醒)
+#
+# ⚠️ 為什麼盯盤要獨立跑而不是併進 intraday.yml:
+# 當沖層還在驗證階段,它掛掉不該連累已經穩定運作的盤中掃描;
+# 而且兩者的輪詢節奏、推播頻道、台帳都不同。
+
+on:
+  schedule:
+    # cron 是 UTC。00:30 UTC = 08:30 台北(建池),01:00 UTC = 09:00 台北(盯盤)。
+    # 內建 schedule 會延遲 5~30 分鐘,但建池不急、盯盤 job 自己會等到交易時段才動作。
+    - cron: "30 0 * * 1-5"
+    - cron: "0 1 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "pool(建池)/ watch(盯盤)/ scan(單次除錯)/ summary(台帳彙總)"
+        required: false
+        default: "pool"
+        type: choice
+        options: ["pool", "watch", "scan", "summary"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daytrade
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 當沖層的錯會直接變成「叫你去做不能做的單」,所以跑之前先過測試。
+      - name: Run tests
+        run: python tests/run_all.py
+
+      - name: Run
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          if [ -z "$MODE" ]; then
+            # 排程觸發:00:xx UTC(=08:xx 台北)那班建池,其餘(01:xx UTC=09:xx 台北)盯盤。
+            # 用小時判斷就夠,而且 GitHub schedule 延遲 5~30 分鐘也不會跨過界線。
+            if [ "$(date -u +%H)" = "00" ]; then MODE="pool"; else MODE="watch"; fi
+          fi
+          echo "daytrade mode = $MODE"
+          case "$MODE" in
+            pool)    python -m scripts.daytrade.engine --pool ;;
+            watch)   python -m scripts.daytrade.engine --watch --until 13:35 ;;
+            scan)    python -m scripts.daytrade.engine --scan ;;
+            summary) python -m scripts.daytrade.engine --summary ;;
+          esac
+
+      - name: Commit daytrade data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 逐一 add:`git add A B C` 只要有一個路徑不存在就 fatal 且整批不 stage
+          # (2026-07-22 盤中整天沒發布的真兇,這裡不重蹈覆轍)。
+          for p in data/daytrade docs/daytrade.json; do
+            [ -e "$p" ] && git add "$p" 2>/dev/null || true
+          done
+          if git diff --cached --quiet; then
+            echo "No daytrade changes."
+          else
+            git commit -m "daytrade: $(date -u +'%Y-%m-%d %H:%M')Z"
+            bash .github/scripts/push-with-retry.sh "當沖資料未發布,下一輪會重試。"
+          fi

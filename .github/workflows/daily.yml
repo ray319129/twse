@@ -45,6 +45,12 @@ jobs:
       - name: Check realtime isolation
         run: python -m scripts.check_realtime_isolation
 
+      # 單元測試(2026-09-08 起)。目前涵蓋當沖層的純函數:成本/tick 計算、法規閘門、
+      # 訊號分級、風控方向、台帳。不追求覆蓋率,只擋「四檔手動測不出、
+      # 全市場掃描才現形」那類低級錯誤 —— 這種 bug 這個專案已經踩過三次。
+      - name: Run tests
+        run: python tests/run_all.py
+
       - name: Run daily screener
         env:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}

@@ -1,0 +1,27 @@
+{
+  "_comment": "當沖個人偏好。網頁可改(走 api/daytrade_prefs.py,與 api/watchlist.py 同一套 GitHub Contents API + secret 機制)。改這裡不影響既有選股系統。",
+  "_boundary": "使用者 2026-09-08 選擇方案 B:額度上傳 repo,讓 Discord 推播卡能直接算可買張數。注意這放寬了 2026-07-19『不上傳成本損益』的界線 —— 但只放寬到『額度上限』這一個數字,實際持倉張數與成本仍只留 localStorage。",
+
+  "quota_twd": 250000,
+
+  "price_min": 20,
+  "price_max": 300,
+
+  "min_dollar_volume_m": 200,
+  "min_atr_pct": 2.0,
+  "max_atr_pct": 12.0,
+
+  "max_cost_pct": 0.90,
+  "_max_cost_pct_note": "來回成本上限(%)。0.90 會排除 tick 換檔正上方的昂貴價位帶(100~130、500~560、1000~1300)。設 99 等於不過濾。",
+
+  "allow_long": true,
+  "allow_short": true,
+  "max_borrow_fee_pct": 0.5,
+  "_short_note": "做空額外條件:須 short_ok(非處置、非暫停先賣後買)且借券費不超過 max_borrow_fee_pct。",
+
+  "exclude": [],
+  "include_always": [],
+  "_include_always_note": "無論篩選條件如何都一定納入的代號(仍須通過法規閘門)。",
+
+  "max_universe": 60
+}

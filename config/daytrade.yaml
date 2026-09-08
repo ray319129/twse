@@ -1,0 +1,58 @@
+# 當沖層參數(系統面)。使用者個人偏好在 config/daytrade_prefs.json,兩者刻意分開:
+# 這一份是「規則怎麼定」,那一份是「我今天想看什麼」,前者改動要謹慎、後者可隨時調。
+#
+# ⚠️ 這一層與既有選股/信心分系統**完全隔離**(使用者 2026-09-08 要求「獨立出來測試」)。
+# enabled: false 就整層關掉,既有系統一行都不受影響。
+
+enabled: true
+
+# ── 訊號分級:這是本層最重要的參數 ──────────────────────────────────────
+# 實測既有盤中掃描每日觸發 9~15 筆,而當沖來回成本門檻是 0.52%(見 daytrade/cost.py)。
+# 全做必虧(15 筆 × 0.52% = 7.8%),所以當沖層的價值在**拒絕**而不是在找更多。
+# 每筆訊號一律算分,預設只推前 N 名,其餘只進網頁與台帳供事後驗證。
+ranking:
+  push_top_n: 3          # 每日實際推播的上限(多空各自計算)
+  min_score: 55          # 低於此分連網頁都不列(0~100)
+  cooldown_minutes: 20   # 同一檔兩次推播的最小間隔(避免同一檔反覆觸發洗版)
+
+# ── 成本(與 config/screeners.yaml 的 cost 區塊一致,但當沖稅率不同)──────
+cost:
+  fee_rate: 0.001425
+  fee_discount: 0.6
+  daytrade_tax_rate: 0.0015   # 當沖證交稅減半,延長至 2027-12-31
+  ticks_crossed: 2.0          # 假設進出都掃單各跨一次價差(當沖追價的常態)
+  # 成本帶門檻(%):超過 expensive_above 的價位帶預設排除,可在 prefs 放寬
+  cheap_below: 0.60
+  expensive_above: 0.90
+
+# ── 價位水位(第2層:價位穿越推播)────────────────────────────────────
+levels:
+  opening_range_minutes: 15   # 開盤區間 09:00~09:15
+  use_prev_high_low: true     # 昨日高低
+  use_vwap: true              # 均價(降級模式下是自行輪詢累積的估計值)
+  use_round_numbers: true     # 整數關卡
+  breakout_buffer: 0.002      # 要穿越 0.2% 才算(防貼著水位來回磨)
+
+# ── 風控與強制回補(第3層)─────────────────────────────────────────
+risk:
+  # 現股當沖先賣後買若收盤沒買回 → 券差 → 券商代為借券 → 當日 15:30 前沒補款
+  # 就報違約交割。所以回補提醒是本層唯一「一定要推、不准被合併視窗吃掉」的通知。
+  forced_close_times: ["13:00", "13:15", "13:25"]
+  forced_close_channel_separate: true   # 用獨立 webhook,不與機會提醒混同
+  atr_stop_mult: 1.0        # 建議停損距離 = ATR × 此值
+  max_risk_pct_of_quota: 2.0  # 單筆風險不超過額度的 %
+
+# ── 掃描 ────────────────────────────────────────────────────────
+scan:
+  # MIS 是非官方端點、50 檔一批,宇宙太大會拖慢輪詢也容易被 ban。
+  # 有 FinMind 訂閱時可放大(走全市場快照,一次呼叫)。
+  max_universe_no_subscription: 60
+  max_universe_with_subscription: 200
+  interval_seconds_no_subscription: 30
+  interval_seconds_with_subscription: 10
+
+# ── 台帳(第4層)──────────────────────────────────────────────────
+# 與既有 data/performance.json 分開記 —— 當沖的勝率/成本不能跟波段選股混在一起算。
+ledger:
+  enabled: true
+  followup_minutes: [5, 15, 30, 60]   # 推播後記錄這幾個時點的價格

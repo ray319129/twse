@@ -21,8 +21,11 @@ ROOT = Path(__file__).resolve().parent
 # 這些模組是「選股 / 研究」層,結果必須在沒有 Sponsor 訂閱時也完全一致
 PROTECTED = ["scoring.py", "indicators.py", "backtest.py", "screener.py", "industry.py"]
 
-# 這些模組承載即時資料,上面那些不准碰
-REALTIME = {"quotes", "snapshot_archive"}
+# 這些模組承載即時資料,上面那些不准碰。
+# daytrade 於 2026-09-08 加入:當沖層是高頻、高成本、未經驗證的東西,
+# 一旦它的邏輯滲進選股/回測,既有那套台帳就再也分不清績效是誰造成的
+# (使用者明確要求「當沖功能要獨立出來測試」)。
+REALTIME = {"quotes", "snapshot_archive", "daytrade"}
 
 
 def _violations(path: Path) -> list[str]:
