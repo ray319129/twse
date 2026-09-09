@@ -1,0 +1,200 @@
+"""當沖交易計畫 —— 把「候選標的」變成「可執行的建議」。
+
+## 為什麼要有這一支(2026-09-09)
+
+第一版的標的池只回答「今天哪些檔可以做」,但使用者要的是
+**進場價 / 出場價 / 停損價 / 預計獲利 / 預計成本 / 為什麼推薦**。
+少了這些,那份清單就只是 watchlist,還是得自己算 —— 而當沖沒時間算。
+
+## 設計原則
+
+**1. 停損先決定,其他都從它推出來。**
+當沖的唯一硬約束是「一天內一定要平掉」,所以風險必須先框死。
+停損距離 = ATR(14) × `atr_stop_mult`,再用 tick 對齊到可掛的價位。
+目標價 = 進場 ± 停損距離 × `rr_target`(預設 1.5R)。
+
+**2. 預計獲利一律扣成本,而且扣完才顯示。**
+毛獲利沒有意義 —— 來回成本 0.52%~1.3%,不扣的話 1R 的單看起來會像賺錢實際打平。
+所以卡片上的「預計獲利」是**淨額**,並且同時列出成本金額讓人對照。
+
+**3. 算得出來才給,算不出來就說沒有。**
+ATR 缺、價格為 0、停損距離小於一個 tick → 回 `None`,不要用猜的數字讓人拿去下單。
+
+**4. 目標價要被壓力/支撐修正。**
+純用 1.5R 推出來的目標可能落在前高上方一大截,那種單不會到。
+所以若 R 目標超過最近壓力(多方)/支撐(空方),就改用那個水位並標記出來。
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, asdict
+
+from . import cost as C
+
+# 預設參數(可被 config/daytrade.yaml 的 risk 區塊覆寫)
+#
+# ⚠️ `atr_stop_mult` 為什麼是 0.4 而不是 1.0:
+# ATR(14) 是**整天**的平均真實區間,但當沖只持有幾小時、通常只吃到其中一段。
+# 第一版用 1.0 的實測結果:台半停損距離 5.56%、最大虧損 10,766 元 —— 那是 25 萬額度的
+# **4.3%**,一天做兩筆就可能賠掉近一成本金;而且目標價要走 8.28% 才到,盤中根本不會發生。
+# 0.4 倍讓停損落在日內合理波動內,目標 1.5R ≈ 0.6 倍 ATR,是一天走得到的距離。
+DEFAULT_ATR_STOP_MULT = 0.4
+DEFAULT_RR_TARGET = 1.5
+MIN_STOP_TICKS = 2          # 停損至少要離 2 個 tick,否則等於一跳就出場
+DEFAULT_MAX_RISK_PCT = 2.0  # 單筆最大虧損不超過額度的 %(config risk.max_risk_pct_of_quota)
+
+
+def align_to_tick(price: float, stock_id: str, *, mode: str = "nearest") -> float | None:
+    """把價格對齊到可掛單的 tick 刻度。
+
+    不對齊的話卡片會出現 74.37 這種**掛不進去**的價格,使用者得自己換算 ——
+    當沖沒有這個時間。mode: nearest / up(保守買進) / down(保守賣出)。
+    """
+    try:
+        p = float(price)
+    except (TypeError, ValueError):
+        return None
+    if p <= 0:
+        return None
+    t = C.tick_size(p, stock_id)
+    n = p / t
+    if mode == "up":
+        n = -(-n // 1)          # ceil
+    elif mode == "down":
+        n = n // 1
+    else:
+        n = round(n)
+    out = round(n * t, 4)
+    return out if out > 0 else None
+
+
+@dataclass
+class TradePlan:
+    side: str
+    entry: float
+    stop: float
+    target: float
+    stop_pct: float            # 停損距離佔進場價 %
+    target_pct: float
+    rr: float                  # 實際風報比(可能因壓力修正而不等於設定值)
+    lots: int
+    notional: float            # 進場總金額
+    cost_amount: float         # 來回成本(元,含借券費)
+    gross_profit: float        # 到目標價的毛利
+    net_profit: float          # **扣掉成本後**的預期獲利
+    max_loss: float            # 打到停損的虧損(含成本)
+    target_capped_by: str | None = None   # 目標價被哪個水位壓下來
+    tick: float = 0.0
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def build_plan(*, stock_id: str, side: str, ref_price: float,
+               atr: float | None, quota: float,
+               cost_pct: float, borrow_fee_pct: float | None = None,
+               resistance: float | None = None, support: float | None = None,
+               atr_stop_mult: float = DEFAULT_ATR_STOP_MULT,
+               rr_target: float = DEFAULT_RR_TARGET,
+               max_risk_pct: float = DEFAULT_MAX_RISK_PCT,
+               max_lots: int | None = None) -> TradePlan | None:
+    """算一份可以直接照著下單的計畫。任何一個必要輸入缺失就回 None。"""
+    try:
+        entry_raw = float(ref_price)
+    except (TypeError, ValueError):
+        return None
+    if entry_raw <= 0 or side not in ("long", "short") or not atr or atr <= 0:
+        return None
+
+    tick = C.tick_size(entry_raw, stock_id)
+    # 進場價保守取整:做多往上、做空往下 —— 寧可算出來的預期獲利略低,
+    # 也不要用一個你其實搶不到的價位去算出漂亮的數字。
+    entry = align_to_tick(entry_raw, stock_id, mode="up" if side == "long" else "down")
+    if entry is None:
+        return None
+
+    stop_dist = max(atr * atr_stop_mult, tick * MIN_STOP_TICKS)
+    stop = align_to_tick(entry - stop_dist if side == "long" else entry + stop_dist,
+                         stock_id, mode="down" if side == "long" else "up")
+    if stop is None or stop <= 0 or stop == entry:
+        return None
+    real_stop_dist = abs(entry - stop)
+    if real_stop_dist < tick:
+        return None
+
+    # 目標價:R 倍數推出來,再被壓力/支撐修正
+    target_raw = (entry + real_stop_dist * rr_target if side == "long"
+                  else entry - real_stop_dist * rr_target)
+    capped = None
+    if side == "long" and resistance and 0 < resistance < target_raw:
+        target_raw, capped = resistance, "最近壓力"
+    elif side == "short" and support and target_raw < support < entry:
+        target_raw, capped = support, "最近支撐"
+    target = align_to_tick(target_raw, stock_id,
+                           mode="down" if side == "long" else "up")
+    if target is None or target <= 0:
+        return None
+    target_dist = abs(target - entry)
+    if target_dist < tick:
+        return None
+
+    # ── 部位大小:買得起幾張 **和** 風險預算允許幾張,取小的 ──
+    # 只看「買得起」會讓停損寬的標的一次押掉太多風險 —— 實測台半用滿額度時
+    # 單筆最大虧損 10,766 元 = 25 萬的 4.3%。風險預算把它壓回設定的上限內。
+    affordable = C.lots_for_quota(entry, quota)
+    risk_budget = quota * (max_risk_pct / 100.0) if (quota and max_risk_pct) else 0
+    risk_lots = affordable
+    if risk_budget > 0:
+        per_lot_risk = real_stop_dist * 1000
+        risk_lots = int(risk_budget // per_lot_risk) if per_lot_risk > 0 else 0
+    lots = min(affordable, risk_lots)
+    if max_lots is not None:
+        lots = min(lots, max_lots)
+    if lots < 1:
+        return None
+
+    shares = lots * 1000
+    notional = entry * shares
+    total_cost_pct = cost_pct + (borrow_fee_pct or 0.0 if side == "short" else 0.0)
+    cost_amount = notional * total_cost_pct / 100.0
+    gross = target_dist * shares
+    net = gross - cost_amount
+    max_loss = real_stop_dist * shares + cost_amount
+
+    return TradePlan(
+        side=side, entry=entry, stop=stop, target=target,
+        stop_pct=round(real_stop_dist / entry * 100, 2),
+        target_pct=round(target_dist / entry * 100, 2),
+        rr=round(target_dist / real_stop_dist, 2),
+        lots=lots, notional=round(notional),
+        cost_amount=round(cost_amount), gross_profit=round(gross),
+        net_profit=round(net), max_loss=round(max_loss),
+        target_capped_by=capped, tick=tick,
+    )
+
+
+def plan_quality(plan: TradePlan | None) -> tuple[str, str]:
+    """這份計畫值不值得做。回 (等級, 說明)。
+
+    當沖最常見的自欺是「風報比看起來 1.5,但扣完成本淨利是負的」——
+    所以這裡的第一道檢查是 net_profit,不是 rr。
+    """
+    if plan is None:
+        return ("none", "資料不足,無法產生計畫")
+    if plan.net_profit <= 0:
+        return ("bad", f"⚠ 到目標價也是虧的:毛利 {plan.gross_profit:,.0f} "
+                       f"扣成本 {plan.cost_amount:,.0f} = {plan.net_profit:,.0f} 元")
+    ratio = plan.net_profit / plan.cost_amount if plan.cost_amount else 0
+    if plan.rr < 1.0:
+        return ("bad", f"風報比僅 {plan.rr}(賺的比賠的少),不建議")
+    if ratio < 1.0:
+        return ("weak", f"淨利 {plan.net_profit:,.0f} 元只有成本的 {ratio:.1f} 倍,空間偏薄")
+    return ("ok", f"風報比 {plan.rr}、淨利是成本的 {ratio:.1f} 倍")
+
+
+def explain_plan(plan: TradePlan, *, name: str, stock_id: str) -> str:
+    """一句話講完怎麼做 —— 給 Discord 與卡片用。"""
+    d = "做多" if plan.side == "long" else "做空(先賣後買)"
+    return (f"{name}({stock_id}) {d} {plan.lots} 張｜"
+            f"進 {plan.entry:g} → 目標 {plan.target:g}(+{plan.target_pct:.1f}%)"
+            f"、停損 {plan.stop:g}(−{plan.stop_pct:.1f}%)｜"
+            f"淨賺約 {plan.net_profit:,.0f} / 最大賠 {plan.max_loss:,.0f} 元")

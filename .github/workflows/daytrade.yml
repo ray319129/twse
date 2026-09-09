@@ -13,11 +13,17 @@ name: Day Trade (independent)
 # 而且兩者的輪詢節奏、推播頻道、台帳都不同。
 
 on:
-  schedule:
-    # cron 是 UTC。00:30 UTC = 08:30 台北(建池),01:00 UTC = 09:00 台北(盯盤)。
-    # 內建 schedule 會延遲 5~30 分鐘,但建池不急、盯盤 job 自己會等到交易時段才動作。
-    - cron: "30 0 * * 1-5"
-    - cron: "0 1 * * 1-5"
+  # ⚠️ **不要用 GitHub 內建 schedule**(2026-09-09 事故)。
+  # 本專案早就知道內建 schedule 會延遲 5~30 分鐘甚至整天不觸發,daily/premarket 因此
+  # 都改走外部 cron(見 SETUP_PREMARKET_CRON.md)。當沖層第一版卻架在內建 schedule 上,
+  # 結果 **9/09 整天沒跑**:沒建池、沒盯盤、沒量延遲,網頁還在顯示 9/08 的標的池。
+  #
+  # 改成掛在「Premarket Watch 跑完」之後 —— 那支是由外部 cron 以 workflow_dispatch
+  # 觸發的,實測每天準時。它 08:45 台北跑完,接著建池 + 進盯盤(盯盤本來就會自己
+  # 等到 09:00 才開始掃),時序剛好。
+  workflow_run:
+    workflows: ["Premarket Watch"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       mode:
@@ -30,9 +36,11 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: daytrade
-  cancel-in-progress: false
+# ⚠️ 刻意**不設 concurrency group**。Premarket 一天跑兩班(08:45 / 09:25 台北),
+# 兩班都會觸發這支。若設了 group + cancel-in-progress:false,第二班會排隊等第一班的
+# 盯盤跑完(4.5 小時)才輪到,白佔一個 queued 位;設 true 又會把正在盯盤的那班砍掉、
+# 連當日去重狀態一起丟失。改用下面 run 步驟裡的「今日池已存在就跳過」檔案守衛 ——
+# 兩班相隔 40 分鐘,不會有競爭條件。
 
 jobs:
   run:
@@ -63,18 +71,30 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           MODE="${{ github.event.inputs.mode }}"
-          if [ -z "$MODE" ]; then
-            # 排程觸發:00:xx UTC(=08:xx 台北)那班建池,其餘(01:xx UTC=09:xx 台北)盯盤。
-            # 用小時判斷就夠,而且 GitHub schedule 延遲 5~30 分鐘也不會跨過界線。
-            if [ "$(date -u +%H)" = "00" ]; then MODE="pool"; else MODE="watch"; fi
+          MODE="${MODE:-auto}"
+          TODAY=$(TZ=Asia/Taipei date +%F)
+          NOWHM=$(TZ=Asia/Taipei date +%H:%M)
+          echo "daytrade mode=$MODE 台北時間=$TODAY $NOWHM"
+
+          if [ "$MODE" = "auto" ]; then
+            # Premarket 一天觸發兩班。第二班(09:25 台北)如果發現今日池已經建好,
+            # 就代表第一班已經在盯盤了 → 直接結束,不要起第二個盯盤迴圈。
+            # 池子不存在才補做(第一班可能在建池前就掛了,這是自我修復的路徑)。
+            if [ -f "data/daytrade/pool-$TODAY.json" ] && [[ "$NOWHM" > "09:05" ]]; then
+              echo "今日池已存在且已過 09:05 → 判定先前觸發已在盯盤,跳過。"
+              exit 0
+            fi
+            python -m scripts.daytrade.engine --pool
+            # 盯盤自己會等到 09:00 才開始掃(in_trading_session),所以 08:45 就進場沒問題。
+            python -m scripts.daytrade.engine --watch --until 13:35
+          else
+            case "$MODE" in
+              pool)    python -m scripts.daytrade.engine --pool ;;
+              watch)   python -m scripts.daytrade.engine --watch --until 13:35 ;;
+              scan)    python -m scripts.daytrade.engine --scan ;;
+              summary) python -m scripts.daytrade.engine --summary ;;
+            esac
           fi
-          echo "daytrade mode = $MODE"
-          case "$MODE" in
-            pool)    python -m scripts.daytrade.engine --pool ;;
-            watch)   python -m scripts.daytrade.engine --watch --until 13:35 ;;
-            scan)    python -m scripts.daytrade.engine --scan ;;
-            summary) python -m scripts.daytrade.engine --summary ;;
-          esac
 
       - name: Commit daytrade data
         run: |

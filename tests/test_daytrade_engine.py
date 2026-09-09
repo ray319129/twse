@@ -188,6 +188,69 @@ def test_stop_hit_pushes_critical():
         assert hits and hits[0].urgency == "critical"
 
 
+def test_plan_embed_has_every_field_the_user_asked_for():
+    """使用者要求卡片上要有:進場/出場/停損/預計獲利/預計成本/為什麼推薦/指標/參考資料。
+    少一個就是沒做到,所以直接把清單釘進測試。"""
+    c = dict(_pool()["long"][0])
+    c["plan"] = {"side": "long", "entry": 82.2, "stop": 80.5, "target": 84.8,
+                 "stop_pct": 2.07, "target_pct": 3.16, "rr": 1.53, "lots": 3,
+                 "notional": 246600, "cost_amount": 1390, "gross_profit": 7800,
+                 "net_profit": 6410, "max_loss": 6490, "target_capped_by": None,
+                 "tick": 0.1}
+    c["reasons"] = ["日均波動 ATR 9.2%", "RSI 55(中性)"]
+    c["indicators"] = {"rsi": 55.0, "ma20": 80.1, "high20": 88.0, "low20": 76.0,
+                       "vol_ratio": 1.3}
+    c["plan_note"] = "風報比 1.53"
+    e = E._plan_embed(c, "long", title_prefix="▲ 做多")
+    names = [f["name"] for f in e["fields"]]
+    for need in ("進場", "目標", "停損", "預計獲利", "最大虧損", "預計成本",
+                 "風報比", "為什麼推薦", "指標", "參考"):
+        assert need in names, f"卡片缺少「{need}」"
+    profit = next(f["value"] for f in e["fields"] if f["name"] == "預計獲利")
+    assert "已扣成本" in profit, "預計獲利必須標明已扣成本"
+    ref = next(f["value"] for f in e["fields"] if f["name"] == "參考")
+    assert "cmoney" in ref and "yahoo" in ref.lower() and "mops" in ref
+
+
+def test_plan_embed_skipped_when_no_plan():
+    """沒有交易計畫就不發卡 —— 只有代號和成本的卡片沒有用,反而佔版面。"""
+    c = dict(_pool()["long"][0]); c["plan"] = None
+    assert E._plan_embed(c, "long") is None
+
+
+def test_premarket_push_sends_both_sides():
+    sent = {}
+    orig = E.send_discord
+    E.send_discord = lambda embeds, content="", **kw: sent.update(
+        {"n": len(embeds), "content": content, "titles": [e["title"] for e in embeds]})
+    try:
+        pool = _pool()
+        plan = {"side": "long", "entry": 82.2, "stop": 80.5, "target": 84.8,
+                "stop_pct": 2.07, "target_pct": 3.16, "rr": 1.53, "lots": 3,
+                "notional": 246600, "cost_amount": 1390, "gross_profit": 7800,
+                "net_profit": 6410, "max_loss": 6490, "target_capped_by": None, "tick": 0.1}
+        pool["long"][0]["plan"] = dict(plan)
+        pool["short"][0]["plan"] = dict(plan, side="short")
+        n = E.push_premarket_picks(pool, top_n=1)
+        assert n == 2 and sent["n"] == 2
+        assert any("做多" in t for t in sent["titles"])
+        assert any("做空" in t for t in sent["titles"])
+        assert "盤前精選" in sent["content"]
+    finally:
+        E.send_discord = orig
+
+
+def test_premarket_push_silent_when_no_plans():
+    calls = []
+    orig = E.send_discord
+    E.send_discord = lambda *a, **k: calls.append(1)
+    try:
+        assert E.push_premarket_picks({"long": [], "short": []}) == 0
+        assert not calls
+    finally:
+        E.send_discord = orig
+
+
 def test_empty_pool_is_safe():
     with _Harness(_tmp()):
         r = E.scan_once({"long": [], "short": []}, {}, CFG)

@@ -33,6 +33,7 @@ from ..utils import log
 from . import cost as C
 from . import ledger as L
 from . import risk as R
+from . import plan as P
 from . import signals as S
 from . import universe as U
 
@@ -53,13 +54,99 @@ def load_cfg() -> dict:
 
 # ─────────────────────────── 盤前:標的池 ───────────────────────────
 
-def run_pool(today: date | None = None) -> dict:
+def run_pool(today: date | None = None, *, notify: bool = True) -> dict:
     today = today or now_tpe().date()
     pool = U.build(today=today)
     U.save(pool, today)
     _write_web(pool)
     log.info(f"當沖標的池已產生:多 {len(pool['long'])} / 空 {len(pool['short'])}")
+    if notify:
+        push_premarket_picks(pool)
     return pool
+
+
+def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
+    """盤前把當日精選推到 Discord。
+
+    第一版只在「盤中價位穿越」時才推,結果是**開盤前完全收不到任何東西** ——
+    而當沖最需要準備的時間點就是開盤前。這支補上那一段:
+    每天建完池就推多空各前 N 檔的完整計畫卡(進場/目標/停損/預計獲利/成本/理由)。
+
+    與盤中訊號分開發:盤前是「今天可以盯這幾檔」,盤中是「現在觸發了」,
+    兩者急迫度不同,混在同一則會讓人分不清該不該立刻動作。
+    """
+    cfg = load_cfg()
+    n = top_n if top_n is not None else int((cfg.get("ranking", {}) or {}).get("push_top_n", 3))
+    embeds: list[dict] = []
+    for side, label in (("long", "▲ 做多"), ("short", "▼ 做空(先賣後買)")):
+        for c in (pool.get(side) or [])[:n]:
+            e = _plan_embed(c, side, title_prefix=label)
+            if e:
+                embeds.append(e)
+    if not embeds:
+        log.info("盤前推播:今日無符合條件的標的,不發送。")
+        return 0
+    d = pool.get("date", "")
+    head = (f"**當沖盤前精選 {d}**｜多 {len(pool.get('long') or [])} / "
+            f"空 {len(pool.get('short') or [])} 檔入選,以下為各方向前 {n} 名\n"
+            f"價格以昨收為基準,開盤後請以實際價位為準。條件符合 ≠ 買進建議。")
+    try:
+        send_discord(embeds, content=head)
+        log.info(f"盤前推播已送出:{len(embeds)} 張卡")
+        return len(embeds)
+    except Exception as e:
+        log.warning(f"盤前推播失敗:{e}")
+        return 0
+
+
+def _plan_embed(c: dict, side: str, *, title_prefix: str = "") -> dict | None:
+    """把一張標的池卡片轉成 Discord embed。沒有交易計畫就不發 ——
+    只有代號和成本的卡片對使用者沒有用,反而佔版面。"""
+    p = c.get("plan")
+    if not p:
+        return None
+    fields = [
+        {"name": "進場", "value": f"**{p['entry']:g}**", "inline": True},
+        {"name": "目標", "value": f"{p['target']:g}(+{p['target_pct']}%)", "inline": True},
+        {"name": "停損", "value": f"{p['stop']:g}(−{p['stop_pct']}%)", "inline": True},
+        {"name": "張數", "value": f"{p['lots']} 張(約 {p['notional'] / 10000:.1f} 萬)", "inline": True},
+        {"name": "預計獲利", "value": f"**+{p['net_profit']:,} 元**(已扣成本)", "inline": True},
+        {"name": "最大虧損", "value": f"−{p['max_loss']:,} 元", "inline": True},
+        {"name": "預計成本", "value": f"{p['cost_amount']:,} 元({c.get('cost_pct')}%)"
+                                     + (f"・借券 {c['borrow_fee_pct']}%" if c.get("borrow_fee_pct") else ""),
+         "inline": True},
+        {"name": "風報比", "value": f"{p['rr']}", "inline": True},
+    ]
+    if p.get("target_capped_by"):
+        fields.append({"name": "備註", "value": f"目標受{p['target_capped_by']}限制", "inline": True})
+    reasons = c.get("reasons") or []
+    if reasons:
+        fields.append({"name": "為什麼推薦", "value": "・".join(reasons)[:1024], "inline": False})
+    ind = c.get("indicators") or {}
+    ind_txt = "・".join(x for x in [
+        f"RSI {ind['rsi']}" if ind.get("rsi") is not None else "",
+        f"月線 {ind['ma20']}" if ind.get("ma20") is not None else "",
+        f"20日高 {ind['high20']}" if ind.get("high20") is not None else "",
+        f"20日低 {ind['low20']}" if ind.get("low20") is not None else "",
+        f"量能 {ind['vol_ratio']}" if ind.get("vol_ratio") is not None else "",
+    ] if x)
+    if ind_txt:
+        fields.append({"name": "指標", "value": ind_txt[:1024], "inline": False})
+    sid = c.get("stock_id", "")
+    fields.append({"name": "參考", "value":
+                   f"[線圖](https://www.cmoney.tw/forum/stock/{sid}) ・ "
+                   f"[Yahoo 報價](https://tw.stock.yahoo.com/quote/{sid}.TW) ・ "
+                   f"[公開資訊](https://mops.twse.com.tw/mops/web/t146sb05?step=1&COMPANY_ID={sid})",
+                   "inline": False})
+    note = c.get("plan_note") or ""
+    gate = c.get("gate_note") or ""
+    foot = note + (f"｜{gate}" if gate and gate != "閘門全過" else "")
+    return {
+        "title": f"{title_prefix}｜{c.get('name', '')}({sid})",
+        "color": _COLOR[side],
+        "fields": fields,
+        "footer": {"text": foot[:2048]},
+    }
 
 
 def _write_web(pool: dict) -> None:
@@ -150,6 +237,17 @@ def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
                 volume_ratio=q.volume_ratio, cost_pct=row["cost_pct"],
                 change_pct=q.change_pct, side=side)
             atr_abs = (row.get("atr_pct") or 0) / 100 * q.price
+            # 用觸發當下的即時價重算計畫 —— 盤前那份是以昨收為基準,價格已經動了。
+            ind = row.get("indicators") or {}
+            rk_cfg = cfg.get("risk", {}) or {}
+            live_plan = P.build_plan(
+                stock_id=sid, side=side, ref_price=q.price, atr=atr_abs,
+                quota=float((pool.get("prefs") or {}).get("quota_twd") or 0),
+                cost_pct=row["cost_pct"], borrow_fee_pct=row.get("borrow_fee_pct"),
+                resistance=ind.get("high20"), support=ind.get("low20"),
+                max_risk_pct=float(rk_cfg.get("max_risk_pct_of_quota", 2.0)),
+            )
+            _, live_note = P.plan_quality(live_plan)
             new_signals.append(S.Signal(
                 stock_id=sid, name=row.get("name") or q.name, side=side, kind=lv.kind,
                 label=lv.label, price=q.price, level=lv.price,
@@ -159,9 +257,12 @@ def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
                 degraded=degraded, fired_at=hhmm,
                 borrow_fee_pct=row.get("borrow_fee_pct"),
                 lots_affordable=row.get("lots_affordable", 0),
-                suggested_stop=S.suggest_stop(price=q.price, side=side, atr=atr_abs),
-                risk_per_lot=C.risk_per_lot(q.price, S.suggest_stop(
-                    price=q.price, side=side, atr=atr_abs) or q.price),
+                suggested_stop=(live_plan.stop if live_plan else None),
+                risk_per_lot=C.risk_per_lot(q.price, live_plan.stop) if live_plan else None,
+                plan=(live_plan.to_dict() if live_plan else None),
+                plan_note=live_note,
+                reasons_pool=row.get("reasons") or [],
+                indicators=ind,
             ))
             fired[key] = hhmm
 
@@ -228,35 +329,61 @@ def _risk_pass(state: dict, cfg: dict, quotes: dict, day: date, hhmm: str) -> No
 # ─────────────────────────── Discord ───────────────────────────
 
 def _push_signals(sigs: list[S.Signal]) -> None:
+    """盤中觸發推播。與盤前精選共用同一種卡片結構(進場/目標/停損/獲利/成本/理由/指標),
+    差別只在多了「觸發了什麼水位」與「即時價」—— 使用者不該因為是盤中就少拿到資訊。"""
     embeds = []
     for s in sigs:
-        arrow = "▲ 做多" if s.side == "long" else "▼ 做空"
+        arrow = "▲ 做多" if s.side == "long" else "▼ 做空(先賣後買)"
+        p = s.plan
         fields = [
             {"name": "觸發", "value": f"{s.label} {s.level:g}", "inline": True},
-            {"name": "現價", "value": f"**{s.price:g}**"
-             + (f" ({s.change_pct:+.2f}%)" if s.change_pct is not None else ""), "inline": True},
-            {"name": "分數", "value": f"{s.score:.0f}", "inline": True},
-            {"name": "來回成本", "value": f"{s.cost_pct:.3f}%"
-             + (f"(含借券 {s.borrow_fee_pct:g}%)" if s.borrow_fee_pct else ""), "inline": True},
-            {"name": "空間", "value": (f"{s.edge_ratio:.1f}x 成本" if s.edge_ratio else "—"),
-             "inline": True},
-            {"name": "額度可買", "value": f"{s.lots_affordable} 張", "inline": True},
+            {"name": "即時價", "value": f"**{s.price:g}**"
+             + (f"({s.change_pct:+.2f}%)" if s.change_pct is not None else ""), "inline": True},
+            {"name": "訊號分", "value": f"{s.score:.0f}", "inline": True},
         ]
-        if s.suggested_stop:
-            fields.append({"name": "建議停損", "value":
-                           f"{s.suggested_stop:g}(每張風險 {s.risk_per_lot:,.0f} 元)",
+        if p:
+            fields += [
+                {"name": "進場", "value": f"**{p['entry']:g}**", "inline": True},
+                {"name": "目標", "value": f"{p['target']:g}(+{p['target_pct']}%)", "inline": True},
+                {"name": "停損", "value": f"{p['stop']:g}(−{p['stop_pct']}%)", "inline": True},
+                {"name": "張數", "value": f"{p['lots']} 張(約 {p['notional'] / 10000:.1f} 萬)", "inline": True},
+                {"name": "預計獲利", "value": f"**+{p['net_profit']:,} 元**(已扣成本)", "inline": True},
+                {"name": "最大虧損", "value": f"−{p['max_loss']:,} 元", "inline": True},
+                {"name": "預計成本", "value": f"{p['cost_amount']:,} 元({s.cost_pct}%)"
+                 + (f"・借券 {s.borrow_fee_pct}%" if s.borrow_fee_pct else ""), "inline": True},
+                {"name": "風報比", "value": f"{p['rr']}", "inline": True},
+            ]
+        else:
+            fields.append({"name": "交易計畫", "value": f"無法產生({s.plan_note or '資料不足'})",
                            "inline": False})
-        foot = "・".join(s.reasons[:3])
+        why = "・".join((s.reasons or []) + (s.reasons_pool or []))
+        if why:
+            fields.append({"name": "為什麼推薦", "value": why[:1024], "inline": False})
+        ind = s.indicators or {}
+        ind_txt = "・".join(x for x in [
+            f"RSI {ind['rsi']}" if ind.get("rsi") is not None else "",
+            f"月線 {ind['ma20']}" if ind.get("ma20") is not None else "",
+            f"20日高 {ind['high20']}" if ind.get("high20") is not None else "",
+            f"20日低 {ind['low20']}" if ind.get("low20") is not None else "",
+        ] if x)
+        if ind_txt:
+            fields.append({"name": "指標", "value": ind_txt[:1024], "inline": False})
+        fields.append({"name": "參考", "value":
+                       f"[線圖](https://www.cmoney.tw/forum/stock/{s.stock_id}) ・ "
+                       f"[Yahoo 報價](https://tw.stock.yahoo.com/quote/{s.stock_id}.TW) ・ "
+                       f"[公開資訊](https://mops.twse.com.tw/mops/web/t146sb05?step=1&COMPANY_ID={s.stock_id})",
+                       "inline": False})
+        foot = f"{s.fired_at} ・ {s.plan_note or ''}"
         if s.degraded:
             foot += " ｜⚠ 降級模式:量比/均價為估計值"
         embeds.append({
             "title": f"{arrow}｜{s.name}({s.stock_id})",
             "color": _COLOR[s.side],
             "fields": fields,
-            "footer": {"text": f"{s.fired_at} ・ {foot}"[:2048]},
+            "footer": {"text": foot[:2048]},
         })
     try:
-        send_discord(embeds, content="**當沖訊號**")
+        send_discord(embeds, content="**當沖盤中訊號**")
     except Exception as e:
         log.warning(f"當沖訊號推播失敗:{e}")
 

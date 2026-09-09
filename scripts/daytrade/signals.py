@@ -57,6 +57,12 @@ class Signal:
     lots_affordable: int = 0
     suggested_stop: float | None = None
     risk_per_lot: float | None = None
+    # 用「觸發當下的即時價」重算的交易計畫(見 plan.py)。盤前那份是以昨收為基準,
+    # 盤中觸發時價格已經動了,直接沿用會給出錯的進場/停損 —— 所以這裡重算一份。
+    plan: dict | None = None
+    plan_note: str = ""
+    reasons_pool: list = field(default_factory=list)   # 標的池的「為什麼推薦」
+    indicators: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return asdict(self)

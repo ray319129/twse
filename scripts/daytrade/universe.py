@@ -22,7 +22,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import date
 from pathlib import Path
 
@@ -31,6 +31,7 @@ import pandas as pd
 from ..config import DATA_DIR
 from ..utils import log
 from . import cost as C
+from .plan import build_plan, plan_quality
 from .rules import Gate, gate_for, load_or_fetch
 
 PREFS_PATH = Path(DATA_DIR).parent / "config" / "daytrade_prefs.json"
@@ -88,6 +89,12 @@ class Candidate:
     lots_affordable: int      # 以使用者額度買得起幾張
     gate_note: str
     score: float = 0.0        # 標的池排序分(不是訊號分)
+    # ── 以下是 2026-09-09 新增:讓卡片能直接照著下單,不用自己再算一次 ──
+    plan: dict | None = None          # 進場/停損/目標/預計獲利/成本(見 plan.py)
+    plan_quality: str = ""            # ok / weak / bad / none
+    plan_note: str = ""
+    reasons: list = field(default_factory=list)   # 為什麼推薦(全部可查證)
+    indicators: dict = field(default_factory=dict)  # RSI/均線/量比/前高低
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -112,29 +119,110 @@ def _load_levels() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def real_atr_pct(stock_id: str) -> float | None:
-    """用本機價格序列算真正的 ATR(14)%。
+def tech_snapshot(stock_id: str) -> dict:
+    """一次算齊這檔的技術面快照(ATR / RSI / 均線位階 / 前高低)。
 
-    第一版本來想用 levels 裡的 high20/ma20 距離當代理,實測結果是**排序出一堆金融股**
-    (兆豐金、華南金、第一金)—— 那個代理量到的是「距月線多遠」不是「一天會走多少」,
-    對當沖等於沒有波動過濾。當沖沒有波動就只剩成本,所以這裡寧可多花一點時間算真的。
+    第一版只算 ATR%,而且是拿 levels 的 high20/ma20 距離當代理 —— 實測**排序出一堆
+    金融股**(兆豐金、華南金、第一金),因為那個代理量到的是「距月線多遠」不是
+    「一天會走多少」。改成用價格序列算真的,順便把交易計畫需要的
+    ATR 絕對值、壓力、支撐,以及卡片要顯示的指標一起算出來 —— 反正只多幾個欄位,
+    但可以省掉後面每一層各自再讀一次價格檔。
 
     只對通過價格/流動性初篩的標的算(約 200 檔),盤前批次跑,不打任何 API。
+    抓不到就回 {} —— 呼叫端據此把這檔剔除(當沖沒有波動資料等於不能評估)。
     """
     try:
         from ..storage import load_prices
         from ..indicators import compute_all
         df = load_prices(stock_id)
         if df is None or len(df) < 30:
-            return None
+            return {}
         d = compute_all(df.copy())
         last = d.iloc[-1]
         atr, close = _f(last.get("atr14")), _f(last.get("close"))
         if not atr or not close or close <= 0:
-            return None
-        return atr / close * 100.0
+            return {}
+        tail = d.tail(20)
+        out = {
+            "atr": atr,
+            "atr_pct": atr / close * 100.0,
+            "close": close,
+            "rsi": _f(last.get("rsi14")),
+            "ma5": _f(last.get("ma5")), "ma20": _f(last.get("ma20")),
+            "ma60": _f(last.get("ma60")),
+            "vol_ratio": None,
+            "high20": _f(tail["high"].max()) if "high" in tail else None,
+            "low20": _f(tail["low"].min()) if "low" in tail else None,
+            "prev_high": _f(last.get("high")), "prev_low": _f(last.get("low")),
+        }
+        v5, v20 = _f(last.get("vol_ma5")), _f(last.get("vol_ma20"))
+        if v5 and v20 and v20 > 0:
+            out["vol_ratio"] = round(v5 / v20, 2)
+        return out
     except Exception:
-        return None
+        return {}
+
+
+def real_atr_pct(stock_id: str) -> float | None:
+    """向後相容的薄包裝(既有測試與呼叫端仍在用)。"""
+    return tech_snapshot(stock_id).get("atr_pct")
+
+
+def build_reasons(t: dict, side: str, c_edge: float | None,
+                  gate_note: str) -> list[str]:
+    """「為什麼推薦這檔」—— 全部是可查證的事實,不是形容詞。
+
+    刻意不寫「強勢」「看好」這種話:當沖卡片上的每一句都要能對回一個數字,
+    否則使用者無從判斷該不該信。
+    """
+    r: list[str] = []
+    atrp, close = t.get("atr_pct"), t.get("close")
+    if atrp:
+        r.append(f"日均波動 ATR {atrp:.1f}%")
+    if c_edge:
+        r.append(f"波動是來回成本的 {c_edge:.1f} 倍(操作空間)")
+    ma5, ma20, ma60 = t.get("ma5"), t.get("ma20"), t.get("ma60")
+    if close and ma5 and ma20:
+        if side == "long" and close > ma5 > ma20:
+            r.append("站上 5 日與月線(多頭排列)")
+        elif side == "short" and close < ma5 < ma20:
+            r.append("跌破 5 日與月線(空頭排列)")
+        elif close and ma20:
+            r.append(f"距月線 {(close / ma20 - 1) * 100:+.1f}%")
+    rsi = t.get("rsi")
+    if rsi is not None:
+        tag = "超買區" if rsi >= 70 else ("超賣區" if rsi <= 30 else "中性")
+        r.append(f"RSI {rsi:.0f}({tag})")
+    vr = t.get("vol_ratio")
+    if vr:
+        r.append(f"5日均量/20日均量 {vr:.2f}")
+    if gate_note and gate_note != "閘門全過":
+        r.append(f"⚠ {gate_note}")
+    return r
+
+
+def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
+                 cost_pct: float, borrow_fee: float | None,
+                 edge: float | None, gate_note: str) -> dict:
+    """組出卡片需要的 plan / reasons / indicators 三塊。
+
+    盤前用昨收當參考價 —— 開盤後盯盤層會用即時價重算(見 engine.scan_once)。
+    這裡先算是為了讓**盤前就看得到完整的可執行計畫**,而不是只有一張候選清單。
+    """
+    p = build_plan(
+        stock_id=sid, side=side, ref_price=price, atr=tech.get("atr"),
+        quota=float(prefs.get("quota_twd") or 0), cost_pct=cost_pct,
+        borrow_fee_pct=borrow_fee,
+        resistance=tech.get("high20"), support=tech.get("low20"),
+    )
+    lvl, note = plan_quality(p)
+    return {
+        "plan": p.to_dict() if p else None,
+        "plan_quality": lvl, "plan_note": note,
+        "reasons": build_reasons(tech, side, edge, gate_note),
+        "indicators": {k: (round(v, 2) if isinstance(v, float) else v)
+                       for k, v in tech.items() if k != "atr"},
+    }
 
 
 def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
@@ -195,8 +283,10 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
             continue
 
         # 波動是**硬條件**不是軟權重:當沖沒有波動就只剩成本。
-        # (通過前面便宜的篩選後才算真 ATR,約 200 檔,不會拖太久。)
-        atr_pct = real_atr_pct(sid)
+        # (通過前面便宜的篩選後才算,約 200 檔,不會拖太久。順便把交易計畫與
+        #  卡片指標需要的 ATR 絕對值/RSI/均線/前高低一次算齊。)
+        tech = tech_snapshot(sid)
+        atr_pct = tech.get("atr_pct")
         if not forced:
             if atr_pct is None:
                 stats["no_atr"] += 1
@@ -227,6 +317,8 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
                 cost_rating=rating, cost_note=note,
                 breakeven_ticks=round(C.breakeven_ticks(price, sid, ticks_crossed=ticks_crossed) or 0, 2),
                 borrow_fee_pct=None, lots_affordable=lots, gate_note=g.explain(),
+                **_plan_fields(sid, "long", price, tech, prefs, long_cost,
+                               None, long_edge, g.explain()),
             ))
 
         # ── 空方:額外閘門 + 借券費進成本 ──
@@ -260,6 +352,8 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
             breakeven_ticks=round(C.breakeven_ticks(price, sid, ticks_crossed=ticks_crossed,
                                                     borrow_fee_pct=fee or 0.0) or 0, 2),
             borrow_fee_pct=fee, lots_affordable=lots, gate_note=g.explain(),
+            **_plan_fields(sid, "short", price, tech, prefs, short_cost,
+                           fee, short_edge, g.explain()),
         ))
 
     # ── 標的池排序:流動性高、成本低、波動足夠 ──

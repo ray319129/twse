@@ -548,6 +548,35 @@
   .hnl-read{color:var(--up);}
   .health-foot{margin-top:16px;font-size:11px;color:var(--muted-2);line-height:1.6;}
 
+  /* ---------- 當沖卡片(2026-09-09)---------- */
+  .dt-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
+           padding:13px 15px;margin-bottom:10px;box-shadow:var(--shadow);}
+  .dt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:9px;}
+  .dt-plan{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0;}
+  .dt-px{background:var(--surface-3);border-radius:9px;padding:7px 9px;}
+  .dt-px span{display:block;font-size:10.5px;color:var(--muted);font-weight:600;}
+  .dt-px b{font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .dt-px small{display:block;font-size:10.5px;color:var(--muted-2);font-variant-numeric:tabular-nums;}
+  .dt-pnl{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12px;color:var(--ink-2);
+          padding:7px 0;border-top:1px solid var(--line-soft);}
+  .dt-pnl b{font-variant-numeric:tabular-nums;}
+  .dt-why{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+  .dt-chip{font-size:11px;background:var(--accent-bg);color:var(--accent-ink);
+           padding:2px 8px;border-radius:999px;font-weight:600;}
+  .dt-chip-dim{background:var(--surface-3);color:var(--muted);}
+  .dt-acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px;padding-top:8px;
+           border-top:1px solid var(--line-soft);font-size:12px;}
+  .dt-form{background:var(--surface-3);border-radius:11px;padding:11px 13px;margin:8px 0;
+           display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;align-items:end;}
+  .dt-form label{font-size:10.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px;}
+  .dt-form input,.dt-form select{width:100%;padding:6px 8px;border-radius:8px;font-size:13px;
+           border:1px solid var(--line);background:var(--surface);color:var(--ink);
+           font-variant-numeric:tabular-nums;}
+  .dt-form button{padding:7px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+           border:1px solid var(--line);background:var(--accent);color:#fff;}
+  .dt-form button.sec{background:var(--surface);color:var(--ink-2);}
+  @media(max-width:640px){.dt-plan{grid-template-columns:repeat(2,1fr);}}
+
   @media(max-width:760px){
     .health-top{grid-template-columns:1fr;text-align:center;}
     .health-meta-block{align-items:center;}
@@ -2960,6 +2989,9 @@ function liveIds(){
      只加未出場的:已出場的列用歷史成交價,查即時價毫無意義還會撐大 payload
      (api/quote 的 MAX_IDS=200)。實測未出場約 10 檔,加進來成本可忽略。 */
   (LED||[]).forEach(r=>{if(r&&r.stock_id&&ledIsOpen(r))s.add(String(r.stock_id));});
+  /* 當沖未平倉部位:卡片要顯示現價與未實現損益,而且停損有沒有被觸及全靠它。
+     只加未平倉的 —— 已平倉的查即時價沒有意義。 */
+  (typeof DTPOS!=='undefined'?DTPOS:[]).forEach(p=>{if(p&&!p.closed&&p.stock_id)s.add(String(p.stock_id));});
   return [...s];
 }
 /* 盤中時段(台北 09:00–13:35,週一~五)。用使用者本機時間判斷 —— 使用者在台灣,
@@ -3756,22 +3788,74 @@ function dtCostChip(c){
   return `<span style="color:${col};font-weight:700">${esc(txt)} ${c.cost_pct.toFixed(3)}%</span>`;
 }
 
+function dtPlanCard(c,side){
+  const p=c.plan;
+  const dir=side==='long'?'做多':'做空';
+  const col=side==='long'?'var(--up-ink)':'var(--down-ink)';
+  const q={ok:['var(--up-ink)',''],weak:['var(--warn)','⚠ '],bad:['var(--down-ink)','✗ '],none:['var(--muted)','']}[c.plan_quality]||['var(--muted)',''];
+  /* 沒有計畫就誠實說沒有 —— 不要拿昨收硬湊一組價格給人下單 */
+  const planHtml = !p ? `<div style="color:var(--muted-2);font-size:12px;padding:6px 0">
+       無法產生交易計畫(${esc(c.plan_note||'資料不足')})</div>`
+    : `<div class="dt-plan">
+      <div class="dt-px"><span>進場</span><b>${p.entry}</b></div>
+      <div class="dt-px"><span>目標</span><b style="color:var(--up-ink)">${p.target}</b>
+        <small>+${p.target_pct}%</small></div>
+      <div class="dt-px"><span>停損</span><b style="color:var(--down-ink)">${p.stop}</b>
+        <small>−${p.stop_pct}%</small></div>
+      <div class="dt-px"><span>張數</span><b>${p.lots} 張</b><small>約 ${(p.notional/10000).toFixed(1)} 萬</small></div>
+    </div>
+    <div class="dt-pnl">
+      <span>預計獲利 <b style="color:var(--up-ink)">+${p.net_profit.toLocaleString()}</b> 元(已扣成本)</span>
+      <span>最大虧損 <b style="color:var(--down-ink)">−${p.max_loss.toLocaleString()}</b> 元</span>
+      <span>預計成本 <b>${p.cost_amount.toLocaleString()}</b> 元(${c.cost_pct}%)</span>
+      <span>風報比 <b>${p.rr}</b></span>
+      ${p.target_capped_by?`<span style="color:var(--warn)">目標受${esc(p.target_capped_by)}限制</span>`:''}
+    </div>
+    <div style="font-size:11.5px;color:${q[0]};font-weight:600;margin-top:4px">${q[1]}${esc(c.plan_note||'')}</div>`;
+
+  const why=(c.reasons||[]).map(r=>`<span class="dt-chip">${esc(r)}</span>`).join('');
+  const ind=c.indicators||{};
+  const indHtml=[
+    ind.rsi!=null?`RSI ${ind.rsi}`:'',
+    ind.ma20!=null?`月線 ${ind.ma20}`:'',
+    ind.high20!=null?`20日高 ${ind.high20}`:'',
+    ind.low20!=null?`20日低 ${ind.low20}`:'',
+    ind.vol_ratio!=null?`量能 ${ind.vol_ratio}`:'',
+  ].filter(Boolean).map(x=>`<span class="dt-chip dt-chip-dim">${esc(x)}</span>`).join('');
+
+  return `<div class="dt-card" style="border-left:3px solid ${col}">
+    <div class="dt-head">
+      <div><b style="font-size:15px">${esc(c.name||'')}</b>
+        <span class="mk-id">${slink(c.stock_id)}</span>
+        <span style="color:${col};font-weight:700;margin-left:6px">${dir}</span>
+        ${c.gate_note&&c.gate_note!=='閘門全過'?`<span style="color:var(--warn);font-size:11px;margin-left:6px">${esc(c.gate_note)}</span>`:''}
+      </div>
+      <div style="text-align:right">
+        <div class="num" style="font-size:17px;font-weight:800">${num(c.price)}</div>
+        <div style="font-size:11px;color:var(--muted-2)">昨收 · tick ${c.tick}</div>
+      </div>
+    </div>
+    ${planHtml}
+    <div class="dt-why">${why}</div>
+    <div class="dt-why">${indHtml}</div>
+    <div class="dt-acts">
+      <button class="lk" onclick="dtQuickAdd('${c.stock_id}','${side}')">＋ 登記這筆</button>
+      <a class="lk" href="https://www.cmoney.tw/forum/stock/${c.stock_id}" target="_blank" rel="noopener">看線圖 ↗</a>
+      <a class="lk" href="https://tw.stock.yahoo.com/quote/${c.stock_id}.TW" target="_blank" rel="noopener">Yahoo 報價 ↗</a>
+      <a class="lk" href="https://mops.twse.com.tw/mops/web/t146sb05?step=1&COMPANY_ID=${c.stock_id}" target="_blank" rel="noopener">公開資訊 ↗</a>
+    </div>
+  </div>`;
+}
+
 function dtRows(list,side){
   if(!list||!list.length)return `<div class="note-box" style="color:var(--muted-2)">${side==='long'?'多方':'空方'}今日無符合條件的標的。</div>`;
-  return list.slice(0,20).map(c=>`
-    <div class="mk-row" style="grid-template-columns:1fr auto auto auto">
-      <div class="mk-nm"><b>${esc(c.name||'')}</b><span class="mk-id">${slink(c.stock_id)}</span>
-        <div style="font-size:11px;color:var(--muted-2);margin-top:2px">
-          ${dtCostChip(c)} · tick ${c.tick} · 需賺 ${c.breakeven_ticks} 檔打平
-          ${c.borrow_fee_pct?` · <span style="color:var(--down-ink)">借券費 ${c.borrow_fee_pct}%</span>`:''}
-          ${c.gate_note&&c.gate_note!=='閘門全過'?` · ${esc(c.gate_note)}`:''}
-        </div></div>
-      <div class="num">${num(c.price)}</div>
-      <div class="num" title="ATR% ÷ 來回成本% —— 一天的波動能覆蓋幾次來回成本">
-        ${c.edge_ratio?c.edge_ratio.toFixed(1)+'x':'—'}</div>
-      <div class="num" title="以你設定的額度可買張數">${c.lots_affordable} 張</div>
-    </div>`).join('');
+  const n=DT_EXPAND[side]?list.length:6;
+  const cards=list.slice(0,n).map(c=>dtPlanCard(c,side)).join('');
+  const more=list.length>n?`<div style="text-align:center;margin:10px 0">
+    <button class="lk" onclick="DT_EXPAND['${side}']=true;renderDaytrade()">顯示其餘 ${list.length-n} 檔 ▾</button></div>`:'';
+  return cards+more;
 }
+let DT_EXPAND={long:false,short:false};
 
 function dtLatencyBox(){
   if(!DTLAT||!DTLAT.verdict)return `<div class="note-box" style="color:var(--muted-2)">
@@ -3814,56 +3898,125 @@ function dtSavePositions(){
     }).catch(e=>alert('部位同步失敗:'+e));
 }
 
-function dtAddPosition(){
-  const sid=(prompt('股票代號?')||'').trim();
-  if(!/^\d{4,6}[A-Z]?$/.test(sid))return;
-  const side=(prompt('方向?輸入 long(做多)或 short(做空,先賣後買)','long')||'').trim();
-  if(side!=='long'&&side!=='short')return;
-  const entry=parseFloat(prompt('進場價?')||'');
-  if(!(entry>0))return;
-  const lots=parseInt(prompt('張數?','1')||'',10);
-  if(!(lots>0))return;
-  const stopIn=prompt('停損價?(可留空,但留空就不會有停損提醒)','');
-  const stop=stopIn?parseFloat(stopIn):null;
-  const cand=[...(DT&&DT.long||[]),...(DT&&DT.short||[])].find(c=>c.stock_id===sid);
-  DTPOS.push({stock_id:sid,name:(cand&&cand.name)||'',side,entry_price:entry,lots,
-              stop_price:(stop>0?stop:null),
-              opened_at:new Date().toTimeString().slice(0,8),closed:false});
+/* 部位編輯:第一版用連續 5 個 prompt(),使用者反映「新增部位要更簡單更輕鬆,
+   也要能刪改」—— 而且 prompt 鏈只要中途按一次取消就全部白打。
+   改成內嵌表單:一次填完、可編輯、可刪除,標的池卡片還能一鍵帶入。 */
+let DT_EDIT=null;   // null=表單收起 / {idx:-1}=新增 / {idx:n}=編輯第 n 筆
+
+function dtOpenForm(idx,preset){
+  DT_EDIT=Object.assign({idx:(idx==null?-1:idx)},preset||{});
+  renderDaytrade();
+  setTimeout(()=>{const el=document.querySelector('#dtf-sid');if(el)el.focus();},50);
+}
+function dtCancelForm(){DT_EDIT=null;renderDaytrade();}
+
+function dtQuickAdd(sid,side){
+  /* 從標的池卡片帶入:代號/方向/進場/停損/張數全部預填,只要按確定 */
+  const list=(DT&&DT[side])||[];
+  const c=list.find(x=>x.stock_id===sid);
+  const p=c&&c.plan;
+  dtOpenForm(null,{stock_id:sid,name:(c&&c.name)||'',side,
+    entry_price:p?p.entry:(c?c.price:''),stop_price:p?p.stop:'',lots:p?p.lots:1});
+}
+
+function dtSubmitForm(){
+  const g=id=>{const el=document.querySelector('#'+id);return el?el.value.trim():'';};
+  const sid=g('dtf-sid');
+  if(!/^\d{4,6}[A-Z]?$/.test(sid)){alert('股票代號格式不對(4~6 碼數字)');return;}
+  const entry=parseFloat(g('dtf-entry')),lots=parseInt(g('dtf-lots'),10);
+  if(!(entry>0)){alert('進場價要大於 0');return;}
+  if(!(lots>0)){alert('張數要大於 0');return;}
+  const stopRaw=g('dtf-stop'),stop=stopRaw?parseFloat(stopRaw):null;
+  const side=g('dtf-side');
+  const cand=[...(DT&&DT.long||[]),...(DT&&DT.short||[])].find(x=>x.stock_id===sid);
+  const row={stock_id:sid,name:(DT_EDIT&&DT_EDIT.name)||(cand&&cand.name)||'',
+             side,entry_price:entry,lots,stop_price:(stop>0?stop:null),
+             opened_at:(DT_EDIT&&DT_EDIT.idx>=0&&DTPOS[DT_EDIT.idx]?DTPOS[DT_EDIT.idx].opened_at:new Date().toTimeString().slice(0,8)),
+             closed:(DT_EDIT&&DT_EDIT.idx>=0&&DTPOS[DT_EDIT.idx]?!!DTPOS[DT_EDIT.idx].closed:false)};
+  if(DT_EDIT&&DT_EDIT.idx>=0)DTPOS[DT_EDIT.idx]=row; else DTPOS.push(row);
+  DT_EDIT=null;
   dtSavePositions();
 }
 
+function dtDeletePosition(i){
+  if(!DTPOS[i])return;
+  if(!confirm(`刪除 ${DTPOS[i].name||DTPOS[i].stock_id} 這筆部位?`))return;
+  DTPOS.splice(i,1);
+  dtSavePositions();
+}
 function dtClosePosition(i){
   if(!DTPOS[i])return;
   DTPOS[i].closed=!DTPOS[i].closed;
   dtSavePositions();
 }
-window.dtAddPosition=dtAddPosition;window.dtClosePosition=dtClosePosition;
+window.dtOpenForm=dtOpenForm;window.dtCancelForm=dtCancelForm;
+window.dtSubmitForm=dtSubmitForm;window.dtDeletePosition=dtDeletePosition;
+window.dtClosePosition=dtClosePosition;window.dtQuickAdd=dtQuickAdd;
+
+function dtFormHtml(){
+  if(!DT_EDIT)return '';
+  const e=DT_EDIT,cur=(e.idx>=0?DTPOS[e.idx]:null)||{};
+  const v=(k,d)=>{const x=(e[k]!==undefined?e[k]:cur[k]);return (x===null||x===undefined)?(d||''):x;};
+  return `<div class="dt-form">
+    <div><label>代號</label><input id="dtf-sid" value="${esc(String(v('stock_id')))}" placeholder="2330"></div>
+    <div><label>方向</label><select id="dtf-side">
+      <option value="long"${v('side','long')==='long'?' selected':''}>做多</option>
+      <option value="short"${v('side')==='short'?' selected':''}>做空(先賣後買)</option>
+    </select></div>
+    <div><label>進場價</label><input id="dtf-entry" type="number" step="0.01" value="${esc(String(v('entry_price')))}"></div>
+    <div><label>張數</label><input id="dtf-lots" type="number" step="1" min="1" value="${esc(String(v('lots',1)))}"></div>
+    <div><label>停損價(可空)</label><input id="dtf-stop" type="number" step="0.01" value="${esc(String(v('stop_price')))}"></div>
+    <div style="display:flex;gap:6px">
+      <button onclick="dtSubmitForm()">${e.idx>=0?'儲存':'新增'}</button>
+      <button class="sec" onclick="dtCancelForm()">取消</button>
+    </div>
+  </div>`;
+}
 
 function dtPositionsBox(){
   const live=DTPOS.filter(p=>!p.closed);
   const shorts=live.filter(p=>p.side==='short').length;
-  const rows=DTPOS.map((p,i)=>`
-    <div class="mk-row" style="grid-template-columns:1fr auto auto auto;${p.closed?'opacity:.45':''}">
+  const rows=DTPOS.map((p,i)=>{
+    /* 現價用既有的 LIVE 報價快取(/api/quote 三級降級:Sponsor→MIS→昨收),
+       抓不到就只顯示進場資訊 —— 不要用昨收假裝成現價。 */
+    const q=(typeof LIVE!=='undefined'&&LIVE)?LIVE[p.stock_id]:null;
+    const px=q&&isNum(q.price)?q.price:null;
+    let pnl=null,pnlAmt=null;
+    if(px&&p.entry_price>0){
+      const raw=(px/p.entry_price-1)*100;
+      pnl=p.side==='short'?-raw:raw;
+      pnlAmt=(p.side==='short'?(p.entry_price-px):(px-p.entry_price))*p.lots*1000;
+    }
+    const hit=p.stop_price&&px&&(p.side==='short'?px>=p.stop_price:px<=p.stop_price);
+    return `<div class="mk-row" style="grid-template-columns:1fr auto auto auto;${p.closed?'opacity:.45':''}">
       <div class="mk-nm"><b>${esc(p.name||'')}</b><span class="mk-id">${slink(p.stock_id)}</span>
         <div style="font-size:11px;color:var(--muted-2);margin-top:2px">
           <span style="color:${p.side==='short'?'var(--down-ink)':'var(--up-ink)'};font-weight:700">
             ${p.side==='short'?'做空(先賣後買)':'做多'}</span>
           · ${p.lots} 張 @${p.entry_price}
           ${p.stop_price?` · 停損 ${p.stop_price}`:' · <span style="color:var(--warn)">未設停損</span>'}
+          ${hit?' · <b style="color:var(--down-ink)">已觸及停損</b>':''}
         </div></div>
-      <div class="num">${(p.entry_price*p.lots*1000/10000).toFixed(1)}萬</div>
-      <div class="num">${p.opened_at||''}</div>
-      <div><button class="lk" onclick="dtClosePosition(${i})">${p.closed?'重開':'已平倉'}</button></div>
-    </div>`).join('');
+      <div class="num">${px?num(px):'—'}</div>
+      <div class="num ${pnl==null?'':cls(pnl)}">${pnl==null?'—':fmt(pnl)+'%'}
+        <div style="font-size:10.5px;color:var(--muted-2)">${pnlAmt==null?'':(pnlAmt>=0?'+':'')+Math.round(pnlAmt).toLocaleString()}</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="lk" onclick="dtOpenForm(${i})">改</button>
+        <button class="lk" onclick="dtClosePosition(${i})">${p.closed?'重開':'平倉'}</button>
+        <button class="lk" style="color:var(--down-ink)" onclick="dtDeletePosition(${i})">刪</button>
+      </div>
+    </div>`;}).join('');
   return `
   <div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--warn);display:inline-block"></span>
-    我的當沖部位 <span class="lk" onclick="dtAddPosition()" style="margin-left:8px">+ 新增</span></div>
+    我的當沖部位 ${DT_EDIT?'':`<span class="lk" onclick="dtOpenForm()" style="margin-left:8px">＋ 新增</span>`}</div>
+  ${dtFormHtml()}
   ${live.length?`<div class="note-box" style="border-left:3px solid ${shorts?'var(--down-ink)':'var(--warn)'}">
       未平倉 <b>${live.length}</b> 筆${shorts?`,其中 <b>${shorts}</b> 筆是先賣後買 ——
       收盤沒買回會變成券差,券商代為借券後當日 15:30 前沒補款會<b>報違約交割</b>`:''}。
       系統會在 13:00 / 13:15 / 13:25 推播回補提醒。</div>`
-    :`<div class="note-box" style="color:var(--muted-2)">今日尚未登記部位。
-      <b>沒有登記就不會有回補提醒與停損提醒</b> —— 那是這一層最有價值的部分,建議做了就順手登記。</div>`}
+    :(DT_EDIT?'':`<div class="note-box" style="color:var(--muted-2)">今日尚未登記部位。
+      <b>沒有登記就不會有回補提醒與停損提醒</b> —— 那是這一層最有價值的部分,
+      可以直接在下方標的池卡片按「＋ 登記這筆」一鍵帶入。</div>`)}
   ${rows}`;
 }
 
@@ -3885,7 +4038,16 @@ function renderDaytrade(){
   }
   const p=DT.prefs||{},s=DT.stats||{};
   const quota=p.quota_twd||0;
+  /* 過期警告(鐵則二:降級要看得見)。2026-09-09 事故:排程沒觸發,網頁整天顯示
+     前一日的標的池卻只在頁尾小字標日期 —— 那等於拿昨天的價格叫人今天下單。 */
+  const stale=DT.date&&DT.date<dtToday();
+  const staleBox=stale?`<div class="note-box" style="border-left:3px solid var(--down-ink)">
+    <b style="color:var(--down-ink)">⚠️ 這是 ${esc(DT.date)} 的標的池,不是今天(${dtToday()})的</b><br>
+    今日盤前建池沒有執行,下方所有價格與計畫都以 <b>${esc(DT.date)} 的收盤</b>為基準
+    —— <b>不要直接照著下單</b>。可到 GitHub Actions 手動觸發 <code>Day Trade</code>
+    的 <code>pool</code> 模式重建。</div>`:'';
   el.innerHTML=`
+  ${staleBox}
   <div class="note-box" style="border-left:3px solid var(--warn)">
     <b>⚠️ 這一層還在驗證期</b> —— 每筆當沖來回成本門檻約
     <b>0.52%</b>(手續稅 0.321% + 進出各跨一檔價差),一天做 3 筆就要先賺 1.56% 才打平。
@@ -3928,7 +4090,11 @@ function activateTab(p){
   if(p==='live')startLivePoll();else stopLivePoll();
   if(p==='dash')loadDashLive();
   if(p==='health'&&!HEALTH_TAB_INIT){HEALTH_TAB_INIT=true;renderHealthTab();}
-  if(p==='daytrade')renderDaytrade();
+  if(p==='daytrade'){
+    renderDaytrade();
+    /* 部位卡要顯示現價與未實現損益 —— 進來就抓一次,之後靠既有的即時輪詢更新。 */
+    if(typeof liveQuotes==='function'&&typeof liveIds==='function')liveQuotes(liveIds()).then(()=>renderDaytrade());
+  }
   /* 離開熱力圖一定要停輪詢 —— 它是 Vercel CPU 的頭號來源(見 hmLive 註解)。
      重進時 initHeatmap 因 _hmReady 會直接 return,所以計時器必須由 startHmLive 另外起。 */
   if(p==='heatmap'){initHeatmap();startHmLive();}else stopHmLive();
