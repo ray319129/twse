@@ -40,6 +40,7 @@ OUT_DIR = DATA_DIR / "daytrade"
 
 DEFAULT_PREFS = {
     "quota_twd": 250000,
+    "quota_per_trade_pct": 50.0,
     "price_min": 20.0, "price_max": 300.0,
     "min_dollar_volume_m": 200.0,
     "min_atr_pct": 2.0, "max_atr_pct": 12.0,
@@ -47,6 +48,7 @@ DEFAULT_PREFS = {
     "allow_long": True, "allow_short": True,
     "max_borrow_fee_pct": 0.5,
     "min_edge_ratio": 3.0,
+    "min_direction_bias": 0.3,
     "exclude": [], "include_always": [],
     "max_universe": 60,
 }
@@ -93,6 +95,7 @@ class Candidate:
     plan: dict | None = None          # 進場/停損/目標/預計獲利/成本(見 plan.py)
     plan_quality: str = ""            # ok / weak / bad / none
     plan_note: str = ""
+    direction_bias: float = 0.0   # −1(強空)~+1(強多),決定這檔該進哪一邊
     reasons: list = field(default_factory=list)   # 為什麼推薦(全部可查證)
     indicators: dict = field(default_factory=dict)  # RSI/均線/量比/前高低
 
@@ -168,6 +171,47 @@ def real_atr_pct(stock_id: str) -> float | None:
     return tech_snapshot(stock_id).get("atr_pct")
 
 
+def direction_bias(t: dict) -> tuple[float, list[str]]:
+    """技術面偏多還是偏空。回 (bias −1~+1, 判斷依據)。
+
+    ## 為什麼一定要有這個(2026-09-09 修)
+
+    第一版的標的池**完全沒有方向判斷** —— 只要通過法規閘門與成本/波動篩選,
+    同一檔就同時進多方與空方兩份清單,而排序用的 `ATR% ÷ 成本%` 多空一模一樣。
+    實測結果:60 檔裡有 **51 檔同時出現在兩邊**。那不是推薦,那是「這檔可以做,
+    方向你自己看」—— 等於把最難的部分丟回給使用者。
+
+    這裡用五個**互相獨立**的均線/動能條件投票,每個 ±1,加總後歸一化。
+    刻意不用複雜模型:當沖的方向判斷本來就不可能精準,能做的是
+    「方向不明的就別推」,而不是硬要猜一邊。
+    """
+    close, ma5, ma20 = t.get("close"), t.get("ma5"), t.get("ma20")
+    ma60, rsi = t.get("ma60"), t.get("rsi")
+    votes: list[int] = []
+    why: list[str] = []
+    if close and ma5:
+        v = 1 if close > ma5 else -1
+        votes.append(v); why.append(f"收盤{'>' if v > 0 else '<'}5日線")
+    if ma5 and ma20:
+        v = 1 if ma5 > ma20 else -1
+        votes.append(v); why.append(f"5日線{'>' if v > 0 else '<'}月線")
+    if close and ma20:
+        v = 1 if close > ma20 else -1
+        votes.append(v); why.append(f"收盤{'>' if v > 0 else '<'}月線")
+    if ma20 and ma60:
+        v = 1 if ma20 > ma60 else -1
+        votes.append(v); why.append(f"月線{'>' if v > 0 else '<'}季線")
+    if rsi is not None:
+        # RSI 只在明確偏離中軸時才投票 —— 45~55 之間本來就沒有方向可言
+        if rsi >= 55:
+            votes.append(1); why.append(f"RSI {rsi:.0f} 偏強")
+        elif rsi <= 45:
+            votes.append(-1); why.append(f"RSI {rsi:.0f} 偏弱")
+    if not votes:
+        return (0.0, [])
+    return (round(sum(votes) / len(votes), 3), why)
+
+
 def build_reasons(t: dict, side: str, c_edge: float | None,
                   gate_note: str) -> list[str]:
     """「為什麼推薦這檔」—— 全部是可查證的事實,不是形容詞。
@@ -203,7 +247,8 @@ def build_reasons(t: dict, side: str, c_edge: float | None,
 
 def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
                  cost_pct: float, borrow_fee: float | None,
-                 edge: float | None, gate_note: str) -> dict:
+                 edge: float | None, gate_note: str,
+                 bias: float = 0.0, bias_why: list | None = None) -> dict:
     """組出卡片需要的 plan / reasons / indicators 三塊。
 
     盤前用昨收當參考價 —— 開盤後盯盤層會用即時價重算(見 engine.scan_once)。
@@ -211,7 +256,10 @@ def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
     """
     p = build_plan(
         stock_id=sid, side=side, ref_price=price, atr=tech.get("atr"),
-        quota=float(prefs.get("quota_twd") or 0), cost_pct=cost_pct,
+        # ⚠️ 用**單筆預算**而不是整個額度:當沖額度是當日累計上限,
+        # 每筆都 sizing 到吃滿的話,第二筆就會被券商擋下來(使用者 2026-09-09 說明)。
+        quota=float(prefs.get("quota_twd") or 0) * float(prefs.get("quota_per_trade_pct", 50)) / 100.0,
+        cost_pct=cost_pct,
         borrow_fee_pct=borrow_fee,
         resistance=tech.get("high20"), support=tech.get("low20"),
     )
@@ -219,7 +267,10 @@ def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
     return {
         "plan": p.to_dict() if p else None,
         "plan_quality": lvl, "plan_note": note,
-        "reasons": build_reasons(tech, side, edge, gate_note),
+        "direction_bias": bias,
+        "reasons": (([("偏多" if bias > 0 else "偏空") + f" {abs(bias):.0%}(" + "、".join(bias_why or []) + ")"]
+                     if bias_why else [])
+                    + build_reasons(tech, side, edge, gate_note)),
         "indicators": {k: (round(v, 2) if isinstance(v, float) else v)
                        for k, v in tech.items() if k != "atr"},
     }
@@ -248,6 +299,7 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
     stats = {"scanned": 0, "gate_blocked": 0, "price_filtered": 0,
              "liquidity_filtered": 0, "unaffordable": 0, "no_atr": 0,
              "volatility_filtered": 0, "cost_filtered": 0, "edge_filtered": 0,
+             "no_direction": 0,
              "short_gate_blocked": 0}
 
     for row in levels.to_dict("records"):
@@ -295,6 +347,17 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
                 stats["volatility_filtered"] += 1
                 continue
 
+        # ── 方向判斷:一檔只該出現在它技術面偏向的那一邊 ──
+        # 沒有這一段的話,同一檔會同時進多方與空方(實測 60 檔裡 51 檔重複),
+        # 那不是推薦,是把最難的部分丟回給使用者。
+        bias, bias_why = direction_bias(tech)
+        min_bias = float(prefs.get("min_direction_bias", 0.3))
+        want_long = bias >= min_bias
+        want_short = bias <= -min_bias
+        if not forced and not (want_long or want_short):
+            stats["no_direction"] += 1
+            continue
+
         # ── 多方 ──
         long_cost = C.round_trip_cost_pct(price, sid, ticks_crossed=ticks_crossed)
         rating, note = C.cost_rating(price, sid, ticks_crossed=ticks_crossed)
@@ -306,7 +369,7 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
         elif not forced and (long_edge is None or long_edge < min_edge):
             # 一天的波動幅度連來回成本的 min_edge 倍都不到 → 這檔沒有操作空間
             stats["edge_filtered"] += 1
-        elif prefs.get("allow_long", True):
+        elif prefs.get("allow_long", True) and (want_long or forced):
             longs.append(Candidate(
                 stock_id=sid, name=str(row.get("name") or g.name or ""), market=g.market,
                 side="long", price=price,
@@ -318,11 +381,13 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
                 breakeven_ticks=round(C.breakeven_ticks(price, sid, ticks_crossed=ticks_crossed) or 0, 2),
                 borrow_fee_pct=None, lots_affordable=lots, gate_note=g.explain(),
                 **_plan_fields(sid, "long", price, tech, prefs, long_cost,
-                               None, long_edge, g.explain()),
+                               None, long_edge, g.explain(), bias, bias_why),
             ))
 
         # ── 空方:額外閘門 + 借券費進成本 ──
         if not prefs.get("allow_short", True):
+            continue
+        if not (want_short or forced):
             continue
         if not g.short_ok:
             stats["short_gate_blocked"] += 1
@@ -353,7 +418,7 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
                                                     borrow_fee_pct=fee or 0.0) or 0, 2),
             borrow_fee_pct=fee, lots_affordable=lots, gate_note=g.explain(),
             **_plan_fields(sid, "short", price, tech, prefs, short_cost,
-                           fee, short_edge, g.explain()),
+                           fee, short_edge, g.explain(), bias, bias_why),
         ))
 
     # ── 標的池排序:流動性高、成本低、波動足夠 ──
@@ -381,8 +446,14 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
              f"價格帶擋 {stats['price_filtered']}、流動性擋 {stats['liquidity_filtered']}、"
              f"買不起擋 {stats['unaffordable']}、波動擋 {stats['volatility_filtered']}、"
              f"成本帶擋 {stats['cost_filtered']}、空間不足擋 {stats['edge_filtered']}、"
+             f"方向不明擋 {stats['no_direction']}、"
              f"空方閘門擋 {stats['short_gate_blocked']})")
-    return {"date": today.isoformat(), "prefs": prefs, "stats": stats,
+    # 建池時間戳:使用者要看得出「這份推薦是什麼時候算的」,只有日期不夠 ——
+    # 同一天可能重建好幾次(手動觸發、盤前排程、修完 bug 補跑)。
+    from datetime import datetime as _dt
+    return {"date": today.isoformat(),
+            "built_at": _dt.now().strftime("%Y-%m-%d %H:%M"),
+            "prefs": prefs, "stats": stats,
             "long": [c.to_dict() for c in longs], "short": [c.to_dict() for c in shorts]}
 
 

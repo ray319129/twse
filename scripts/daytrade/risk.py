@@ -171,6 +171,37 @@ def forced_close_alert(positions: list[Position], level: tuple[str, str, str],
                      side="", message=msg)
 
 
+def quota_usage(positions: list[Position], quota: float,
+                per_trade_pct: float = 50.0) -> dict:
+    """當日額度使用狀況。
+
+    ## 為什麼是「當日累計」而不是「每筆」(使用者 2026-09-09 說明)
+
+    > 我的額度為 25 萬,**一天內買賣超過 25 萬會無法成立**
+
+    所以額度是**當日累計成交金額上限**,不是單筆上限 ——
+    第一版把每筆都 sizing 到吃滿整個額度,你只要照著做第二筆就會被券商擋下來。
+    而且**已平倉的部位一樣算進去**(它今天成交過了),所以這裡把 open 與 closed
+    全部加總。
+
+    `per_trade_pct`:單筆最多用掉剩餘額度的百分之多少。預設 50% 表示
+    「留一半給下一個機會」,想單押就設 100。
+    """
+    used = sum((p.entry_price or 0) * (p.lots or 0) * 1000 for p in positions)
+    remaining = max(0.0, (quota or 0) - used)
+    return {
+        "quota": round(quota or 0),
+        "used": round(used),
+        "used_pct": round(used / quota * 100, 1) if quota else None,
+        "remaining": round(remaining),
+        "per_trade_budget": round(remaining * (per_trade_pct / 100.0)),
+        "per_trade_pct": per_trade_pct,
+        "n_positions": len(positions),
+        "note": ("當沖額度是**當日累計成交金額**上限,已平倉的也算 —— "
+                 "所以剩餘額度會隨著今天做過的每一筆遞減。"),
+    }
+
+
 def position_risk_summary(pos: Position, quota: float) -> dict:
     """單筆部位佔額度多少、風險金額多少。給網頁與推播卡用。"""
     notional = pos.entry_price * pos.lots * 1000

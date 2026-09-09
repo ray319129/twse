@@ -4020,6 +4020,91 @@ function dtPositionsBox(){
   ${rows}`;
 }
 
+/* 額度狀況:當沖額度是**當日累計成交金額**上限(使用者 2026-09-09 說明:
+   「一天內買賣超過25萬會無法成立」),已平倉的也算。所以這一格要放在最上面 ——
+   剩多少額度直接決定今天還能不能再做。 */
+function dtQuotaBox(){
+  const p=(DT&&DT.prefs)||{},quota=p.quota_twd||0;
+  const used=DTPOS.reduce((a,x)=>a+(x.entry_price||0)*(x.lots||0)*1000,0);
+  const remain=Math.max(0,quota-used);
+  const pct=quota?Math.min(100,used/quota*100):0;
+  const perTrade=Math.round(remain*((p.quota_per_trade_pct||50)/100));
+  const col=pct>=90?'var(--down-ink)':(pct>=60?'var(--warn)':'var(--up-ink)');
+  return `<div class="note-box" style="border-left:3px solid ${col}">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:13px">
+      <b>今日額度</b>
+      <span>已用 <b style="color:${col}">${(used/10000).toFixed(1)}萬</b> / ${(quota/10000).toFixed(0)}萬
+        (${pct.toFixed(0)}%)・剩 <b>${(remain/10000).toFixed(1)}萬</b>
+        ・單筆預算 <b>${(perTrade/10000).toFixed(1)}萬</b></span>
+    </div>
+    <div style="height:6px;border-radius:3px;background:var(--surface-3);margin-top:6px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${col}"></div></div>
+    <div style="font-size:11px;color:var(--muted-2);margin-top:5px">
+      當沖額度是<b>當日累計成交金額</b>上限,<b>已平倉的也算</b> ——
+      所以剩餘額度會隨今天做過的每一筆遞減。卡片上的張數是用「單筆預算」算的,
+      預設留一半給下一個機會(可在下方設定調整)。</div>
+  </div>`;
+}
+
+/* 當沖統計獨立計算 —— 使用者要求。當沖的勝率/持有期/成本結構跟波段選股完全不同,
+   混進 data/performance.json 會兩邊都失真,所以資料源是 data/daytrade/ledger-*.json。 */
+function dtStatsBox(){
+  const live=DTPOS.filter(p=>!p.closed),done=DTPOS.filter(p=>p.closed);
+  let win=0,lose=0,net=0,measured=0;
+  DTPOS.forEach(p=>{
+    const q=(typeof LIVE!=='undefined'&&LIVE)?LIVE[p.stock_id]:null;
+    if(!q||!isNum(q.price)||!(p.entry_price>0))return;
+    const amt=(p.side==='short'?(p.entry_price-q.price):(q.price-p.entry_price))*p.lots*1000;
+    net+=amt;measured++;amt>=0?win++:lose++;
+  });
+  const cell=(k,v,c)=>`<div class="stat"><div class="k">${k}</div><div class="v"${c?` style="color:${c}"`:''}>${v}</div></div>`;
+  return `<div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block"></span>今日當沖統計<span style="font-size:11px;color:var(--muted-2);font-weight:400;margin-left:8px">獨立計算,不與波段台帳混算</span></div>
+  <div class="gmetrics" style="margin:8px 0 14px">
+    ${cell('已登記',DTPOS.length+' 筆')}
+    ${cell('未平倉',live.length+' 筆',live.length?'var(--warn)':'')}
+    ${cell('已平倉',done.length+' 筆')}
+    ${cell('浮動損益',measured?((net>=0?'+':'')+Math.round(net).toLocaleString()):'—',net>=0?'var(--up-ink)':'var(--down-ink)')}
+    ${cell('勝/敗',measured?`${win}/${lose}`:'—')}
+  </div>
+  <div class="note-box" style="font-size:11.5px;color:var(--muted-2)">
+    浮動損益以即時報價計算,<b>未扣交易成本</b>(每筆來回約 0.5%~1.3%)。
+    收盤後的正式統計在 <code>data/daytrade/ledger-*.json</code>,
+    含「有推播 vs 沒推播」兩組對照 —— 那才是判斷訊號分級有沒有用的依據。</div>`;
+}
+
+let DT_SETTINGS=false;
+function dtSettingsBox(){
+  const p=(DT&&DT.prefs)||{};
+  if(!DT_SETTINGS)return `<div style="text-align:right;margin:6px 0">
+    <button class="lk" onclick="DT_SETTINGS=true;renderDaytrade()">⚙ 調整條件(額度/價格區間/方向強度)</button></div>`;
+  return `<div class="dt-form" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+    <div><label>當沖額度(元)</label><input id="dts-quota" type="number" step="10000" value="${p.quota_twd||250000}"></div>
+    <div><label>單筆用剩餘的 %</label><input id="dts-pertrade" type="number" step="5" min="1" max="100" value="${p.quota_per_trade_pct||50}"></div>
+    <div><label>價格下限</label><input id="dts-pmin" type="number" step="1" value="${p.price_min||20}"></div>
+    <div><label>價格上限</label><input id="dts-pmax" type="number" step="1" value="${p.price_max||300}"></div>
+    <div><label>方向強度門檻</label><input id="dts-bias" type="number" step="0.1" min="0" max="1" value="${p.min_direction_bias==null?0.3:p.min_direction_bias}"></div>
+    <div style="display:flex;gap:6px">
+      <button onclick="dtSaveSettings()">儲存</button>
+      <button class="sec" onclick="DT_SETTINGS=false;renderDaytrade()">取消</button>
+    </div>
+  </div>
+  <div class="note-box" style="font-size:11px;color:var(--muted-2)">
+    改完會寫回 <code>config/daytrade_prefs.json</code>,<b>下次建池(明早 08:45)才生效</b>;
+    要立刻套用可到 GitHub Actions 手動跑 <code>Day Trade</code> 的 <code>pool</code> 模式。</div>`;
+}
+function dtSaveSettings(){
+  const g=id=>parseFloat((document.querySelector('#'+id)||{}).value);
+  const prefs={quota_twd:g('dts-quota'),quota_per_trade_pct:g('dts-pertrade'),
+               price_min:g('dts-pmin'),price_max:g('dts-pmax'),min_direction_bias:g('dts-bias')};
+  const secret=wlSecret(); if(!secret)return;
+  fetch('/api/daytrade',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prefs,secret})}).then(r=>r.json()).then(j=>{
+      if(j&&j.ok){if(DT)DT.prefs=Object.assign({},DT.prefs,j.prefs);DT_SETTINGS=false;renderDaytrade();}
+      else alert('設定儲存失敗:'+((j&&j.error)||'未知'));
+    }).catch(e=>alert('設定儲存失敗:'+e));
+}
+window.dtSaveSettings=dtSaveSettings;
+
 function renderDaytrade(){
   const el=$('#p-daytrade');if(!el)return;
   if(!DT_LOADED){
@@ -4030,61 +4115,65 @@ function renderDaytrade(){
       fetch('./daytrade_latency.json?'+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null),
     ]).then(([a,b])=>{DT=a;DTLAT=b;dtLoadPositions(()=>{
       renderDaytrade();
-      /* ⚠️ 報價一定要在**部位載入之後**才抓 —— liveIds() 是從 DTPOS 取代號的,
-         在部位還沒回來時呼叫,未平倉那幾檔根本不在清單裡,卡片就會一直顯示「—」。 */
+      /* 報價一定要在**部位載入之後**才抓 —— liveIds() 是從 DTPOS 取代號的,
+         在部位還沒回來時呼叫,未平倉那幾檔根本不在清單裡,卡片會一直顯示「—」。 */
       if(typeof liveQuotes==='function'&&typeof liveIds==='function')
         liveQuotes(liveIds()).then(()=>renderDaytrade());
     });});
     return;
   }
   if(!DT){
-    el.innerHTML=`<div class="note-box">尚未產生當沖標的池。每個交易日 08:30 由
+    el.innerHTML=`<div class="note-box">尚未產生當沖標的池。每個交易日 08:45 由
       <code>daytrade.yml</code> 自動建立;也可手動觸發該 workflow 的 <code>pool</code> 模式。</div>`;
     return;
   }
   const p=DT.prefs||{},s=DT.stats||{};
-  const quota=p.quota_twd||0;
-  /* 過期警告(鐵則二:降級要看得見)。2026-09-09 事故:排程沒觸發,網頁整天顯示
-     前一日的標的池卻只在頁尾小字標日期 —— 那等於拿昨天的價格叫人今天下單。 */
   const stale=DT.date&&DT.date<dtToday();
   const staleBox=stale?`<div class="note-box" style="border-left:3px solid var(--down-ink)">
     <b style="color:var(--down-ink)">⚠️ 這是 ${esc(DT.date)} 的標的池,不是今天(${dtToday()})的</b><br>
     今日盤前建池沒有執行,下方所有價格與計畫都以 <b>${esc(DT.date)} 的收盤</b>為基準
-    —— <b>不要直接照著下單</b>。可到 GitHub Actions 手動觸發 <code>Day Trade</code>
-    的 <code>pool</code> 模式重建。</div>`:'';
+    —— <b>不要直接照著下單</b>。</div>`:'';
+  const nL=(DT.long||[]).length,nS=(DT.short||[]).length;
+
   el.innerHTML=`
   ${staleBox}
-  <div class="note-box" style="border-left:3px solid var(--warn)">
-    <b>⚠️ 這一層還在驗證期</b> —— 每筆當沖來回成本門檻約
-    <b>0.52%</b>(手續稅 0.321% + 進出各跨一檔價差),一天做 3 筆就要先賺 1.56% 才打平。
-    所以系統<b>刻意只推多空各前 3 名</b>,其餘只記錄進台帳當對照組。
-    條件觸發 ≠ 買進建議;請等台帳累積一個月後再判斷這套有沒有用。
+  <div class="sec-h2" style="margin-top:0">
+    <span class="bar" style="width:3px;height:15px;border-radius:2px;background:var(--accent);display:inline-block"></span>
+    今日推薦 · ${esc(DT.date||'')}
+    <span style="font-size:11.5px;color:var(--muted-2);font-weight:400;margin-left:8px">
+      建池於 ${esc(DT.built_at||DT.date||'')}${stale?'':' ・ 資料為今日'}
+      ・多 ${nL} / 空 ${nS} 檔入選 ・ 卡片價格以昨收為基準
+    </span>
   </div>
-  ${dtLatencyBox()}
+  ${dtQuotaBox()}
   ${dtPositionsBox()}
-  <div class="gmetrics" style="margin:14px 0">
-    <div class="stat"><div class="k">額度</div><div class="v">${(quota/10000).toFixed(0)}<small>萬</small></div></div>
-    <div class="stat"><div class="k">價格區間</div><div class="v" style="font-size:19px">${p.price_min}–${p.price_max}</div></div>
-    <div class="stat"><div class="k">多方標的</div><div class="v">${(DT.long||[]).length}</div></div>
-    <div class="stat"><div class="k">空方標的</div><div class="v">${(DT.short||[]).length}</div></div>
-  </div>
-  <div class="note-box" style="font-size:12px;color:var(--muted-2)">
-    篩選過程:掃 ${s.scanned??'—'} 檔 → 法規閘門擋 ${s.gate_blocked??0}、價格帶擋 ${s.price_filtered??0}、
-    流動性擋 ${s.liquidity_filtered??0}、額度買不起擋 ${s.unaffordable??0}、波動不足擋 ${s.volatility_filtered??0}、
-    成本帶擋 ${s.cost_filtered??0}、空間不足擋 ${s.edge_filtered??0}、空方閘門擋 ${s.short_gate_blocked??0}。
-    <br><b>空間</b> = ATR% ÷ 來回成本%,代表一天的波動能覆蓋幾次來回成本 —— 這是排序主軸。
-    <b>tick 換檔的正上方最貴</b>(如 105 元的來回成本是 99 元的 2.4 倍),已預設排除。
-  </div>
-  <div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--up-ink);display:inline-block"></span>多方標的池</div>
+  ${dtStatsBox()}
+  <div class="sec-h2"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--up-ink);display:inline-block"></span>多方推薦 ${nL} 檔</div>
   ${dtRows(DT.long,'long')}
-  <div class="sec-h2" style="margin-top:22px"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--down-ink);display:inline-block"></span>空方標的池(先賣後買)</div>
-  <div class="note-box" style="font-size:12px;color:var(--muted-2)">
-    空方已過額外閘門:非處置、<b>非暫停先賣後買</b>、借券費低於 ${p.max_borrow_fee_pct}%。
-    ⚠️ 先賣後買收盤沒買回會變成券差,券商代為借券後當日 15:30 前沒補款會<b>報違約交割</b> ——
-    系統會在 13:00 / 13:15 / 13:25 推播回補提醒,但那需要你先在部位標記裡登記。
-  </div>
+  <div class="sec-h2" style="margin-top:22px"><span class="bar" style="width:3px;height:13px;border-radius:2px;background:var(--down-ink);display:inline-block"></span>空方推薦(先賣後買)${nS} 檔</div>
   ${dtRows(DT.short,'short')}
-  <div class="health-foot">標的池於每交易日 08:30 產生,資料日期 ${esc(DT.date||'')}。本頁僅供研究參考,非投資建議。</div>`;
+  ${dtSettingsBox()}
+  <details style="margin-top:14px">
+    <summary style="cursor:pointer;font-size:12.5px;color:var(--muted);font-weight:600">
+      篩選過程與方法說明(點開)</summary>
+    <div class="note-box" style="font-size:12px;color:var(--muted-2);margin-top:8px">
+      <b>成本門檻</b>:每筆來回約 <b>0.52%</b>(手續稅 0.321% + 進出各跨一檔價差),
+      一天做 3 筆要先賺 1.56% 才打平。所以系統<b>只推多空各前 3 名</b>到 Discord,
+      其餘只記錄進台帳當對照組。條件觸發 ≠ 買進建議。<br><br>
+      <b>篩選</b>:掃 ${s.scanned==null?'—':s.scanned} 檔 → 法規閘門擋 ${s.gate_blocked||0}、
+      價格帶擋 ${s.price_filtered||0}、流動性擋 ${s.liquidity_filtered||0}、
+      額度買不起擋 ${s.unaffordable||0}、波動不足擋 ${s.volatility_filtered||0}、
+      成本帶擋 ${s.cost_filtered||0}、空間不足擋 ${s.edge_filtered||0}、
+      <b>方向不明擋 ${s.no_direction||0}</b>、空方閘門擋 ${s.short_gate_blocked||0}。<br><br>
+      <b>方向</b>:五個均線/動能條件投票(收盤vs5日線、5日vs月線、收盤vs月線、
+      月線vs季線、RSI),強度低於 ${p.min_direction_bias==null?0.3:p.min_direction_bias} 視為方向不明、兩邊都不推 ——
+      這是為了避免同一檔同時出現在多空清單。<br>
+      <b>排序</b>:ATR% ÷ 來回成本%(一天的波動能覆蓋幾次來回成本)。<br>
+      <b>成本帶</b>:tick 換檔的正上方最貴(105 元的來回成本是 99 元的 2.4 倍),已預設排除。
+    </div>
+  </details>
+  ${dtLatencyBox()}
+  <div class="health-foot">標的池每交易日 08:45 產生。本頁僅供研究參考,非投資建議。</div>`;
 }
 
 /* ============================================================

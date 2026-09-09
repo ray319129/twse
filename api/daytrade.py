@@ -47,6 +47,8 @@ MAX_POSITIONS = 50
 # 只接受這些偏好欄位,其餘一律丟棄(前端多送不會寫進 repo)
 _PREF_NUM = {
     "quota_twd": (0, 100_000_000),
+    "quota_per_trade_pct": (1, 100),
+    "min_direction_bias": (0, 1),
     "price_min": (0, 10_000), "price_max": (0, 10_000),
     "min_dollar_volume_m": (0, 1_000_000),
     "min_atr_pct": (0, 100), "max_atr_pct": (0, 100),

@@ -30,6 +30,7 @@ from ..config import DATA_DIR, now_tpe
 from ..notify import send_discord
 from ..quotes import get_quotes, in_trading_session, sponsor_status
 from ..utils import log
+from . import chart as CH
 from . import cost as C
 from . import ledger as L
 from . import risk as R
@@ -90,13 +91,34 @@ def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
     head = (f"**當沖盤前精選 {d}**｜多 {len(pool.get('long') or [])} / "
             f"空 {len(pool.get('short') or [])} 檔入選,以下為各方向前 {n} 名\n"
             f"價格以昨收為基準,開盤後請以實際價位為準。條件符合 ≠ 買進建議。")
+    files = _charts_for([c for side in ("long", "short")
+                         for c in (pool.get(side) or [])[:n] if c.get("plan")])
     try:
-        send_discord(embeds, content=head)
-        log.info(f"盤前推播已送出:{len(embeds)} 張卡")
+        send_discord(embeds, content=head, files=files or None)
+        log.info(f"盤前推播已送出:{len(embeds)} 張卡、{len(files)} 張圖")
         return len(embeds)
     except Exception as e:
         log.warning(f"盤前推播失敗:{e}")
         return 0
+
+
+# 一次最多附幾張圖:每張 5 分K 要打一次 yfinance(約 1~2 秒),而且 Discord 單則
+# 訊息有附件大小上限。前幾檔有圖就夠了 —— 其餘可以點卡片上的線圖連結。
+CHART_TOP = 3
+
+
+def _charts_for(cands: list[dict]) -> list[tuple[str, bytes]]:
+    """給前 CHART_TOP 檔畫 5 分K。失敗的略過,不影響通知本身。"""
+    out: list[tuple[str, bytes]] = []
+    for c in cands[:CHART_TOP]:
+        p = c.get("plan") or {}
+        png = CH.five_min_k_png(
+            c.get("stock_id", ""), c.get("name", ""), c.get("market", "twse"),
+            entry=p.get("entry"), target=p.get("target"), stop=p.get("stop"),
+            side=p.get("side", "long"))
+        if png:
+            out.append((f"{c.get('stock_id', 'x')}_5m.png", png))
+    return out
 
 
 def _plan_embed(c: dict, side: str, *, title_prefix: str = "") -> dict | None:
@@ -382,8 +404,11 @@ def _push_signals(sigs: list[S.Signal]) -> None:
             "fields": fields,
             "footer": {"text": foot[:2048]},
         })
+    files = _charts_for([{
+        "stock_id": s.stock_id, "name": s.name, "market": "twse",
+        "plan": s.plan} for s in sigs if s.plan])
     try:
-        send_discord(embeds, content="**當沖盤中訊號**")
+        send_discord(embeds, content="**當沖盤中訊號**", files=files or None)
     except Exception as e:
         log.warning(f"當沖訊號推播失敗:{e}")
 
