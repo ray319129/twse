@@ -162,6 +162,57 @@ def test_explain_contains_actionable_numbers():
         assert token.rstrip("0").rstrip(".") in s or token in s
 
 
+# ── 2026-09-09 實戰事故:Discord 推出「做多但目標低於進場」的卡片 ──
+# 台塑化 6505 現價 87.45、20 日高 83.1(當天大漲 9.86% 早就站上 20 日高),
+# 目標被壓力修正壓到 83 —— 比進場 87.5 還低,卻因為距離用 abs() 算,
+# 卡片上顯示成「+5.14%、預計獲利 +7,976 元、風報比 2.65」,全部是假的。
+
+def test_resistance_below_entry_must_not_cap_target():
+    """突破日:股價已站上 20 日高,壓力低於進場價 —— 那條壓力對做多沒有意義,
+    不可以拿它當目標(會產生比進場還低的目標)。"""
+    p = build_plan(stock_id="6505", side="long", ref_price=87.45, atr=4.25,
+                   quota=250000, cost_pct=0.585, resistance=83.1, support=68.6)
+    assert p is not None
+    assert p.target > p.entry, f"做多目標 {p.target} 不該低於進場 {p.entry}"
+    assert p.target_capped_by is None, "壓力在進場之下時不該被當成目標"
+
+
+def test_resistance_above_entry_still_caps():
+    """壓力落在進場與原目標之間時,仍要正常修正 —— 不能因為修 bug 就把功能關掉。"""
+    p = build_plan(stock_id="6505", side="long", ref_price=87.45, atr=4.25,
+                   quota=250000, cost_pct=0.585, resistance=88.5)
+    assert p.target_capped_by == "最近壓力"
+    assert p.entry < p.target <= 88.5
+
+
+def test_support_above_entry_must_not_cap_short_target():
+    """做空的對稱情況:支撐高於進場價時不可拿來當目標。"""
+    p = build_plan(stock_id="6505", side="short", ref_price=70.0, atr=3.0,
+                   quota=250000, cost_pct=0.6, support=75.0)
+    assert p is not None
+    assert p.target < p.entry, f"做空目標 {p.target} 不該高於進場 {p.entry}"
+
+
+def test_price_ordering_invariant_always_holds():
+    """不變式安全網:掃一批參數組合,做多一律 停損<進場<目標、做空一律 目標<進場<停損。
+    任何一段邏輯寫錯都應該在這裡被擋成 None,而不是產生看起來合理的錯誤價格。"""
+    import itertools
+    for side, px, atr, res, sup in itertools.product(
+            ("long", "short"), (25.0, 87.45, 250.0), (0.5, 4.25),
+            (None, 20.0, 83.1, 88.5, 300.0), (None, 20.0, 68.6, 90.0)):
+        p = build_plan(stock_id="6505", side=side, ref_price=px, atr=atr,
+                       quota=500000, cost_pct=0.6, resistance=res, support=sup)
+        if p is None:
+            continue
+        if side == "long":
+            assert p.stop < p.entry < p.target, (
+                f"long {px}/{atr}/res={res}: {p.stop} {p.entry} {p.target}")
+        else:
+            assert p.target < p.entry < p.stop, (
+                f"short {px}/{atr}/sup={sup}: {p.target} {p.entry} {p.stop}")
+        assert p.net_profit == p.gross_profit - p.cost_amount
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

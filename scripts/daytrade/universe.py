@@ -220,24 +220,25 @@ def build_reasons(t: dict, side: str, c_edge: float | None,
     刻意不寫「強勢」「看好」這種話:當沖卡片上的每一句都要能對回一個數字,
     否則使用者無從判斷該不該信。
     """
+    # ⚠️ 這裡**刻意不重複 direction_bias 已經講過的東西**。
+    # 2026-09-09 的實際卡片同時出現:
+    #   「偏多 100%(收盤>5日線、5日線>月線、收盤>月線、月線>季線、RSI 62 偏強)」
+    #   「站上 5 日與月線(多頭排列)」   ← 重複
+    #   「RSI 62(中性)」               ← 與上面的「RSI 62 偏強」**互相矛盾**
+    #   「波動是來回成本的 7.9 倍」      ← 與訊號層的「空間 7.9x 成本」重複
+    # 均線與 RSI 的判讀交給 direction_bias 統一講(那裡才有完整的投票結果),
+    # 這裡只補它沒講的:波動幅度、量能、閘門提醒。
     r: list[str] = []
     atrp, close = t.get("atr_pct"), t.get("close")
     if atrp:
         r.append(f"日均波動 ATR {atrp:.1f}%")
     if c_edge:
+        # 「空間」留在這裡(池子)而不是訊號層 —— 盤前卡只有池子的理由,
+        # 拿掉的話盤前就看不到操作空間了。訊號層那句較短的重複版已移除。
         r.append(f"波動是來回成本的 {c_edge:.1f} 倍(操作空間)")
-    ma5, ma20, ma60 = t.get("ma5"), t.get("ma20"), t.get("ma60")
-    if close and ma5 and ma20:
-        if side == "long" and close > ma5 > ma20:
-            r.append("站上 5 日與月線(多頭排列)")
-        elif side == "short" and close < ma5 < ma20:
-            r.append("跌破 5 日與月線(空頭排列)")
-        elif close and ma20:
-            r.append(f"距月線 {(close / ma20 - 1) * 100:+.1f}%")
-    rsi = t.get("rsi")
-    if rsi is not None:
-        tag = "超買區" if rsi >= 70 else ("超賣區" if rsi <= 30 else "中性")
-        r.append(f"RSI {rsi:.0f}({tag})")
+    ma20 = t.get("ma20")
+    if close and ma20:
+        r.append(f"距月線 {(close / ma20 - 1) * 100:+.1f}%")
     vr = t.get("vol_ratio")
     if vr:
         r.append(f"5日均量/20日均量 {vr:.2f}")

@@ -125,7 +125,13 @@ def build_plan(*, stock_id: str, side: str, ref_price: float,
     target_raw = (entry + real_stop_dist * rr_target if side == "long"
                   else entry - real_stop_dist * rr_target)
     capped = None
-    if side == "long" and resistance and 0 < resistance < target_raw:
+    # ⚠️ 壓力/支撐只有落在「進場與目標之間」才是有效的修正。
+    # 原本做多那條只檢查 `0 < resistance < target_raw`,**漏了 `resistance > entry`** ——
+    # 強勢突破日(股價已站上 20 日高)時 resistance 會低於進場價,目標就被壓到進場之下。
+    # 2026-09-09 實際發生:台塑化 6505 現價 87.45、20日高 83.1 → 做多目標算成 83,
+    # 比進場 87.5 還低,卻因為下面用 abs() 算距離而顯示成「+5.14%、預計獲利 +7,976 元」。
+    # (做空那條本來就有 `support < entry`,是不對稱的疏漏。)
+    if side == "long" and resistance and entry < resistance < target_raw:
         target_raw, capped = resistance, "最近壓力"
     elif side == "short" and support and target_raw < support < entry:
         target_raw, capped = support, "最近支撐"
@@ -133,6 +139,16 @@ def build_plan(*, stock_id: str, side: str, ref_price: float,
                            mode="down" if side == "long" else "up")
     if target is None or target <= 0:
         return None
+
+    # ── 不變式:做多必須 停損 < 進場 < 目標;做空必須 目標 < 進場 < 停損 ──
+    # 這是**安全網**,不是重複檢查。上面任何一段邏輯寫錯(例如壓力修正漏了方向判斷)
+    # 都會在這裡被擋下來,而不是產生一組看起來合理、實際上是虧的價格。
+    # 之所以需要它:距離一律用 abs() 算,方向錯了數字仍然「漂亮」——
+    # 台塑化那次就是目標比進場低,卻顯示 +5.14%、預計獲利 +7,976 元。
+    ok = (stop < entry < target) if side == "long" else (target < entry < stop)
+    if not ok:
+        return None
+
     target_dist = abs(target - entry)
     if target_dist < tick:
         return None

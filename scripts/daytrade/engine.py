@@ -115,6 +115,10 @@ def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
 CHART_TOP_PREMARKET = 6
 CHART_TOP_INTRADAY = 3
 
+# 同方向漲跌超過這個幅度就不再推(台股上下限 ±10%)。
+# 漲停買不到、跌停賣不掉,而且隔天跳空風險不對稱。
+MAX_CHG_PCT = 8.0
+
 
 def _chart_key(stock_id: str, side: str) -> str:
     """同一檔可能同時有多方與空方卡(理論上方向判斷後不會,但別假設),
@@ -252,7 +256,18 @@ def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
         return {"ok": False, "reason": "empty_pool"}
 
     ids = list(cands)
-    quotes = get_quotes(ids)
+    raw_quotes = get_quotes(ids)
+    # ⚠️ **一定要濾掉 source == "close" 的報價。**
+    # get_quotes 的最後一層降級是「本機昨收」,它會回昨天的價格當成 price。
+    # 那個值一旦進到 prev_price,下一輪拿到真實價時就會「穿越」昨收與現價之間的
+    # **每一條水位** —— 全部是假訊號。
+    # 2026-09-09 實際發生:台塑化昨收 75.8、盤中 87.45,系統在 13:17 推出
+    # 「觸發 整數關卡 85」,而 85 早在上午就被穿越過了。
+    quotes = {k: q for k, q in raw_quotes.items()
+              if q and q.price is not None and q.source != "close"}
+    if not quotes:
+        return {"ok": False, "reason": "no_live_quotes", "checked": 0,
+                "pushed": 0, "held": 0}
     degraded = not sponsor_status().get("active")
 
     # 開盤區間:09:00~09:15 期間持續更新高低
@@ -299,6 +314,14 @@ def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
             row = next((c for c in side_pool if c["stock_id"] == sid), None)
             if row is None:
                 continue
+            # 漲跌停附近不推:台股上下限 ±10%,漲停時買不到、跌停時賣不掉,
+            # 而且隔天跳空的風險完全不對稱。既有 intraday_scan 有 MAX_CHG=8 的同款保護,
+            # 當沖層第一版漏了 —— 2026-09-09 推出台塑化「已漲 9.86%」的做多訊號。
+            if q.change_pct is not None:
+                move = q.change_pct if side == "long" else -q.change_pct
+                if move >= MAX_CHG_PCT:
+                    continue
+
             score, reasons = S.score_signal(
                 kind=lv.kind, edge_ratio=row.get("edge_ratio"),
                 volume_ratio=q.volume_ratio, cost_pct=row["cost_pct"],

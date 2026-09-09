@@ -257,6 +257,52 @@ def test_empty_pool_is_safe():
         assert r["ok"] is False and r["reason"] == "empty_pool"
 
 
+# ── 2026-09-09 實戰事故:「觸發 整數關卡 85」但即時價 87.45 ──
+# 台塑化昨收 75.8。get_quotes 的最後一層降級會回本機昨收當 price,
+# 那個值進到 prev_price 之後,下一輪拿到真實價 87.45 就「穿越」了
+# 75.8~87.45 之間的每一條水位 —— 85 正好在中間,於是在 13:17 推出
+# 一個早上就該觸發完的假訊號。
+
+def test_stale_close_quote_must_not_create_phantom_cross():
+    """報價降級成「昨收」時必須整輪跳過,不能拿昨天的價格當 prev_price。"""
+    from scripts.quotes import Quote
+    with _Harness(_tmp()) as h:
+        # 第一輪:報價層降級,回昨收 75.8(source="close")
+        E.get_quotes = lambda ids: {"2426": Quote(
+            stock_id="2426", price=75.8, prev_close=75.8, name="鼎元",
+            source="close", ts="")}
+        state = {}
+        r1 = E.scan_once(_pool(), state, CFG)
+        assert r1["ok"] is False and r1["reason"] == "no_live_quotes"
+        assert "2426" not in state.get("prev_price", {}), "昨收不該進 prev_price"
+
+        # 第二輪:真實價 87.45。若上一輪汙染了 prev_price,這裡會假穿越一堆水位
+        E.get_quotes = lambda ids: {"2426": _quote(87.45)}
+        E.scan_once(_pool(), state, CFG)
+        assert h.pushed_signals == [], "不該因為昨收→現價的跳躍而觸發"
+
+
+def test_near_limit_up_is_not_recommended_long():
+    """漲停附近不推做多:買不到,而且隔天跳空風險完全不對稱。"""
+    with _Harness(_tmp()) as h:
+        state = {}
+        E.get_quotes = lambda ids: {"2426": _quote(82.2, change=1.0)}
+        E.scan_once(_pool(), state, CFG)            # 建基準
+        E.get_quotes = lambda ids: {"2426": _quote(84.0, change=9.5)}
+        E.scan_once(_pool(), state, CFG)            # 穿越昨高,但已漲 9.5%
+        assert not [s for s in h.pushed_signals if s.side == "long"],             "已漲 9.5% 不該再推做多"
+
+
+def test_near_limit_down_is_not_recommended_short():
+    with _Harness(_tmp()) as h:
+        state = {}
+        E.get_quotes = lambda ids: {"2426": _quote(82.2, change=-1.0)}
+        E.scan_once(_pool(), state, CFG)
+        E.get_quotes = lambda ids: {"2426": _quote(79.0, change=-9.5)}
+        E.scan_once(_pool(), state, CFG)
+        assert not [s for s in h.pushed_signals if s.side == "short"],             "已跌 9.5% 不該再推做空"
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

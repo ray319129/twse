@@ -99,7 +99,9 @@ def build_levels(*, prev_high: float | None, prev_low: float | None,
         t = C.tick_size(price, stock_id)
         step = 10.0 if t >= 0.5 else (5.0 if t >= 0.1 else 1.0)
         near = round(price / step) * step
-        if near > 0 and abs(near - price) / price < 0.03:
+        # 容差原本 3% —— 對當沖太鬆:離現價 2.8% 的整數關卡早就在幾小時前穿越過了,
+        # 留著它只會在報價抖動時製造假訊號。收到 1%(約當一根 5 分K 的幅度)。
+        if near > 0 and abs(near - price) / price < 0.01:
             out.append(Level("round", float(near), f"整數關卡 {near:g}"))
     return out
 
@@ -140,8 +142,9 @@ def score_signal(*, kind: str, edge_ratio: float | None, volume_ratio: float | N
     reasons.append(f"水位品質 {kind}({w:.2f})")
 
     edge = min((edge_ratio or 0) / 8.0, 1.0)
-    if edge_ratio:
-        reasons.append(f"空間 {edge_ratio:.1f}x 成本")
+    # 「空間」不在這裡重複講 —— 標的池的理由已經有較完整的
+    # 「波動是來回成本的 X 倍(操作空間)」,兩句併在同一張卡上是冗詞。
+
 
     vol = 0.5
     if volume_ratio is not None:
