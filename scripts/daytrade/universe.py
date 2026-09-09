@@ -37,6 +37,7 @@ from .rules import Gate, gate_for, load_or_fetch
 PREFS_PATH = Path(DATA_DIR).parent / "config" / "daytrade_prefs.json"
 LEVELS_PATH = DATA_DIR / "levels.parquet"
 OUT_DIR = DATA_DIR / "daytrade"
+_RISK: dict = {}   # build() 開始時才載入(見 _risk_cfg)
 
 DEFAULT_PREFS = {
     "quota_twd": 250000,
@@ -245,6 +246,22 @@ def build_reasons(t: dict, side: str, c_edge: float | None,
     return r
 
 
+def _risk_cfg() -> dict:
+    """讀 config/daytrade.yaml 的 risk 區塊。
+
+    ⚠️ 一開始 `build_plan` 只用 plan.py 的預設值,`daytrade.yaml` 裡的
+    `atr_stop_mult` / `max_risk_pct_of_quota` **完全沒被讀** —— 設定檔看起來可調
+    但改了沒有任何效果,那比沒有設定檔更糟。
+    """
+    try:
+        import yaml
+        cfg = yaml.safe_load(
+            (Path(DATA_DIR).parent / "config" / "daytrade.yaml").read_text(encoding="utf-8")) or {}
+        return cfg.get("risk", {}) or {}
+    except Exception:
+        return {}
+
+
 def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
                  cost_pct: float, borrow_fee: float | None,
                  edge: float | None, gate_note: str,
@@ -262,6 +279,9 @@ def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
         cost_pct=cost_pct,
         borrow_fee_pct=borrow_fee,
         resistance=tech.get("high20"), support=tech.get("low20"),
+        atr_stop_mult=float(_RISK.get("atr_stop_mult", 0.4)),
+        rr_target=float(_RISK.get("rr_target", 1.5)),
+        max_risk_pct=float(_RISK.get("max_risk_pct_of_quota", 2.0)),
     )
     lvl, note = plan_quality(p)
     return {
@@ -281,6 +301,8 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
     """產出今日當沖標的池。回傳 {date, prefs, long: [...], short: [...], stats}。"""
     today = today or date.today()
     prefs = prefs or load_prefs()
+    global _RISK
+    _RISK = _risk_cfg()
     gates = gates if gates is not None else load_or_fetch(today)
     levels = _load_levels()
 
