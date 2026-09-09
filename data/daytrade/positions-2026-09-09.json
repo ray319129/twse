@@ -10,7 +10,7 @@
    "lots": 1,
    "stop_price": 74.5,
    "opened_at": "10:40:57",
-   "closed": false
+   "closed": true
   }
  ]
 }
