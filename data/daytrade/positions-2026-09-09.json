@@ -1,0 +1,16 @@
+{
+ "_comment": "當沖部位(供強制回補與停損提醒)。由網頁標記同步。只有代號/方向/進場價/張數/停損 —— 無累計損益、無帳戶餘額。",
+ "date": "2026-09-09",
+ "positions": [
+  {
+   "stock_id": "6770",
+   "name": "力積電",
+   "side": "short",
+   "entry_price": 74.0,
+   "lots": 1,
+   "stop_price": 74.5,
+   "opened_at": "10:40:57",
+   "closed": false
+  }
+ ]
+}
