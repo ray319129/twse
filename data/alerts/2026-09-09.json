@@ -63,5 +63,18 @@
   "vwap": 31.314820942197116,
   "fired_at": "09:06",
   "degraded": true
+ },
+ "2360|breakout": {
+  "stock_id": "2360",
+  "name": "致茂",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2400.00(現價 2410.00,高出 0.4%)・量比 4.34(市場中位 1.00)・站上均價 2378.24",
+  "price": 2410.0,
+  "change_rate": 6.4,
+  "volume_ratio": 4.336,
+  "vwap": 2378.239247311828,
+  "fired_at": "09:50",
+  "degraded": true
  }
 }
