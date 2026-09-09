@@ -4028,7 +4028,13 @@ function renderDaytrade(){
     Promise.all([
       fetch('./daytrade.json?'+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null),
       fetch('./daytrade_latency.json?'+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null),
-    ]).then(([a,b])=>{DT=a;DTLAT=b;dtLoadPositions(()=>renderDaytrade());});
+    ]).then(([a,b])=>{DT=a;DTLAT=b;dtLoadPositions(()=>{
+      renderDaytrade();
+      /* ⚠️ 報價一定要在**部位載入之後**才抓 —— liveIds() 是從 DTPOS 取代號的,
+         在部位還沒回來時呼叫,未平倉那幾檔根本不在清單裡,卡片就會一直顯示「—」。 */
+      if(typeof liveQuotes==='function'&&typeof liveIds==='function')
+        liveQuotes(liveIds()).then(()=>renderDaytrade());
+    });});
     return;
   }
   if(!DT){
@@ -4090,10 +4096,12 @@ function activateTab(p){
   if(p==='live')startLivePoll();else stopLivePoll();
   if(p==='dash')loadDashLive();
   if(p==='health'&&!HEALTH_TAB_INIT){HEALTH_TAB_INIT=true;renderHealthTab();}
+  /* 第一次進來由 renderDaytrade 內部在部位載入後自己抓報價(順序有相依,見那裡的註解);
+     之後每次切回來再刷新一次現價。 */
   if(p==='daytrade'){
     renderDaytrade();
-    /* 部位卡要顯示現價與未實現損益 —— 進來就抓一次,之後靠既有的即時輪詢更新。 */
-    if(typeof liveQuotes==='function'&&typeof liveIds==='function')liveQuotes(liveIds()).then(()=>renderDaytrade());
+    if(DT_LOADED&&DTPOS_LOADED&&typeof liveQuotes==='function')
+      liveQuotes(liveIds()).then(()=>renderDaytrade());
   }
   /* 離開熱力圖一定要停輪詢 —— 它是 Vercel CPU 的頭號來源(見 hmLive 註解)。
      重進時 initHeatmap 因 _hmReady 會直接 return,所以計時器必須由 startHmLive 另外起。 */
