@@ -30,7 +30,26 @@ from ..config import DATA_DIR
 from ..utils import log
 
 LEDGER_DIR = DATA_DIR / "daytrade"
-FOLLOWUP_MINUTES = (5, 15, 30, 60)
+
+
+def _load_followups() -> tuple:
+    """追蹤時點。可由 config/daytrade.yaml 的 ledger.followup_minutes 覆寫 ——
+    原本那個設定沒被讀,只是剛好與這裡的預設一致。"""
+    try:
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load((Path(DATA_DIR).parent / "config" / "daytrade.yaml")
+                             .read_text(encoding="utf-8")) or {}
+        v = (cfg.get("ledger", {}) or {}).get("followup_minutes")
+        got = tuple(sorted({int(x) for x in v if int(x) > 0}))
+        if got:
+            return got
+    except Exception:
+        pass
+    return (5, 15, 30, 60)
+
+
+FOLLOWUP_MINUTES = _load_followups()
 
 
 @dataclass

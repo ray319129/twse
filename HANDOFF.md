@@ -3471,3 +3471,73 @@ Discord:
 - 延遲量測仍未取得(9/09 排程沒跑)。修好後 9/10 開盤應該就會有第一筆。
 - 網頁截圖在本機預覽抓不到(頁面捲動容器的問題),已改用
   `getBoundingClientRect()` + DOM 文字驗證版面,不影響功能。
+
+---
+
+## 67. Discord 圖片內嵌 + 全面衝突稽核(2026-09-09 晚)
+
+### Discord 圖片改成嵌在卡片內
+
+原本 `send_discord(embeds, files=...)` 有送圖但 embed 沒有引用 ——
+**圖會掉到訊息最下面變成一排孤兒附件**,看不出哪張對應哪一檔。
+改成沿用 `intraday_scan._embed` 已驗證的作法:embed 加
+`"image": {"url": f"attachment://{檔名}"}`。
+
+關鍵是**圖與卡必須一起產生**,分開產生檔名會對不上。所以先決定要推哪幾檔 →
+`_charts_for()` 回 `(附件清單, {chart_key: 檔名})` → 組 embed 時用那張對照表引用。
+`chart_key` 含方向(`{sid}_{side}`),避免同一檔多空兩張圖撞名。
+
+附圖上限拆成兩個:`CHART_TOP_PREMARKET = 6`(盤前不趕時間,推幾張卡就給幾張圖)、
+`CHART_TOP_INTRADAY = 3`(盤中是時間敏感的,每張圖要打一次 yfinance 約 1~2 秒,
+多等 5 秒對當沖是實質成本)。實測盤前 4 張卡 4 張圖全部有嵌。
+
+### 稽核發現一:`scan.max_universe_*` 是死設定,而且是真的負載問題
+
+`scan_once` 直接用 `pool["long"] + pool["short"]` = **119 檔**,
+config 的 `max_universe_no_subscription: 60` 從沒被讀。
+
+這不只是設定沒生效 —— **既有的 `intraday_scan` 盯盤同時也在打 MIS**
+(降級模式 35 檔 = 1 批)。119 檔 = 3 批,兩支加起來 **8 次/分鐘**打在
+非官方端點上。已套上限(依分數多空各取一半),降到 **6 次/分鐘**。
+
+### 稽核發現二:七個死設定
+
+寫了一支稽核腳本掃 `config/daytrade.yaml` 的每個 key 有沒有出現在程式碼裡,
+找出 7 個從沒被讀的設定。目前值剛好都與程式常數一致所以沒出事,
+**但這正是 `atr_stop_mult`(yaml 1.0 vs 程式 0.4)那個坑的同一類 —— 會發散**。
+
+處理方式分兩種:
+- **接上去**(5 個):`cost.fee_rate` / `cost.fee_discount` / `cost.daytrade_tax_rate` /
+  `cost.cheap_below` / `cost.expensive_above` / `risk.forced_close_times` /
+  `ledger.followup_minutes`。改 config 實測會生效(改成 12:50/13:10/13:20 與
+  追蹤 3/10 分鐘都確認有讀到)。
+- **移除**(2 個):`levels.use_prev_high_low`、`risk.forced_close_channel_separate` ——
+  這兩個描述的是結構性行為(昨日高低一定要納入;風控通知一定要單獨發),
+  **有旗標卻不生效比沒有旗標更糟**,所以直接拿掉並在原處留註解說明。
+
+稽核腳本可重跑:比對 yaml 的 leaf key 是否出現在 `scripts/daytrade/*.py` +
+`docs/index.html` + `api/daytrade.py`。修完再掃一次 → **死設定 0 個**。
+
+### 稽核發現三:測試沒有涵蓋真實推播路徑
+
+`test_daytrade_engine` 把 `_push_signals` monkeypatch 掉了,所以
+「embed 有沒有正確引用附件」這件事測試根本測不到。已直接跑真實路徑驗證:
+卡片 14 個欄位齊全、`image=attachment://6770_short_5m.png`、附件檔名相符。
+
+### 其餘稽核結果(無問題)
+
+| 項目 | 結果 |
+|---|---|
+| 8 個測試檔 | 全過 |
+| 鐵則一隔離 | 通過(選股層仍未依賴即時報價) |
+| 全模組 import | 9 支全 OK |
+| workflow 觸發衝突 | 無。daytrade 靠 `workflow_run` 掛在 Premarket 後,刻意不設 concurrency(理由見 §66) |
+| 輸出檔案衝突 | 無。當沖只寫 `daytrade.json` / `daytrade_latency.json`,其他模組不碰 |
+| 兩支盯盤並行 | 實測同時 in_progress,intraday 仍每 3 分鐘正常 commit |
+| `daytrade_prefs.json` | 無死設定 |
+
+### 仍待觀察
+
+- 目前正在跑的盯盤是**改動前的版本**(03:34 UTC 啟動),掃的是 119 檔;
+  明天起才會套到 60 檔上限。
+- MIS 延遲量測仍未拿到(要等這班盯盤結束 commit)。

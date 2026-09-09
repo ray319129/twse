@@ -38,9 +38,28 @@ _ETF_BANDS: tuple[tuple[float, float, float], ...] = (
     (50.0, float("inf"), 0.05),
 )
 
-DEFAULT_FEE_RATE = 0.001425      # 券商手續費標準費率
-DEFAULT_FEE_DISCOUNT = 0.6       # 折扣(與 config/screeners.yaml 的 cost.fee_discount 一致)
-DEFAULT_DAYTRADE_TAX = 0.0015    # 當沖證交稅(減半),賣出時課一次
+def _cfg() -> dict:
+    """讀 config/daytrade.yaml 的 cost 區塊。
+
+    這些值原本寫死在這裡、config 裡也有一份**但沒被讀** —— 兩份會發散。
+    (同一類的坑實際發生過:risk.atr_stop_mult 設 1.0 但程式用 0.4。)
+    讀不到就用下面的預設,不讓設定檔缺失擋掉計算。
+    """
+    try:
+        import yaml
+        from pathlib import Path
+        from ..config import DATA_DIR
+        cfg = yaml.safe_load((Path(DATA_DIR).parent / "config" / "daytrade.yaml")
+                             .read_text(encoding="utf-8")) or {}
+        return cfg.get("cost", {}) or {}
+    except Exception:
+        return {}
+
+
+_C = _cfg()
+DEFAULT_FEE_RATE = float(_C.get("fee_rate", 0.001425))          # 券商手續費標準費率
+DEFAULT_FEE_DISCOUNT = float(_C.get("fee_discount", 0.6))       # 折扣
+DEFAULT_DAYTRADE_TAX = float(_C.get("daytrade_tax_rate", 0.0015))  # 當沖證交稅(減半)
 
 
 def is_etf(stock_id: str) -> bool:
@@ -121,8 +140,9 @@ def breakeven_ticks(price: float, stock_id: str = "", **kw) -> float | None:
 
 
 # 成本分級門檻(%)。以實測分布定:最便宜約 0.52%、最貴約 1.27%。
-_COST_GOOD = 0.60
-_COST_BAD = 0.90
+# 可由 config/daytrade.yaml 的 cost.cheap_below / cost.expensive_above 覆寫。
+_COST_GOOD = float(_C.get("cheap_below", 0.60))
+_COST_BAD = float(_C.get("expensive_above", 0.90))
 
 
 def cost_rating(price: float, stock_id: str = "", **kw) -> tuple[str, str]:

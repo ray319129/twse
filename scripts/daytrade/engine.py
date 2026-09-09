@@ -78,12 +78,21 @@ def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
     """
     cfg = load_cfg()
     n = top_n if top_n is not None else int((cfg.get("ranking", {}) or {}).get("push_top_n", 3))
-    embeds: list[dict] = []
+    # 先決定要推哪幾檔,再一次把「圖」與「卡」綁在一起產生 ——
+    # 分開產生的話檔名對不上,attachment:// 就引用不到。
+    picks: list[tuple[dict, str]] = []
     for side, label in (("long", "▲ 做多"), ("short", "▼ 做空(先賣後買)")):
         for c in (pool.get(side) or [])[:n]:
-            e = _plan_embed(c, side, title_prefix=label)
-            if e:
-                embeds.append(e)
+            if c.get("plan"):
+                picks.append((c, side))
+    files, name_by_key = _charts_for([c for c, _ in picks], top=CHART_TOP_PREMARKET)
+    embeds: list[dict] = []
+    for c, side in picks:
+        label = "▲ 做多" if side == "long" else "▼ 做空(先賣後買)"
+        e = _plan_embed(c, side, title_prefix=label,
+                        chart_name=name_by_key.get(_chart_key(c["stock_id"], side)))
+        if e:
+            embeds.append(e)
     if not embeds:
         log.info("盤前推播:今日無符合條件的標的,不發送。")
         return 0
@@ -91,8 +100,6 @@ def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
     head = (f"**當沖盤前精選 {d}**｜多 {len(pool.get('long') or [])} / "
             f"空 {len(pool.get('short') or [])} 檔入選,以下為各方向前 {n} 名\n"
             f"價格以昨收為基準,開盤後請以實際價位為準。條件符合 ≠ 買進建議。")
-    files = _charts_for([c for side in ("long", "short")
-                         for c in (pool.get(side) or [])[:n] if c.get("plan")])
     try:
         send_discord(embeds, content=head, files=files or None)
         log.info(f"盤前推播已送出:{len(embeds)} 張卡、{len(files)} 張圖")
@@ -102,28 +109,52 @@ def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
         return 0
 
 
-# 一次最多附幾張圖:每張 5 分K 要打一次 yfinance(約 1~2 秒),而且 Discord 單則
-# 訊息有附件大小上限。前幾檔有圖就夠了 —— 其餘可以點卡片上的線圖連結。
-CHART_TOP = 3
+# 一次最多附幾張圖。每張 5 分K 要打一次 yfinance(約 1~2 秒)。
+# 盤前不趕時間 → 推幾張卡就給幾張圖(最多 6),讓每張卡都有圖。
+# 盤中訊號是時間敏感的 → 只給前 3 張,多等 5 秒對當沖是實質成本。
+CHART_TOP_PREMARKET = 6
+CHART_TOP_INTRADAY = 3
 
 
-def _charts_for(cands: list[dict]) -> list[tuple[str, bytes]]:
-    """給前 CHART_TOP 檔畫 5 分K。失敗的略過,不影響通知本身。"""
+def _chart_key(stock_id: str, side: str) -> str:
+    """同一檔可能同時有多方與空方卡(理論上方向判斷後不會,但別假設),
+    所以附件檔名要含方向,否則兩張圖會撞名、其中一張被覆蓋。"""
+    return f"{stock_id}_{side}"
+
+
+def _charts_for(cands: list[dict], top: int = CHART_TOP_INTRADAY) -> tuple[list[tuple[str, bytes]], dict]:
+    """給前 CHART_TOP 檔畫 5 分K。
+
+    回 (附件清單, {chart_key: 檔名})。第二個回傳值是給 embed 用 `attachment://`
+    引用的 —— 沒有它圖片會變成訊息底部的孤兒附件,對不上是哪一檔。
+    失敗的略過,不影響通知本身。
+    """
     out: list[tuple[str, bytes]] = []
-    for c in cands[:CHART_TOP]:
+    names: dict[str, str] = {}
+    for c in cands[:top]:
         p = c.get("plan") or {}
+        sid = str(c.get("stock_id", "x"))
+        side = p.get("side", "long")
         png = CH.five_min_k_png(
-            c.get("stock_id", ""), c.get("name", ""), c.get("market", "twse"),
+            sid, c.get("name", ""), c.get("market", "twse"),
             entry=p.get("entry"), target=p.get("target"), stop=p.get("stop"),
-            side=p.get("side", "long"))
+            side=side)
         if png:
-            out.append((f"{c.get('stock_id', 'x')}_5m.png", png))
-    return out
+            fn = f"{sid}_{side}_5m.png"
+            out.append((fn, png))
+            names[_chart_key(sid, side)] = fn
+    return out, names
 
 
-def _plan_embed(c: dict, side: str, *, title_prefix: str = "") -> dict | None:
+def _plan_embed(c: dict, side: str, *, title_prefix: str = "",
+                chart_name: str | None = None) -> dict | None:
     """把一張標的池卡片轉成 Discord embed。沒有交易計畫就不發 ——
-    只有代號和成本的卡片對使用者沒有用,反而佔版面。"""
+    只有代號和成本的卡片對使用者沒有用,反而佔版面。
+
+    `chart_name` 是同一則訊息裡的 5 分K 附件檔名,用 `attachment://` 引用 ——
+    **不加這個的話圖會掉到訊息最下面變成一排孤兒附件**,看不出哪張圖對應哪一檔
+    (沿用 intraday_scan._embed 已經驗證過的作法)。
+    """
     p = c.get("plan")
     if not p:
         return None
@@ -163,12 +194,15 @@ def _plan_embed(c: dict, side: str, *, title_prefix: str = "") -> dict | None:
     note = c.get("plan_note") or ""
     gate = c.get("gate_note") or ""
     foot = note + (f"｜{gate}" if gate and gate != "閘門全過" else "")
-    return {
+    out = {
         "title": f"{title_prefix}｜{c.get('name', '')}({sid})",
         "color": _COLOR[side],
         "fields": fields,
         "footer": {"text": foot[:2048]},
     }
+    if chart_name:
+        out["image"] = {"url": f"attachment://{chart_name}"}
+    return out
 
 
 def _write_web(pool: dict) -> None:
@@ -202,7 +236,18 @@ def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
     """一輪掃描。state 保存 prev_price / 開盤區間 / 已觸發過的 key。"""
     now = now_tpe()
     hhmm = now.strftime("%H:%M")
-    cands = {c["stock_id"]: c for c in pool.get("long", []) + pool.get("short", [])}
+    # ⚠️ 掃描宇宙要套上限。`scan.max_universe_*` 原本**完全沒被讀** —— 標的池有
+    # 多 59 + 空 60 = 119 檔,整份丟進去等於每輪打 3 批 MIS,而**既有的
+    # intraday_scan 盯盤同時也在打 MIS**(降級模式 35 檔 = 1 批)。
+    # MIS 是非官方端點,兩支加起來 8 次/分鐘有被 ban 的風險。
+    # 依分數各取一半,兩個方向都保留代表性。
+    sc = cfg.get("scan", {}) or {}
+    cap = int(sc.get("max_universe_with_subscription", 200) if sponsor_status().get("active")
+              else sc.get("max_universe_no_subscription", 60))
+    half = max(1, cap // 2)
+    picked = (sorted(pool.get("long", []), key=lambda c: -(c.get("score") or 0))[:half]
+              + sorted(pool.get("short", []), key=lambda c: -(c.get("score") or 0))[:half])
+    cands = {c["stock_id"]: c for c in picked}
     if not cands:
         return {"ok": False, "reason": "empty_pool"}
 
@@ -353,6 +398,10 @@ def _risk_pass(state: dict, cfg: dict, quotes: dict, day: date, hhmm: str) -> No
 def _push_signals(sigs: list[S.Signal]) -> None:
     """盤中觸發推播。與盤前精選共用同一種卡片結構(進場/目標/停損/獲利/成本/理由/指標),
     差別只在多了「觸發了什麼水位」與「即時價」—— 使用者不該因為是盤中就少拿到資訊。"""
+    # 先畫圖:embed 要用 attachment:// 引用檔名,兩者必須一起產生。
+    files, name_by_key = _charts_for([{
+        "stock_id": s.stock_id, "name": s.name, "market": "twse",
+        "plan": s.plan} for s in sigs if s.plan])
     embeds = []
     for s in sigs:
         arrow = "▲ 做多" if s.side == "long" else "▼ 做空(先賣後買)"
@@ -398,15 +447,16 @@ def _push_signals(sigs: list[S.Signal]) -> None:
         foot = f"{s.fired_at} ・ {s.plan_note or ''}"
         if s.degraded:
             foot += " ｜⚠ 降級模式:量比/均價為估計值"
-        embeds.append({
+        emb = {
             "title": f"{arrow}｜{s.name}({s.stock_id})",
             "color": _COLOR[s.side],
             "fields": fields,
             "footer": {"text": foot[:2048]},
-        })
-    files = _charts_for([{
-        "stock_id": s.stock_id, "name": s.name, "market": "twse",
-        "plan": s.plan} for s in sigs if s.plan])
+        }
+        cn = name_by_key.get(_chart_key(s.stock_id, s.side))
+        if cn:
+            emb["image"] = {"url": f"attachment://{cn}"}
+        embeds.append(emb)
     try:
         send_discord(embeds, content="**當沖盤中訊號**", files=files or None)
     except Exception as e:

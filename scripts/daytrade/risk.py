@@ -30,11 +30,43 @@ from . import cost as C
 POS_DIR = DATA_DIR / "daytrade"
 
 # 強制回補提醒的時間點與急迫度。13:30 收盤,所以 13:25 是最後一次友善提醒。
-FORCED_CLOSE_LEVELS = [
-    ("13:00", "info", "還有 30 分鐘收盤"),
-    ("13:15", "warn", "剩 15 分鐘,建議開始平倉"),
-    ("13:25", "critical", "剩 5 分鐘 —— 沒平掉就會變成券差/交割"),
-]
+# 時間點可由 config/daytrade.yaml 的 risk.forced_close_times 覆寫 ——
+# 原本那個設定**完全沒被讀**,只是剛好與這裡的常數一致所以沒出事。
+# (同一類的坑:risk.atr_stop_mult 設 1.0 但程式用 0.4,那次就真的發散了。)
+_DEFAULT_FORCED_TIMES = ["13:00", "13:15", "13:25"]
+_URGENCY = ["info", "warn", "critical"]
+_WHY = ["還有 30 分鐘收盤", "剩 15 分鐘,建議開始平倉",
+        "剩 5 分鐘 —— 沒平掉就會變成券差/交割"]
+
+
+def _build_levels(times: list[str] | None = None) -> list[tuple[str, str, str]]:
+    """把時間點清單配上急迫度與說明。最後一個一律 critical(那是最後通牒)。"""
+    ts = [str(t) for t in (times or _DEFAULT_FORCED_TIMES) if str(t).count(":") == 1]
+    if not ts:
+        ts = list(_DEFAULT_FORCED_TIMES)
+    ts = sorted(set(ts))
+    out = []
+    for i, t in enumerate(ts):
+        last = (i == len(ts) - 1)
+        urg = "critical" if last else (_URGENCY[min(i, 1)])
+        why = _WHY[min(i, len(_WHY) - 1)] if len(ts) == len(_WHY) else (
+            "收盤前必須平倉" if last else f"距收盤剩 {t} 之後的時間")
+        out.append((t, urg, why))
+    return out
+
+
+def _load_forced_times() -> list[str] | None:
+    try:
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load((Path(DATA_DIR).parent / "config" / "daytrade.yaml")
+                             .read_text(encoding="utf-8")) or {}
+        return (cfg.get("risk", {}) or {}).get("forced_close_times")
+    except Exception:
+        return None
+
+
+FORCED_CLOSE_LEVELS = _build_levels(_load_forced_times())
 
 
 @dataclass
