@@ -37,5 +37,18 @@
   "vwap": 244.55205582798945,
   "fired_at": "09:05",
   "degraded": true
+ },
+ "5464|breakout": {
+  "stock_id": "5464",
+  "name": "霖宏",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 82.80(現價 84.10,高出 1.6%)・量比 48.95(市場中位 1.00)・站上均價 83.25",
+  "price": 84.1,
+  "change_rate": 1.57,
+  "volume_ratio": 48.947,
+  "vwap": 83.25439393939394,
+  "fired_at": "09:06",
+  "degraded": true
  }
 }
