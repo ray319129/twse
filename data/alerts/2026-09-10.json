@@ -50,5 +50,31 @@
   "vwap": 83.25439393939394,
   "fired_at": "09:06",
   "degraded": true
+ },
+ "2303|breakout": {
+  "stock_id": "2303",
+  "name": "聯電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 144.50(現價 145.25,高出 0.5%)・量比 9.63(市場中位 1.00)・站上均價 144.24",
+  "price": 145.25,
+  "change_rate": 2.65,
+  "volume_ratio": 9.635,
+  "vwap": 144.2440781232206,
+  "fired_at": "09:09",
+  "degraded": true
+ },
+ "6531|breakout": {
+  "stock_id": "6531",
+  "name": "愛普*",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1015.00(現價 1027.50,高出 1.2%)・量比 6.72(市場中位 1.00)・站上均價 1011.88",
+  "price": 1027.5,
+  "change_rate": 2.85,
+  "volume_ratio": 6.718,
+  "vwap": 1011.8805104408352,
+  "fired_at": "09:10",
+  "degraded": true
  }
 }
