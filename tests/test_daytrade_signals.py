@@ -4,8 +4,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from scripts.daytrade.signals import (Level, Signal, build_levels, detect_cross,
-                                      rank_and_cap, score_signal, suggest_stop)
+from scripts.daytrade.signals import (  # noqa: F401
+    _KIND_WEIGHT, Level, Signal, build_levels, detect_cross,
+    rank_and_cap, score_signal, suggest_stop)
 
 
 def _lv(price=100.0):
@@ -110,6 +111,87 @@ def test_suggest_stop_direction_and_missing_atr():
     # 沒有 ATR 就不給數字 —— 不要讓人拿猜的停損去下單
     assert suggest_stop(price=100.0, side="long", atr=None) is None
     assert suggest_stop(price=0, side="long", atr=3.0) is None
+
+
+def test_zones_are_reordered_by_distance_not_by_stored_weight():
+    """**存檔的順序不可信。**
+
+    標的池存的是 `levels_mtf.summary()` 的輸出,那是依**權重**排的。
+    直接取前 N 個會留下「很重但今天走不到」的水位、砍掉近的 ——
+    實測 6226 光鼎現價 29.65,存檔第 7 個是 24.50(離 17.4%),
+    而 27.12(離 8.5%)排第 8。而且盤中價格早就離盤前基準走掉了。
+    ⚠️ 這個測試附加在 runner 之前 —— 之後的測試不會被執行(踩過)。
+    """
+    zones = [{"price": 24.50, "confluence": 2, "timeframes": ["月線", "日線"]},
+             {"price": 27.12, "confluence": 1, "timeframes": ["日線"]}]
+    lv = build_levels(prev_high=None, prev_low=None, open_range_high=None,
+                      open_range_low=None, vwap=None, price=29.65,
+                      stock_id="6226", use_round=False, zones=zones, max_zones=1,
+                      min_confluence=1)
+    assert [x.price for x in lv] == [27.12], [x.price for x in lv]
+
+
+def test_zone_hugging_current_price_is_dropped():
+    """貼著現價的水位第一個 tick 就會「突破」—— 那不是突破,是雜訊。"""
+    zones = [{"price": 100.1, "confluence": 3, "timeframes": ["月線", "日線", "小時線"]}]
+    lv = build_levels(prev_high=None, prev_low=None, open_range_high=None,
+                      open_range_low=None, vwap=None, price=100.0,
+                      stock_id="2330", use_round=False, zones=zones)
+    assert lv == [], lv
+
+
+def test_zone_too_close_to_an_existing_level_is_dropped():
+    """相距不到一次來回成本的兩條線在交易上是同一筆,留著會雙重觸發。"""
+    zones = [{"price": 105.0, "confluence": 3, "timeframes": ["月線", "日線", "小時線"]}]
+    lv = build_levels(prev_high=105.1, prev_low=None, open_range_high=None,
+                      open_range_low=None, vwap=None, price=100.0,
+                      stock_id="2330", use_round=False, zones=zones)
+    assert [x.kind for x in lv] == ["prev_high"], [(x.kind, x.price) for x in lv]
+
+
+def test_confluence_maps_to_weight_and_three_beats_opening_range():
+    """三個週期都認得的價位比開盤區間還硬 —— 這是加入多週期的整個理由。"""
+    zones = [{"price": 110.0, "confluence": 3, "timeframes": ["月線", "日線", "小時線"]},
+             {"price": 95.0, "confluence": 1, "timeframes": ["小時線"]}]
+    lv = build_levels(prev_high=None, prev_low=None, open_range_high=None,
+                      open_range_low=None, vwap=None, price=100.0,
+                      stock_id="2330", use_round=False, zones=zones,
+                      min_confluence=1)
+    kinds = {x.kind for x in lv}
+    assert kinds == {"mtf3", "mtf1"}, kinds
+    assert _KIND_WEIGHT["mtf3"] > _KIND_WEIGHT["orh"] > _KIND_WEIGHT["mtf1"]
+    hi, _ = score_signal(kind="mtf3", edge_ratio=5.0, volume_ratio=1.5,
+                         cost_pct=0.6, change_pct=1.0, side="long")
+    lo, _ = score_signal(kind="round", edge_ratio=5.0, volume_ratio=1.5,
+                         cost_pct=0.6, change_pct=1.0, side="long")
+    assert hi > lo
+
+
+def test_malformed_zones_never_crash_the_scan():
+    """zones 來自 JSON,盤中掃描不能因為一個壞欄位就整輪掛掉。"""
+    zones = [{"price": None}, {"price": "x"}, {}, {"price": -5, "confluence": 2},
+             {"price": 110.0, "confluence": 2, "timeframes": ["月線", "日線"]}]
+    lv = build_levels(prev_high=None, prev_low=None, open_range_high=None,
+                      open_range_low=None, vwap=None, price=100.0,
+                      stock_id="2330", use_round=False, zones=zones)
+    assert [x.price for x in lv] == [110.0]
+
+
+def test_single_timeframe_zones_are_gated_out_by_default():
+    """匯流才是加入多週期的整個理由 —— 預設只收兩個週期以上背書的價位。
+
+    實測若全收,單週期水位會佔新增水位的 38%(67/175),而它們的權重 0.6
+    比 VWAP 還低:等於用最弱的水位把訊號量灌回去,正是使用者抱怨的
+    「訊號過多而且不準」。開關在 config `levels.min_mtf_confluence`。
+    """
+    zones = [{"price": 110.0, "confluence": 1, "timeframes": ["小時線"]},
+             {"price": 105.0, "confluence": 2, "timeframes": ["月線", "日線"]}]
+    kw = dict(prev_high=None, prev_low=None, open_range_high=None,
+              open_range_low=None, vwap=None, price=100.0,
+              stock_id="2330", use_round=False, zones=zones)
+    assert [x.price for x in build_levels(**kw)] == [105.0]
+    assert [x.price for x in build_levels(**kw, min_confluence=1)] == [105.0, 110.0]
+    assert build_levels(**kw, min_confluence=3) == []
 
 
 if __name__ == "__main__":

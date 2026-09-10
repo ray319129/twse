@@ -33,6 +33,7 @@ from ..utils import log
 from . import chart as CH
 from . import cost as C
 from . import ledger as L
+from . import levels_mtf as MTF
 from . import risk as R
 from . import plan as P
 from . import signals as S
@@ -58,12 +59,49 @@ def load_cfg() -> dict:
 def run_pool(today: date | None = None, *, notify: bool = True) -> dict:
     today = today or now_tpe().date()
     pool = U.build(today=today)
+    _enrich_hourly(pool)
     U.save(pool, today)
     _write_web(pool)
     log.info(f"當沖標的池已產生:多 {len(pool['long'])} / 空 {len(pool['short'])}")
     if notify:
         push_premarket_picks(pool)
     return pool
+
+
+def _enrich_hourly(pool: dict) -> int:
+    """替**已入選**的標的補上小時線水位,重算匯流。
+
+    使用者要的是「日線、小時線、月線」三個週期,但 `universe.tech_snapshot`
+    是對約 200 檔跑的,那裡開小時線等於 200 次 yfinance 呼叫 —— 太慢也太容易被擋,
+    所以那一層寫死 `with_hourly=False`。結果就是**小時線從頭到尾沒有真的接上**,
+    匯流度最高只到 2,`_KIND_WEIGHT["mtf3"]` 形同死碼。
+
+    這一支補在池子建好之後:只剩幾十檔,盤前又不趕時間(08:xx 跑),
+    一檔約 1~2 秒是可以接受的。失敗的就維持月線+日線,不影響其他檔。
+    """
+    from ..storage import load_prices
+    n = 0
+    for side in ("long", "short"):
+        for c in pool.get(side) or []:
+            sid = c.get("stock_id")
+            px = c.get("price")
+            if not sid or not px:
+                continue
+            try:
+                df = load_prices(sid)
+                if df is None or len(df) < 30:
+                    continue
+                atr = (c.get("atr_pct") or 0) / 100.0 * px or None
+                zones = MTF.build(sid, df, px, market=c.get("market", "twse"),
+                                  with_hourly=True, atr=atr)
+                if zones:
+                    c["zones"] = MTF.summary(zones, top=8)
+                    n += 1
+            except Exception as e:
+                log.info(f"小時線補強失敗 {sid}(維持月線+日線):{e}")
+    if n:
+        log.info(f"多週期水位:已對 {n} 檔補上小時線(月線+日線+小時線匯流)")
+    return n
 
 
 def push_premarket_picks(pool: dict, top_n: int | None = None) -> int:
@@ -150,6 +188,32 @@ def _charts_for(cands: list[dict], top: int = CHART_TOP_INTRADAY) -> tuple[list[
     return out, names
 
 
+def _zone_text(zones, price: float | None, top: int = 4) -> str:
+    """把多週期匯流區排成一行給卡片用。
+
+    使用者 2026-09-10 要求「策略要加入看日線、小時線、月線支撐壓力」——
+    有算沒顯示等於沒做:他要能在卡片上看到這個價位是誰背書的。
+    只列有兩個以上週期背書的(單週期的不夠硬,見 levels.min_mtf_confluence)。
+    """
+    if not zones or not price or price <= 0:
+        return ""
+    rows = []
+    for z in zones:
+        try:
+            zp, conf = float(z.get("price")), int(z.get("confluence") or 1)
+        except (TypeError, ValueError, AttributeError):
+            continue
+        if zp <= 0 or conf < 2:
+            continue
+        rows.append((abs(zp - price), zp, conf, "+".join(z.get("timeframes") or [])))
+    rows.sort()
+    out = []
+    for _, zp, conf, tfs in rows[:top]:
+        arrow = "壓力" if zp > price else "支撐"
+        out.append(f"{arrow} **{zp:g}**({zp / price - 1:+.1%}・{tfs}・{conf}週期)")
+    return "\n".join(out)
+
+
 def _plan_embed(c: dict, side: str, *, title_prefix: str = "",
                 chart_name: str | None = None) -> dict | None:
     """把一張標的池卡片轉成 Discord embed。沒有交易計畫就不發 ——
@@ -189,6 +253,9 @@ def _plan_embed(c: dict, side: str, *, title_prefix: str = "",
     ] if x)
     if ind_txt:
         fields.append({"name": "指標", "value": ind_txt[:1024], "inline": False})
+    zone_txt = _zone_text(c.get("zones"), c.get("price"))
+    if zone_txt:
+        fields.append({"name": "多週期支撐壓力", "value": zone_txt[:1024], "inline": False})
     sid = c.get("stock_id", "")
     fields.append({"name": "參考", "value":
                    f"[線圖](https://www.cmoney.tw/forum/stock/{sid}) ・ "
@@ -222,18 +289,61 @@ def _write_web(pool: dict) -> None:
 # ─────────────────────────── 盤中:水位與訊號 ───────────────────────────
 
 def _levels_for(cand: dict, quote, cfg: dict, opening: dict) -> list[S.Level]:
+    """組出這一檔盤中要盯的水位。
+
+    ⚠️ **昨日高低一定要取盤前算好的那份,不能用 `quote.high` / `quote.low`。**
+    2026-09-10 排錯抓到:`Quote.high/low` 是 **今日盤中**的最高/最低(MIS 的 h/l),
+    不是昨日的。把它當「昨日高點」有兩個後果:
+      1. 卡片寫「昨日高點」但顯示的是今天的高點 —— 直接是錯的資訊;
+      2. **這條水位在功能上是壞的**。今日高點依定義 ≥ 現價且隨現價移動,
+         而 `detect_cross` 要 `price >= level × 1.002` 才算上穿 ——
+         永遠不可能成立,除非報價的 high 欄位落後 price 欄位超過 0.2%。
+         也就是說它只會在「資料不同步」時觸發,那全部是假訊號。
+      空方的今日低點同理。而 prev_high/prev_low 權重 0.85 是第二高的,
+      等於把第二重要的水位換成了雜訊產生器。
+    正確來源是 `tech_snapshot` 從本機日線算的 `indicators.prev_high/prev_low`
+    (昨日那根 K 棒的高低),盤前就算好、盤中不會變。
+    """
     lv = cfg.get("levels", {}) or {}
     orng = opening.get(cand["stock_id"], {})
+    ind = cand.get("indicators") or {}
     return S.build_levels(
-        prev_high=quote.high if quote else None,
-        prev_low=quote.low if quote else None,
+        prev_high=ind.get("prev_high"),
+        prev_low=ind.get("prev_low"),
         open_range_high=orng.get("high"),
         open_range_low=orng.get("low"),
         vwap=(quote.vwap if (quote and lv.get("use_vwap", True)) else None),
         price=(quote.price if quote else 0) or 0,
         stock_id=cand["stock_id"],
         use_round=lv.get("use_round_numbers", True),
+        zones=cand.get("zones") or [],
+        max_zones=int(lv.get("max_mtf_zones", 6)),
+        min_confluence=int(lv.get("min_mtf_confluence", 2)),
     )
+
+
+def _zone_bounds(zones, price: float) -> tuple[float | None, float | None]:
+    """從標的池存下來的多週期匯流區裡,挑離「現價」最近的壓力與支撐。
+
+    盤前那份 `mtf_resistance` / `mtf_support` 是以**昨收**為基準算的,盤中價格
+    走掉之後就不對了(昨收下方的壓力，開盤跳空後可能已經在現價下方)。
+    所以盤中要拿原始 zones 依即時價重新挑。只認有兩個以上週期背書的
+    (confluence >= 2)—— 單一週期的水位當目標價不夠硬。
+    """
+    res = sup = None
+    for z in zones or []:
+        try:
+            zp = float(z.get("price"))
+            conf = int(z.get("confluence") or 1)
+        except (TypeError, ValueError, AttributeError):
+            continue
+        if zp <= 0 or conf < 2:
+            continue
+        if zp > price and (res is None or zp < res):
+            res = zp
+        elif zp < price and (sup is None or zp > sup):
+            sup = zp
+    return res, sup
 
 
 def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
@@ -330,13 +440,33 @@ def scan_once(pool: dict, state: dict, cfg: dict) -> dict:
             # 用觸發當下的即時價重算計畫 —— 盤前那份是以昨收為基準,價格已經動了。
             ind = row.get("indicators") or {}
             rk_cfg = cfg.get("risk", {}) or {}
+            # ⚠️ 這裡的參數必須跟 universe._plan_fields 保持一致。
+            # 2026-09-10 排錯抓到:盤中這條路徑**繞過了盤前那條的四道防護** ——
+            #   1. 壓力/支撐還在用 20 日高低,而不是多週期匯流區。20 日高在
+            #      突破日會落在現價**下方**(2026-09-09 台塑化就是這樣把做多目標
+            #      算到進場之下),不變式雖然會擋下來,但是是靜默地把計畫變成 None;
+            #   2. 沒有 min_rr —— 風報比 0.66 的單盤中照推,盤前卻擋掉;
+            #   3. 沒有 atr_stop_mult / rr_target,寫死用 plan.py 的預設;
+            #   4. 沒有 min_stop_cost_mult。
+            # 「同一件事有兩條路徑」是這個專案反覆出事的地方,兩邊都要改。
+            quota = float((pool.get("prefs") or {}).get("quota_twd") or 0)
+            per_trade = float((pool.get("prefs") or {}).get("quota_per_trade_pct") or 100.0)
+            zr, zs = _zone_bounds(row.get("zones"), q.price)
             live_plan = P.build_plan(
                 stock_id=sid, side=side, ref_price=q.price, atr=atr_abs,
-                quota=float((pool.get("prefs") or {}).get("quota_twd") or 0),
+                quota=quota * per_trade / 100.0, risk_quota=quota,
                 cost_pct=row["cost_pct"], borrow_fee_pct=row.get("borrow_fee_pct"),
-                resistance=ind.get("high20"), support=ind.get("low20"),
+                resistance=zr or ind.get("high20"), support=zs or ind.get("low20"),
+                atr_stop_mult=float(rk_cfg.get("atr_stop_mult", 0.4)),
+                rr_target=float(rk_cfg.get("rr_target", 1.5)),
                 max_risk_pct=float(rk_cfg.get("max_risk_pct_of_quota", 2.0)),
+                min_stop_cost_mult=float(rk_cfg.get("min_stop_cost_mult", 2.0)),
             )
+            min_rr = float(rk_cfg.get("min_rr", 1.0))
+            if live_plan is not None and live_plan.rr < min_rr:
+                # 風報比不足就整筆不推 —— 沒有計畫的訊號對當沖沒有用,
+                # 而「賠的比賺的多」的計畫比沒有更糟。
+                continue
             _, live_note = P.plan_quality(live_plan)
             new_signals.append(S.Signal(
                 stock_id=sid, name=row.get("name") or q.name, side=side, kind=lv.kind,

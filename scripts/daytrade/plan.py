@@ -40,6 +40,14 @@ from . import cost as C
 DEFAULT_ATR_STOP_MULT = 0.4
 DEFAULT_RR_TARGET = 1.5
 MIN_STOP_TICKS = 2          # 停損至少要離 2 個 tick,否則等於一跳就出場
+# 停損距離至少要是**來回成本的這個倍數**(config risk.min_stop_cost_mult)。
+# 2026-09-10 排錯抓到:兆豐金/彰銀/元大金/永豐金這些低波動金融股,
+# ATR 小 × atr_stop_mult 0.4 → 停損只有 0.92~1.12%,而來回成本 0.55~0.72%,
+# 倍數只有 1.38~1.68。那種停損**整條都在雜訊帶裡** —— 隨便一個買賣價差來回就掃到,
+# 而且被掃掉時虧的錢跟成本同一個量級,等於在付手續費玩擲硬幣。
+# 它們能通過 edge_ratio 閘門是因為成本也低,比值看起來沒問題 ——
+# 但比值不能取代絕對距離。2.0 倍是下限,低於此就不給計畫。
+MIN_STOP_COST_MULT = 2.0
 DEFAULT_MAX_RISK_PCT = 2.0  # 單筆最大虧損不超過額度的 %(config risk.max_risk_pct_of_quota)
 
 
@@ -90,12 +98,13 @@ class TradePlan:
 
 
 def build_plan(*, stock_id: str, side: str, ref_price: float,
-               atr: float | None, quota: float,
+               atr: float | None, quota: float, risk_quota: float | None = None,
                cost_pct: float, borrow_fee_pct: float | None = None,
                resistance: float | None = None, support: float | None = None,
                atr_stop_mult: float = DEFAULT_ATR_STOP_MULT,
                rr_target: float = DEFAULT_RR_TARGET,
                max_risk_pct: float = DEFAULT_MAX_RISK_PCT,
+               min_stop_cost_mult: float = MIN_STOP_COST_MULT,
                max_lots: int | None = None) -> TradePlan | None:
     """算一份可以直接照著下單的計畫。任何一個必要輸入缺失就回 None。"""
     try:
@@ -112,7 +121,9 @@ def build_plan(*, stock_id: str, side: str, ref_price: float,
     if entry is None:
         return None
 
-    stop_dist = max(atr * atr_stop_mult, tick * MIN_STOP_TICKS)
+    # 三個下限取大者:ATR 比例、最少 2 個 tick、來回成本的 N 倍。
+    cost_floor = entry * (cost_pct or 0.0) / 100.0 * min_stop_cost_mult
+    stop_dist = max(atr * atr_stop_mult, tick * MIN_STOP_TICKS, cost_floor)
     stop = align_to_tick(entry - stop_dist if side == "long" else entry + stop_dist,
                          stock_id, mode="down" if side == "long" else "up")
     if stop is None or stop <= 0 or stop == entry:
@@ -156,8 +167,17 @@ def build_plan(*, stock_id: str, side: str, ref_price: float,
     # ── 部位大小:買得起幾張 **和** 風險預算允許幾張,取小的 ──
     # 只看「買得起」會讓停損寬的標的一次押掉太多風險 —— 實測台半用滿額度時
     # 單筆最大虧損 10,766 元 = 25 萬的 4.3%。風險預算把它壓回設定的上限內。
+    #
+    # ⚠️ `quota` 與 `risk_quota` 是**兩件不同的事**,不能共用同一個數字:
+    #   quota      = 這筆最多能動用多少資金(單筆預算 = 總額度 × quota_per_trade_pct)
+    #   risk_quota = 風險百分比的基準(**總額度**,因為 max_risk_pct_of_quota 的語意
+    #                就是「總額度的百分之幾」)
+    # 原本兩者都傳單筆預算 → 風險上限變成 2% × 50% = 總額度的 1%,只有設定值的一半,
+    # 而且是**靜默**的:實測 2026-09-10 有 43 檔(佔標的池 36%)因此算不出計畫,
+    # 卡片只寫「資料不足」,完全看不出真正原因是風險預算被砍半。
     affordable = C.lots_for_quota(entry, quota)
-    risk_budget = quota * (max_risk_pct / 100.0) if (quota and max_risk_pct) else 0
+    rq = risk_quota if risk_quota is not None else quota
+    risk_budget = rq * (max_risk_pct / 100.0) if (rq and max_risk_pct) else 0
     risk_lots = affordable
     if risk_budget > 0:
         per_lot_risk = real_stop_dist * 1000

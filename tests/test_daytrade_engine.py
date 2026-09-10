@@ -22,6 +22,10 @@ def _pool():
         "tick": 0.1, "cost_pct": 0.564, "cost_rating": "cheap", "cost_note": "",
         "breakeven_ticks": 4.6, "borrow_fee_pct": None, "lots_affordable": 3,
         "gate_note": "閘門全過", "score": 88.0,
+        # 昨日高低必須來自這裡(盤前算好的),不是 Quote 的 high/low ——
+        # 那兩個是**今日盤中**的高低,拿來當昨高低既標錯也不可能正確觸發。
+        "indicators": {"prev_high": 83.0, "prev_low": 79.5, "rsi": 55.0,
+                       "high20": 88.0, "low20": 76.0},
     }
     return {"date": "2026-09-08", "prefs": {"quota_twd": 250000},
             "long": [dict(row, side="long")], "short": [dict(row, side="short")],
@@ -98,7 +102,7 @@ def test_first_poll_fires_nothing():
 
 
 def test_upward_cross_fires_long_signal():
-    """第二輪價格穿過昨高(83.0 → 用 high 當水位),應產生做多訊號。"""
+    """第二輪價格穿過昨高 83.0(來自 indicators.prev_high),應產生做多訊號。"""
     with _Harness(_tmp()) as h:
         state = {}
         E.scan_once(_pool(), state, CFG)          # 基準輪 82.2
@@ -110,6 +114,36 @@ def test_upward_cross_fires_long_signal():
         assert s.stock_id == "2426" and s.score >= 55
         assert s.degraded is True                  # 無訂閱 → 必須標記
         assert s.suggested_stop is not None and s.suggested_stop < s.price
+
+
+def test_prev_high_comes_from_pool_not_from_todays_quote():
+    """昨日高低一定要取盤前算好的那份。
+
+    2026-09-10 排錯:原本 `_levels_for` 傳的是 `quote.high` / `quote.low`,
+    而那是**今日盤中**的最高最低。後果是 (a) 卡片標「昨日高點」卻顯示今天的,
+    (b) 今日高點依定義 ≥ 現價且隨現價移動,`detect_cross` 的
+    `price >= level×1.002` 永遠不會成立 —— 這條水位只會在報價欄位不同步時
+    誤觸發。權重 0.85 的第二重要水位變成雜訊產生器。
+    """
+    cand = dict(_pool()["long"][0])
+    cand["indicators"] = {"prev_high": 100.0, "prev_low": 90.0}
+    q = _quote(95.0)                       # 今日高 83.0 / 低 79.5,與昨日高低無關
+    levels = E._levels_for(cand, q, CFG, {})
+    by_kind = {lv.kind: lv.price for lv in levels}
+    assert by_kind.get("prev_high") == 100.0, by_kind
+    assert by_kind.get("prev_low") == 90.0, by_kind
+    assert 83.0 not in by_kind.values(), "今日盤中高點不該出現在水位裡"
+
+
+def test_zone_bounds_picks_confluent_zones_around_live_price():
+    """盤中的壓力/支撐要依**即時價**重挑,而且只認有兩個以上週期背書的。"""
+    zones = [{"price": 88.0, "confluence": 2}, {"price": 86.0, "confluence": 1},
+             {"price": 80.0, "confluence": 3}, {"price": 84.5, "confluence": 1}]
+    res, sup = E._zone_bounds(zones, 85.0)
+    assert res == 88.0, "86.0 只有一個週期背書,不該當壓力"
+    assert sup == 80.0, "84.5 只有一個週期背書,不該當支撐"
+    assert E._zone_bounds([], 85.0) == (None, None)
+    assert E._zone_bounds(None, 85.0) == (None, None)
 
 
 def test_downward_cross_fires_short_signal():

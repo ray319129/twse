@@ -31,6 +31,7 @@ import pandas as pd
 from ..config import DATA_DIR
 from ..utils import log
 from . import cost as C
+from . import levels_mtf as MTF
 from .plan import build_plan, plan_quality
 from .rules import Gate, gate_for, load_or_fetch
 
@@ -99,6 +100,7 @@ class Candidate:
     direction_bias: float = 0.0   # −1(強空)~+1(強多),決定這檔該進哪一邊
     reasons: list = field(default_factory=list)   # 為什麼推薦(全部可查證)
     indicators: dict = field(default_factory=dict)  # RSI/均線/量比/前高低
+    zones: list = field(default_factory=list)   # 多週期支撐壓力區(月線/日線/小時線匯流)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -162,6 +164,24 @@ def tech_snapshot(stock_id: str) -> dict:
         v5, v20 = _f(last.get("vol_ma5")), _f(last.get("vol_ma20"))
         if v5 and v20 and v20 > 0:
             out["vol_ratio"] = round(v5 / v20, 2)
+
+        # ── 多週期支撐壓力(月線 + 日線,零 API)──────────────────────
+        # 使用者 2026-09-10 要求「策略要加入看日線、小時線、月線支撐壓力」。
+        # 原本目標價的修正只用「20 日高/低」—— 那只是一個窗口的極值,沒有任何
+        # 匯流概念,而且突破日時 20 日高會落在現價下方(2026-09-09 台塑化那次
+        # 就是因此把做多目標算到進場之下)。改用多週期匯流區域,穩定得多。
+        # 小時線要打網路,留給盤中掃描的小宇宙開(見 levels_mtf.build 的 with_hourly)。
+        try:
+            zones = MTF.build(stock_id, df, close, with_hourly=False, atr=atr)
+            out["zones"] = MTF.summary(zones, top=8)
+            r = MTF.nearest(zones, close, "resistance", min_weight=MTF.W_DAY)
+            sup = MTF.nearest(zones, close, "support", min_weight=MTF.W_DAY)
+            out["mtf_resistance"] = r.price if r else None
+            out["mtf_resistance_w"] = r.weight if r else None
+            out["mtf_support"] = sup.price if sup else None
+            out["mtf_support_w"] = sup.weight if sup else None
+        except Exception as e:
+            log.info(f"多週期水位計算失敗 {stock_id}(退回 20 日高低):{e}")
         return out
     except Exception:
         return {}
@@ -242,6 +262,11 @@ def build_reasons(t: dict, side: str, c_edge: float | None,
     vr = t.get("vol_ratio")
     if vr:
         r.append(f"5日均量/20日均量 {vr:.2f}")
+    # 多週期支撐壓力 —— 這是判斷「目標價到不到得了」最實際的依據
+    if side == "long" and t.get("mtf_resistance"):
+        r.append(f"上方壓力 {t['mtf_resistance']:g}(多週期匯流,權重 {t.get('mtf_resistance_w', 0):g})")
+    elif side == "short" and t.get("mtf_support"):
+        r.append(f"下方支撐 {t['mtf_support']:g}(多週期匯流,權重 {t.get('mtf_support_w', 0):g})")
     if gate_note and gate_note != "閘門全過":
         r.append(f"⚠ {gate_note}")
     return r
@@ -272,19 +297,30 @@ def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
     盤前用昨收當參考價 —— 開盤後盯盤層會用即時價重算(見 engine.scan_once)。
     這裡先算是為了讓**盤前就看得到完整的可執行計畫**,而不是只有一張候選清單。
     """
+    min_rr = float(_RISK.get("min_rr", 1.0))
     p = build_plan(
         stock_id=sid, side=side, ref_price=price, atr=tech.get("atr"),
         # ⚠️ 用**單筆預算**而不是整個額度:當沖額度是當日累計上限,
         # 每筆都 sizing 到吃滿的話,第二筆就會被券商擋下來(使用者 2026-09-09 說明)。
         quota=float(prefs.get("quota_twd") or 0) * float(prefs.get("quota_per_trade_pct", 50)) / 100.0,
+        risk_quota=float(prefs.get("quota_twd") or 0),   # 風險 % 的基準是**總額度**
         cost_pct=cost_pct,
         borrow_fee_pct=borrow_fee,
-        resistance=tech.get("high20"), support=tech.get("low20"),
+        # 壓力/支撐優先用多週期匯流區域,沒有才退回 20 日高低。
+        resistance=tech.get("mtf_resistance") or tech.get("high20"),
+        support=tech.get("mtf_support") or tech.get("low20"),
         atr_stop_mult=float(_RISK.get("atr_stop_mult", 0.4)),
         rr_target=float(_RISK.get("rr_target", 1.5)),
         max_risk_pct=float(_RISK.get("max_risk_pct_of_quota", 2.0)),
+        min_stop_cost_mult=float(_RISK.get("min_stop_cost_mult", 2.0)),
     )
+    # 風報比低於門檻的計畫等於「賠的比賺的多」,不該當成推薦。
+    # 實測 2026-09-10:目標被壓力壓下來後出現 RR 0.66 的卡片,卻照樣進池。
+    if p is not None and p.rr < min_rr:
+        p = None
     lvl, note = plan_quality(p)
+    if lvl == "none" and min_rr > 0:
+        note = f"無有效計畫(風報比需 ≥ {min_rr:g},或資料不足)"
     return {
         "plan": p.to_dict() if p else None,
         "plan_quality": lvl, "plan_note": note,
@@ -293,7 +329,8 @@ def _plan_fields(sid: str, side: str, price: float, tech: dict, prefs: dict,
                      if bias_why else [])
                     + build_reasons(tech, side, edge, gate_note)),
         "indicators": {k: (round(v, 2) if isinstance(v, float) else v)
-                       for k, v in tech.items() if k != "atr"},
+                       for k, v in tech.items() if k not in ("atr", "zones")},
+        "zones": tech.get("zones") or [],
     }
 
 
@@ -352,7 +389,12 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
             continue
 
         # 買不起一張就不該進池 —— 顯示「可買 0 張」的標的對使用者沒有意義。
-        lots = C.lots_for_quota(price, prefs["quota_twd"])
+        # ⚠️ 要用**單筆預算**判斷,不能用總額度:計畫層是用單筆預算算張數的,
+        # 兩邊標準不一致的話會有一批標的「通過池子的買得起檢查、卻算不出計畫」
+        # (實測 2026-09-10 有 36 檔卡在這個落差上,卡片只寫「資料不足」)。
+        per_trade_budget = (float(prefs.get("quota_twd") or 0)
+                            * float(prefs.get("quota_per_trade_pct", 50)) / 100.0)
+        lots = C.lots_for_quota(price, per_trade_budget)
         if not forced and lots < 1:
             stats["unaffordable"] += 1
             continue
@@ -458,6 +500,14 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
 
     for c in longs + shorts:
         c.score = rank(c)
+    # 沒有可執行計畫的不算推薦 —— 使用者反映「訊號過多」,而其中一大部分是
+    # 這種「列在清單上但算不出進場/停損/目標」的標的(實測一度佔 36%)。
+    # 它們對當沖沒有任何用處:你沒辦法照著下單,只是佔版面。
+    dropped_noplan = sum(1 for c in longs + shorts if not c.plan)
+    longs = [c for c in longs if c.plan]
+    shorts = [c for c in shorts if c.plan]
+    stats["no_plan_dropped"] = dropped_noplan
+
     cap = int(prefs.get("max_universe", 60))
     longs.sort(key=lambda c: -c.score)
     shorts.sort(key=lambda c: -c.score)
@@ -469,7 +519,7 @@ def build(prefs: dict | None = None, gates: dict[str, Gate] | None = None,
              f"價格帶擋 {stats['price_filtered']}、流動性擋 {stats['liquidity_filtered']}、"
              f"買不起擋 {stats['unaffordable']}、波動擋 {stats['volatility_filtered']}、"
              f"成本帶擋 {stats['cost_filtered']}、空間不足擋 {stats['edge_filtered']}、"
-             f"方向不明擋 {stats['no_direction']}、"
+             f"方向不明擋 {stats['no_direction']}、無計畫擋 {stats.get('no_plan_dropped', 0)}、"
              f"空方閘門擋 {stats['short_gate_blocked']})")
     # 建池時間戳:使用者要看得出「這份推薦是什麼時候算的」,只有日期不夠 ——
     # 同一天可能重建好幾次(手動觸發、盤前排程、修完 bug 補跑)。

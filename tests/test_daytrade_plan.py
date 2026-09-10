@@ -145,8 +145,11 @@ def test_stop_has_minimum_distance():
 
 def test_quality_flags_negative_net_profit():
     """扣完成本是負的 → 一定要標 bad,這是最常見的自欺。"""
-    p = build_plan(stock_id="6770", side="long", ref_price=74.0, atr=0.01,
-                   quota=250000, cost_pct=5.0)     # 誇張成本
+    # 目標被緊貼的壓力壓到只剩一檔,而成本很高 → 扣完成本是負的。
+    # (不能只靠「誇張成本」了:停損下限現在是成本的 2 倍,目標跟著等比拉開,
+    #  單純把 cost_pct 調高反而算得出正淨利。要讓淨利為負,必須壓縮**目標距離**。)
+    p = build_plan(stock_id="6770", side="long", ref_price=74.0, atr=2.0,
+                   quota=250000, cost_pct=3.0, resistance=75.5)
     lvl, msg = plan_quality(p)
     assert lvl == "bad" and "虧的" in msg
 
@@ -211,6 +214,62 @@ def test_price_ordering_invariant_always_holds():
             assert p.target < p.entry < p.stop, (
                 f"short {px}/{atr}/sup={sup}: {p.target} {p.entry} {p.stop}")
         assert p.net_profit == p.gross_profit - p.cost_amount
+
+
+def test_risk_quota_is_separate_from_per_trade_capital():
+    """**額度(能買多少)與風險基準(能賠多少)是兩件事,不可以共用一個參數。**
+
+    2026-09-10 排錯抓到:`_plan_fields` 把「每筆可用資金」(總額度 × 50%)
+    當成 `quota` 傳進來,而 `build_plan` 內部拿 `quota × max_risk_pct`
+    當單筆風險預算 —— 於是風險預算變成真實額度的 1%,不是設定的 2%。
+    結果是**靜默地**把 43 檔的計畫算成 None(風險預算連一張都買不起)。
+    分開之後,同樣的資金上限但風險基準是完整額度,張數才對得上。
+    """
+    common = dict(stock_id="6770", side="long", ref_price=50.0, atr=1.0,
+                  cost_pct=0.6, max_risk_pct=2.0)
+    tight = build_plan(quota=125000, **common)                      # 舊寫法
+    fixed = build_plan(quota=125000, risk_quota=250000, **common)   # 修好之後
+    assert fixed is not None
+    assert fixed.lots >= (tight.lots if tight else 0)
+    # 資金上限仍然是 12.5 萬 —— 分開風險基準不等於放大部位
+    assert fixed.notional <= 125000 * 1.001, fixed.notional
+
+
+def test_risk_quota_defaults_to_quota_when_not_given():
+    """沒傳 risk_quota 就沿用 quota —— 既有呼叫端的行為不能被這個改動改掉。"""
+    a = build_plan(stock_id="6770", side="long", ref_price=50.0, atr=1.0,
+                   quota=250000, cost_pct=0.6)
+    b = build_plan(stock_id="6770", side="long", ref_price=50.0, atr=1.0,
+                   quota=250000, risk_quota=250000, cost_pct=0.6)
+    assert a is not None and b is not None
+    assert a.lots == b.lots and a.stop == b.stop
+
+
+def test_stop_is_never_narrower_than_a_round_trip_cost_floor():
+    """**低波動金融股的停損整條都在雜訊帶裡。**
+
+    兆豐金 ATR 小 × atr_stop_mult 0.4 → 停損只有 0.99%,而來回成本 0.719%,
+    倍數 1.38。被雜訊掃掉時虧的錢跟手續費同一個量級,等於在付費擲硬幣。
+    它能通過 edge_ratio 閘門是因為成本也低 —— 比值不能取代絕對距離。
+    """
+    p = build_plan(stock_id="2886", side="long", ref_price=45.0, atr=0.15,
+                   quota=250000, cost_pct=0.72, min_stop_cost_mult=2.0)
+    assert p is not None
+    assert abs(p.entry - p.stop) / p.entry * 100 >= 0.72 * 2 - 1e-6, p.stop_pct
+    # 空方對稱
+    q = build_plan(stock_id="2886", side="short", ref_price=45.0, atr=0.15,
+                   quota=250000, cost_pct=0.72, min_stop_cost_mult=2.0)
+    assert q is not None and abs(q.stop - q.entry) / q.entry * 100 >= 0.72 * 2 - 1e-6
+
+
+def test_cost_floor_does_not_shrink_an_already_wide_stop():
+    """ATR 夠寬時下限不該生效 —— 下限是保護,不是覆蓋。"""
+    wide = build_plan(stock_id="6770", side="long", ref_price=100.0, atr=5.0,
+                      quota=250000, cost_pct=0.6, min_stop_cost_mult=2.0)
+    none_ = build_plan(stock_id="6770", side="long", ref_price=100.0, atr=5.0,
+                       quota=250000, cost_pct=0.6, min_stop_cost_mult=0.0)
+    assert wide is not None and none_ is not None
+    assert wide.stop == none_.stop
 
 
 if __name__ == "__main__":

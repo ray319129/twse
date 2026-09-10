@@ -85,6 +85,12 @@ jobs:
               exit 0
             fi
             python -m scripts.daytrade.engine --pool
+            # ⚠️ **建完池馬上發布,不能等 job 結束。**
+            # 上面那道守衛是在 checkout 出來的 repo 裡找池子檔案,而原本 commit 只在
+            # job 最後一步 —— 盯盤 4.5 小時期間檔案根本還沒進 repo,09:25 那一班
+            # 永遠找不到 → 兩個盯盤迴圈同時跑、Discord 雙份通知(2026-09-10 實際發生)。
+            # 順帶解決另一件事:網頁與盤前卡片本來也要等到 13:35 才更新。
+            bash .github/scripts/daytrade-publish.sh "pool $TODAY"
             # 盯盤自己會等到 09:00 才開始掃(in_trading_session),所以 08:45 就進場沒問題。
             python -m scripts.daytrade.engine --watch --until 13:35
           else
@@ -97,17 +103,5 @@ jobs:
           fi
 
       - name: Commit daytrade data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # 逐一 add:`git add A B C` 只要有一個路徑不存在就 fatal 且整批不 stage
-          # (2026-07-22 盤中整天沒發布的真兇,這裡不重蹈覆轍)。
-          for p in data/daytrade docs/daytrade.json docs/daytrade_latency.json; do
-            [ -e "$p" ] && git add "$p" 2>/dev/null || true
-          done
-          if git diff --cached --quiet; then
-            echo "No daytrade changes."
-          else
-            git commit -m "daytrade: $(date -u +'%Y-%m-%d %H:%M')Z"
-            bash .github/scripts/push-with-retry.sh "當沖資料未發布,下一輪會重試。"
-          fi
+        if: always()
+        run: bash .github/scripts/daytrade-publish.sh

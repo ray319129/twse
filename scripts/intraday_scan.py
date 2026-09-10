@@ -1065,7 +1065,15 @@ def _git_publish(msg: str) -> None:
         # 還沒生成),整個 git add 會 fatal rc=128 且**一個檔都不 stage** → diff 空 → 靜默略過。
         # 這個坑在 7/21 把 data/snapshots 加進清單那刻就埋下了(7/20 能發是因為當時清單裡
         # 每個路徑都存在)。所以每輪先過濾掉不存在的路徑。
-        _all = ["data/alerts", "data/snapshots", "docs/alerts.json", "docs/levels.json",
+        # ⚠️ **`data/levels.parquet` 一定要在這份清單裡**(2026-09-10 修)。
+        # 這是 7/21 把 `data/snapshots` 加進來時的同一個坑,只是當時只補了
+        # `docs/levels.json`、漏了 parquet。後果:parquet 只有 job 最後那次才 commit,
+        # job 被取消 / push 失敗就整天沒進 repo —— 實測 **從 08-24 起停更 16 天**,
+        # 而 `docs/levels.json` 每天都有更新,所以從外面完全看不出來。
+        # 當沖標的池的所有價格都來自這個 parquet,實測 2426 池子寫 82.2、實際 99.5(差 21%),
+        # 6505 寫 75.8、實際 87.5(差 15%)—— 卡片上的進場/停損/目標全是兩週前的價格。
+        _all = ["data/alerts", "data/snapshots", "data/levels.parquet",
+                "docs/alerts.json", "docs/levels.json",
                 "docs/pulse.json", "docs/deep.json", "docs/series.json", "docs/freshness.json"]
         _root = DATA_DIR.parent
         files = [f for f in _all if (_root / f).exists()]

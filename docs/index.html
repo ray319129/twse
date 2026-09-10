@@ -561,6 +561,13 @@
           padding:7px 0;border-top:1px solid var(--line-soft);}
   .dt-pnl b{font-variant-numeric:tabular-nums;}
   .dt-why{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.dt-zones{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 2px}
+.dt-zones-h{font-size:10.5px;color:var(--muted-2);letter-spacing:.04em}
+.dt-zone{display:inline-flex;align-items:baseline;gap:4px;padding:2px 7px;border-radius:6px;
+  background:var(--chip-bg,rgba(127,127,127,.10));font-size:11.5px;white-space:nowrap}
+.dt-zone i{font-style:normal;font-weight:700;font-size:10.5px}
+.dt-zone b{font-variant-numeric:tabular-nums}
+.dt-zone small{color:var(--muted-2);font-size:10.5px}
   .dt-chip{font-size:11px;background:var(--accent-bg);color:var(--accent-ink);
            padding:2px 8px;border-radius:999px;font-weight:600;}
   .dt-chip-dim{background:var(--surface-3);color:var(--muted);}
@@ -3823,6 +3830,20 @@ function dtPlanCard(c,side){
     ind.vol_ratio!=null?`量能 ${ind.vol_ratio}`:'',
   ].filter(Boolean).map(x=>`<span class="dt-chip dt-chip-dim">${esc(x)}</span>`).join('');
 
+  /* 多週期支撐壓力(月線/日線/小時線匯流)—— 使用者 2026-09-10 要求加入策略,
+     算了不顯示等於沒做。只列有兩個以上週期背書的:單一週期的水位不夠硬。 */
+  const zones=(c.zones||[]).filter(z=>z&&z.price>0&&(z.confluence||1)>=2)
+    .map(z=>({...z,d:Math.abs(z.price-c.price)}))
+    .sort((a,b)=>a.d-b.d).slice(0,4);
+  const zoneHtml=zones.length?`<div class="dt-zones">
+    <span class="dt-zones-h">多週期支撐壓力</span>
+    ${zones.map(z=>{const up=z.price>c.price;
+      return `<span class="dt-zone" title="${esc((z.timeframes||[]).join('、'))}｜權重 ${z.weight}">
+        <i style="color:${up?'var(--down-ink)':'var(--up-ink)'}">${up?'壓':'撐'}</i>
+        <b>${z.price}</b>
+        <small>${((z.price/c.price-1)*100).toFixed(1)}%・${z.confluence}週期</small></span>`;}).join('')}
+  </div>`:'';
+
   return `<div class="dt-card" style="border-left:3px solid ${col}">
     <div class="dt-head">
       <div><b style="font-size:15px">${esc(c.name||'')}</b>
@@ -3836,6 +3857,7 @@ function dtPlanCard(c,side){
       </div>
     </div>
     ${planHtml}
+    ${zoneHtml}
     <div class="dt-why">${why}</div>
     <div class="dt-why">${indHtml}</div>
     <div class="dt-acts">

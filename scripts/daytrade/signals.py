@@ -73,16 +73,31 @@ class Signal:
 _KIND_WEIGHT = {
     "orh": 1.00, "orl": 1.00,
     "prev_high": 0.85, "prev_low": 0.85,
+    # 多週期匯流區:權重由「有幾個週期背書」決定(見 build_levels),
+    # 三個週期都認得的價位比開盤區間還硬,只有一個週期的則跟昨高低差不多。
+    "mtf3": 1.10, "mtf2": 0.90, "mtf1": 0.60,
     "vwap": 0.70,
-    "round": 0.50,
+    "round": 0.35,
 }
+
+
+# 兩條水位至少要離這麼遠(%),也是水位與現價的最小距離。
+# 來回成本約 0.52~0.72%,相距不到一次成本的兩條線在交易上是同一筆;
+# 而貼著現價的水位會在第一個 tick 就「突破」。取 0.35%(約當半次成本)。
+MIN_LEVEL_GAP_PCT = 0.35
 
 
 def build_levels(*, prev_high: float | None, prev_low: float | None,
                  open_range_high: float | None, open_range_low: float | None,
                  vwap: float | None, price: float, stock_id: str = "",
-                 use_round: bool = True) -> list[Level]:
-    """組出一檔的水位清單。缺的就不放 —— 不要用估的湊數。"""
+                 use_round: bool = True, zones: list | None = None,
+                 max_zones: int = 6, min_confluence: int = 2) -> list[Level]:
+    """組出一檔的水位清單。缺的就不放 —— 不要用估的湊數。
+
+    `zones` 是 `levels_mtf` 產出的多週期支撐壓力區(月線/日線/小時線匯流)。
+    使用者 2026-09-10 要求加入 —— 原本的水位只有「當天的」加上整數關卡,
+    後者根本不是真的支撐壓力(心理價位,常穿了又回),是訊號多而不準的主因之一。
+    """
     out: list[Level] = []
     if open_range_high:
         out.append(Level("orh", float(open_range_high), "開盤區間上緣"))
@@ -94,6 +109,47 @@ def build_levels(*, prev_high: float | None, prev_low: float | None,
         out.append(Level("prev_low", float(prev_low), "昨日低點"))
     if vwap:
         out.append(Level("vwap", float(vwap), "均價(VWAP)"))
+    # ── 多週期匯流區 ────────────────────────────────────────────
+    # ⚠️ **一定要在這裡依「離現價的距離」重新排序,不能相信存檔的順序。**
+    # 標的池存的是 `levels_mtf.summary()` 的輸出,那是依**權重**排的;
+    # 直接 `[:max_zones]` 會留下「很重但今天走不到」的水位、砍掉近的。
+    # 實測 6226 光鼎(現價 29.65)存檔第 7 個是 24.50(離 17.4%),
+    # 而 27.12(離 8.5%)排第 8 —— 取前 6 會保留前者、丟掉後者,完全相反。
+    # 而且盤中價格早就離盤前基準走掉了,那個順序本來就過期。
+    parsed = []
+    for z in zones or []:
+        try:
+            zp = float(z.get("price"))
+            conf = int(z.get("confluence") or 1)
+        except (TypeError, ValueError, AttributeError):
+            continue
+        if zp <= 0:
+            continue
+        # 只有一個週期背書的水位不收(config levels.min_mtf_confluence)。
+        # 匯流才是加入多週期的整個理由:一個價位要三個週期都認得才叫硬。
+        # 實測若全收,單週期水位會佔新增水位的 38%(67/175),而它們的權重 0.6
+        # 比 VWAP 還低 —— 等於用最弱的水位把訊號量灌回去,正是使用者抱怨的
+        # 「訊號過多而且不準」。
+        if conf < min_confluence:
+            continue
+        parsed.append((zp, conf, "+".join(z.get("timeframes") or []) or "多週期"))
+    if price and price > 0:
+        parsed.sort(key=lambda x: abs(x[0] - price))
+    kept = 0
+    for zp, conf, tfs in parsed:
+        if kept >= max_zones:
+            break
+        # 貼著現價的水位不要:buffer 只有 0.2%,距離現價比它還近的「突破」
+        # 第一個 tick 就會觸發 —— 那不是突破,是雜訊。
+        if price and price > 0 and abs(zp - price) / price < MIN_LEVEL_GAP_PCT / 100.0:
+            continue
+        # 跟已經放進去的水位太近的也不要:兩條相距不到一次來回成本的線,
+        # 交易上根本是同一筆,留著只會讓同一次波動觸發兩則通知。
+        if any(abs(zp - lv.price) / max(zp, 1e-9) < MIN_LEVEL_GAP_PCT / 100.0 for lv in out):
+            continue
+        out.append(Level(f"mtf{min(max(conf, 1), 3)}", zp, f"{tfs}支撐壓力"))
+        kept += 1
+
     if use_round and price and price > 0:
         # 整數關卡:取最接近現價的一個整數刻度(依 tick 級距決定粒度)
         t = C.tick_size(price, stock_id)
