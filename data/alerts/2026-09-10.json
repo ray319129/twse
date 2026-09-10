@@ -76,5 +76,18 @@
   "vwap": 1011.8805104408352,
   "fired_at": "09:10",
   "degraded": true
+ },
+ "3026|breakout": {
+  "stock_id": "3026",
+  "name": "禾伸堂",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 795.00(現價 817.00,高出 2.8%)・量比 1.60(市場中位 1.00)・站上均價 780.25",
+  "price": 817.0,
+  "change_rate": 7.78,
+  "volume_ratio": 1.6,
+  "vwap": 780.2465213746857,
+  "fired_at": "13:07",
+  "degraded": true
  }
 }
