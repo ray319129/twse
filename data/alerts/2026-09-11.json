@@ -50,5 +50,18 @@
   "vwap": 491.81015891032916,
   "fired_at": "12:23",
   "degraded": true
+ },
+ "3016|breakout": {
+  "stock_id": "3016",
+  "name": "嘉晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 110.00(現價 114.75,高出 4.3%)・量比 3.75(市場中位 1.00)・站上均價 109.31",
+  "price": 114.75,
+  "change_rate": 4.32,
+  "volume_ratio": 3.749,
+  "vwap": 109.3099593495935,
+  "fired_at": "13:27",
+  "degraded": true
  }
 }
