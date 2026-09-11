@@ -11,5 +11,18 @@
   "vwap": 45.828005893909626,
   "fired_at": "09:03",
   "degraded": true
+ },
+ "7799|breakout": {
+  "stock_id": "7799",
+  "name": "禾榮科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 425.00(現價 433.00,高出 1.9%)・量比 34.31(市場中位 1.00)・站上均價 419.00",
+  "price": 433.0,
+  "change_rate": 1.88,
+  "volume_ratio": 34.306,
+  "vwap": 418.9985380116959,
+  "fired_at": "09:14",
+  "degraded": true
  }
 }
