@@ -37,5 +37,18 @@
   "vwap": 105.49634467881113,
   "fired_at": "09:55",
   "degraded": true
+ },
+ "7717|breakout": {
+  "stock_id": "7717",
+  "name": "萊德光電-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 519.00(現價 524.00,高出 1.0%)・量比 3.18(市場中位 1.00)・站上均價 491.81",
+  "price": 524.0,
+  "change_rate": 7.71,
+  "volume_ratio": 3.176,
+  "vwap": 491.81015891032916,
+  "fired_at": "12:23",
+  "degraded": true
  }
 }
