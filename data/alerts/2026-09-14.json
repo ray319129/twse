@@ -1,0 +1,15 @@
+{
+ "6227|breakout": {
+  "stock_id": "6227",
+  "name": "茂綸",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 127.50(現價 133.00,高出 4.3%)・量比 77.96(市場中位 1.00)・站上均價 132.12",
+  "price": 133.0,
+  "change_rate": 4.31,
+  "volume_ratio": 77.957,
+  "vwap": 132.11858974358975,
+  "fired_at": "09:02",
+  "degraded": true
+ }
+}
