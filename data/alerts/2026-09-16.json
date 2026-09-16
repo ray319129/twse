@@ -1,0 +1,15 @@
+{
+ "6683|breakout": {
+  "stock_id": "6683",
+  "name": "雍智科技",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1505.00(現價 1527.50,高出 1.5%)・量比 4.11(市場中位 1.00)・站上均價 1469.05",
+  "price": 1527.5,
+  "change_rate": 5.34,
+  "volume_ratio": 4.113,
+  "vwap": 1469.047619047619,
+  "fired_at": "10:18",
+  "degraded": true
+ }
+}
