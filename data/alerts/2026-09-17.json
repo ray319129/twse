@@ -76,5 +76,31 @@
   "vwap": 154.19234668018245,
   "fired_at": "09:07",
   "degraded": true
+ },
+ "5269|breakout": {
+  "stock_id": "5269",
+  "name": "祥碩",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1495.00(現價 1502.50,高出 0.5%)・量比 12.92(市場中位 1.00)・站上均價 1491.31",
+  "price": 1502.5,
+  "change_rate": 1.86,
+  "volume_ratio": 12.916,
+  "vwap": 1491.3125,
+  "fired_at": "09:09",
+  "degraded": true
+ },
+ "2399|breakout": {
+  "stock_id": "2399",
+  "name": "映泰",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 49.50(現價 49.92,高出 0.8%)・量比 20.56(市場中位 1.00)・站上均價 49.00",
+  "price": 49.92,
+  "change_rate": 5.54,
+  "volume_ratio": 20.562,
+  "vwap": 48.99669408897014,
+  "fired_at": "09:10",
+  "degraded": true
  }
 }
