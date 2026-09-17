@@ -102,5 +102,18 @@
   "vwap": 48.99669408897014,
   "fired_at": "09:10",
   "degraded": true
+ },
+ "1709|breakout": {
+  "stock_id": "1709",
+  "name": "和益",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 39.05(現價 40.88,高出 4.7%)・量比 9.23(市場中位 1.00)・站上均價 40.62",
+  "price": 40.88,
+  "change_rate": 4.69,
+  "volume_ratio": 9.226,
+  "vwap": 40.62407684597394,
+  "fired_at": "09:39",
+  "degraded": true
  }
 }
