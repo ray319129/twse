@@ -50,5 +50,31 @@
   "vwap": 119.29661912308505,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "2801|breakout": {
+  "stock_id": "2801",
+  "name": "彰銀",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 28.90(現價 29.27,高出 1.3%)・量比 5.34(市場中位 1.00)・站上均價 29.12",
+  "price": 29.27,
+  "change_rate": 1.28,
+  "volume_ratio": 5.342,
+  "vwap": 29.12487594390507,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "6706|breakout": {
+  "stock_id": "6706",
+  "name": "惠特",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 155.50(現價 158.25,高出 1.8%)・量比 22.48(市場中位 1.00)・站上均價 154.19",
+  "price": 158.25,
+  "change_rate": 7.65,
+  "volume_ratio": 22.484,
+  "vwap": 154.19234668018245,
+  "fired_at": "09:07",
+  "degraded": true
  }
 }
