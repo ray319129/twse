@@ -1,0 +1,54 @@
+{
+ "6133|breakout": {
+  "stock_id": "6133",
+  "name": "金橋",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 26.05(現價 27.23,高出 4.5%)・量比 6.54(市場中位 1.00)・站上均價 27.17",
+  "price": 27.23,
+  "change_rate": 4.53,
+  "volume_ratio": 6.538,
+  "vwap": 27.168648018648017,
+  "fired_at": "13:25",
+  "degraded": true
+ },
+ "3066|breakout": {
+  "stock_id": "3066",
+  "name": "李洲",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 28.60(現價 29.77,高出 4.1%)・量比 6.02(市場中位 1.00)・站上均價 29.71",
+  "price": 29.77,
+  "change_rate": 5.19,
+  "volume_ratio": 6.024,
+  "vwap": 29.70809523809524,
+  "fired_at": "13:25",
+  "degraded": true
+ },
+ "1569|breakout": {
+  "stock_id": "1569",
+  "name": "濱川",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 53.50(現價 55.15,高出 3.1%)・量比 6.10(市場中位 1.00)・站上均價 55.11",
+  "price": 55.15,
+  "change_rate": 6.06,
+  "volume_ratio": 6.096,
+  "vwap": 55.109375,
+  "fired_at": "13:25",
+  "degraded": true
+ },
+ "4960|breakout": {
+  "stock_id": "4960",
+  "name": "誠美材",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 22.55(現價 22.98,高出 1.9%)・量比 9.94(市場中位 1.00)・站上均價 22.90",
+  "price": 22.98,
+  "change_rate": 4.45,
+  "volume_ratio": 9.941,
+  "vwap": 22.903809523809525,
+  "fired_at": "13:26",
+  "degraded": true
+ }
+}
