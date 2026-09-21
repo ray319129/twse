@@ -128,5 +128,18 @@
   "vwap": 23.678077056577578,
   "fired_at": "09:14",
   "degraded": true
+ },
+ "1314|breakout": {
+  "stock_id": "1314",
+  "name": "中石化",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 9.37(現價 9.43,高出 0.6%)・量比 9.38(市場中位 1.00)・站上均價 9.22",
+  "price": 9.43,
+  "change_rate": 5.25,
+  "volume_ratio": 9.384,
+  "vwap": 9.222868912635615,
+  "fired_at": "09:28",
+  "degraded": true
  }
 }
