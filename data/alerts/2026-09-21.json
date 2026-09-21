@@ -1,0 +1,54 @@
+{
+ "3264|breakout": {
+  "stock_id": "3264",
+  "name": "欣銓",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 268.50(現價 273.75,高出 2.0%)・量比 22.70(市場中位 1.00)・站上均價 272.49",
+  "price": 273.75,
+  "change_rate": 1.96,
+  "volume_ratio": 22.702,
+  "vwap": 272.485,
+  "fired_at": "09:03",
+  "degraded": true
+ },
+ "6257|breakout": {
+  "stock_id": "6257",
+  "name": "矽格",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 244.50(現價 257.25,高出 5.2%)・量比 34.11(市場中位 1.00)・站上均價 254.92",
+  "price": 257.25,
+  "change_rate": 5.21,
+  "volume_ratio": 34.11,
+  "vwap": 254.91506410256412,
+  "fired_at": "09:03",
+  "degraded": true
+ },
+ "6199|breakout": {
+  "stock_id": "6199",
+  "name": "天品",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 113.00(現價 115.25,高出 2.0%)・量比 6.79(市場中位 1.00)・站上均價 115.08",
+  "price": 115.25,
+  "change_rate": 1.99,
+  "volume_ratio": 6.788,
+  "vwap": 115.07722513089006,
+  "fired_at": "09:03",
+  "degraded": true
+ },
+ "2454|breakout": {
+  "stock_id": "2454",
+  "name": "聯發科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4855.00(現價 4895.00,高出 0.8%)・量比 8.38(市場中位 1.00)・站上均價 4887.94",
+  "price": 4895.0,
+  "change_rate": 3.93,
+  "volume_ratio": 8.385,
+  "vwap": 4887.936288088643,
+  "fired_at": "09:03",
+  "degraded": true
+ }
+}
