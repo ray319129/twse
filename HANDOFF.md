@@ -3780,3 +3780,60 @@ ATR 夠寬時下限不覆蓋）。
 - **MIS 盤中真實延遲仍未量到**（今天兩班都被砍）。它直接決定「價位穿越」這層值不值得做。
 - 台帳仍然沒有對照組資料（推播一直沒成功累積）。
 - workflow 目前 `disabled_manually`，**等使用者說了才重新啟用**。
+
+---
+
+## §70 Vercel 儲存爆量 → 重加 ignoreCommand(2026-09-21）
+
+使用者收到 Vercel 信:免費方案的 **Deployment Storage (10 GB) 與 Function Storage
+(10 GB) 都用到 100%**,警告即將中斷服務。使用者:「檢查並修復 vercel 的問題」。
+
+### 根因
+
+Vercel 綁 git 分支,**每次 push 都觸發一次 production 部署**。而本專案盤中每 3 分鐘
+commit 一次(近 30 天 1130 個 commit、其中 **97% 是 data-only**:intraday/daytrade
+的 JSON)。每個部署都重編 7 支肥 Python function(pandas+pyarrow+matplotlib+
+yfinance+anthropic…),Vercel **保留每一個歷史部署** → 兩個 10 GB 額度都被塞滿。
+
+### 早該生效卻沒有的防線
+
+2026-07-20 曾加 `ignoreCommand`,**當天就被 revert**(`7f0b859f5`,「部署失敗」)。
+當時用 `git diff HEAD^ HEAD` 搭配 pathspec exclude magic(`':!data/**'`),在 Vercel
+的**淺層 clone** 上 `HEAD^` 不存在會讓 git 報錯。改用 dashboard「Ignored Build Step」
+的計畫顯然沒真的擋住(儲存還是滿了)。
+
+### 這次的修法(shallow-clone-safe)
+
+`vercel.json` 重加 `ignoreCommand`,兩個關鍵差異讓它不會重蹈覆轍:
+
+```
+git rev-parse --verify -q HEAD^ >/dev/null 2>&1 || exit 1; \
+git diff --name-only HEAD^ HEAD | grep -qvE '^(data/|docs/[^/]*\.json$)' && exit 1 || exit 0
+```
+
+1. **先驗 `HEAD^` 存在**,淺層 clone 抓不到父 commit 就 `exit 1`(照常建置,安全預設),
+   不會再觸發 git fatal error。
+2. **不用 pathspec exclude magic**,改 `git diff --name-only` + `grep`,避開 git 版本差異。
+3. 語意(Vercel:exit 0=略過、exit 1=建置):**改動全落在 `data/` 或 `docs/*.json`
+   → 略過;有任何其他檔案(api/、requirements.txt、vercel.json、docs/index.html…)
+   → 建置。**
+
+**已用真實 commit 驗證**:intraday data commit → SKIP;程式改動 commit → BUILD;
+vercel.json 改動 → BUILD。
+
+**為什麼略過這些部署不會壞掉**:盤中 JSON 前端本來就走 GitHub raw
+(`RAW_BASE`,見 index.html loadLive),不是讀 Vercel 部署上的檔案 ——
+這條路徑在 revert 之後一直都在,所以略過 data-only 部署對網站零影響。
+
+### ⚠️ 我看不到 Vercel 建置日誌
+
+跟上次一樣,這是依變更範圍與 git 行為推論的。**第一個 data-only commit 進來後,
+請到 Vercel dashboard 確認那次部署顯示「Skipped/Canceled」而不是「Error」。**
+若又出問題,一行還原:把 vercel.json 的 `ignoreCommand` 那行刪掉即可。
+
+### 使用者必須手動做的(我做不到)
+
+`ignoreCommand` 只**止血**(不再產生新部署),**不會回收已經佔用的 10 GB**。
+要解除「即將中斷」的警告,得在 Vercel dashboard **刪掉歷史部署**:
+Project → Deployments → 篩選舊的 → 刪除;或設定部署保留/到期。
+這是外部帳號的破壞性操作,需要使用者本人在 dashboard 執行。
