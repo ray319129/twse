@@ -3837,3 +3837,23 @@ vercel.json 改動 → BUILD。
 要解除「即將中斷」的警告,得在 Vercel dashboard **刪掉歷史部署**:
 Project → Deployments → 篩選舊的 → 刪除;或設定部署保留/到期。
 這是外部帳號的破壞性操作,需要使用者本人在 dashboard 執行。
+
+### §70 補記(2026-09-21 稍晚,實際登入 Vercel 檢查後)
+
+上面那版 shallow-safe 命令**也是錯的**,而且錯在同一個地方。實際登入 Vercel dashboard 排查後發現:
+
+**真相一:vercel.json 的 ignoreCommand 是覆蓋 dashboard 的,不是反過來。** dashboard「Ignored Build Step」→「Production Overrides」面板明講:「The setting in the dashboard will not take effect unless the override is removed from this file.」所以 vercel.json 一直是生效的那個。
+
+**真相二:`HEAD^` 在 Vercel 的淺層 clone(depth 1)根本不存在。** 於是我加的「保險」`git rev-parse --verify HEAD^ ... || exit 1` 每次都走 `|| exit 1` = **每個 commit 都建置**。這正是 2026-07-20 那次「部署失敗」的同一個根因,只是症狀變成「從不略過」。實測:vercel.json 推上去後,09:33/36/40/43/46 五個 data-only commit 全部照建。
+
+**真相三:實際用量比信件嚴重得多。** Functions Storage **580 GB / 10 GB**、Deployment Storage 28 GB / 10 GB(其餘所有項目都趨近 0,Function Invocations 一個月才 233 次)。這是**累積的歷史部署**佔用,不是月結會歸零的量表。
+
+**最終修法:改用 commit message 判斷,完全不碰 git 歷史(淺層 clone 也能用)。**
+```
+echo "$VERCEL_GIT_COMMIT_MESSAGE" | grep -qE '^(intraday|premarket|chips|data|heatmap|snapshot|marks):' && exit 0 || exit 1
+```
+`VERCEL_GIT_COMMIT_MESSAGE` 在 ignore step 一定有值。近 400 個 commit 裡 intraday 佔 380(95%)、premarket/chips/data 共 19,唯一的 code commit 是 fix ——skip-list 命中 99.75%,而任何 code 訊息(fix/feat/daytrade…)或未知訊息都會**建置**(安全預設)。已用真實訊息模擬驗證:data 類 exit 0(略過)、code 類 exit 1(建置)。
+
+dashboard 的 Behavior 已改回「Automatic」(我一度設成 Custom + HEAD^ 命令,但既然 vercel.json 覆蓋 dashboard,那是死碼,清掉以免日後誤導)。vercel.json 是唯一真實來源。
+
+**⚠️ 回收 580 GB 仍需動作。** ignoreCommand 只止血。Hobby 方案的 Deployment Retention 是**自動、不可自訂週期**的(dashboard 顯示「some deployments will be deleted after a set time period」),所以停掉每日新部署後,舊部署會隨保留週期自然被清掉,儲存量應該會在數天內回落。要更快回收才需要手動刪除歷史部署(破壞性、不可逆,且 Hobby UI 只能逐一刪或用 `vercel remove twse-main --safe` CLI 批次刪)——這步要等使用者明確同意再做。
