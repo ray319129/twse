@@ -115,5 +115,18 @@
   "vwap": 32.347577773429855,
   "fired_at": "09:10",
   "degraded": true
+ },
+ "4960|breakout": {
+  "stock_id": "4960",
+  "name": "誠美材",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 23.85(現價 24.35,高出 2.1%)・量比 25.83(市場中位 1.00)・站上均價 23.68",
+  "price": 24.35,
+  "change_rate": 6.33,
+  "volume_ratio": 25.827,
+  "vwap": 23.678077056577578,
+  "fired_at": "09:14",
+  "degraded": true
  }
 }
