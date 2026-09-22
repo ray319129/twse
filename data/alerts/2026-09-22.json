@@ -50,5 +50,44 @@
   "vwap": 5346.673913043478,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "2363|breakout": {
+  "stock_id": "2363",
+  "name": "矽統",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 59.00(現價 60.00,高出 1.7%)・量比 80.68(市場中位 1.00)・站上均價 59.64",
+  "price": 60.0,
+  "change_rate": 1.69,
+  "volume_ratio": 80.678,
+  "vwap": 59.64105724180077,
+  "fired_at": "09:05",
+  "degraded": true
+ },
+ "6526|breakout": {
+  "stock_id": "6526",
+  "name": "達發",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 734.00(現價 743.00,高出 1.2%)・量比 22.68(市場中位 1.00)・站上均價 742.80",
+  "price": 743.0,
+  "change_rate": 2.62,
+  "volume_ratio": 22.684,
+  "vwap": 742.7962264150943,
+  "fired_at": "09:07",
+  "degraded": true
+ },
+ "8299|breakout": {
+  "stock_id": "8299",
+  "name": "群聯",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 2195.00(現價 2222.50,高出 1.3%)・量比 7.28(市場中位 1.00)・站上均價 2210.66",
+  "price": 2222.5,
+  "change_rate": 3.37,
+  "volume_ratio": 7.281,
+  "vwap": 2210.6593927893737,
+  "fired_at": "09:07",
+  "degraded": true
  }
 }
