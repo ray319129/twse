@@ -89,5 +89,18 @@
   "vwap": 2210.6593927893737,
   "fired_at": "09:07",
   "degraded": true
+ },
+ "8215|breakout": {
+  "stock_id": "8215",
+  "name": "明基材",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 30.05(現價 30.67,高出 2.1%)・量比 37.19(市場中位 1.00)・站上均價 30.06",
+  "price": 30.67,
+  "change_rate": 2.06,
+  "volume_ratio": 37.187,
+  "vwap": 30.062316017316018,
+  "fired_at": "09:16",
+  "degraded": true
  }
 }
