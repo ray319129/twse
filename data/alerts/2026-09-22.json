@@ -102,5 +102,18 @@
   "vwap": 30.062316017316018,
   "fired_at": "09:16",
   "degraded": true
+ },
+ "2855|breakout": {
+  "stock_id": "2855",
+  "name": "統一證",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 58.00(現價 58.25,高出 0.4%)・量比 5.19(市場中位 1.00)・站上均價 57.69",
+  "price": 58.25,
+  "change_rate": 1.66,
+  "volume_ratio": 5.194,
+  "vwap": 57.68651797603196,
+  "fired_at": "09:21",
+  "degraded": true
  }
 }
