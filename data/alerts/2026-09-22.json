@@ -128,5 +128,18 @@
   "vwap": 258.1823933710175,
   "fired_at": "09:58",
   "degraded": true
+ },
+ "8150|breakout": {
+  "stock_id": "8150",
+  "name": "南茂",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 103.00(現價 104.25,高出 1.2%)・量比 7.95(市場中位 1.00)・站上均價 101.97",
+  "price": 104.25,
+  "change_rate": 1.21,
+  "volume_ratio": 7.947,
+  "vwap": 101.9686704235104,
+  "fired_at": "10:41",
+  "degraded": true
  }
 }
