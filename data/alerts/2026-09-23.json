@@ -50,5 +50,18 @@
   "vwap": 2486.619318181818,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "6166|breakout": {
+  "stock_id": "6166",
+  "name": "凌華",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 133.00(現價 133.75,高出 0.6%)・量比 14.19(市場中位 1.00)・站上均價 132.66",
+  "price": 133.75,
+  "change_rate": 5.31,
+  "volume_ratio": 14.188,
+  "vwap": 132.6587591240876,
+  "fired_at": "09:07",
+  "degraded": true
  }
 }
