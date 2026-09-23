@@ -102,5 +102,18 @@
   "vwap": 136.72614413466596,
   "fired_at": "10:15",
   "degraded": true
+ },
+ "3014|breakout": {
+  "stock_id": "3014",
+  "name": "聯陽",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 142.50(現價 143.00,高出 0.4%)・量比 2.94(市場中位 1.00)・站上均價 140.44",
+  "price": 143.0,
+  "change_rate": 2.88,
+  "volume_ratio": 2.943,
+  "vwap": 140.43660550458716,
+  "fired_at": "13:14",
+  "degraded": true
  }
 }
