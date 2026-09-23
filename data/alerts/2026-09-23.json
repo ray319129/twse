@@ -89,5 +89,18 @@
   "vwap": 74.62578763127188,
   "fired_at": "09:30",
   "degraded": true
+ },
+ "4919|breakout": {
+  "stock_id": "4919",
+  "name": "新唐",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 138.00(現價 141.25,高出 2.4%)・量比 16.58(市場中位 1.00)・站上均價 136.73",
+  "price": 141.25,
+  "change_rate": 5.81,
+  "volume_ratio": 16.576,
+  "vwap": 136.72614413466596,
+  "fired_at": "10:15",
+  "degraded": true
  }
 }
