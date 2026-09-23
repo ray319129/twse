@@ -76,5 +76,18 @@
   "vwap": 214.82784911717496,
   "fired_at": "09:14",
   "degraded": true
+ },
+ "6425|breakout": {
+  "stock_id": "6425",
+  "name": "易發",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 75.20(現價 75.95,高出 1.0%)・量比 9.19(市場中位 1.00)・站上均價 74.63",
+  "price": 75.95,
+  "change_rate": 4.47,
+  "volume_ratio": 9.187,
+  "vwap": 74.62578763127188,
+  "fired_at": "09:30",
+  "degraded": true
  }
 }
