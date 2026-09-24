@@ -76,5 +76,18 @@
   "vwap": 195.70988538681948,
   "fired_at": "10:48",
   "degraded": true
+ },
+ "2404|breakout": {
+  "stock_id": "2404",
+  "name": "漢唐",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1250.00(現價 1262.50,高出 1.0%)・量比 2.31(市場中位 1.00)・站上均價 1233.04",
+  "price": 1262.5,
+  "change_rate": 1.0,
+  "volume_ratio": 2.311,
+  "vwap": 1233.0441302485003,
+  "fired_at": "11:00",
+  "degraded": true
  }
 }
