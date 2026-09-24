@@ -50,5 +50,18 @@
   "vwap": 43.33590618336887,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "8040|breakout": {
+  "stock_id": "8040",
+  "name": "九暘",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 93.00(現價 94.70,高出 1.8%)・量比 29.99(市場中位 1.00)・站上均價 94.05",
+  "price": 94.7,
+  "change_rate": 3.95,
+  "volume_ratio": 29.993,
+  "vwap": 94.04704154427192,
+  "fired_at": "09:13",
+  "degraded": true
  }
 }
