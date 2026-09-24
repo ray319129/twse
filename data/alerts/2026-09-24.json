@@ -89,5 +89,18 @@
   "vwap": 1233.0441302485003,
   "fired_at": "11:00",
   "degraded": true
+ },
+ "6456|breakout": {
+  "stock_id": "6456",
+  "name": "GIS-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 80.90(現價 81.15,高出 0.3%)・量比 2.30(市場中位 1.00)・站上均價 78.45",
+  "price": 81.15,
+  "change_rate": 3.24,
+  "volume_ratio": 2.304,
+  "vwap": 78.44957738542449,
+  "fired_at": "12:56",
+  "degraded": true
  }
 }
