@@ -76,5 +76,31 @@
   "vwap": 46.43587852494577,
   "fired_at": "09:08",
   "degraded": true
+ },
+ "8028|breakout": {
+  "stock_id": "8028",
+  "name": "昇陽半導體",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 274.00(現價 275.25,高出 0.5%)・量比 12.30(市場中位 1.00)・站上均價 272.40",
+  "price": 275.25,
+  "change_rate": 2.32,
+  "volume_ratio": 12.302,
+  "vwap": 272.4016210173281,
+  "fired_at": "09:10",
+  "degraded": true
+ },
+ "6166|breakout": {
+  "stock_id": "6166",
+  "name": "凌華",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 135.00(現價 137.25,高出 1.7%)・量比 12.08(市場中位 1.00)・站上均價 136.11",
+  "price": 137.25,
+  "change_rate": 3.98,
+  "volume_ratio": 12.076,
+  "vwap": 136.10872483221476,
+  "fired_at": "09:12",
+  "degraded": true
  }
 }
