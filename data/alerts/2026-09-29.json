@@ -141,5 +141,18 @@
   "vwap": 268.2389400921659,
   "fired_at": "09:47",
   "degraded": true
+ },
+ "6693|breakout": {
+  "stock_id": "6693",
+  "name": "廣閎科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 212.50(現價 214.25,高出 0.8%)・量比 4.37(市場中位 1.00)・站上均價 208.80",
+  "price": 214.25,
+  "change_rate": 2.27,
+  "volume_ratio": 4.368,
+  "vwap": 208.79949784791967,
+  "fired_at": "09:59",
+  "degraded": true
  }
 }
