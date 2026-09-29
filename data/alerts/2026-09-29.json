@@ -102,5 +102,18 @@
   "vwap": 136.10872483221476,
   "fired_at": "09:12",
   "degraded": true
+ },
+ "6533|breakout": {
+  "stock_id": "6533",
+  "name": "晶心科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 278.50(現價 285.50,高出 2.5%)・量比 30.07(市場中位 1.00)・站上均價 276.39",
+  "price": 285.5,
+  "change_rate": 3.44,
+  "volume_ratio": 30.066,
+  "vwap": 276.39148289828984,
+  "fired_at": "09:20",
+  "degraded": true
  }
 }
