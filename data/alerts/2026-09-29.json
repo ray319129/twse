@@ -50,5 +50,31 @@
   "vwap": 58.65,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "3042|breakout": {
+  "stock_id": "3042",
+  "name": "晶技",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 212.00(現價 215.25,高出 1.5%)・量比 21.46(市場中位 1.00)・站上均價 211.05",
+  "price": 215.25,
+  "change_rate": 6.03,
+  "volume_ratio": 21.457,
+  "vwap": 211.05454946996466,
+  "fired_at": "09:05",
+  "degraded": true
+ },
+ "2302|breakout": {
+  "stock_id": "2302",
+  "name": "麗正",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 46.85(現價 47.17,高出 0.7%)・量比 4.69(市場中位 1.00)・站上均價 46.44",
+  "price": 47.17,
+  "change_rate": 2.43,
+  "volume_ratio": 4.691,
+  "vwap": 46.43587852494577,
+  "fired_at": "09:08",
+  "degraded": true
  }
 }
