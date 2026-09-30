@@ -11,5 +11,83 @@
   "vwap": 337.2691466083151,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "6122|breakout": {
+  "stock_id": "6122",
+  "name": "擎邦",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 60.00(現價 60.55,高出 0.9%)・量比 14.41(市場中位 1.00)・站上均價 60.52",
+  "price": 60.55,
+  "change_rate": 1.42,
+  "volume_ratio": 14.407,
+  "vwap": 60.52154696132597,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "2340|breakout": {
+  "stock_id": "2340",
+  "name": "台亞",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 38.00(現價 38.38,高出 1.0%)・量比 70.90(市場中位 1.00)・站上均價 38.32",
+  "price": 38.38,
+  "change_rate": 1.0,
+  "volume_ratio": 70.896,
+  "vwap": 38.31730375426621,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "4566|breakout": {
+  "stock_id": "4566",
+  "name": "時碩工業",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 75.20(現價 76.20,高出 1.3%)・量比 27.52(市場中位 1.00)・站上均價 76.13",
+  "price": 76.2,
+  "change_rate": 4.1,
+  "volume_ratio": 27.519,
+  "vwap": 76.13289630512514,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "6922|breakout": {
+  "stock_id": "6922",
+  "name": "宸曜",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 228.50(現價 229.50,高出 0.4%)・量比 8.25(市場中位 1.00)・站上均價 227.25",
+  "price": 229.5,
+  "change_rate": 2.0,
+  "volume_ratio": 8.248,
+  "vwap": 227.25,
+  "fired_at": "09:07",
+  "degraded": true
+ },
+ "5309|breakout": {
+  "stock_id": "5309",
+  "name": "系統電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 59.10(現價 62.15,高出 5.2%)・量比 133.65(市場中位 1.00)・站上均價 61.90",
+  "price": 62.15,
+  "change_rate": 5.16,
+  "volume_ratio": 133.647,
+  "vwap": 61.89622641509434,
+  "fired_at": "09:08",
+  "degraded": true
+ },
+ "2409|breakout": {
+  "stock_id": "2409",
+  "name": "友達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 36.65(現價 37.08,高出 1.2%)・量比 11.74(市場中位 1.00)・站上均價 37.02",
+  "price": 37.08,
+  "change_rate": 5.79,
+  "volume_ratio": 11.742,
+  "vwap": 37.02240911456397,
+  "fired_at": "09:08",
+  "degraded": true
  }
 }
