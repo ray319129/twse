@@ -115,5 +115,18 @@
   "vwap": 274.34103641456585,
   "fired_at": "09:12",
   "degraded": true
+ },
+ "1809|breakout": {
+  "stock_id": "1809",
+  "name": "中釉",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 47.25(現價 48.02,高出 1.6%)・量比 16.38(市場中位 1.00)・站上均價 46.42",
+  "price": 48.02,
+  "change_rate": 6.71,
+  "volume_ratio": 16.381,
+  "vwap": 46.41536124031008,
+  "fired_at": "09:36",
+  "degraded": true
  }
 }
