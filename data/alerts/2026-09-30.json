@@ -102,5 +102,18 @@
   "vwap": 2500.1626213592235,
   "fired_at": "09:10",
   "degraded": true
+ },
+ "4772|breakout": {
+  "stock_id": "4772",
+  "name": "台特化",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 273.00(現價 277.00,高出 1.5%)・量比 26.39(市場中位 1.00)・站上均價 274.34",
+  "price": 277.0,
+  "change_rate": 2.21,
+  "volume_ratio": 26.395,
+  "vwap": 274.34103641456585,
+  "fired_at": "09:12",
+  "degraded": true
  }
 }
