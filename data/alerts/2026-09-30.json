@@ -167,5 +167,18 @@
   "vwap": 28.855523058663955,
   "fired_at": "12:16",
   "degraded": true
+ },
+ "8240|breakout": {
+  "stock_id": "8240",
+  "name": "華宏",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 57.00(現價 57.20,高出 0.4%)・量比 1.59(市場中位 1.00)・站上均價 55.52",
+  "price": 57.2,
+  "change_rate": 4.95,
+  "volume_ratio": 1.589,
+  "vwap": 55.519761789013124,
+  "fired_at": "13:16",
+  "degraded": true
  }
 }
