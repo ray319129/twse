@@ -141,5 +141,18 @@
   "vwap": 1271.3515342960288,
   "fired_at": "09:40",
   "degraded": true
+ },
+ "6182|breakout": {
+  "stock_id": "6182",
+  "name": "合晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 125.00(現價 126.25,高出 1.0%)・量比 4.31(市場中位 1.00)・站上均價 123.96",
+  "price": 126.25,
+  "change_rate": 4.34,
+  "volume_ratio": 4.311,
+  "vwap": 123.9583769576408,
+  "fired_at": "10:02",
+  "degraded": true
  }
 }
