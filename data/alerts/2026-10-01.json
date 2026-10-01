@@ -102,5 +102,18 @@
   "vwap": 1289.9,
   "fired_at": "09:26",
   "degraded": true
+ },
+ "6122|breakout": {
+  "stock_id": "6122",
+  "name": "擎邦",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 60.90(現價 61.45,高出 0.9%)・量比 3.56(市場中位 1.00)・站上均價 61.02",
+  "price": 61.45,
+  "change_rate": 1.57,
+  "volume_ratio": 3.557,
+  "vwap": 61.02472426470588,
+  "fired_at": "09:56",
+  "degraded": true
  }
 }
