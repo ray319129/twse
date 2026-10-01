@@ -37,5 +37,31 @@
   "vwap": 208.88635724331928,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "6691|breakout": {
+  "stock_id": "6691",
+  "name": "洋基工程",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 719.00(現價 729.00,高出 1.4%)・量比 14.33(市場中位 1.00)・站上均價 725.09",
+  "price": 729.0,
+  "change_rate": 1.39,
+  "volume_ratio": 14.334,
+  "vwap": 725.0904255319149,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "2409|breakout": {
+  "stock_id": "2409",
+  "name": "友達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 38.55(現價 39.00,高出 1.2%)・量比 18.49(市場中位 1.00)・站上均價 38.95",
+  "price": 39.0,
+  "change_rate": 1.17,
+  "volume_ratio": 18.487,
+  "vwap": 38.94528824150678,
+  "fired_at": "09:06",
+  "degraded": true
  }
 }
