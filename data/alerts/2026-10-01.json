@@ -63,5 +63,31 @@
   "vwap": 38.94528824150678,
   "fired_at": "09:06",
   "degraded": true
+ },
+ "2061|breakout": {
+  "stock_id": "2061",
+  "name": "風青",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 63.30(現價 63.55,高出 0.4%)・量比 7.62(市場中位 1.00)・站上均價 62.36",
+  "price": 63.55,
+  "change_rate": 6.27,
+  "volume_ratio": 7.622,
+  "vwap": 62.36113636363636,
+  "fired_at": "09:09",
+  "degraded": true
+ },
+ "2330|pullback": {
+  "stock_id": "2330",
+  "name": "台積電",
+  "type": "pullback",
+  "label": "回檔買點",
+  "reason": "多頭排列(5>20>60)・回到月線 2439.00 附近(距 +2.2%)・翻紅 +0.50% 站回均價・量比 3.84(市場中位 1.00)",
+  "price": 2492.5,
+  "change_rate": 0.5,
+  "volume_ratio": 3.844,
+  "vwap": 2490.1337209302324,
+  "fired_at": "09:10",
+  "degraded": true
  }
 }
