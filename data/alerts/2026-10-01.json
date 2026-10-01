@@ -1,0 +1,41 @@
+{
+ "6488|breakout": {
+  "stock_id": "6488",
+  "name": "環球晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1035.00(現價 1062.50,高出 2.7%)・量比 17.57(市場中位 1.00)・站上均價 1060.23",
+  "price": 1062.5,
+  "change_rate": 2.66,
+  "volume_ratio": 17.572,
+  "vwap": 1060.231843575419,
+  "fired_at": "09:03",
+  "degraded": true
+ },
+ "6182|breakout": {
+  "stock_id": "6182",
+  "name": "合晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 133.00(現價 135.00,高出 1.5%)・量比 19.39(市場中位 1.00)・站上均價 133.78",
+  "price": 135.0,
+  "change_rate": 1.5,
+  "volume_ratio": 19.39,
+  "vwap": 133.78125293289534,
+  "fired_at": "09:04",
+  "degraded": true
+ },
+ "5483|breakout": {
+  "stock_id": "5483",
+  "name": "中美晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 207.50(現價 210.00,高出 1.2%)・量比 29.96(市場中位 1.00)・站上均價 208.89",
+  "price": 210.0,
+  "change_rate": 1.2,
+  "volume_ratio": 29.956,
+  "vwap": 208.88635724331928,
+  "fired_at": "09:04",
+  "degraded": true
+ }
+}
