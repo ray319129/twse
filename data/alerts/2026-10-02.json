@@ -154,5 +154,18 @@
   "vwap": 135.28355134174734,
   "fired_at": "10:50",
   "degraded": true
+ },
+ "3673|breakout": {
+  "stock_id": "3673",
+  "name": "TPK-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 75.80(現價 77.50,高出 2.2%)・量比 4.24(市場中位 1.00)・站上均價 75.13",
+  "price": 77.5,
+  "change_rate": 5.73,
+  "volume_ratio": 4.242,
+  "vwap": 75.13380229199664,
+  "fired_at": "10:54",
+  "degraded": true
  }
 }
