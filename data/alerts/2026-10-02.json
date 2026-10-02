@@ -89,5 +89,18 @@
   "vwap": 39.74175952242732,
   "fired_at": "09:49",
   "degraded": true
+ },
+ "6488|breakout": {
+  "stock_id": "6488",
+  "name": "環球晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 1135.00(現價 1142.50,高出 0.7%)・量比 3.58(市場中位 1.00)・站上均價 1110.14",
+  "price": 1142.5,
+  "change_rate": 5.3,
+  "volume_ratio": 3.578,
+  "vwap": 1110.1364165696223,
+  "fired_at": "09:52",
+  "degraded": true
  }
 }
