@@ -128,5 +128,18 @@
   "vwap": 216.565473738414,
   "fired_at": "10:18",
   "degraded": true
+ },
+ "8109|breakout": {
+  "stock_id": "8109",
+  "name": "博大",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 145.50(現價 146.00,高出 0.3%)・量比 2.60(市場中位 1.00)・站上均價 145.17",
+  "price": 146.0,
+  "change_rate": 1.04,
+  "volume_ratio": 2.603,
+  "vwap": 145.16901408450704,
+  "fired_at": "10:36",
+  "degraded": true
  }
 }
