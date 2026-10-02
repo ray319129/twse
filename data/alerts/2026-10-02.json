@@ -102,5 +102,18 @@
   "vwap": 1110.1364165696223,
   "fired_at": "09:52",
   "degraded": true
+ },
+ "4923|breakout": {
+  "stock_id": "4923",
+  "name": "力士",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 67.40(現價 67.80,高出 0.6%)・量比 16.05(市場中位 1.00)・站上均價 67.13",
+  "price": 67.8,
+  "change_rate": 3.99,
+  "volume_ratio": 16.055,
+  "vwap": 67.13207627118643,
+  "fired_at": "09:54",
+  "degraded": true
  }
 }
