@@ -115,5 +115,18 @@
   "vwap": 67.13207627118643,
   "fired_at": "09:54",
   "degraded": true
+ },
+ "5483|breakout": {
+  "stock_id": "5483",
+  "name": "中美晶",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 221.50(現價 222.50,高出 0.5%)・量比 4.40(市場中位 1.00)・站上均價 216.57",
+  "price": 222.5,
+  "change_rate": 5.2,
+  "volume_ratio": 4.404,
+  "vwap": 216.565473738414,
+  "fired_at": "10:18",
+  "degraded": true
  }
 }
