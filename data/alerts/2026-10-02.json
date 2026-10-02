@@ -167,5 +167,18 @@
   "vwap": 75.13380229199664,
   "fired_at": "10:54",
   "degraded": true
+ },
+ "3149|breakout": {
+  "stock_id": "3149",
+  "name": "正達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 76.10(現價 76.55,高出 0.6%)・量比 3.57(市場中位 1.00)・站上均價 75.22",
+  "price": 76.55,
+  "change_rate": 3.03,
+  "volume_ratio": 3.568,
+  "vwap": 75.2234774933804,
+  "fired_at": "11:07",
+  "degraded": true
  }
 }
