@@ -76,5 +76,18 @@
   "vwap": 341.91671580188677,
   "fired_at": "09:06",
   "degraded": true
+ },
+ "2409|breakout": {
+  "stock_id": "2409",
+  "name": "友達",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 40.00(現價 40.42,高出 1.0%)・量比 4.17(市場中位 1.00)・站上均價 39.74",
+  "price": 40.42,
+  "change_rate": 5.54,
+  "volume_ratio": 4.169,
+  "vwap": 39.74175952242732,
+  "fired_at": "09:49",
+  "degraded": true
  }
 }
