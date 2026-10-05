@@ -141,5 +141,18 @@
   "vwap": 200.9164798206278,
   "fired_at": "09:23",
   "degraded": true
+ },
+ "7712|breakout": {
+  "stock_id": "7712",
+  "name": "博盛半導體",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 176.00(現價 177.00,高出 0.6%)・量比 4.93(市場中位 1.00)・站上均價 174.71",
+  "price": 177.0,
+  "change_rate": 3.81,
+  "volume_ratio": 4.929,
+  "vwap": 174.70953757225433,
+  "fired_at": "10:26",
+  "degraded": true
  }
 }
