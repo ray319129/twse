@@ -76,5 +76,31 @@
   "vwap": 579.901766933109,
   "fired_at": "09:05",
   "degraded": true
+ },
+ "3221|breakout": {
+  "stock_id": "3221",
+  "name": "台嘉碩",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 57.80(現價 58.15,高出 0.6%)・量比 19.44(市場中位 1.00)・站上均價 56.82",
+  "price": 58.15,
+  "change_rate": 3.84,
+  "volume_ratio": 19.442,
+  "vwap": 56.82021475256769,
+  "fired_at": "09:06",
+  "degraded": true
+ },
+ "3030|breakout": {
+  "stock_id": "3030",
+  "name": "德律",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 306.50(現價 308.75,高出 0.7%)・量比 21.19(市場中位 1.00)・站上均價 307.88",
+  "price": 308.75,
+  "change_rate": 2.92,
+  "volume_ratio": 21.191,
+  "vwap": 307.8796992481203,
+  "fired_at": "09:08",
+  "degraded": true
  }
 }
