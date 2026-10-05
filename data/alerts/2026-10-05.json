@@ -154,5 +154,18 @@
   "vwap": 174.70953757225433,
   "fired_at": "10:26",
   "degraded": true
+ },
+ "1708|breakout": {
+  "stock_id": "1708",
+  "name": "東鹼",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 56.90(現價 57.10,高出 0.4%)・量比 3.19(市場中位 1.00)・站上均價 56.57",
+  "price": 57.1,
+  "change_rate": 1.6,
+  "volume_ratio": 3.191,
+  "vwap": 56.57433660052594,
+  "fired_at": "11:10",
+  "degraded": true
  }
 }
