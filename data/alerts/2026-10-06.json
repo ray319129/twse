@@ -76,5 +76,18 @@
   "vwap": 588.67603801335,
   "fired_at": "09:36",
   "degraded": true
+ },
+ "5434|breakout": {
+  "stock_id": "5434",
+  "name": "崇越",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 623.00(現價 627.50,高出 0.7%)・量比 3.51(市場中位 1.00)・站上均價 620.14",
+  "price": 627.5,
+  "change_rate": 1.21,
+  "volume_ratio": 3.513,
+  "vwap": 620.1430921052631,
+  "fired_at": "09:49",
+  "degraded": true
  }
 }
