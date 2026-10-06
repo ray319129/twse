@@ -1,0 +1,41 @@
+{
+ "6658|breakout": {
+  "stock_id": "6658",
+  "name": "聯策",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 200.00(現價 208.50,高出 4.2%)・量比 98.51(市場中位 1.00)・站上均價 208.13",
+  "price": 208.5,
+  "change_rate": 4.25,
+  "volume_ratio": 98.511,
+  "vwap": 208.1294964028777,
+  "fired_at": "09:03",
+  "degraded": true
+ },
+ "6197|breakout": {
+  "stock_id": "6197",
+  "name": "佳必琪",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 353.50(現價 357.50,高出 1.1%)・量比 22.94(市場中位 1.00)・站上均價 356.38",
+  "price": 357.5,
+  "change_rate": 3.62,
+  "volume_ratio": 22.94,
+  "vwap": 356.38157894736844,
+  "fired_at": "09:03",
+  "degraded": true
+ },
+ "4989|breakout": {
+  "stock_id": "4989",
+  "name": "榮科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 70.20(現價 70.95,高出 1.1%)・量比 78.37(市場中位 1.00)・站上均價 70.44",
+  "price": 70.95,
+  "change_rate": 1.07,
+  "volume_ratio": 78.366,
+  "vwap": 70.43827113480579,
+  "fired_at": "09:04",
+  "degraded": true
+ }
+}
