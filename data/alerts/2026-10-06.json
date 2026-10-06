@@ -37,5 +37,18 @@
   "vwap": 70.43827113480579,
   "fired_at": "09:04",
   "degraded": true
+ },
+ "3030|breakout": {
+  "stock_id": "3030",
+  "name": "德律",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 312.00(現價 313.50,高出 0.5%)・量比 56.18(市場中位 1.00)・站上均價 312.83",
+  "price": 313.5,
+  "change_rate": 2.62,
+  "volume_ratio": 56.176,
+  "vwap": 312.82642180094786,
+  "fired_at": "09:05",
+  "degraded": true
  }
 }
