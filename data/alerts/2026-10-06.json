@@ -102,5 +102,18 @@
   "vwap": 178.63735919899875,
   "fired_at": "11:06",
   "degraded": true
+ },
+ "1714|breakout": {
+  "stock_id": "1714",
+  "name": "和桐",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 18.50(現價 18.80,高出 1.6%)・量比 10.69(市場中位 1.00)・站上均價 17.90",
+  "price": 18.8,
+  "change_rate": 1.62,
+  "volume_ratio": 10.692,
+  "vwap": 17.89569639140849,
+  "fired_at": "11:36",
+  "degraded": true
  }
 }
