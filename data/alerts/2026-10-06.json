@@ -63,5 +63,18 @@
   "vwap": 221.89890710382514,
   "fired_at": "09:20",
   "degraded": true
+ },
+ "4958|breakout": {
+  "stock_id": "4958",
+  "name": "臻鼎-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 590.00(現價 594.50,高出 0.8%)・量比 5.51(市場中位 1.00)・站上均價 588.68",
+  "price": 594.5,
+  "change_rate": 3.21,
+  "volume_ratio": 5.507,
+  "vwap": 588.67603801335,
+  "fired_at": "09:36",
+  "degraded": true
  }
 }
