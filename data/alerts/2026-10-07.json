@@ -89,5 +89,18 @@
   "vwap": 136.81913545480145,
   "fired_at": "09:22",
   "degraded": true
+ },
+ "4989|breakout": {
+  "stock_id": "4989",
+  "name": "榮科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 71.90(現價 72.15,高出 0.3%)・量比 5.45(市場中位 1.00)・站上均價 69.99",
+  "price": 72.15,
+  "change_rate": 5.95,
+  "volume_ratio": 5.453,
+  "vwap": 69.99469567503616,
+  "fired_at": "10:24",
+  "degraded": true
  }
 }
