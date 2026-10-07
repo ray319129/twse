@@ -102,5 +102,31 @@
   "vwap": 69.99469567503616,
   "fired_at": "10:24",
   "degraded": true
+ },
+ "6278|breakout": {
+  "stock_id": "6278",
+  "name": "台表科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 237.50(現價 238.25,高出 0.3%)・量比 3.10(市場中位 1.00)・站上均價 233.83",
+  "price": 238.25,
+  "change_rate": 1.82,
+  "volume_ratio": 3.105,
+  "vwap": 233.82947692307692,
+  "fired_at": "11:08",
+  "degraded": true
+ },
+ "3013|breakout": {
+  "stock_id": "3013",
+  "name": "晟銘電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 96.80(現價 97.15,高出 0.4%)・量比 3.74(市場中位 1.00)・站上均價 95.44",
+  "price": 97.15,
+  "change_rate": 2.26,
+  "volume_ratio": 3.738,
+  "vwap": 95.44383116883117,
+  "fired_at": "11:08",
+  "degraded": true
  }
 }
