@@ -63,5 +63,31 @@
   "vwap": 72.8848683357115,
   "fired_at": "09:10",
   "degraded": true
+ },
+ "3661|breakout": {
+  "stock_id": "3661",
+  "name": "世芯-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4240.00(現價 4262.50,高出 0.5%)・量比 5.53(市場中位 1.00)・站上均價 4200.43",
+  "price": 4262.5,
+  "change_rate": 1.97,
+  "volume_ratio": 5.529,
+  "vwap": 4200.427807486631,
+  "fired_at": "09:22",
+  "degraded": true
+ },
+ "3715|breakout": {
+  "stock_id": "3715",
+  "name": "定穎投控",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 138.00(現價 139.00,高出 0.7%)・量比 8.44(市場中位 1.00)・站上均價 136.82",
+  "price": 139.0,
+  "change_rate": 4.51,
+  "volume_ratio": 8.435,
+  "vwap": 136.81913545480145,
+  "fired_at": "09:22",
+  "degraded": true
  }
 }
