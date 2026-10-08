@@ -50,5 +50,18 @@
   "vwap": 80.62010309278351,
   "fired_at": "09:05",
   "degraded": true
+ },
+ "8131|breakout": {
+  "stock_id": "8131",
+  "name": "福懋科",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 69.20(現價 70.10,高出 1.3%)・量比 20.96(市場中位 1.00)・站上均價 69.25",
+  "price": 70.1,
+  "change_rate": 2.79,
+  "volume_ratio": 20.962,
+  "vwap": 69.24887459807074,
+  "fired_at": "09:07",
+  "degraded": true
  }
 }
