@@ -89,5 +89,18 @@
   "vwap": 80.83083756345178,
   "fired_at": "09:28",
   "degraded": true
+ },
+ "3661|breakout": {
+  "stock_id": "3661",
+  "name": "世芯-KY",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 4295.00(現價 4360.00,高出 1.5%)・量比 3.50(市場中位 1.00)・站上均價 4259.81",
+  "price": 4360.0,
+  "change_rate": 4.06,
+  "volume_ratio": 3.496,
+  "vwap": 4259.807392996109,
+  "fired_at": "09:48",
+  "degraded": true
  }
 }
