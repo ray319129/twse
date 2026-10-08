@@ -102,5 +102,18 @@
   "vwap": 4259.807392996109,
   "fired_at": "09:48",
   "degraded": true
+ },
+ "8042|breakout": {
+  "stock_id": "8042",
+  "name": "金山電",
+  "type": "breakout",
+  "label": "量增突破",
+  "reason": "突破 20 日高 128.50(現價 129.00,高出 0.4%)・量比 4.01(市場中位 1.00)・站上均價 125.58",
+  "price": 129.0,
+  "change_rate": 2.38,
+  "volume_ratio": 4.007,
+  "vwap": 125.57804286291953,
+  "fired_at": "10:03",
+  "degraded": true
  }
 }
